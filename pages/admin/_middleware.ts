@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { getSession } from 'next-auth/react';
+import { getToken } from 'next-auth/jwt';
 
 export async function middleware(req) {
-  const session = await getSession({ req });
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  if (!session || session.user.role !== 'ADMIN') {
+  if (!token || token.role !== 'ADMIN') {
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
