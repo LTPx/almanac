@@ -24,17 +24,17 @@ model User {
   role      Role     @default(USER)
 }
 
-model Contenido {
+model Unit {
   id    Int    @id @default(autoincrement())
   name  String
-  temas Tema[]
+  lessons Lesson[]
 }
 
-model Tema {
-  id          Int       @id @default(autoincrement())
-  name        String
-  contenido   Contenido @relation(fields: [contenidoId], references: [id])
-  contenidoId Int
+model Lesson {
+  id     Int    @id @default(autoincrement())
+  name   String
+  unit   Unit   @relation(fields: [unitId], references: [id])
+  unitId Int
 }
 
 enum Role {
