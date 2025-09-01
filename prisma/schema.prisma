@@ -21,6 +21,7 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  role      Role     @default(USER)
 }
 
 model Contenido {
@@ -34,4 +35,9 @@ model Tema {
   name        String
   contenido   Contenido @relation(fields: [contenidoId], references: [id])
   contenidoId Int
+}
+
+enum Role {
+  USER
+  ADMIN
 }

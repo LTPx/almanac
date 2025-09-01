@@ -1,38 +1,36 @@
+# Project Blueprint
 
-# Project Overview
+## Overview
 
-This is a Next.js project that uses Prisma for database access with PostgreSQL. The application allows users to learn different subjects (Contenidos) and their specific topics (Temas).
+This is a Next.js application with Prisma for database management.
 
-# Project Features
+## Features
 
-* **Framework:** Next.js
-* **Database:** PostgreSQL
-* **ORM:** Prisma
+### User Model
 
-## Schema
+*   `id`: Int (autoincrement, primary key)
+*   `name`: String (optional)
+*   `email`: String (unique)
+*   `password`: String
+*   `createdAt`: DateTime (default: now())
+*   `updatedAt`: DateTime (updated at)
+*   `role`: Role (enum: `USER`, `ADMIN`, default: `USER`)
 
-* **User Model:**
-    * `id`: Int (autoincrement, primary key)
-    * `name`: String (optional)
-    * `email`: String (unique)
-    * `password`: String
-    * `createdAt`: DateTime (defaults to now)
-    * `updatedAt`: DateTime (updates on modification)
+### Content Model
 
-* **Contenido Model:**
-    * `id`: Int (autoincrement, primary key)
-    * `name`: String
-    * `temas`: Relation to `Tema` model (one-to-many)
+*   `id`: Int (autoincrement, primary key)
+*   `name`: String
+*   `temas`: Relation to Tema model
 
-* **Tema Model:**
-    * `id`: Int (autoincrement, primary key)
-    * `name`: String
-    * `contenido`: Relation to `Contenido` model (many-to-one)
-    * `contenidoId`: Int
+### Tema Model
 
-# Current Plan
+*   `id`: Int (autoincrement, primary key)
+*   `name`: String
+*   `contenido`: Relation to Contenido model
 
-* **Goal:** Create the `Contenido` and `Tema` models.
-* **Steps:**
-    1. Define the `Contenido` and `Tema` models in `prisma/schema.prisma`.
-    2. Run `prisma migrate dev` to create and apply the migration.
+## Current Task: Add Role to User
+
+*   [x] Add `Role` enum to `prisma/schema.prisma` with `USER` and `ADMIN` values.
+*   [x] Add `role` field to `User` model in `prisma/schema.prisma`.
+*   [x] Run database migration to apply the changes.
+*   [x] Document the changes in `blueprint.md`.
