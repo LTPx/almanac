@@ -1,68 +1,63 @@
-import { getCsrfToken, getProviders, signIn } from 'next-auth/react';
+import { getCsrfToken } from 'next-auth/react';
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from 'next';
-import { Pylon } from 'nexus-ui';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-export default function SignIn({ csrfToken, providers }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function SignIn({
+  csrfToken,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <div className="text-center">
-          <Pylon className="w-24 h-24 mx-auto text-primary-500" />
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Admin Login
-          </h2>
-        </div>
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <Card className="w-full max-w-sm">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
+          <CardDescription>
+            Enter your email and password to access the admin panel
+          </CardDescription>
+        </CardHeader>
         <form method="post" action="/api/auth/callback/credentials">
           <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-bold text-gray-600" htmlFor="email">
-                Email
-              </label>
-              <input
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
                 id="email"
                 name="email"
                 type="email"
-                autoComplete="email"
+                placeholder="m@example.com"
                 required
-                className="w-full px-3 py-2 mt-1 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
-            <div>
-              <label className="text-sm font-bold text-gray-600" htmlFor="password">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                className="w-full px-3 py-2 mt-1 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-              />
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" name="password" type="password" required />
             </div>
-          </div>
-          <div className="mt-6">
-            <button
-              type="submit"
-              className="w-full px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-            >
-              Sign in
-            </button>
-          </div>
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" className="w-full">
+              Sign In
+            </Button>
+          </CardFooter>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const csrfToken = await getCsrfToken(context);
-  const providers = await getProviders();
   return {
     props: {
-      csrfToken,
-      providers,
+      csrfToken: csrfToken ?? null,
     },
   };
 }
