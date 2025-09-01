@@ -31,10 +31,13 @@ model Unit {
 }
 
 model Lesson {
-  id     Int    @id @default(autoincrement())
-  name   String
-  unit   Unit   @relation(fields: [unitId], references: [id])
-  unitId Int
+  id               Int     @id @default(autoincrement())
+  name             String
+  unit             Unit    @relation(fields: [unitId], references: [id])
+  unitId           Int
+  mandatory        Boolean @default(false)
+  experiencePoints Int     @default(25)
+  order            String
 }
 
 enum Role {
