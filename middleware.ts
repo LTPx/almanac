@@ -3,23 +3,17 @@ import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
 export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  const isAdminPage = pathname.startsWith('/admin');
-  const isLoginPage = pathname.startsWith('/admin/login');
 
-  if (isAdminPage) {
-    if ((!token || token.role !== 'ADMIN') && !isLoginPage) {
-      return NextResponse.redirect(new URL('/admin/login', req.url));
-    }
-    if (token && token.role === 'ADMIN' && isLoginPage) {
-        return NextResponse.redirect(new URL('/admin/units', req.url));
-    }
+  if (!token || token.role !== 'ADMIN') {
+    const url = req.nextUrl.clone();
+    url.pathname = '/admin/login';
+    return NextResponse.rewrite(url);
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: '/admin/:path*',
 };
