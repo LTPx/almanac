@@ -1,5 +1,4 @@
-
-import { PrismaClient, QuestionType } from '@prisma/client';
+const { PrismaClient, QuestionType } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
