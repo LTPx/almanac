@@ -8,7 +8,8 @@
 		"start": "next start",
 		"lint": "next lint",
 		"postinstall": "prisma generate",
-		"prisma:migrate": "prisma migrate dev"
+		"prisma:migrate": "prisma migrate dev",
+		"prisma:seed": "ts-node prisma/seed.ts"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^4.1.3",
@@ -43,13 +44,14 @@
 	"devDependencies": {
 		"@eslint/eslintrc": "^3",
 		"@tailwindcss/postcss": "^4",
-		"@types/node": "^20",
+		"@types/node": "^20.19.11",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
 		"eslint": "^9",
 		"eslint-config-next": "15.2.4",
 		"prisma": "^6.5.0",
 		"tailwindcss": "^4",
+		"ts-node": "^10.9.2",
 		"typescript": "^5"
 	}
 }
