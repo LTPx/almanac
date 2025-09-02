@@ -7,7 +7,10 @@ import Link from "next/link";
 import { Home, BookOpen, Medal, User } from "lucide-react"; // 👈 reemplazo de react-icons
 import isInViewport from "@/lib/utils";
 
-let WIN_PREV_POSITION = window.pageYOffset;
+let WIN_PREV_POSITION = 0;
+if (typeof window !== "undefined") {
+  WIN_PREV_POSITION = window.pageYOffset;
+}
 
 const NAV = [
   { name: "Home", link: "/home", icon: Home },
