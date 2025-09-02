@@ -67,19 +67,77 @@ model Verification {
 }
 
 model Unit {
-  id      Int      @id @default(autoincrement())
-  name    String
-  lessons Lesson[]
-  order   Int
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  lessons     Lesson[]
+  order       Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("unit")
 }
 
 model Lesson {
-  id               Int     @id @default(autoincrement())
+  id               Int      @id @default(autoincrement())
   name             String
-  unit             Unit    @relation(fields: [unitId], references: [id])
+  description      String?
+  unit             Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
   unitId           Int
-  mandatory        Boolean @default(false)
-  experiencePoints Int     @default(25)
-  order            String
-  position         Int     @default(1)
+  mandatory        Boolean  @default(false)
+  experiencePoints Int      @default(25)
+  position         Int      @default(1)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relations
+  questions Question[]
+
+  @@map("lesson")
+}
+
+model Question {
+  id        Int          @id @default(autoincrement())
+  lesson    Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId  Int
+  type      QuestionType
+  title     String // Texto de la pregunta
+  order     Int // Orden dentro de la lección
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  // Datos específicos por tipo de pregunta (JSON)
+  content Json // Contenido flexible según el tipo
+
+  // Relaciones
+  answers Answer[]
+
+  @@map("question")
+}
+
+model Answer {
+  id         Int      @id @default(autoincrement())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId Int
+  text       String // Texto de la respuesta
+  isCorrect  Boolean // Si es la respuesta correcta
+  order      Int // Orden de la opción
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("answer")
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE // Pregunta de opción múltiple
+  FILL_IN_BLANK // Completar espacios en blanco
+  ORDER_WORDS // Ordenar palabras/oraciones
+  TRUE_FALSE // Verdadero/Falso
+  MATCHING // Emparejar elementos
+  DRAG_DROP // Arrastrar y soltar
+
+  @@map("question_type")
 }
