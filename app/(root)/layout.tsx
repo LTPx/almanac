@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { UserProvider } from "@/context/UserContext";
 import { StarsBackground } from "@/components/animate-ui/backgrounds/stars";
-import FooterNav from "@/components/ui/footer-nav";
+import FooterNav from "@/components/footer-nav";
 
 export default async function HomeLayout({
    children,

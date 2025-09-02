@@ -2,31 +2,18 @@
 
 import React, { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-
-import {
-  HiOutlineHome,
-  HiOutlineBookOpen,
-  HiOutlineBadgeCheck,
-  HiOutlineUser,
-} from "react-icons/hi";
-import isInViewport from "@/lib/utils";
 import Link from "next/link";
+
+import { Home, BookOpen, Medal, User } from "lucide-react"; // 👈 reemplazo de react-icons
+import isInViewport from "@/lib/utils";
 
 let WIN_PREV_POSITION = window.pageYOffset;
 
 const NAV = [
-  { name: "Home", link: "/home", icon: HiOutlineHome },
-  { name: "Contents", link: "/contents", icon: HiOutlineBookOpen },
-  {
-    name: "Achievements",
-    link: "/achievements",
-    icon: HiOutlineBadgeCheck,
-  },
-  {
-    name: "Profile",
-    link: "/profile",
-    icon: HiOutlineUser,
-  },
+  { name: "Home", link: "/home", icon: Home },
+  { name: "Contents", link: "/contents", icon: BookOpen },
+  { name: "Achievements", link: "/achievements", icon: Medal },
+  { name: "Profile", link: "/profile", icon: User },
 ];
 
 const FooterNav = ({
@@ -45,6 +32,9 @@ const FooterNav = ({
     if (typeof window !== "undefined") {
       window.addEventListener("scroll", handleEvent);
     }
+    return () => {
+      window.removeEventListener("scroll", handleEvent);
+    };
   }, []);
 
   const handleEvent = () => {
@@ -83,7 +73,7 @@ const FooterNav = ({
       <div className="w-full max-w-lg flex justify-around mx-auto text-sm text-center ">
         {navigationMenu.map((item, index) => {
           const active = location === item.link;
-          return item.link ? (
+          return (
             <Link
               key={index}
               href={item.link}
@@ -96,16 +86,6 @@ const FooterNav = ({
               />
               {/* <span className="text-[11px] leading-none mt-1">{item.name}</span> */}
             </Link>
-          ) : (
-            <div
-              key={index}
-              className={`flex flex-col items-center justify-between text-neutral-500 ${
-                active ? "text-neutral-900" : ""
-              }`}
-            >
-              <item.icon className="w-6 h-6" />
-              {/* <span className="text-[11px] leading-none mt-1">{item.name}</span> */}
-            </div>
           );
         })}
       </div>
