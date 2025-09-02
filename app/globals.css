@@ -171,3 +171,8 @@
     @apply p-8 mx-auto max-w-screen;
   }
 }
+
+
+.FooterNav--hide {
+  @apply translate-y-full;
+}
