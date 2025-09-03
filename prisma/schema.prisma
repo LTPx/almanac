@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id            String       @id @default(uuid())
+  id            String    @id @default(uuid())
   email         String    @unique
   name          String?
   emailVerified Boolean
@@ -18,6 +17,11 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
+
+  // Educational relationships
+  userProgress UserProgress[]
+  testAttempts TestAttempt[]
+  streaks      UserStreak[]
 
   @@map("user")
 }
@@ -65,4 +69,147 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+model Unit {
+  id           Int            @id @default(autoincrement())
+  name         String
+  description  String?
+  lessons      Lesson[]
+  order        Int
+  isActive     Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  userProgress UserProgress[]
+
+  @@map("unit")
+}
+
+model Lesson {
+  id               Int      @id @default(autoincrement())
+  name             String
+  description      String?
+  unit             Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId           Int
+  mandatory        Boolean  @default(false)
+  experiencePoints Int      @default(25)
+  position         Int      @default(1)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // relationships
+  questions    Question[]
+  userProgress UserProgress[]
+  TestAttempt  TestAttempt[]
+
+  @@map("lesson")
+}
+
+model Question {
+  id        Int          @id @default(autoincrement())
+  lesson    Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId  Int
+  type      QuestionType
+  title     String // Texto de la pregunta
+  order     Int // Orden dentro de la lección
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  // Datos específicos por tipo de pregunta (JSON)
+  content Json // Contenido flexible según el tipo
+
+  // relationships
+  answers     Answer[]
+  testAnswers TestAnswer[]
+
+  @@map("question")
+}
+
+model Answer {
+  id         Int      @id @default(autoincrement())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId Int
+  text       String // Texto de la respuesta
+  isCorrect  Boolean // Si es la respuesta correcta
+  order      Int // Orden de la opción
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("answer")
+}
+
+model UserProgress {
+  id               Int       @id @default(autoincrement())
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  unit             Unit?     @relation(fields: [unitId], references: [id])
+  unitId           Int?
+  lesson           Lesson?   @relation(fields: [lessonId], references: [id])
+  lessonId         Int?
+  isCompleted      Boolean   @default(false)
+  experiencePoints Int       @default(0)
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([userId, unitId])
+  @@unique([userId, lessonId])
+  @@map("user_progress")
+}
+
+model TestAttempt {
+  id             Int          @id @default(autoincrement())
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  lesson         Lesson       @relation(fields: [lessonId], references: [id])
+  lessonId       Int
+  score          Float // Puntuación obtenida (0-100)
+  totalQuestions Int // Total de preguntas en el test
+  correctAnswers Int // Respuestas correctas
+  isCompleted    Boolean      @default(false)
+  startedAt      DateTime     @default(now())
+  completedAt    DateTime?
+  answers        TestAnswer[]
+
+  @@map("test_attempt")
+}
+
+model TestAnswer {
+  id            Int         @id @default(autoincrement())
+  testAttempt   TestAttempt @relation(fields: [testAttemptId], references: [id], onDelete: Cascade)
+  testAttemptId Int
+  question      Question    @relation(fields: [questionId], references: [id])
+  questionId    Int
+  userAnswer    String // Respuesta del usuario (puede ser texto, JSON, etc.)
+  isCorrect     Boolean
+  timeSpent     Int? // Tiempo en segundos
+  createdAt     DateTime    @default(now())
+
+  @@map("test_answer")
+}
+
+model UserStreak {
+  id            Int      @id @default(autoincrement())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String   @unique
+  currentStreak Int      @default(0)
+  longestStreak Int      @default(0)
+  lastActivity  DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("user_streak")
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE // Pregunta de opción múltiple
+  FILL_IN_BLANK // Completar espacios en blanco
+  ORDER_WORDS // Ordenar palabras/oraciones
+  TRUE_FALSE // Verdadero/Falso
+  MATCHING // Emparejar elementos
+  DRAG_DROP // Arrastrar y soltar
+
+  @@map("question_type")
 }
