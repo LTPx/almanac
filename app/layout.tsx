@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title: "Almanac",
   description: "Learning App + NFTs blockchain",
   icons: {
-    icon: '/logo.png'
+    icon: '/almanac.svg'
   }
 };
 
