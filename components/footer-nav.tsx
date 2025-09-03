@@ -16,12 +16,12 @@ const NAV = [
   { name: "Home", link: "/home", icon: Home },
   { name: "Contents", link: "/contents", icon: BookOpen },
   { name: "Achievements", link: "/achievements", icon: Medal },
-  { name: "Profile", link: "/profile", icon: User },
+  { name: "Profile", link: "/profile", icon: User }
 ];
 
 const FooterNav = ({
   guestMode,
-  cartLink,
+  cartLink
 }: {
   guestMode?: boolean;
   cartLink?: string;
@@ -70,7 +70,7 @@ const FooterNav = ({
   return (
     <div
       ref={containerRef}
-      className="FooterNav block md:hidden p-2 bg-white fixed top-auto bottom-0 inset-x-0 z-30 border-t border-neutral-300
+      className="FooterNav block p-2 bg-white fixed top-auto bottom-0 inset-x-0 z-30 border-t border-neutral-300
         transition-transform duration-300 ease-in-out"
     >
       <div className="w-full max-w-lg flex justify-around mx-auto text-sm text-center ">

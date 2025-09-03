@@ -94,6 +94,7 @@ const LearningPath: React.FC<LearningPathProps> = ({ unit }) => {
                       <LessonNode
                         id={nodeData.id}
                         name={nodeData.name}
+                        description={nodeData.description}
                         state={getLessonState(nodeData.id)}
                         color={getLockedColor(nodeData.id)}
                       />
