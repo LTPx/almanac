@@ -22,7 +22,7 @@ export default function Navbar() {
                      <>
 
                         <Link
-                           href="/dashboard"
+                           href="/admin/dashboard"
                            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                         >
                            <Button variant="outline">

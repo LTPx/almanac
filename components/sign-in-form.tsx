@@ -41,7 +41,7 @@ export default function SignInForm() {
          onSuccess: () => {
             toast.dismiss();
             toast.success("Signed in successfully");
-            redirect("/dashboard")
+            redirect("/units")
          },
          onError: (ctx) => {
             toast.dismiss();
