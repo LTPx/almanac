@@ -1,14 +1,7 @@
 "use client";
 
-import {useState, useEffect, createContext, useContext, ReactNode} from "react";
-import {
-	ChevronDown,
-	BookOpen,
-	CheckCircle,
-	Clock,
-	Star,
-	Trophy,
-} from "lucide-react";
+import {useState, useEffect} from "react";
+import {BookOpen, CheckCircle, Clock, Star, Trophy} from "lucide-react";
 import {
 	Select,
 	SelectContent,
@@ -69,8 +62,7 @@ export default function HomePage() {
 	const [lessonsLoading, setLessonsLoading] = useState(false);
 	const user = useUser();
 
-	// Mock userId - reemplaza con tu sistema de autenticación
-	const userId = user?.id || '';
+	const userId = user?.id || "";
 
 	// API call functions
 	const fetchUnits = async () => {
