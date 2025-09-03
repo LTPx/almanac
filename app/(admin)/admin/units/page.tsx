@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
+import LearningGrid from "@/components/learning-path"
 
 type Unit = {
   id: number
@@ -287,6 +288,8 @@ export default function UnitsAdminPage() {
           </Button>
         </div>
       )}
+
+      <LearningGrid />
     </div>
   )
 }
