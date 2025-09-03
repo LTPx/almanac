@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useUser } from "@/context/UserContext";
 import { TestSystem } from "@/components/test/TestSystem";
+import LearningGrid from "@/components/learning-path";
 
 // Tipos para TypeScript
 type Unit = {
@@ -322,79 +323,85 @@ export default function HomePage() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                       </div>
                     ) : lessons.length > 0 ? (
-                      <div className="space-y-4">
-                        {lessons.map((lesson) => {
-                          const isCompleted = userProgress?.unit.lessons.some(
-                            (ul) => ul.id === lesson.id
-                          );
+                      <>
+                        <div className="space-y-4">
+                          {lessons.map((lesson) => {
+                            const isCompleted = userProgress?.unit.lessons.some(
+                              (ul) => ul.id === lesson.id
+                            );
 
-                          return (
-                            <Card
-                              key={lesson.id}
-                              className={`transition-all duration-200 cursor-pointer hover:shadow-md ${
-                                isCompleted
-                                  ? "border-green-200 bg-green-50/50"
-                                  : "hover:border-primary/50"
-                              }`}
-                            >
-                              <CardContent className="p-6">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-4">
-                                    <div className="flex-shrink-0">
-                                      {isCompleted ? (
-                                        <CheckCircle className="h-8 w-8 text-green-500" />
-                                      ) : (
-                                        <Clock className="h-8 w-8 text-muted-foreground" />
-                                      )}
-                                    </div>
-                                    <div className="flex-1">
-                                      <h3 className="font-semibold text-lg mb-1">
-                                        {lesson.name}
-                                      </h3>
-                                      {lesson.description && (
-                                        <p className="text-sm text-muted-foreground mb-2">
-                                          {lesson.description}
-                                        </p>
-                                      )}
-                                      <div className="flex items-center gap-4">
-                                        <Badge
-                                          variant="outline"
-                                          className="text-xs"
-                                        >
-                                          {lesson._count.questions} preguntas
-                                        </Badge>
-                                        <Badge
-                                          variant="outline"
-                                          className="text-xs"
-                                        >
-                                          <Trophy className="h-3 w-3 mr-1" />+
-                                          {lesson.experiencePoints} XP
-                                        </Badge>
+                            return (
+                              <Card
+                                key={lesson.id}
+                                className={`transition-all duration-200 cursor-pointer hover:shadow-md ${
+                                  isCompleted
+                                    ? "border-green-200 bg-green-50/50"
+                                    : "hover:border-primary/50"
+                                }`}
+                              >
+                                <CardContent className="p-6">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                      <div className="flex-shrink-0">
+                                        {isCompleted ? (
+                                          <CheckCircle className="h-8 w-8 text-green-500" />
+                                        ) : (
+                                          <Clock className="h-8 w-8 text-muted-foreground" />
+                                        )}
+                                      </div>
+                                      <div className="flex-1">
+                                        <h3 className="font-semibold text-lg mb-1">
+                                          {lesson.name}
+                                        </h3>
+                                        {lesson.description && (
+                                          <p className="text-sm text-muted-foreground mb-2">
+                                            {lesson.description}
+                                          </p>
+                                        )}
+                                        <div className="flex items-center gap-4">
+                                          <Badge
+                                            variant="outline"
+                                            className="text-xs"
+                                          >
+                                            {lesson._count.questions} preguntas
+                                          </Badge>
+                                          <Badge
+                                            variant="outline"
+                                            className="text-xs"
+                                          >
+                                            <Trophy className="h-3 w-3 mr-1" />+
+                                            {lesson.experiencePoints} XP
+                                          </Badge>
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
 
-                                  <div className="flex-shrink-0">
-                                    {isCompleted ? (
-                                      <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                                        Completada
-                                      </Badge>
-                                    ) : (
-                                      <Button
-                                        onClick={() => {
-                                          handleStartLesson(lesson);
-                                        }}
-                                      >
-                                        Comenzar
-                                      </Button>
-                                    )}
+                                    <div className="flex-shrink-0">
+                                      {isCompleted ? (
+                                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                                          Completada
+                                        </Badge>
+                                      ) : (
+                                        <Button
+                                          onClick={() => {
+                                            handleStartLesson(lesson);
+                                          }}
+                                        >
+                                          Comenzar
+                                        </Button>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          );
-                        })}
-                      </div>
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
+                        </div>
+                        <LearningGrid
+                          lessons={lessons as any}
+                          unitId={selectedUnitId}
+                        />
+                      </>
                     ) : (
                       <div className="text-center py-12">
                         <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -426,6 +433,7 @@ export default function HomePage() {
           )}
         </div>
       </div>
+      <div className="ml-10"></div>
     </>
   );
 }

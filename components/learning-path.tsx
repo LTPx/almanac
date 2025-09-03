@@ -8,13 +8,9 @@ import {
   DragEndEvent
 } from "@dnd-kit/core";
 
-type Unit = { id: string; label: string };
+import { Lesson } from "@prisma/client";
 
-const initialUnits: Unit[] = [
-  { id: "u1", label: "Álgebra" },
-  { id: "u2", label: "Geometría" },
-  { id: "u3", label: "Cálculo" }
-];
+type LessonGrid = { id: string; lessonId: number; label: string };
 
 // === Draggable ===
 function Draggable({ id, label }: { id: string; label: string }) {
@@ -58,11 +54,23 @@ function Droppable({
   );
 }
 
-export default function LearningGrid() {
-  // Panel lateral: unidades libres
-  const [availableUnits, setAvailableUnits] = useState<Unit[]>(initialUnits);
+export default function LearningGrid({
+  lessons,
+  unitId
+}: {
+  lessons: Lesson[];
+  unitId: number;
+}) {
+  // usar el ID real de la lección (Prisma)
+  const initialLessons: LessonGrid[] = lessons.map((lesson) => ({
+    id: `lesson-${lesson.id}`, // ID único para drag & drop
+    lessonId: lesson.id,
+    label: lesson.name
+  }));
 
-  // Grid: asignaciones celda → unidadId
+  const [availableLessons, setAvailableLessons] =
+    useState<LessonGrid[]>(initialLessons);
+
   const [assignments, setAssignments] = useState<Record<string, string | null>>(
     Object.fromEntries(
       Array.from({ length: 12 * 5 }).map((_, i) => [`cell-${i}`, null])
@@ -73,72 +81,106 @@ export default function LearningGrid() {
     const { active, over } = event;
     if (!over) return;
 
-    const unitId = active.id as string;
+    const lessonKey = active.id as string;
 
-    // Caso 1: soltar en panel lateral → devolver unidad
+    // Soltar en panel
     if (over.id === "panel") {
       setAssignments((prev) => {
         const updated = { ...prev };
         for (const key of Object.keys(updated)) {
-          if (updated[key] === unitId) {
+          if (updated[key] === lessonKey) {
             updated[key] = null;
           }
         }
         return updated;
       });
 
-      if (!availableUnits.find((u) => u.id === unitId)) {
-        const unit = initialUnits.find((u) => u.id === unitId);
-        if (unit) setAvailableUnits((prev) => [...prev, unit]);
+      if (!availableLessons.find((u) => u.id === lessonKey)) {
+        const lesson = initialLessons.find((u) => u.id === lessonKey);
+        if (lesson) setAvailableLessons((prev) => [...prev, lesson]);
       }
       return;
     }
 
-    // Caso 2: soltar en una celda del grid
+    // Soltar en celda
     if (over.id.toString().startsWith("cell-")) {
       setAssignments((prev) => {
         const updated = { ...prev };
 
-        // Liberar cualquier celda previa de esa unidad
+        // liberar celda previa de esa lesson
         for (const key of Object.keys(updated)) {
-          if (updated[key] === unitId) updated[key] = null;
+          if (updated[key] === lessonKey) updated[key] = null;
         }
 
-        // Asignar a la nueva celda
-        updated[over.id] = unitId;
+        updated[over.id] = lessonKey;
         return updated;
       });
 
-      // Sacar del panel si estaba allí
-      setAvailableUnits((prev) => prev.filter((u) => u.id !== unitId));
+      setAvailableLessons((prev) => prev.filter((u) => u.id !== lessonKey));
+    }
+  };
+
+  // === Guardar path en el backend ===
+  const handleSave = async () => {
+    // Convertir assignments → arreglo [{lessonId, position}]
+    const payload = Object.entries(assignments)
+      .filter(([_, lessonKey]) => lessonKey !== null)
+      .map(([cellId, lessonKey]) => {
+        const position = parseInt(cellId.replace("cell-", ""), 10);
+        const lesson = initialLessons.find((l) => l.id === lessonKey);
+        return { lessonId: lesson!.lessonId, position };
+      });
+
+    console.log("payload to save:", payload);
+
+    const res = await fetch(`/api/units/${unitId}/lessons/sort`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      alert("✅ Path guardado correctamente!");
+    } else {
+      alert("❌ Error al guardar el path");
     }
   };
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div className="flex gap-6">
-        {/* Panel lateral de unidades disponibles */}
-        <Droppable id="panel">
-          <div className="flex flex-col gap-2">
-            {availableUnits.map((u) => (
-              <Draggable key={u.id} id={u.id} label={u.label} />
-            ))}
+      <div className="flex flex-col gap-4">
+        <div className="flex gap-6">
+          {/* Panel lateral */}
+          <Droppable id="panel">
+            <div className="flex flex-col gap-2">
+              {availableLessons.map((u) => (
+                <Draggable key={u.id} id={u.id} label={u.label} />
+              ))}
+            </div>
+          </Droppable>
+
+          {/* Grid 12x5 */}
+          <div className="grid grid-cols-5 gap-2">
+            {Object.keys(assignments).map((cellId) => {
+              const lessonKey = assignments[cellId];
+              const lesson = initialLessons.find((u) => u.id === lessonKey);
+
+              return (
+                <Droppable key={cellId} id={cellId}>
+                  {lesson && <Draggable id={lesson.id} label={lesson.label} />}
+                </Droppable>
+              );
+            })}
           </div>
-        </Droppable>
-
-        {/* Grid 12x5 */}
-        <div className="grid grid-cols-5 gap-2">
-          {Object.keys(assignments).map((cellId) => {
-            const unitId = assignments[cellId];
-            const unit = initialUnits.find((u) => u.id === unitId);
-
-            return (
-              <Droppable key={cellId} id={cellId}>
-                {unit && <Draggable id={unit.id} label={unit.label} />}
-              </Droppable>
-            );
-          })}
         </div>
+
+        {/* Botón Guardar */}
+        <button
+          onClick={handleSave}
+          className="self-start px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700"
+        >
+          Guardar Path
+        </button>
       </div>
     </DndContext>
   );
