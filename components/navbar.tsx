@@ -48,7 +48,6 @@ export default function Navbar() {
                         </Button>
                      </>
                   )}
-                  <GithubStars />
                </div>
             </nav>
          </div>
