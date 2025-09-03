@@ -13,68 +13,69 @@ export const getUserProgress = cache(async (userId: string) => {
       unit: true,
       lesson: true
     },
-    orderBy: [
-      { unit: { order: 'asc' } },
-      { lesson: { position: 'asc' } }
-    ]
+    orderBy: [{ unit: { order: "asc" } }, { lesson: { position: "asc" } }]
   });
   return data;
 });
 
-export const getUserProgressByUnit = cache(async (userId: string, unitId: number) => {
-  if (!userId) return null;
-  const data = await prisma.userProgress.findUnique({
-    where: {
-      userId_unitId: {
-        userId,
-        unitId
-      }
-    },
-    include: {
-      unit: {
-        include: {
-          lessons: {
-            include: {
-              _count: {
-                select: {
-                  questions: true
+export const getUserProgressByUnit = cache(
+  async (userId: string, unitId: number) => {
+    if (!userId) return null;
+    const data = await prisma.userProgress.findUnique({
+      where: {
+        userId_unitId: {
+          userId,
+          unitId
+        }
+      },
+      include: {
+        unit: {
+          include: {
+            lessons: {
+              include: {
+                _count: {
+                  select: {
+                    questions: true
+                  }
                 }
-              }
-            },
-            orderBy: { position: 'asc' }
+              },
+              orderBy: { position: "asc" }
+            }
           }
         }
       }
-    }
-  });
-  return data;
-});
+    });
+    return data;
+  }
+);
 
-export const getUserProgressByLesson = cache(async (userId: string, lessonId: number) => {
-  if (!userId) return null;
-  const data = await prisma.userProgress.findUnique({
-    where: {
-      userId_lessonId: {
-        userId,
-        lessonId
-      }
-    },
-    include: {
-      lesson: {
-        include: {
-          unit: true,
-          questions: {
-            include: {
-              answers: true
-            },
-            orderBy: { order: 'asc' }
+export const getUserProgressByLesson = cache(
+  async (userId: string, lessonId: number) => {
+    if (!userId) return null;
+    const data = await prisma.userProgress.findUnique({
+      where: {
+        userId_lessonId: {
+          userId,
+          lessonId
+        }
+      },
+      include: {
+        lesson: {
+          include: {
+            unit: true,
+            questions: {
+              include: {
+                answers: true
+              },
+              orderBy: { order: "asc" }
+            }
           }
         }
       }
-    }
-  });
-  return data;
-});
+    });
+    return data;
+  }
+);
 
 // ============== UNIT QUERIES ==============
 
@@ -95,7 +96,7 @@ export const getAllUnits = cache(async () => {
             }
           }
         },
-        orderBy: { position: 'asc' }
+        orderBy: { position: "asc" }
       },
       _count: {
         select: {
@@ -103,7 +104,7 @@ export const getAllUnits = cache(async () => {
         }
       }
     },
-    orderBy: { order: 'asc' }
+    orderBy: { order: "asc" }
   });
   return data;
 });
@@ -126,7 +127,7 @@ export const getUnitById = cache(async (unitId: number) => {
             }
           }
         },
-        orderBy: { position: 'asc' }
+        orderBy: { position: "asc" }
       }
     }
   });
@@ -135,7 +136,7 @@ export const getUnitById = cache(async (unitId: number) => {
 
 export const getUnitsWithUserProgress = cache(async (userId: string) => {
   if (!userId) return await getAllUnits();
-  
+
   const data = await prisma.unit.findMany({
     where: {
       isActive: true
@@ -157,7 +158,7 @@ export const getUnitsWithUserProgress = cache(async (userId: string) => {
             }
           }
         },
-        orderBy: { position: 'asc' }
+        orderBy: { position: "asc" }
       },
       userProgress: {
         where: {
@@ -165,7 +166,7 @@ export const getUnitsWithUserProgress = cache(async (userId: string) => {
         }
       }
     },
-    orderBy: { order: 'asc' }
+    orderBy: { order: "asc" }
   });
   return data;
 });
@@ -186,10 +187,10 @@ export const getLessonById = cache(async (lessonId: number) => {
         },
         include: {
           answers: {
-            orderBy: { order: 'asc' }
+            orderBy: { order: "asc" }
           }
         },
-        orderBy: { order: 'asc' }
+        orderBy: { order: "asc" }
       }
     }
   });
@@ -209,41 +210,43 @@ export const getLessonsByUnitId = cache(async (unitId: number) => {
         }
       }
     },
-    orderBy: { position: 'asc' }
+    orderBy: { position: "asc" }
   });
   return data;
 });
 
-export const getLessonWithUserProgress = cache(async (lessonId: number, userId: string) => {
-  if (!userId) return await getLessonById(lessonId);
-  
-  const data = await prisma.lesson.findUnique({
-    where: {
-      id: lessonId,
-      isActive: true
-    },
-    include: {
-      unit: true,
-      questions: {
-        where: {
-          isActive: true
-        },
-        include: {
-          answers: {
-            orderBy: { order: 'asc' }
-          }
-        },
-        orderBy: { order: 'asc' }
+export const getLessonWithUserProgress = cache(
+  async (lessonId: number, userId: string) => {
+    if (!userId) return await getLessonById(lessonId);
+
+    const data = await prisma.lesson.findUnique({
+      where: {
+        id: lessonId,
+        isActive: true
       },
-      userProgress: {
-        where: {
-          userId
+      include: {
+        unit: true,
+        questions: {
+          where: {
+            isActive: true
+          },
+          include: {
+            answers: {
+              orderBy: { order: "asc" }
+            }
+          },
+          orderBy: { order: "asc" }
+        },
+        userProgress: {
+          where: {
+            userId
+          }
         }
       }
-    }
-  });
-  return data;
-});
+    });
+    return data;
+  }
+);
 
 // ============== QUESTION QUERIES ==============
 
@@ -255,10 +258,10 @@ export const getQuestionsByLessonId = cache(async (lessonId: number) => {
     },
     include: {
       answers: {
-        orderBy: { order: 'asc' }
+        orderBy: { order: "asc" }
       }
     },
-    orderBy: { order: 'asc' }
+    orderBy: { order: "asc" }
   });
   return data;
 });
@@ -276,7 +279,7 @@ export const getQuestionById = cache(async (questionId: number) => {
         }
       },
       answers: {
-        orderBy: { order: 'asc' }
+        orderBy: { order: "asc" }
       }
     }
   });
@@ -285,92 +288,98 @@ export const getQuestionById = cache(async (questionId: number) => {
 
 // ============== TEST ATTEMPT QUERIES ==============
 
-export const getUserTestAttempts = cache(async (userId: string, lessonId?: number) => {
-  if (!userId) return null;
-  
-  const whereClause: any = { userId };
-  if (lessonId) whereClause.lessonId = lessonId;
-  
-  const data = await prisma.testAttempt.findMany({
-    where: whereClause,
-    include: {
-      lesson: {
-        include: {
-          unit: true
-        }
-      },
-      answers: {
-        include: {
-          question: true
-        }
-      }
-    },
-    orderBy: { startedAt: 'desc' }
-  });
-  return data;
-});
+export const getUserTestAttempts = cache(
+  async (userId: string, lessonId?: number) => {
+    if (!userId) return null;
 
-export const getTestAttemptById = cache(async (attemptId: number, userId: string) => {
-  if (!userId) return null;
-  
-  const data = await prisma.testAttempt.findUnique({
-    where: {
-      id: attemptId
-    },
-    include: {
-      lesson: {
-        include: {
-          unit: true,
-          questions: {
-            include: {
-              answers: true
-            }
+    const whereClause: any = { userId };
+    if (lessonId) whereClause.lessonId = lessonId;
+
+    const data = await prisma.testAttempt.findMany({
+      where: whereClause,
+      include: {
+        lesson: {
+          include: {
+            unit: true
+          }
+        },
+        answers: {
+          include: {
+            question: true
           }
         }
       },
-      answers: {
-        include: {
-          question: {
-            include: {
-              answers: true
+      orderBy: { startedAt: "desc" }
+    });
+    return data;
+  }
+);
+
+export const getTestAttemptById = cache(
+  async (attemptId: number, userId: string) => {
+    if (!userId) return null;
+
+    const data = await prisma.testAttempt.findUnique({
+      where: {
+        id: attemptId
+      },
+      include: {
+        lesson: {
+          include: {
+            unit: true,
+            questions: {
+              include: {
+                answers: true
+              }
+            }
+          }
+        },
+        answers: {
+          include: {
+            question: {
+              include: {
+                answers: true
+              }
             }
           }
         }
       }
-    }
-  });
-  
-  // Verificar que el intento pertenece al usuario
-  if (data?.userId !== userId) return null;
-  
-  return data;
-});
+    });
 
-export const getLatestTestAttemptByLesson = cache(async (userId: string, lessonId: number) => {
-  if (!userId) return null;
-  
-  const data = await prisma.testAttempt.findFirst({
-    where: {
-      userId,
-      lessonId
-    },
-    include: {
-      answers: {
-        include: {
-          question: true
+    // Verificar que el intento pertenece al usuario
+    if (data?.userId !== userId) return null;
+
+    return data;
+  }
+);
+
+export const getLatestTestAttemptByLesson = cache(
+  async (userId: string, lessonId: number) => {
+    if (!userId) return null;
+
+    const data = await prisma.testAttempt.findFirst({
+      where: {
+        userId,
+        lessonId
+      },
+      include: {
+        answers: {
+          include: {
+            question: true
+          }
         }
-      }
-    },
-    orderBy: { startedAt: 'desc' }
-  });
-  return data;
-});
+      },
+      orderBy: { startedAt: "desc" }
+    });
+    return data;
+  }
+);
 
 // ============== USER STREAK QUERIES ==============
 
 export const getUserStreak = cache(async (userId: string) => {
   if (!userId) return null;
-  
+
   const data = await prisma.userStreak.findUnique({
     where: {
       userId
@@ -383,7 +392,7 @@ export const getUserStreak = cache(async (userId: string) => {
 
 export const getUserStatistics = cache(async (userId: string) => {
   if (!userId) return null;
-  
+
   const [
     totalProgress,
     completedLessons,
@@ -395,9 +404,9 @@ export const getUserStatistics = cache(async (userId: string) => {
       where: { userId }
     }),
     prisma.userProgress.count({
-      where: { 
+      where: {
         userId,
-        isCompleted: true 
+        isCompleted: true
       }
     }),
     prisma.userProgress.aggregate({
@@ -407,16 +416,16 @@ export const getUserStatistics = cache(async (userId: string) => {
       }
     }),
     prisma.testAttempt.count({
-      where: { 
+      where: {
         userId,
-        isCompleted: true 
+        isCompleted: true
       }
     }),
     prisma.userStreak.findUnique({
       where: { userId }
     })
   ]);
-  
+
   return {
     totalProgress,
     completedLessons,
@@ -428,34 +437,30 @@ export const getUserStatistics = cache(async (userId: string) => {
 });
 
 export const getLessonStatistics = cache(async (lessonId: number) => {
-  const [
-    totalQuestions,
-    averageScore,
-    completionRate
-  ] = await Promise.all([
+  const [totalQuestions, averageScore, completionRate] = await Promise.all([
     prisma.question.count({
-      where: { 
+      where: {
         lessonId,
-        isActive: true 
+        isActive: true
       }
     }),
     prisma.testAttempt.aggregate({
-      where: { 
+      where: {
         lessonId,
-        isCompleted: true 
+        isCompleted: true
       },
       _avg: {
         score: true
       }
     }),
     prisma.testAttempt.count({
-      where: { 
+      where: {
         lessonId,
-        isCompleted: true 
+        isCompleted: true
       }
     })
   ]);
-  
+
   return {
     totalQuestions,
     averageScore: averageScore._avg.score || 0,
@@ -466,16 +471,16 @@ export const getLessonStatistics = cache(async (lessonId: number) => {
 // ============== SEARCH QUERIES ==============
 
 export const searchContent = cache(async (query: string, userId?: string) => {
-  const searchTerms = query.split(' ').filter(term => term.length > 2);
-  
+  const searchTerms = query.split(" ").filter((term) => term.length > 2);
+
   const [units, lessons, questions] = await Promise.all([
     prisma.unit.findMany({
       where: {
         isActive: true,
-        OR: searchTerms.map(term => ({
+        OR: searchTerms.map((term) => ({
           OR: [
-            { name: { contains: term, mode: 'insensitive' } },
-            { description: { contains: term, mode: 'insensitive' } }
+            { name: { contains: term, mode: "insensitive" } },
+            { description: { contains: term, mode: "insensitive" } }
           ]
         }))
       },
@@ -489,10 +494,10 @@ export const searchContent = cache(async (query: string, userId?: string) => {
     prisma.lesson.findMany({
       where: {
         isActive: true,
-        OR: searchTerms.map(term => ({
+        OR: searchTerms.map((term) => ({
           OR: [
-            { name: { contains: term, mode: 'insensitive' } },
-            { description: { contains: term, mode: 'insensitive' } }
+            { name: { contains: term, mode: "insensitive" } },
+            { description: { contains: term, mode: "insensitive" } }
           ]
         }))
       },
@@ -504,8 +509,8 @@ export const searchContent = cache(async (query: string, userId?: string) => {
     prisma.question.findMany({
       where: {
         isActive: true,
-        OR: searchTerms.map(term => ({
-          title: { contains: term, mode: 'insensitive' }
+        OR: searchTerms.map((term) => ({
+          title: { contains: term, mode: "insensitive" }
         }))
       },
       include: {
@@ -518,7 +523,7 @@ export const searchContent = cache(async (query: string, userId?: string) => {
       take: 20
     })
   ]);
-  
+
   return {
     units,
     lessons,

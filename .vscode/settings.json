@@ -1,5 +1,8 @@
 {
-  "cSpell.words": [
-    "uuid"
-  ]
+  "cSpell.words": ["uuid"],
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "editor.formatOnSave": true,
+  "svg.preview.background": "transparent"
 }
