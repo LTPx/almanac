@@ -20,25 +20,25 @@ export default function FadeInView({
   distance = 50,
   direction = "up",
   className = "",
-  exit = false,
+  exit = false
 }: FadeInViewProps) {
   const ref = React.useRef<HTMLDivElement | null>(null)
   const inView = useInView(ref, {
     amount: 0.1,
-    once: !exit,
+    once: !exit
   })
   const initialPosition = {
     up: { x: 0, y: distance },
     down: { x: 0, y: -distance },
     left: { x: distance, y: 0 },
-    right: { x: -distance, y: 0 },
+    right: { x: -distance, y: 0 }
   }
 
   const variants = {
     hidden: {
       opacity: 0,
       ...initialPosition[direction],
-      scale: 0.95,
+      scale: 0.95
     },
     visible: {
       opacity: 1,
@@ -47,14 +47,14 @@ export default function FadeInView({
       scale: 1,
       transition: {
         duration,
-        delay,
-      },
+        delay
+      }
     },
     exit: {
       opacity: 0,
       scale: 0.95,
-      transition: { duration: 0.3 },
-    },
+      transition: { duration: 0.3 }
+    }
   }
 
   return (

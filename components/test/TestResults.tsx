@@ -14,7 +14,7 @@ export function TestResults({
   results,
   lessonName,
   onReturnToLessons,
-  onRetakeTest,
+  onRetakeTest
 }: TestResultsProps) {
   const percentage = Math.round(results.score)
   const isPassed = results.passed

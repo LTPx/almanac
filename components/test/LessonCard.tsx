@@ -18,7 +18,7 @@ interface LessonCardProps {
 export function LessonCard({
   lesson,
   onStartTest,
-  isLoading,
+  isLoading
 }: LessonCardProps) {
   return (
     <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">

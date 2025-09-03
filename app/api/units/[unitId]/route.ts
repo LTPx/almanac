@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma"
 
 export async function GET(
   request: Request,
-  { params }: { params: { unitId: string } },
+  { params }: { params: { unitId: string } }
 ) {
   try {
     const unitId = parseInt(params.unitId)
@@ -14,28 +14,28 @@ export async function GET(
     const unit = await prisma.unit.findUnique({
       where: {
         id: unitId,
-        isActive: true,
+        isActive: true
       },
       include: {
         lessons: {
           where: {
-            isActive: true,
+            isActive: true
           },
           include: {
             _count: {
               select: {
-                questions: true,
-              },
-            },
+                questions: true
+              }
+            }
           },
-          orderBy: { position: "asc" },
+          orderBy: { position: "asc" }
         },
         _count: {
           select: {
-            lessons: true,
-          },
-        },
-      },
+            lessons: true
+          }
+        }
+      }
     })
 
     if (!unit) {
@@ -51,7 +51,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { unitId: string } },
+  { params }: { params: { unitId: string } }
 ) {
   try {
     const unitId = parseInt(params.unitId)
@@ -69,24 +69,24 @@ export async function PUT(
         ...(description !== undefined && { description }),
         ...(order !== undefined && { order }),
         ...(isActive !== undefined && { isActive }),
-        updatedAt: new Date(),
+        updatedAt: new Date()
       },
       include: {
         lessons: {
           include: {
             _count: {
               select: {
-                questions: true,
-              },
-            },
-          },
+                questions: true
+              }
+            }
+          }
         },
         _count: {
           select: {
-            lessons: true,
-          },
-        },
-      },
+            lessons: true
+          }
+        }
+      }
     })
 
     return NextResponse.json(unit)
@@ -94,14 +94,14 @@ export async function PUT(
     console.error("Error updating unit:", error)
     return NextResponse.json(
       { error: "Failed to update unit" },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { unitId: string } },
+  { params }: { params: { unitId: string } }
 ) {
   try {
     const unitId = parseInt(params.unitId)
@@ -114,8 +114,8 @@ export async function DELETE(
       where: { id: unitId },
       data: {
         isActive: false,
-        updatedAt: new Date(),
-      },
+        updatedAt: new Date()
+      }
     })
 
     return NextResponse.json({ message: "Unit deleted successfully" })
@@ -123,7 +123,7 @@ export async function DELETE(
     console.error("Error deleting unit:", error)
     return NextResponse.json(
       { error: "Failed to delete unit" },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }

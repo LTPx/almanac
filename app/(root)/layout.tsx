@@ -6,12 +6,12 @@ import { UserProvider } from "@/context/UserContext"
 import { StarsBackground } from "@/components/animate-ui/backgrounds/stars"
 
 export default async function HomeLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode
 }>) {
   const session = await auth.api.getSession({
-    headers: await headers(),
+    headers: await headers()
   })
   const user = session?.user ?? null
   return (

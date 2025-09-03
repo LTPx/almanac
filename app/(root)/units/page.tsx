@@ -7,14 +7,14 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
@@ -88,7 +88,7 @@ export default function HomePage() {
 
   const fetchUserProgress = async (userId: string, unitId: number) => {
     const response = await fetch(
-      `/api/users/${userId}/progress?unitId=${unitId}`,
+      `/api/users/${userId}/progress?unitId=${unitId}`
     )
     if (!response.ok) {
       throw new Error("Failed to fetch user progress")
@@ -133,7 +133,7 @@ export default function HomePage() {
         const unitId = parseInt(selectedUnitId)
         const [lessonsData, progressData] = await Promise.all([
           fetchLessonsByUnit(unitId),
-          fetchUserProgress(userId, unitId),
+          fetchUserProgress(userId, unitId)
         ])
 
         setLessons(lessonsData)
@@ -163,10 +163,10 @@ export default function HomePage() {
   }
 
   const selectedUnit = units.find(
-    (unit) => unit.id.toString() === selectedUnitId,
+    (unit) => unit.id.toString() === selectedUnitId
   )
   const completedLessons = lessons.filter((lesson) =>
-    userProgress?.unit.lessons.some((ul) => ul.id === lesson.id),
+    userProgress?.unit.lessons.some((ul) => ul.id === lesson.id)
   ).length
   const totalExperience = userProgress?.experiencePoints || 0
   const progressPercentage = selectedUnit
@@ -325,7 +325,7 @@ export default function HomePage() {
                       <div className="space-y-4">
                         {lessons.map((lesson) => {
                           const isCompleted = userProgress?.unit.lessons.some(
-                            (ul) => ul.id === lesson.id,
+                            (ul) => ul.id === lesson.id
                           )
 
                           return (

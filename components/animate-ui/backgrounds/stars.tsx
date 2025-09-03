@@ -7,7 +7,7 @@ import {
   type SpringOptions,
   type Transition,
   useMotionValue,
-  useSpring,
+  useSpring
 } from "motion/react"
 
 import { cn } from "@/lib/utils"
@@ -56,7 +56,7 @@ function StarLayer({
         style={{
           width: `${size}px`,
           height: `${size}px`,
-          boxShadow: boxShadow,
+          boxShadow: boxShadow
         }}
       />
       <div
@@ -64,7 +64,7 @@ function StarLayer({
         style={{
           width: `${size}px`,
           height: `${size}px`,
-          boxShadow: boxShadow,
+          boxShadow: boxShadow
         }}
       />
     </motion.div>
@@ -104,7 +104,7 @@ function StarsBackground({
       offsetX.set(newOffsetX)
       offsetY.set(newOffsetY)
     },
-    [offsetX, offsetY, factor],
+    [offsetX, offsetY, factor]
   )
 
   return (
@@ -112,7 +112,7 @@ function StarsBackground({
       data-slot="stars-background"
       className={cn(
         "relative size-full overflow-hidden bg-[radial-gradient(ellipse_at_bottom,_#262626_0%,_#000_100%)]",
-        className,
+        className
       )}
       onMouseMove={handleMouseMove}
       {...props}
@@ -133,7 +133,7 @@ function StarsBackground({
           transition={{
             repeat: Infinity,
             duration: speed * 2,
-            ease: "linear",
+            ease: "linear"
           }}
           starColor={starColor}
         />
@@ -143,7 +143,7 @@ function StarsBackground({
           transition={{
             repeat: Infinity,
             duration: speed * 3,
-            ease: "linear",
+            ease: "linear"
           }}
           starColor={starColor}
         />
@@ -157,5 +157,5 @@ export {
   StarLayer,
   StarsBackground,
   type StarLayerProps,
-  type StarsBackgroundProps,
+  type StarsBackgroundProps
 }

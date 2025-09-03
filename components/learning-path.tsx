@@ -5,20 +5,20 @@ import {
   DndContext,
   useDraggable,
   useDroppable,
-  DragEndEvent,
+  DragEndEvent
 } from "@dnd-kit/core"
 
 type Unit = { id: string; label: string }
 
 const units: Unit[] = [
   { id: "u1", label: "Álgebra" },
-  { id: "u2", label: "Geometría" },
+  { id: "u2", label: "Geometría" }
 ]
 
 // === Draggable ===
 function Draggable({ unit }: { unit: Unit }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: unit.id,
+    id: unit.id
   })
 
   return (
@@ -29,7 +29,7 @@ function Draggable({ unit }: { unit: Unit }) {
       style={{
         transform: transform
           ? `translate(${transform.x}px, ${transform.y}px)`
-          : undefined,
+          : undefined
       }}
       className="px-3 py-2 bg-green-500 text-white rounded-lg shadow cursor-pointer text-sm"
     >
@@ -41,7 +41,7 @@ function Draggable({ unit }: { unit: Unit }) {
 // === Droppable ===
 function Droppable({
   id,
-  children,
+  children
 }: {
   id: string
   children?: React.ReactNode
@@ -68,8 +68,8 @@ export default function LearningGrid() {
   // asignaciones: celda → unidad
   const [assignments, setAssignments] = useState<Record<string, string | null>>(
     Object.fromEntries(
-      Array.from({ length: 12 * 5 }).map((_, i) => [`cell-${i}`, null]),
-    ),
+      Array.from({ length: 12 * 5 }).map((_, i) => [`cell-${i}`, null])
+    )
   )
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -78,7 +78,7 @@ export default function LearningGrid() {
       //@ts-ignore
       setAssignments((prev) => ({
         ...prev,
-        [over.id]: active.id,
+        [over.id]: active.id
       }))
     }
   }

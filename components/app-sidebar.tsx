@@ -10,7 +10,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarRail,
+  SidebarRail
 } from "@/components/ui/sidebar"
 import SignOutForm from "./sign-out-form"
 import Logo from "./logo"
@@ -20,17 +20,17 @@ const menuItems = [
   {
     href: "/admin/dashboard",
     label: "Dashboard",
-    icon: LayoutDashboard,
+    icon: LayoutDashboard
   },
   {
     href: "/admin/units",
     label: "Unidades",
-    icon: BookAIcon,
-  },
+    icon: BookAIcon
+  }
 ]
 
 export default function AppSidebar(
-  props: React.ComponentProps<typeof Sidebar>,
+  props: React.ComponentProps<typeof Sidebar>
 ) {
   const pathname = usePathname()
 

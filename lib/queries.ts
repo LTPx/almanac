@@ -7,13 +7,13 @@ export const getUserProgress = cache(async (userId: string) => {
   if (!userId) return null
   const data = await prisma.userProgress.findMany({
     where: {
-      userId,
+      userId
     },
     include: {
       unit: true,
-      lesson: true,
+      lesson: true
     },
-    orderBy: [{ unit: { order: "asc" } }, { lesson: { position: "asc" } }],
+    orderBy: [{ unit: { order: "asc" } }, { lesson: { position: "asc" } }]
   })
   return data
 })
@@ -25,8 +25,8 @@ export const getUserProgressByUnit = cache(
       where: {
         userId_unitId: {
           userId,
-          unitId,
-        },
+          unitId
+        }
       },
       include: {
         unit: {
@@ -35,18 +35,18 @@ export const getUserProgressByUnit = cache(
               include: {
                 _count: {
                   select: {
-                    questions: true,
-                  },
-                },
+                    questions: true
+                  }
+                }
               },
-              orderBy: { position: "asc" },
-            },
-          },
-        },
-      },
+              orderBy: { position: "asc" }
+            }
+          }
+        }
+      }
     })
     return data
-  },
+  }
 )
 
 export const getUserProgressByLesson = cache(
@@ -56,8 +56,8 @@ export const getUserProgressByLesson = cache(
       where: {
         userId_lessonId: {
           userId,
-          lessonId,
-        },
+          lessonId
+        }
       },
       include: {
         lesson: {
@@ -65,16 +65,16 @@ export const getUserProgressByLesson = cache(
             unit: true,
             questions: {
               include: {
-                answers: true,
+                answers: true
               },
-              orderBy: { order: "asc" },
-            },
-          },
-        },
-      },
+              orderBy: { order: "asc" }
+            }
+          }
+        }
+      }
     })
     return data
-  },
+  }
 )
 
 // ============== UNIT QUERIES ==============
@@ -82,29 +82,29 @@ export const getUserProgressByLesson = cache(
 export const getAllUnits = cache(async () => {
   const data = await prisma.unit.findMany({
     where: {
-      isActive: true,
+      isActive: true
     },
     include: {
       lessons: {
         where: {
-          isActive: true,
+          isActive: true
         },
         include: {
           _count: {
             select: {
-              questions: true,
-            },
-          },
+              questions: true
+            }
+          }
         },
-        orderBy: { position: "asc" },
+        orderBy: { position: "asc" }
       },
       _count: {
         select: {
-          lessons: true,
-        },
-      },
+          lessons: true
+        }
+      }
     },
-    orderBy: { order: "asc" },
+    orderBy: { order: "asc" }
   })
   return data
 })
@@ -113,23 +113,23 @@ export const getUnitById = cache(async (unitId: number) => {
   const data = await prisma.unit.findUnique({
     where: {
       id: unitId,
-      isActive: true,
+      isActive: true
     },
     include: {
       lessons: {
         where: {
-          isActive: true,
+          isActive: true
         },
         include: {
           _count: {
             select: {
-              questions: true,
-            },
-          },
+              questions: true
+            }
+          }
         },
-        orderBy: { position: "asc" },
-      },
-    },
+        orderBy: { position: "asc" }
+      }
+    }
   })
   return data
 })
@@ -139,34 +139,34 @@ export const getUnitsWithUserProgress = cache(async (userId: string) => {
 
   const data = await prisma.unit.findMany({
     where: {
-      isActive: true,
+      isActive: true
     },
     include: {
       lessons: {
         where: {
-          isActive: true,
+          isActive: true
         },
         include: {
           _count: {
             select: {
-              questions: true,
-            },
+              questions: true
+            }
           },
           userProgress: {
             where: {
-              userId,
-            },
-          },
+              userId
+            }
+          }
         },
-        orderBy: { position: "asc" },
+        orderBy: { position: "asc" }
       },
       userProgress: {
         where: {
-          userId,
-        },
-      },
+          userId
+        }
+      }
     },
-    orderBy: { order: "asc" },
+    orderBy: { order: "asc" }
   })
   return data
 })
@@ -177,22 +177,22 @@ export const getLessonById = cache(async (lessonId: number) => {
   const data = await prisma.lesson.findUnique({
     where: {
       id: lessonId,
-      isActive: true,
+      isActive: true
     },
     include: {
       unit: true,
       questions: {
         where: {
-          isActive: true,
+          isActive: true
         },
         include: {
           answers: {
-            orderBy: { order: "asc" },
-          },
+            orderBy: { order: "asc" }
+          }
         },
-        orderBy: { order: "asc" },
-      },
-    },
+        orderBy: { order: "asc" }
+      }
+    }
   })
   return data
 })
@@ -201,16 +201,16 @@ export const getLessonsByUnitId = cache(async (unitId: number) => {
   const data = await prisma.lesson.findMany({
     where: {
       unitId,
-      isActive: true,
+      isActive: true
     },
     include: {
       _count: {
         select: {
-          questions: true,
-        },
-      },
+          questions: true
+        }
+      }
     },
-    orderBy: { position: "asc" },
+    orderBy: { position: "asc" }
   })
   return data
 })
@@ -222,30 +222,30 @@ export const getLessonWithUserProgress = cache(
     const data = await prisma.lesson.findUnique({
       where: {
         id: lessonId,
-        isActive: true,
+        isActive: true
       },
       include: {
         unit: true,
         questions: {
           where: {
-            isActive: true,
+            isActive: true
           },
           include: {
             answers: {
-              orderBy: { order: "asc" },
-            },
+              orderBy: { order: "asc" }
+            }
           },
-          orderBy: { order: "asc" },
+          orderBy: { order: "asc" }
         },
         userProgress: {
           where: {
-            userId,
-          },
-        },
-      },
+            userId
+          }
+        }
+      }
     })
     return data
-  },
+  }
 )
 
 // ============== QUESTION QUERIES ==============
@@ -254,14 +254,14 @@ export const getQuestionsByLessonId = cache(async (lessonId: number) => {
   const data = await prisma.question.findMany({
     where: {
       lessonId,
-      isActive: true,
+      isActive: true
     },
     include: {
       answers: {
-        orderBy: { order: "asc" },
-      },
+        orderBy: { order: "asc" }
+      }
     },
-    orderBy: { order: "asc" },
+    orderBy: { order: "asc" }
   })
   return data
 })
@@ -270,18 +270,18 @@ export const getQuestionById = cache(async (questionId: number) => {
   const data = await prisma.question.findUnique({
     where: {
       id: questionId,
-      isActive: true,
+      isActive: true
     },
     include: {
       lesson: {
         include: {
-          unit: true,
-        },
+          unit: true
+        }
       },
       answers: {
-        orderBy: { order: "asc" },
-      },
-    },
+        orderBy: { order: "asc" }
+      }
+    }
   })
   return data
 })
@@ -300,19 +300,19 @@ export const getUserTestAttempts = cache(
       include: {
         lesson: {
           include: {
-            unit: true,
-          },
+            unit: true
+          }
         },
         answers: {
           include: {
-            question: true,
-          },
-        },
+            question: true
+          }
+        }
       },
-      orderBy: { startedAt: "desc" },
+      orderBy: { startedAt: "desc" }
     })
     return data
-  },
+  }
 )
 
 export const getTestAttemptById = cache(
@@ -321,7 +321,7 @@ export const getTestAttemptById = cache(
 
     const data = await prisma.testAttempt.findUnique({
       where: {
-        id: attemptId,
+        id: attemptId
       },
       include: {
         lesson: {
@@ -329,28 +329,28 @@ export const getTestAttemptById = cache(
             unit: true,
             questions: {
               include: {
-                answers: true,
-              },
-            },
-          },
+                answers: true
+              }
+            }
+          }
         },
         answers: {
           include: {
             question: {
               include: {
-                answers: true,
-              },
-            },
-          },
-        },
-      },
+                answers: true
+              }
+            }
+          }
+        }
+      }
     })
 
     // Verificar que el intento pertenece al usuario
     if (data?.userId !== userId) return null
 
     return data
-  },
+  }
 )
 
 export const getLatestTestAttemptByLesson = cache(
@@ -360,19 +360,19 @@ export const getLatestTestAttemptByLesson = cache(
     const data = await prisma.testAttempt.findFirst({
       where: {
         userId,
-        lessonId,
+        lessonId
       },
       include: {
         answers: {
           include: {
-            question: true,
-          },
-        },
+            question: true
+          }
+        }
       },
-      orderBy: { startedAt: "desc" },
+      orderBy: { startedAt: "desc" }
     })
     return data
-  },
+  }
 )
 
 // ============== USER STREAK QUERIES ==============
@@ -382,8 +382,8 @@ export const getUserStreak = cache(async (userId: string) => {
 
   const data = await prisma.userStreak.findUnique({
     where: {
-      userId,
-    },
+      userId
+    }
   })
   return data
 })
@@ -398,32 +398,32 @@ export const getUserStatistics = cache(async (userId: string) => {
     completedLessons,
     totalExperience,
     testAttempts,
-    streak,
+    streak
   ] = await Promise.all([
     prisma.userProgress.count({
-      where: { userId },
+      where: { userId }
     }),
     prisma.userProgress.count({
       where: {
         userId,
-        isCompleted: true,
-      },
+        isCompleted: true
+      }
     }),
     prisma.userProgress.aggregate({
       where: { userId },
       _sum: {
-        experiencePoints: true,
-      },
+        experiencePoints: true
+      }
     }),
     prisma.testAttempt.count({
       where: {
         userId,
-        isCompleted: true,
-      },
+        isCompleted: true
+      }
     }),
     prisma.userStreak.findUnique({
-      where: { userId },
-    }),
+      where: { userId }
+    })
   ])
 
   return {
@@ -432,7 +432,7 @@ export const getUserStatistics = cache(async (userId: string) => {
     totalExperience: totalExperience._sum.experiencePoints || 0,
     completedTests: testAttempts,
     currentStreak: streak?.currentStreak || 0,
-    longestStreak: streak?.longestStreak || 0,
+    longestStreak: streak?.longestStreak || 0
   }
 })
 
@@ -441,30 +441,30 @@ export const getLessonStatistics = cache(async (lessonId: number) => {
     prisma.question.count({
       where: {
         lessonId,
-        isActive: true,
-      },
+        isActive: true
+      }
     }),
     prisma.testAttempt.aggregate({
       where: {
         lessonId,
-        isCompleted: true,
+        isCompleted: true
       },
       _avg: {
-        score: true,
-      },
+        score: true
+      }
     }),
     prisma.testAttempt.count({
       where: {
         lessonId,
-        isCompleted: true,
-      },
-    }),
+        isCompleted: true
+      }
+    })
   ])
 
   return {
     totalQuestions,
     averageScore: averageScore._avg.score || 0,
-    totalAttempts: completionRate,
+    totalAttempts: completionRate
   }
 })
 
@@ -480,16 +480,16 @@ export const searchContent = cache(async (query: string, userId?: string) => {
         OR: searchTerms.map((term) => ({
           OR: [
             { name: { contains: term, mode: "insensitive" } },
-            { description: { contains: term, mode: "insensitive" } },
-          ],
-        })),
+            { description: { contains: term, mode: "insensitive" } }
+          ]
+        }))
       },
       include: {
         lessons: {
           where: { isActive: true },
-          take: 3,
-        },
-      },
+          take: 3
+        }
+      }
     }),
     prisma.lesson.findMany({
       where: {
@@ -497,36 +497,36 @@ export const searchContent = cache(async (query: string, userId?: string) => {
         OR: searchTerms.map((term) => ({
           OR: [
             { name: { contains: term, mode: "insensitive" } },
-            { description: { contains: term, mode: "insensitive" } },
-          ],
-        })),
+            { description: { contains: term, mode: "insensitive" } }
+          ]
+        }))
       },
       include: {
-        unit: true,
+        unit: true
       },
-      take: 10,
+      take: 10
     }),
     prisma.question.findMany({
       where: {
         isActive: true,
         OR: searchTerms.map((term) => ({
-          title: { contains: term, mode: "insensitive" },
-        })),
+          title: { contains: term, mode: "insensitive" }
+        }))
       },
       include: {
         lesson: {
           include: {
-            unit: true,
-          },
-        },
+            unit: true
+          }
+        }
       },
-      take: 20,
-    }),
+      take: 20
+    })
   ])
 
   return {
     units,
     lessons,
-    questions,
+    questions
   }
 })

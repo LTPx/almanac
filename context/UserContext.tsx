@@ -12,7 +12,7 @@ export const UserContext = createContext<UserContextType | undefined>(undefined)
 
 export const UserProvider = ({
   user: initialUser,
-  children,
+  children
 }: {
   user: User | null
   children: React.ReactNode

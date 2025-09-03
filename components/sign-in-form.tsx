@@ -7,7 +7,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { authClient } from "@/lib/auth-client"
@@ -24,8 +24,8 @@ export default function SignInForm() {
     resolver: zodResolver(signInFormSchema),
     defaultValues: {
       email: "",
-      password: "",
-    },
+      password: ""
+    }
   })
 
   async function onSubmit(values: z.infer<typeof signInFormSchema>) {
@@ -33,7 +33,7 @@ export default function SignInForm() {
     await authClient.signIn.email(
       {
         email,
-        password,
+        password
       },
       {
         onRequest: () => {
@@ -47,8 +47,8 @@ export default function SignInForm() {
         onError: (ctx) => {
           toast.dismiss()
           toast.error(ctx.error.message)
-        },
-      },
+        }
+      }
     )
   }
 

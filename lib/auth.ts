@@ -4,20 +4,20 @@ import prisma from "./prisma"
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
-    provider: "postgresql",
+    provider: "postgresql"
   }),
   emailAndPassword: {
     enabled: true,
-    autoSignIn: false,
+    autoSignIn: false
   },
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-    },
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
+    }
   },
   rateLimit: {
     window: 60, // time window in seconds
-    max: 10,
-  },
+    max: 10
+  }
 })

@@ -8,19 +8,19 @@ const notoSansKR = Noto_Sans_KR({
   weight: ["300", "400", "500", "700"],
   subsets: ["latin"],
   variable: "--font-noto-sans-kr",
-  display: "swap",
+  display: "swap"
 })
 
 export const metadata: Metadata = {
   title: "Almanac",
   description: "Learning App + NFTs blockchain",
   icons: {
-    icon: "/almanac.svg",
-  },
+    icon: "/almanac.svg"
+  }
 }
 
 export default function RootLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode
 }>) {

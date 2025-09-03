@@ -10,7 +10,7 @@ export async function GET() {
     console.error("Error fetching units:", error)
     return NextResponse.json(
       { error: "Failed to fetch units" },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }
@@ -29,24 +29,24 @@ export async function POST(request: Request) {
         name,
         description,
         order: order || 1,
-        isActive: true,
+        isActive: true
       },
       include: {
         lessons: {
           include: {
             _count: {
               select: {
-                questions: true,
-              },
-            },
-          },
+                questions: true
+              }
+            }
+          }
         },
         _count: {
           select: {
-            lessons: true,
-          },
-        },
-      },
+            lessons: true
+          }
+        }
+      }
     })
 
     return NextResponse.json(unit, { status: 201 })
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     console.error("Error creating unit:", error)
     return NextResponse.json(
       { error: "Failed to create unit" },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }

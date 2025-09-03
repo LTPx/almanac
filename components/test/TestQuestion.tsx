@@ -18,7 +18,7 @@ export function TestQuestion({
   onAnswer,
   showResult = false,
   isCorrect = false,
-  selectedAnswer,
+  selectedAnswer
 }: TestQuestionProps) {
   const [selected, setSelected] = useState<string>(selectedAnswer || "")
   const [hasAnswered, setHasAnswered] = useState(showResult)

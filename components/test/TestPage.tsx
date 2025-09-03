@@ -9,20 +9,20 @@ const mockLessons = [
     id: 1,
     name: "Suma",
     description: "Aprende a sumar números enteros",
-    experiencePoints: 25,
+    experiencePoints: 25
   },
   {
     id: 2,
     name: "Resta",
     description: "Domina la resta de números enteros",
-    experiencePoints: 25,
+    experiencePoints: 25
   },
   {
     id: 3,
     name: "Multiplicación",
     description: "Multiplica números de forma eficiente",
-    experiencePoints: 30,
-  },
+    experiencePoints: 30
+  }
 ]
 
 export default function TestPage() {

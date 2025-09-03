@@ -5,6 +5,4 @@
   },
   "editor.formatOnSave": true,
   "svg.preview.background": "transparent",
-  "editor.tabSize": 2,
-  "editor.insertSpaces": true
 }

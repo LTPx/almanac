@@ -11,7 +11,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -38,7 +38,7 @@ export default function UnitsAdminPage() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    order: 1,
+    order: 1
   })
   // const { toast } = useToast();
 
@@ -76,7 +76,7 @@ export default function UnitsAdminPage() {
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData)
       })
 
       if (!response.ok) throw new Error("Failed to save")
@@ -86,7 +86,7 @@ export default function UnitsAdminPage() {
       //   description: `Unidad ${editingUnit ? 'actualizada' : 'creada'} correctamente`,
       // });
       toast.success(
-        `Unidad ${editingUnit ? "actualizada" : "creada"} correctamente`,
+        `Unidad ${editingUnit ? "actualizada" : "creada"} correctamente`
       )
 
       setDialogOpen(false)
@@ -110,7 +110,7 @@ export default function UnitsAdminPage() {
     setFormData({
       name: unit.name,
       description: unit.description || "",
-      order: unit.order,
+      order: unit.order
     })
     setDialogOpen(true)
   }
@@ -121,7 +121,7 @@ export default function UnitsAdminPage() {
 
     try {
       const response = await fetch(`/api/units/${unit.id}`, {
-        method: "DELETE",
+        method: "DELETE"
       })
 
       if (!response.ok) throw new Error("Failed to delete")
@@ -212,7 +212,7 @@ export default function UnitsAdminPage() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      order: parseInt(e.target.value),
+                      order: parseInt(e.target.value)
                     })
                   }
                   min="1"

@@ -9,7 +9,7 @@ export function useTest() {
 
   const startTest = async (
     userId: string,
-    lessonId: number,
+    lessonId: number
   ): Promise<TestData | null> => {
     setIsLoading(true)
     setError(null)
@@ -18,9 +18,9 @@ export function useTest() {
       const response = await fetch("/api/test/start", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ userId, lessonId }),
+        body: JSON.stringify({ userId, lessonId })
       })
 
       if (!response.ok) {
@@ -42,20 +42,20 @@ export function useTest() {
     testAttemptId: number,
     questionId: number,
     userAnswer: string,
-    timeSpent?: number,
+    timeSpent?: number
   ) => {
     try {
       const response = await fetch("/api/test/submit-answer", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           testAttemptId,
           questionId,
           userAnswer,
-          timeSpent,
-        }),
+          timeSpent
+        })
       })
 
       const data = await response.json()
@@ -67,7 +67,7 @@ export function useTest() {
   }
 
   const completeTest = async (
-    testAttemptId: number,
+    testAttemptId: number
   ): Promise<TestResultsInterface | null> => {
     setIsLoading(true)
 
@@ -75,9 +75,9 @@ export function useTest() {
       const response = await fetch("/api/test/complete", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ testAttemptId }),
+        body: JSON.stringify({ testAttemptId })
       })
 
       const data = await response.json()
@@ -95,6 +95,6 @@ export function useTest() {
     error,
     startTest,
     submitAnswer,
-    completeTest,
+    completeTest
   }
 }

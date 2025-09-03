@@ -35,14 +35,14 @@ async function main() {
               content: {
                 options: ["7", "8", "9", "10"],
                 correctAnswer: "9",
-                explanation: "La suma de 5 + 4 = 9",
+                explanation: "La suma de 5 + 4 = 9"
               },
               answers: [
                 { text: "7", isCorrect: false, order: 1 },
                 { text: "8", isCorrect: false, order: 2 },
                 { text: "9", isCorrect: true, order: 3 },
-                { text: "10", isCorrect: false, order: 4 },
-              ],
+                { text: "10", isCorrect: false, order: 4 }
+              ]
             },
             {
               type: QuestionType.FILL_IN_BLANK,
@@ -51,11 +51,11 @@ async function main() {
               content: {
                 sentence: "12 + ___ = 20",
                 correctAnswer: "8",
-                explanation: "Para que 12 + algo = 20, necesitamos 8",
+                explanation: "Para que 12 + algo = 20, necesitamos 8"
               },
-              answers: [],
-            },
-          ],
+              answers: []
+            }
+          ]
         },
         {
           name: "Resta",
@@ -71,16 +71,16 @@ async function main() {
               content: {
                 options: ["6", "7", "8", "9"],
                 correctAnswer: "8",
-                explanation: "La resta de 15 - 7 = 8",
+                explanation: "La resta de 15 - 7 = 8"
               },
               answers: [
                 { text: "6", isCorrect: false, order: 1 },
                 { text: "7", isCorrect: false, order: 2 },
                 { text: "8", isCorrect: true, order: 3 },
-                { text: "9", isCorrect: false, order: 4 },
-              ],
-            },
-          ],
+                { text: "9", isCorrect: false, order: 4 }
+              ]
+            }
+          ]
         },
         {
           name: "Multiplicación",
@@ -96,18 +96,18 @@ async function main() {
               content: {
                 options: ["40", "41", "42", "43"],
                 correctAnswer: "42",
-                explanation: "6 × 7 = 42",
+                explanation: "6 × 7 = 42"
               },
               answers: [
                 { text: "40", isCorrect: false, order: 1 },
                 { text: "41", isCorrect: false, order: 2 },
                 { text: "42", isCorrect: true, order: 3 },
-                { text: "43", isCorrect: false, order: 4 },
-              ],
-            },
-          ],
-        },
-      ],
+                { text: "43", isCorrect: false, order: 4 }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       name: "Álgebra Elemental",
@@ -132,9 +132,9 @@ async function main() {
                   "En una _______ la x representa la incógnita o lo desconocido",
                 correctAnswer: "ecuación",
                 explanation:
-                  "En una ecuación, la x es la variable que representa el valor desconocido",
+                  "En una ecuación, la x es la variable que representa el valor desconocido"
               },
-              answers: [],
+              answers: []
             },
             {
               type: QuestionType.ORDER_WORDS,
@@ -153,7 +153,7 @@ async function main() {
                   "signo",
                   "de",
                   "cambia",
-                  "de",
+                  "de"
                 ],
                 correctOrder: [
                   "Cuando",
@@ -165,13 +165,13 @@ async function main() {
                   "también",
                   "cambia",
                   "de",
-                  "lado",
+                  "lado"
                 ],
-                explanation: "Esta es una regla fundamental del álgebra",
+                explanation: "Esta es una regla fundamental del álgebra"
               },
-              answers: [],
-            },
-          ],
+              answers: []
+            }
+          ]
         },
         {
           name: "Ecuaciones Simples",
@@ -187,18 +187,18 @@ async function main() {
               content: {
                 options: ["5", "6", "7", "8"],
                 correctAnswer: "7",
-                explanation: "x + 5 = 12, entonces x = 12 - 5 = 7",
+                explanation: "x + 5 = 12, entonces x = 12 - 5 = 7"
               },
               answers: [
                 { text: "5", isCorrect: false, order: 1 },
                 { text: "6", isCorrect: false, order: 2 },
                 { text: "7", isCorrect: true, order: 3 },
-                { text: "8", isCorrect: false, order: 4 },
-              ],
-            },
-          ],
-        },
-      ],
+                { text: "8", isCorrect: false, order: 4 }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       name: "Programación Básica",
@@ -220,14 +220,14 @@ async function main() {
               content: {
                 options: ["string", "integer", "float", "boolean"],
                 correctAnswer: "integer",
-                explanation: "Integer es el tipo de datos para números enteros",
+                explanation: "Integer es el tipo de datos para números enteros"
               },
               answers: [
                 { text: "string", isCorrect: false, order: 1 },
                 { text: "integer", isCorrect: true, order: 2 },
                 { text: "float", isCorrect: false, order: 3 },
-                { text: "boolean", isCorrect: false, order: 4 },
-              ],
+                { text: "boolean", isCorrect: false, order: 4 }
+              ]
             },
             {
               type: QuestionType.TRUE_FALSE,
@@ -235,14 +235,14 @@ async function main() {
               order: 2,
               content: {
                 correctAnswer: true,
-                explanation: "Sí, cualquier texto entre comillas es una cadena",
+                explanation: "Sí, cualquier texto entre comillas es una cadena"
               },
               answers: [
                 { text: "Verdadero", isCorrect: true, order: 1 },
-                { text: "Falso", isCorrect: false, order: 2 },
-              ],
-            },
-          ],
+                { text: "Falso", isCorrect: false, order: 2 }
+              ]
+            }
+          ]
         },
         {
           name: "Funciones",
@@ -261,14 +261,14 @@ async function main() {
                   "Para declarar una función en JavaScript, usas la palabra clave ________.",
                 correctAnswer: "function",
                 explanation:
-                  'La palabra clave "function" se usa para declarar funciones en JavaScript',
+                  'La palabra clave "function" se usa para declarar funciones en JavaScript'
               },
-              answers: [],
-            },
-          ],
-        },
-      ],
-    },
+              answers: []
+            }
+          ]
+        }
+      ]
+    }
   ]
 
   // 🌱 Insertar datos en DB con relaciones anidadas
@@ -295,15 +295,15 @@ async function main() {
                       create: q.answers.map((a) => ({
                         text: a.text,
                         isCorrect: a.isCorrect,
-                        order: a.order,
-                      })),
+                        order: a.order
+                      }))
                     }
-                  : undefined,
-              })),
-            },
-          })),
-        },
-      },
+                  : undefined
+              }))
+            }
+          }))
+        }
+      }
     })
   }
 

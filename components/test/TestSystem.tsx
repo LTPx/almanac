@@ -8,7 +8,7 @@ import { useTest } from "@/hooks/useTest"
 import type {
   TestData,
   Question,
-  TestResultsInterface as TestResultsType,
+  TestResultsInterface as TestResultsType
 } from "@/lib/types"
 
 interface TestSystemProps {
@@ -54,13 +54,13 @@ export function TestSystem({ userId, initialLesson }: TestSystemProps) {
       currentTest.testAttemptId,
       questionId,
       answer,
-      timeSpent,
+      timeSpent
     )
 
     if (result) {
       setAnswers((prev) => ({
         ...prev,
-        [questionId]: { answer, isCorrect: result.isCorrect },
+        [questionId]: { answer, isCorrect: result.isCorrect }
       }))
 
       // Mostrar resultado por 2 segundos, luego continuar
@@ -184,7 +184,7 @@ export function TestSystem({ userId, initialLesson }: TestSystemProps) {
                   width: `${
                     ((currentQuestionIndex + 1) / currentTest.totalQuestions) *
                     100
-                  }%`,
+                  }%`
                 }}
               />
             </div>

@@ -7,12 +7,12 @@ import { redirect } from "next/navigation"
 import { UserProvider } from "@/context/UserContext"
 
 export default async function DashboardLayout({
-  children,
+  children
 }: {
   children: React.ReactNode
 }) {
   const session = await auth.api.getSession({
-    headers: await headers(),
+    headers: await headers()
   })
 
   if (!session) {

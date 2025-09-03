@@ -9,16 +9,16 @@ export async function GET() {
           Authorization: process.env.GITHUB_TOKEN
             ? `Bearer ${process.env.GITHUB_TOKEN}`
             : "",
-          Accept: "application/vnd.github+json",
+          Accept: "application/vnd.github+json"
         },
-        next: { revalidate: 60 },
-      },
+        next: { revalidate: 60 }
+      }
     )
 
     if (!res.ok) {
       return NextResponse.json(
         { error: "Failed to fetch stars" },
-        { status: res.status },
+        { status: res.status }
       )
     }
 
@@ -27,7 +27,7 @@ export async function GET() {
   } catch (error) {
     return NextResponse.json(
       { error: error || "Unexpected error" },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }

@@ -26,8 +26,8 @@ export default function SignOutForm() {
         onError: (ctx) => {
           toast.dismiss()
           toast.error(ctx.error.message)
-        },
-      },
+        }
+      }
     })
   }
   return (

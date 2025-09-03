@@ -7,7 +7,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { authClient } from "@/lib/auth-client"
@@ -25,8 +25,8 @@ export default function SignUpForm() {
     defaultValues: {
       name: "",
       email: "",
-      password: "",
-    },
+      password: ""
+    }
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -35,7 +35,7 @@ export default function SignUpForm() {
       {
         email,
         password,
-        name,
+        name
       },
       {
         onRequest: () => {
@@ -47,8 +47,8 @@ export default function SignUpForm() {
         },
         onError: (ctx) => {
           toast.error(ctx.error.message)
-        },
-      },
+        }
+      }
     )
   }
 

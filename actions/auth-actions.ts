@@ -6,17 +6,17 @@ import { headers } from "next/headers"
 export async function signOut() {
   try {
     const res = await auth.api.signOut({
-      headers: await headers(),
+      headers: await headers()
     })
     return {
       status: true,
-      data: res,
+      data: res
     }
   } catch (error) {
     console.log(error)
     return {
       status: false,
-      error,
+      error
     }
   }
 }

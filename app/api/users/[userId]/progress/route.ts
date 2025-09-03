@@ -3,7 +3,7 @@ import { getUserProgressByUnit } from "@/lib/queries"
 
 export async function GET(
   request: Request,
-  { params }: { params: { userId: string } },
+  { params }: { params: { userId: string } }
 ) {
   try {
     const { searchParams } = new URL(request.url)
@@ -12,7 +12,7 @@ export async function GET(
     if (!unitId) {
       return NextResponse.json(
         { error: "Unit ID is required" },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
@@ -27,7 +27,7 @@ export async function GET(
     console.error("Error fetching user progress:", error)
     return NextResponse.json(
       { error: "Failed to fetch user progress" },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }

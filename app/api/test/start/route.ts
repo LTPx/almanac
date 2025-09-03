@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     if (!userId || !lessonId) {
       return NextResponse.json(
         { error: "userId y lessonId son requeridos" },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const lesson = await prisma.lesson.findFirst({
       where: {
         id: lessonId,
-        isActive: true,
+        isActive: true
       },
       include: {
         questions: {
@@ -25,36 +25,36 @@ export async function POST(request: NextRequest) {
           orderBy: { order: "asc" },
           include: {
             answers: {
-              orderBy: { order: "asc" },
-            },
-          },
-        },
-      },
+              orderBy: { order: "asc" }
+            }
+          }
+        }
+      }
     })
 
     if (!lesson) {
       return NextResponse.json(
         { error: "Lección no encontrada o inactiva" },
-        { status: 404 },
+        { status: 404 }
       )
     }
 
     if (lesson.questions.length === 0) {
       return NextResponse.json(
         { error: "Esta lección no tiene preguntas disponibles" },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
     // Verificar que el usuario existe
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: userId }
     })
 
     if (!user) {
       return NextResponse.json(
         { error: "Usuario no encontrado" },
-        { status: 404 },
+        { status: 404 }
       )
     }
 
@@ -66,8 +66,8 @@ export async function POST(request: NextRequest) {
         totalQuestions: lesson.questions.length,
         correctAnswers: 0,
         score: 0,
-        isCompleted: false,
-      },
+        isCompleted: false
+      }
     })
 
     // Preparar las preguntas sin mostrar las respuestas correctas
@@ -80,9 +80,9 @@ export async function POST(request: NextRequest) {
       answers: question.answers.map((answer) => ({
         id: answer.id,
         text: answer.text,
-        order: answer.order,
+        order: answer.order
         // No incluir isCorrect
-      })),
+      }))
     }))
 
     return NextResponse.json({
@@ -90,16 +90,16 @@ export async function POST(request: NextRequest) {
       lesson: {
         id: lesson.id,
         name: lesson.name,
-        description: lesson.description,
+        description: lesson.description
       },
       questions: questionsForClient,
-      totalQuestions: lesson.questions.length,
+      totalQuestions: lesson.questions.length
     })
   } catch (error) {
     console.error("Error al iniciar test:", error)
     return NextResponse.json(
       { error: "Error interno del servidor" },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }

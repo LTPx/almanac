@@ -3,7 +3,7 @@ import { getLessonsByUnitId } from "@/lib/queries"
 
 export async function GET(
   request: Request,
-  { params }: { params: { unitId: string } },
+  { params }: { params: { unitId: string } }
 ) {
   try {
     const unitId = parseInt(params.unitId)
@@ -17,7 +17,7 @@ export async function GET(
     console.error("Error fetching lessons:", error)
     return NextResponse.json(
       { error: "Failed to fetch lessons" },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }

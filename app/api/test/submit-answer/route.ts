@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     if (!testAttemptId || !questionId || userAnswer === undefined) {
       return NextResponse.json(
         { error: "testAttemptId, questionId y userAnswer son requeridos" },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
@@ -17,27 +17,27 @@ export async function POST(request: NextRequest) {
     const testAttempt = await prisma.testAttempt.findFirst({
       where: {
         id: testAttemptId,
-        isCompleted: false,
-      },
+        isCompleted: false
+      }
     })
 
     if (!testAttempt) {
       return NextResponse.json(
         { error: "Intento de test no encontrado o ya completado" },
-        { status: 404 },
+        { status: 404 }
       )
     }
 
     // Obtener la pregunta con sus respuestas
     const question = await prisma.question.findFirst({
       where: { id: questionId },
-      include: { answers: true },
+      include: { answers: true }
     })
 
     if (!question) {
       return NextResponse.json(
         { error: "Pregunta no encontrada" },
-        { status: 404 },
+        { status: 404 }
       )
     }
 
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       case "TRUE_FALSE":
         // Para opción múltiple, comparar con la respuesta correcta
         const correctAnswer = question.answers.find(
-          (answer) => answer.isCorrect,
+          (answer) => answer.isCorrect
         )
         isCorrect = correctAnswer
           ? correctAnswer.id.toString() === userAnswer
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       case "FILL_IN_BLANK":
         // Para completar espacios, comparar texto (case insensitive)
         const correctText = question.answers.find(
-          (answer) => answer.isCorrect,
+          (answer) => answer.isCorrect
         )?.text
         isCorrect = correctText
           ? correctText.toLowerCase().trim() === userAnswer.toLowerCase().trim()
@@ -89,8 +89,8 @@ export async function POST(request: NextRequest) {
     const existingAnswer = await prisma.testAnswer.findFirst({
       where: {
         testAttemptId,
-        questionId,
-      },
+        questionId
+      }
     })
 
     let testAnswer
@@ -104,8 +104,8 @@ export async function POST(request: NextRequest) {
               ? userAnswer
               : JSON.stringify(userAnswer),
           isCorrect,
-          timeSpent,
-        },
+          timeSpent
+        }
       })
     } else {
       // Crear nueva respuesta
@@ -118,21 +118,21 @@ export async function POST(request: NextRequest) {
               ? userAnswer
               : JSON.stringify(userAnswer),
           isCorrect,
-          timeSpent,
-        },
+          timeSpent
+        }
       })
     }
 
     return NextResponse.json({
       success: true,
       isCorrect,
-      answerId: testAnswer.id,
+      answerId: testAnswer.id
     })
   } catch (error) {
     console.error("Error al enviar respuesta:", error)
     return NextResponse.json(
       { error: "Error interno del servidor" },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }
