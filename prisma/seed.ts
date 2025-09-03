@@ -266,6 +266,245 @@ async function main() {
               answers: []
             }
           ]
+        },
+        {
+          name: "Condicionales",
+          description: "Uso de if, else y else if",
+          order: 3,
+          position: 3,
+          experiencePoints: 35,
+          questions: [
+            {
+              type: QuestionType.MULTIPLE_CHOICE,
+              title: "¿Cuál palabra clave se usa para evaluar una condición?",
+              order: 1,
+              content: {
+                options: ["for", "if", "while", "switch"],
+                correctAnswer: "if",
+                explanation: "La sentencia if se usa para evaluar condiciones."
+              },
+              answers: [
+                { text: "for", isCorrect: false, order: 1 },
+                { text: "if", isCorrect: true, order: 2 },
+                { text: "while", isCorrect: false, order: 3 },
+                { text: "switch", isCorrect: false, order: 4 }
+              ]
+            }
+          ]
+        },
+        {
+          name: "Bucles For",
+          description: "Iteración con bucles for",
+          order: 4,
+          position: 4,
+          experiencePoints: 40,
+          questions: [
+            {
+              type: QuestionType.TRUE_FALSE,
+              title: "Un bucle for siempre se ejecuta al menos una vez.",
+              order: 1,
+              content: {
+                correctAnswer: false,
+                explanation:
+                  "Si la condición inicial es falsa, el bucle for no se ejecuta."
+              },
+              answers: [
+                { text: "Verdadero", isCorrect: false, order: 1 },
+                { text: "Falso", isCorrect: true, order: 2 }
+              ]
+            }
+          ]
+        },
+        {
+          name: "Bucles While",
+          description: "Uso de bucles while y do-while",
+          order: 5,
+          position: 5,
+          experiencePoints: 40,
+          questions: [
+            {
+              type: QuestionType.MULTIPLE_CHOICE,
+              title: "¿Qué bucle garantiza al menos una ejecución?",
+              order: 1,
+              content: {
+                options: ["for", "while", "do-while"],
+                correctAnswer: "do-while",
+                explanation:
+                  "El do-while se ejecuta al menos una vez antes de evaluar la condición."
+              },
+              answers: [
+                { text: "for", isCorrect: false, order: 1 },
+                { text: "while", isCorrect: false, order: 2 },
+                { text: "do-while", isCorrect: true, order: 3 }
+              ]
+            }
+          ]
+        },
+        {
+          name: "Arreglos",
+          description: "Introducción a listas y arreglos",
+          order: 6,
+          position: 6,
+          experiencePoints: 45,
+          questions: [
+            {
+              type: QuestionType.TRUE_FALSE,
+              title:
+                "Un arreglo puede contener diferentes tipos de datos en JavaScript.",
+              order: 1,
+              content: {
+                correctAnswer: true,
+                explanation:
+                  "En JavaScript, los arreglos pueden contener datos de diferentes tipos."
+              },
+              answers: [
+                { text: "Verdadero", isCorrect: true, order: 1 },
+                { text: "Falso", isCorrect: false, order: 2 }
+              ]
+            }
+          ]
+        },
+        {
+          name: "Objetos",
+          description: "Uso de objetos en programación",
+          order: 7,
+          position: 7,
+          experiencePoints: 50,
+          questions: [
+            {
+              type: QuestionType.FILL_IN_BLANK,
+              title: "En JavaScript, los objetos se definen con ________.",
+              order: 1,
+              content: {
+                sentence: "En JavaScript, los objetos se definen con ________.",
+                correctAnswer: "llaves {}",
+                explanation: "Los objetos se definen usando llaves {}."
+              },
+              answers: []
+            }
+          ]
+        },
+        {
+          name: "Operadores Lógicos",
+          description: "AND, OR y NOT en programación",
+          order: 8,
+          position: 8,
+          experiencePoints: 30,
+          questions: [
+            {
+              type: QuestionType.MULTIPLE_CHOICE,
+              title: "¿Cuál operador lógico representa la conjunción?",
+              order: 1,
+              content: {
+                options: ["&&", "||", "!"],
+                correctAnswer: "&&",
+                explanation:
+                  "El operador && representa la conjunción lógica (AND)."
+              },
+              answers: [
+                { text: "&&", isCorrect: true, order: 1 },
+                { text: "||", isCorrect: false, order: 2 },
+                { text: "!", isCorrect: false, order: 3 }
+              ]
+            }
+          ]
+        },
+        {
+          name: "Operadores Aritméticos",
+          description: "Suma, resta, multiplicación y división",
+          order: 9,
+          position: 9,
+          experiencePoints: 30,
+          questions: [
+            {
+              type: QuestionType.TRUE_FALSE,
+              title: "El operador % devuelve el resto de una división.",
+              order: 1,
+              content: {
+                correctAnswer: true,
+                explanation:
+                  "El operador módulo (%) devuelve el resto de una división."
+              },
+              answers: [
+                { text: "Verdadero", isCorrect: true, order: 1 },
+                { text: "Falso", isCorrect: false, order: 2 }
+              ]
+            }
+          ]
+        },
+        {
+          name: "Comentarios en el Código",
+          description: "Uso de comentarios para documentar programas",
+          order: 10,
+          position: 10,
+          experiencePoints: 20,
+          questions: [
+            {
+              type: QuestionType.MULTIPLE_CHOICE,
+              title:
+                "¿Qué símbolo se usa para comentarios de una sola línea en JavaScript?",
+              order: 1,
+              content: {
+                options: ["//", "/*", "#", "<!-- -->"],
+                correctAnswer: "//",
+                explanation:
+                  "En JavaScript, los comentarios de una sola línea se hacen con //."
+              },
+              answers: [
+                { text: "//", isCorrect: true, order: 1 },
+                { text: "/*", isCorrect: false, order: 2 },
+                { text: "#", isCorrect: false, order: 3 },
+                { text: "<!-- -->", isCorrect: false, order: 4 }
+              ]
+            }
+          ]
+        },
+        {
+          name: "Entrada y Salida",
+          description: "Cómo mostrar mensajes y leer datos",
+          order: 11,
+          position: 11,
+          experiencePoints: 35,
+          questions: [
+            {
+              type: QuestionType.FILL_IN_BLANK,
+              title:
+                "En JavaScript, para mostrar un mensaje en la consola usamos ________.",
+              order: 1,
+              content: {
+                sentence:
+                  "En JavaScript, para mostrar un mensaje en la consola usamos ________.",
+                correctAnswer: "console.log",
+                explanation:
+                  "console.log permite mostrar mensajes en la consola."
+              },
+              answers: []
+            }
+          ]
+        },
+        {
+          name: "Constantes",
+          description: "Declaración de constantes en programación",
+          order: 12,
+          position: 12,
+          experiencePoints: 25,
+          questions: [
+            {
+              type: QuestionType.TRUE_FALSE,
+              title:
+                "Las constantes no pueden cambiar su valor después de ser declaradas.",
+              order: 1,
+              content: {
+                correctAnswer: true,
+                explanation:
+                  "Las constantes mantienen el mismo valor una vez declaradas."
+              },
+              answers: [
+                { text: "Verdadero", isCorrect: true, order: 1 },
+                { text: "Falso", isCorrect: false, order: 2 }
+              ]
+            }
+          ]
         }
       ]
     }
