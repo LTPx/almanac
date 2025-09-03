@@ -3,22 +3,22 @@ import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 
 export default async function AuthLayout({
-   children,
+  children,
 }: Readonly<{
-   children: React.ReactNode;
+  children: React.ReactNode
 }>) {
-   const session = await auth.api.getSession({
-      headers: await headers()
-   })
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
 
-   if (session) {
-      return redirect("/")
-   }
-   return (
-      <main>
-         <div className="h-screen flex flex-col items-center justify-center">
-            {children}
-         </div>
-      </main>
-   );
+  if (session) {
+    return redirect("/")
+  }
+  return (
+    <main>
+      <div className="h-screen flex flex-col items-center justify-center">
+        {children}
+      </div>
+    </main>
+  )
 }

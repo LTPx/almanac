@@ -1,7 +1,5 @@
 {
-  "cSpell.words": [
-    "uuid"
-  ],
+  "cSpell.words": ["uuid"],
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
   },

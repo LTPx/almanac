@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { LayoutDashboard, BookAIcon } from "lucide-react";
+import Link from "next/link"
+import { LayoutDashboard, BookAIcon } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -11,10 +11,10 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarRail,
-} from "@/components/ui/sidebar";
-import SignOutForm from "./sign-out-form";
-import Logo from "./logo";
-import { usePathname } from "next/navigation";
+} from "@/components/ui/sidebar"
+import SignOutForm from "./sign-out-form"
+import Logo from "./logo"
+import { usePathname } from "next/navigation"
 
 const menuItems = [
   {
@@ -25,14 +25,14 @@ const menuItems = [
   {
     href: "/admin/units",
     label: "Unidades",
-    icon: BookAIcon, 
+    icon: BookAIcon,
   },
-];
+]
 
 export default function AppSidebar(
-  props: React.ComponentProps<typeof Sidebar>
+  props: React.ComponentProps<typeof Sidebar>,
 ) {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -42,8 +42,8 @@ export default function AppSidebar(
       <SidebarContent>
         <SidebarMenu className="px-2 py-4">
           {menuItems.map((item) => {
-            const isActive = pathname.startsWith(item.href);
-            const Icon = item.icon;
+            const isActive = pathname.startsWith(item.href)
+            const Icon = item.icon
             return (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton isActive={isActive} size="lg">
@@ -60,7 +60,7 @@ export default function AppSidebar(
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-            );
+            )
           })}
         </SidebarMenu>
       </SidebarContent>
@@ -69,5 +69,5 @@ export default function AppSidebar(
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  );
+  )
 }
