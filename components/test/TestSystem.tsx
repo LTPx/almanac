@@ -13,17 +13,17 @@ import type {
 
 interface TestSystemProps {
 	userId: string;
-	initialLessons: {
+	initialLesson: {
 		id: number;
 		name: string;
 		description: string | null;
 		experiencePoints: number;
-	}[];
+	};
 }
 
 type TestState = "lessons" | "testing" | "results";
 
-export function TestSystem({userId, initialLessons}: TestSystemProps) {
+export function TestSystem({userId, initialLesson}: TestSystemProps) {
 	const [state, setState] = useState<TestState>("lessons");
 	const [currentTest, setCurrentTest] = useState<TestData | null>(null);
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -149,14 +149,12 @@ export function TestSystem({userId, initialLessons}: TestSystemProps) {
 					</div>
 
 					<div className="space-y-6">
-						{initialLessons.map((lesson) => (
-							<LessonCard
-								key={lesson.id}
-								lesson={lesson}
-								onStartTest={handleStartTest}
-								isLoading={isLoading}
-							/>
-						))}
+						<LessonCard
+							key={initialLesson.id}
+							lesson={initialLesson}
+							onStartTest={handleStartTest}
+							isLoading={isLoading}
+						/>
 					</div>
 				</div>
 			</div>
