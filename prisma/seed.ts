@@ -1,17 +1,17 @@
-const { PrismaClient, QuestionType } = require("@prisma/client")
-const prisma = new PrismaClient()
+const { PrismaClient, QuestionType } = require("@prisma/client");
+const prisma = new PrismaClient();
 
 async function main() {
   // 🔄 Limpiar datos previos en orden por las relaciones
-  await prisma.testAnswer.deleteMany()
-  await prisma.testAttempt.deleteMany()
-  await prisma.answer.deleteMany()
-  await prisma.question.deleteMany()
-  await prisma.userProgress.deleteMany()
-  await prisma.lesson.deleteMany()
-  await prisma.unit.deleteMany()
+  await prisma.testAnswer.deleteMany();
+  await prisma.testAttempt.deleteMany();
+  await prisma.answer.deleteMany();
+  await prisma.question.deleteMany();
+  await prisma.userProgress.deleteMany();
+  await prisma.lesson.deleteMany();
+  await prisma.unit.deleteMany();
 
-  console.log("🗑️ Datos anteriores eliminados")
+  console.log("🗑️ Datos anteriores eliminados");
 
   // 📚 Data inicial
   const unitsData = [
@@ -269,7 +269,7 @@ async function main() {
         }
       ]
     }
-  ]
+  ];
 
   // 🌱 Insertar datos en DB con relaciones anidadas
   for (const unit of unitsData) {
@@ -304,17 +304,17 @@ async function main() {
           }))
         }
       }
-    })
+    });
   }
 
-  console.log("🎉 Seed completado exitosamente")
+  console.log("🎉 Seed completado exitosamente");
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Error en el seed:", e)
-    process.exit(1)
+    console.error("❌ Error en el seed:", e);
+    process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });

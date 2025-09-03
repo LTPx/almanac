@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from "next/server"
-import prisma from "@/lib/prisma"
+import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, lessonId } = await request.json()
+    const { userId, lessonId } = await request.json();
 
     // Validar que existan los parámetros requeridos
     if (!userId || !lessonId) {
       return NextResponse.json(
         { error: "userId y lessonId son requeridos" },
         { status: 400 }
-      )
+      );
     }
 
     // Verificar que la lección existe y está activa
@@ -30,32 +30,32 @@ export async function POST(request: NextRequest) {
           }
         }
       }
-    })
+    });
 
     if (!lesson) {
       return NextResponse.json(
         { error: "Lección no encontrada o inactiva" },
         { status: 404 }
-      )
+      );
     }
 
     if (lesson.questions.length === 0) {
       return NextResponse.json(
         { error: "Esta lección no tiene preguntas disponibles" },
         { status: 400 }
-      )
+      );
     }
 
     // Verificar que el usuario existe
     const user = await prisma.user.findUnique({
       where: { id: userId }
-    })
+    });
 
     if (!user) {
       return NextResponse.json(
         { error: "Usuario no encontrado" },
         { status: 404 }
-      )
+      );
     }
 
     // Crear nuevo intento de test
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         score: 0,
         isCompleted: false
       }
-    })
+    });
 
     // Preparar las preguntas sin mostrar las respuestas correctas
     const questionsForClient = lesson.questions.map((question) => ({
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
         order: answer.order
         // No incluir isCorrect
       }))
-    }))
+    }));
 
     return NextResponse.json({
       testAttemptId: testAttempt.id,
@@ -94,12 +94,12 @@ export async function POST(request: NextRequest) {
       },
       questions: questionsForClient,
       totalQuestions: lesson.questions.length
-    })
+    });
   } catch (error) {
-    console.error("Error al iniciar test:", error)
+    console.error("Error al iniciar test:", error);
     return NextResponse.json(
       { error: "Error interno del servidor" },
       { status: 500 }
-    )
+    );
   }
 }

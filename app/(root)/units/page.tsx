@@ -1,182 +1,182 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { BookOpen, CheckCircle, Clock, Star, Trophy } from "lucide-react"
+import { useState, useEffect } from "react";
+import { BookOpen, CheckCircle, Clock, Star, Trophy } from "lucide-react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle
-} from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
-import { useUser } from "@/context/UserContext"
-import { TestSystem } from "@/components/test/TestSystem"
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useUser } from "@/context/UserContext";
+import { TestSystem } from "@/components/test/TestSystem";
 
 // Tipos para TypeScript
 type Unit = {
-  id: number
-  name: string
-  description: string | null
-  order: number
-  lessons: Lesson[]
+  id: number;
+  name: string;
+  description: string | null;
+  order: number;
+  lessons: Lesson[];
   _count: {
-    lessons: number
-  }
-}
+    lessons: number;
+  };
+};
 
 type Lesson = {
-  id: number
-  name: string
-  description: string | null
-  experiencePoints: number
-  order: number
+  id: number;
+  name: string;
+  description: string | null;
+  experiencePoints: number;
+  order: number;
   _count: {
-    questions: number
-  }
-}
+    questions: number;
+  };
+};
 
 type UserProgress = {
-  id: number
-  isCompleted: boolean
-  experiencePoints: number
-  completedAt: Date | null
-  unit: Unit
-} | null
+  id: number;
+  isCompleted: boolean;
+  experiencePoints: number;
+  completedAt: Date | null;
+  unit: Unit;
+} | null;
 
 export default function HomePage() {
-  const [units, setUnits] = useState<Unit[]>([])
-  const [selectedUnitId, setSelectedUnitId] = useState<string>("")
-  const [lessons, setLessons] = useState<Lesson[]>([])
-  const [userProgress, setUserProgress] = useState<UserProgress>(null)
-  const [loading, setLoading] = useState(true)
-  const [lessonsLoading, setLessonsLoading] = useState(false)
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [selectedUnitId, setSelectedUnitId] = useState<string>("");
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [userProgress, setUserProgress] = useState<UserProgress>(null);
+  const [loading, setLoading] = useState(true);
+  const [lessonsLoading, setLessonsLoading] = useState(false);
 
-  const [openTest, setOpenTest] = useState(false)
-  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
+  const [openTest, setOpenTest] = useState(false);
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
 
-  const user = useUser()
+  const user = useUser();
 
-  const userId = user?.id || ""
+  const userId = user?.id || "";
 
   // API call functions
   const fetchUnits = async () => {
-    const response = await fetch("/api/units")
+    const response = await fetch("/api/units");
     if (!response.ok) {
-      throw new Error("Failed to fetch units")
+      throw new Error("Failed to fetch units");
     }
-    return response.json()
-  }
+    return response.json();
+  };
 
   const fetchLessonsByUnit = async (unitId: number) => {
-    const response = await fetch(`/api/units/${unitId}/lessons`)
+    const response = await fetch(`/api/units/${unitId}/lessons`);
     if (!response.ok) {
-      throw new Error("Failed to fetch lessons")
+      throw new Error("Failed to fetch lessons");
     }
-    return response.json()
-  }
+    return response.json();
+  };
 
   const fetchUserProgress = async (userId: string, unitId: number) => {
     const response = await fetch(
       `/api/users/${userId}/progress?unitId=${unitId}`
-    )
+    );
     if (!response.ok) {
-      throw new Error("Failed to fetch user progress")
+      throw new Error("Failed to fetch user progress");
     }
-    return response.json()
-  }
+    return response.json();
+  };
 
   // Cargar unidades al montar el componente
   useEffect(() => {
     const loadUnits = async () => {
       try {
-        const unitsData = await fetchUnits()
-        setUnits(unitsData)
+        const unitsData = await fetchUnits();
+        setUnits(unitsData);
 
         // Seleccionar la primera unidad por defecto
         if (unitsData.length > 0) {
-          setSelectedUnitId(unitsData[0].id.toString())
+          setSelectedUnitId(unitsData[0].id.toString());
         }
       } catch (error) {
-        console.error("Error loading units:", error)
-        toast.error("No se pudieron cargar las unidades")
+        console.error("Error loading units:", error);
+        toast.error("No se pudieron cargar las unidades");
         // toast({
         //   title: "Error",
         //   description: "No se pudieron cargar las unidades",
         //   variant: "destructive",
         // });
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadUnits()
-  }, [toast])
+    loadUnits();
+  }, [toast]);
 
   // Cargar lecciones y progreso cuando cambia la unidad seleccionada
   useEffect(() => {
     const loadUnitData = async () => {
-      if (!selectedUnitId) return
+      if (!selectedUnitId) return;
 
-      setLessonsLoading(true)
+      setLessonsLoading(true);
       try {
-        const unitId = parseInt(selectedUnitId)
+        const unitId = parseInt(selectedUnitId);
         const [lessonsData, progressData] = await Promise.all([
           fetchLessonsByUnit(unitId),
           fetchUserProgress(userId, unitId)
-        ])
+        ]);
 
-        setLessons(lessonsData)
-        setUserProgress(progressData)
+        setLessons(lessonsData);
+        setUserProgress(progressData);
       } catch (error) {
-        console.error("Error loading unit data:", error)
-        toast.error("No se pudieron cargar los datos de la unidad")
+        console.error("Error loading unit data:", error);
+        toast.error("No se pudieron cargar los datos de la unidad");
         // toast({
         //   title: "Error",
         //   description: "No se pudieron cargar los datos de la unidad",
         //   variant: "destructive",
         // });
       } finally {
-        setLessonsLoading(false)
+        setLessonsLoading(false);
       }
-    }
+    };
 
-    loadUnitData()
-  }, [selectedUnitId, userId, toast])
+    loadUnitData();
+  }, [selectedUnitId, userId, toast]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-secondary/20 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
-    )
+    );
   }
 
   const selectedUnit = units.find(
     (unit) => unit.id.toString() === selectedUnitId
-  )
+  );
   const completedLessons = lessons.filter((lesson) =>
     userProgress?.unit.lessons.some((ul) => ul.id === lesson.id)
-  ).length
-  const totalExperience = userProgress?.experiencePoints || 0
+  ).length;
+  const totalExperience = userProgress?.experiencePoints || 0;
   const progressPercentage = selectedUnit
     ? (completedLessons / selectedUnit._count.lessons) * 100
-    : 0
+    : 0;
 
   const handleStartLesson = (lesson: Lesson) => {
-    setSelectedLesson(lesson)
-    setOpenTest(true)
-  }
+    setSelectedLesson(lesson);
+    setOpenTest(true);
+  };
 
   // Si el test está abierto, mostrar solo el TestSystem
   if (openTest && selectedLesson) {
@@ -186,7 +186,7 @@ export default function HomePage() {
         initialLesson={selectedLesson}
         // onClose={handleCloseTest}
       />
-    )
+    );
   }
 
   return (
@@ -326,7 +326,7 @@ export default function HomePage() {
                         {lessons.map((lesson) => {
                           const isCompleted = userProgress?.unit.lessons.some(
                             (ul) => ul.id === lesson.id
-                          )
+                          );
 
                           return (
                             <Card
@@ -382,7 +382,7 @@ export default function HomePage() {
                                     ) : (
                                       <Button
                                         onClick={() => {
-                                          handleStartLesson(lesson)
+                                          handleStartLesson(lesson);
                                         }}
                                       >
                                         Comenzar
@@ -392,7 +392,7 @@ export default function HomePage() {
                                 </div>
                               </CardContent>
                             </Card>
-                          )
+                          );
                         })}
                       </div>
                     ) : (
@@ -427,5 +427,5 @@ export default function HomePage() {
         </div>
       </div>
     </>
-  )
+  );
 }

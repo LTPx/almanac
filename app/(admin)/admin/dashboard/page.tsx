@@ -1,4 +1,4 @@
-import ProfileCard from "@/components/profile-card"
+import ProfileCard from "@/components/profile-card";
 
 export default function DashboardPage() {
   return (
@@ -11,5 +11,5 @@ export default function DashboardPage() {
         <ProfileCard />
       </div>
     </div>
-  )
+  );
 }

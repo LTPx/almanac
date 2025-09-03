@@ -1,13 +1,13 @@
-"use client"
-import { Trophy, Target, Award } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { TestResultsInterface } from "@/lib/types"
+"use client";
+import { Trophy, Target, Award } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { TestResultsInterface } from "@/lib/types";
 
 interface TestResultsProps {
-  results: TestResultsInterface
-  lessonName: string
-  onReturnToLessons: () => void
-  onRetakeTest?: () => void
+  results: TestResultsInterface;
+  lessonName: string;
+  onReturnToLessons: () => void;
+  onRetakeTest?: () => void;
 }
 
 export function TestResults({
@@ -16,8 +16,8 @@ export function TestResults({
   onReturnToLessons,
   onRetakeTest
 }: TestResultsProps) {
-  const percentage = Math.round(results.score)
-  const isPassed = results.passed
+  const percentage = Math.round(results.score);
+  const isPassed = results.passed;
 
   return (
     <div className="bg-gray-900 min-h-screen p-6 flex items-center justify-center">
@@ -96,5 +96,5 @@ export function TestResults({
         </div>
       </div>
     </div>
-  )
+  );
 }

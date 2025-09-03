@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Check, Clock, Mail, MapPin, Shield } from "lucide-react"
-import { useUser } from "@/context/UserContext"
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Check, Clock, Mail, MapPin, Shield } from "lucide-react";
+import { useUser } from "@/context/UserContext";
 
 export default function ProfileCard() {
-  const user = useUser()
+  const user = useUser();
   return (
     <Card className="overflow-hidden">
       <CardHeader className="relative p-0">
@@ -65,5 +65,5 @@ export default function ProfileCard() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

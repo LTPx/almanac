@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { TestSystem } from "./TestSystem"
+import { useState, useEffect } from "react";
+import { TestSystem } from "./TestSystem";
 
 // Mock data - en producción esto vendría de tu API
 const mockLessons = [
@@ -23,24 +23,24 @@ const mockLessons = [
     description: "Multiplica números de forma eficiente",
     experiencePoints: 30
   }
-]
+];
 
 export default function TestPage() {
-  const [userId, setUserId] = useState<string>("")
+  const [userId, setUserId] = useState<string>("");
 
   useEffect(() => {
     // Obtener userId de tu sistema de autenticación
     // Por ahora usamos un mock
-    setUserId("user-123")
-  }, [])
+    setUserId("user-123");
+  }, []);
 
   if (!userId) {
     return (
       <div className="bg-gray-900 min-h-screen p-6 flex items-center justify-center">
         <div className="text-white">Cargando...</div>
       </div>
-    )
+    );
   }
 
-  return <TestSystem userId={userId} initialLessons={mockLessons} />
+  return <TestSystem userId={userId} initialLessons={mockLessons} />;
 }

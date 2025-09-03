@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from "next/server"
-import prisma from "@/lib/prisma"
+import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
-    const { testAttemptId } = await request.json()
+    const { testAttemptId } = await request.json();
 
     if (!testAttemptId) {
       return NextResponse.json(
         { error: "testAttemptId es requerido" },
         { status: 400 }
-      )
+      );
     }
 
     // Obtener el intento con todas sus respuestas
@@ -19,27 +19,27 @@ export async function POST(request: NextRequest) {
         answers: true,
         lesson: true
       }
-    })
+    });
 
     if (!testAttempt) {
       return NextResponse.json(
         { error: "Intento de test no encontrado" },
         { status: 404 }
-      )
+      );
     }
 
     if (testAttempt.isCompleted) {
       return NextResponse.json(
         { error: "El test ya ha sido completado" },
         { status: 400 }
-      )
+      );
     }
 
     // Calcular resultados
     const correctAnswers = testAttempt.answers.filter(
       (answer) => answer.isCorrect
-    ).length
-    const score = (correctAnswers / testAttempt.totalQuestions) * 100
+    ).length;
+    const score = (correctAnswers / testAttempt.totalQuestions) * 100;
 
     // Actualizar el intento de test
     const updatedTestAttempt = await prisma.testAttempt.update({
@@ -50,10 +50,10 @@ export async function POST(request: NextRequest) {
         isCompleted: true,
         completedAt: new Date()
       }
-    })
+    });
 
     // Si el score es >= 70, marcar la lección como completada y otorgar puntos de experiencia
-    const passScore = 70
+    const passScore = 70;
     if (score >= passScore) {
       // Verificar si ya existe progreso para esta lección
       const existingProgress = await prisma.userProgress.findFirst({
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
           userId: testAttempt.userId,
           lessonId: testAttempt.lessonId
         }
-      })
+      });
 
       if (!existingProgress || !existingProgress.isCompleted) {
         await prisma.userProgress.upsert({
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
             experiencePoints: testAttempt.lesson.experiencePoints,
             completedAt: new Date()
           }
-        })
+        });
 
         // Actualizar racha del usuario
         await prisma.userStreak.upsert({
@@ -98,18 +98,18 @@ export async function POST(request: NextRequest) {
             longestStreak: 1,
             lastActivity: new Date()
           }
-        })
+        });
 
         // Actualizar la racha más larga si es necesario
         const userStreak = await prisma.userStreak.findUnique({
           where: { userId: testAttempt.userId }
-        })
+        });
 
         if (userStreak && userStreak.currentStreak > userStreak.longestStreak) {
           await prisma.userStreak.update({
             where: { userId: testAttempt.userId },
             data: { longestStreak: userStreak.currentStreak }
-          })
+          });
         }
       }
     }
@@ -124,12 +124,12 @@ export async function POST(request: NextRequest) {
         experienceGained:
           score >= passScore ? testAttempt.lesson.experiencePoints : 0
       }
-    })
+    });
   } catch (error) {
-    console.error("Error al completar test:", error)
+    console.error("Error al completar test:", error);
     return NextResponse.json(
       { error: "Error interno del servidor" },
       { status: 500 }
-    )
+    );
   }
 }

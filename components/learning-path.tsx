@@ -1,25 +1,25 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   DndContext,
   useDraggable,
   useDroppable,
   DragEndEvent
-} from "@dnd-kit/core"
+} from "@dnd-kit/core";
 
-type Unit = { id: string; label: string }
+type Unit = { id: string; label: string };
 
 const units: Unit[] = [
   { id: "u1", label: "Álgebra" },
   { id: "u2", label: "Geometría" }
-]
+];
 
 // === Draggable ===
 function Draggable({ unit }: { unit: Unit }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: unit.id
-  })
+  });
 
   return (
     <div
@@ -35,7 +35,7 @@ function Draggable({ unit }: { unit: Unit }) {
     >
       {unit.label}
     </div>
-  )
+  );
 }
 
 // === Droppable ===
@@ -43,10 +43,10 @@ function Droppable({
   id,
   children
 }: {
-  id: string
-  children?: React.ReactNode
+  id: string;
+  children?: React.ReactNode;
 }) {
-  const { isOver, setNodeRef } = useDroppable({ id })
+  const { isOver, setNodeRef } = useDroppable({ id });
 
   return (
     <div
@@ -60,7 +60,7 @@ function Droppable({
     >
       {children}
     </div>
-  )
+  );
 }
 
 // === MAIN COMPONENT ===
@@ -70,18 +70,18 @@ export default function LearningGrid() {
     Object.fromEntries(
       Array.from({ length: 12 * 5 }).map((_, i) => [`cell-${i}`, null])
     )
-  )
+  );
 
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
+    const { active, over } = event;
     if (over) {
       //@ts-ignore
       setAssignments((prev) => ({
         ...prev,
         [over.id]: active.id
-      }))
+      }));
     }
-  }
+  };
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
@@ -107,5 +107,5 @@ export default function LearningGrid() {
         </div>
       </div>
     </DndContext>
-  )
+  );
 }

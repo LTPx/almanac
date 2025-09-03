@@ -1,8 +1,8 @@
-import { Code, Database, Layers, Lock, Zap } from "lucide-react"
-import React from "react"
-import { Badge } from "./ui/badge"
-import { Card } from "./ui/card"
-import FadeInView from "./animate-ui/fade-in-view"
+import { Code, Database, Layers, Lock, Zap } from "lucide-react";
+import React from "react";
+import { Badge } from "./ui/badge";
+import { Card } from "./ui/card";
+import FadeInView from "./animate-ui/fade-in-view";
 
 const stack = [
   {
@@ -38,7 +38,7 @@ const stack = [
     icon: <Database className="h-6 w-6 text-blue-600" />,
     description: "Powerful, open source object-relational database system"
   }
-]
+];
 
 export default function TechStackSection() {
   return (
@@ -75,5 +75,5 @@ export default function TechStackSection() {
         ))}
       </Card>
     </section>
-  )
+  );
 }

@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Plus, Edit, Trash2, BookOpen } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { useState, useEffect } from "react";
+import { Plus, Edit, Trash2, BookOpen } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 // import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -12,74 +12,74 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { toast } from "sonner"
-import LearningGrid from "@/components/learning-path"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import LearningGrid from "@/components/learning-path";
 
 type Unit = {
-  id: number
-  name: string
-  description: string | null
-  order: number
-  isActive: boolean
+  id: number;
+  name: string;
+  description: string | null;
+  order: number;
+  isActive: boolean;
   _count: {
-    lessons: number
-  }
-}
+    lessons: number;
+  };
+};
 
 export default function UnitsAdminPage() {
-  const [units, setUnits] = useState<Unit[]>([])
-  const [loading, setLoading] = useState(true)
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingUnit, setEditingUnit] = useState<Unit | null>(null)
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingUnit, setEditingUnit] = useState<Unit | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     order: 1
-  })
+  });
   // const { toast } = useToast();
 
   // Fetch units
   const fetchUnits = async () => {
     try {
-      const response = await fetch("/api/units")
-      if (!response.ok) throw new Error("Failed to fetch")
-      const data = await response.json()
-      setUnits(data)
+      const response = await fetch("/api/units");
+      if (!response.ok) throw new Error("Failed to fetch");
+      const data = await response.json();
+      setUnits(data);
     } catch (error) {
       // toast({
       //   title: "Error",
       //   description: "No se pudieron cargar las unidades",
       //   variant: "destructive",
       // });
-      toast.error("No se pudieron cargar las unidades")
+      toast.error("No se pudieron cargar las unidades");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchUnits()
-  }, [])
+    fetchUnits();
+  }, []);
 
   // Handle form submit
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
-      const url = editingUnit ? `/api/units/${editingUnit.id}` : "/api/units"
-      const method = editingUnit ? "PUT" : "POST"
+      const url = editingUnit ? `/api/units/${editingUnit.id}` : "/api/units";
+      const method = editingUnit ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
-      })
+      });
 
-      if (!response.ok) throw new Error("Failed to save")
+      if (!response.ok) throw new Error("Failed to save");
 
       // toast({
       //   title: "Éxito",
@@ -87,14 +87,14 @@ export default function UnitsAdminPage() {
       // });
       toast.success(
         `Unidad ${editingUnit ? "actualizada" : "creada"} correctamente`
-      )
+      );
 
-      setDialogOpen(false)
-      setEditingUnit(null)
-      setFormData({ name: "", description: "", order: 1 })
-      fetchUnits()
+      setDialogOpen(false);
+      setEditingUnit(null);
+      setFormData({ name: "", description: "", order: 1 });
+      fetchUnits();
     } catch (error) {
-      toast.error("No se pudo guardar la unidad")
+      toast.error("No se pudo guardar la unidad");
 
       // toast({
       //   title: "Error",
@@ -102,53 +102,53 @@ export default function UnitsAdminPage() {
       //   variant: "destructive",
       // });
     }
-  }
+  };
 
   // Handle edit
   const handleEdit = (unit: Unit) => {
-    setEditingUnit(unit)
+    setEditingUnit(unit);
     setFormData({
       name: unit.name,
       description: unit.description || "",
       order: unit.order
-    })
-    setDialogOpen(true)
-  }
+    });
+    setDialogOpen(true);
+  };
 
   // Handle delete
   const handleDelete = async (unit: Unit) => {
-    if (!confirm(`¿Estás seguro de eliminar "${unit.name}"?`)) return
+    if (!confirm(`¿Estás seguro de eliminar "${unit.name}"?`)) return;
 
     try {
       const response = await fetch(`/api/units/${unit.id}`, {
         method: "DELETE"
-      })
+      });
 
-      if (!response.ok) throw new Error("Failed to delete")
+      if (!response.ok) throw new Error("Failed to delete");
 
       // toast({
       //   title: "Éxito",
       //   description: "Unidad eliminada correctamente",
       // });
-      toast.success("Unidad eliminada correctamente")
+      toast.success("Unidad eliminada correctamente");
 
-      fetchUnits()
+      fetchUnits();
     } catch (error) {
       // toast({
       //   title: "Error",
       //   description: "No se pudo eliminar la unidad",
       //   variant: "destructive",
       // });
-      toast.error("No se pudo eliminar la unidad")
+      toast.error("No se pudo eliminar la unidad");
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
-    )
+    );
   }
 
   return (
@@ -165,8 +165,8 @@ export default function UnitsAdminPage() {
           <DialogTrigger asChild>
             <Button
               onClick={() => {
-                setEditingUnit(null)
-                setFormData({ name: "", description: "", order: 1 })
+                setEditingUnit(null);
+                setFormData({ name: "", description: "", order: 1 });
               }}
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -291,5 +291,5 @@ export default function UnitsAdminPage() {
 
       <LearningGrid />
     </div>
-  )
+  );
 }

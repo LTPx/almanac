@@ -1,103 +1,105 @@
-"use client"
-import { useState, useEffect } from "react"
-import { LessonCard } from "./LessonCard"
-import { TestQuestion } from "./TestQuestion"
-import { TestResults } from "./TestResults"
-import { useTest } from "@/hooks/useTest"
+"use client";
+import { useState, useEffect } from "react";
+import { LessonCard } from "./LessonCard";
+import { TestQuestion } from "./TestQuestion";
+import { TestResults } from "./TestResults";
+import { useTest } from "@/hooks/useTest";
 
 import type {
   TestData,
   Question,
   TestResultsInterface as TestResultsType
-} from "@/lib/types"
+} from "@/lib/types";
 
 interface TestSystemProps {
-  userId: string
+  userId: string;
   initialLesson: {
-    id: number
-    name: string
-    description: string | null
-    experiencePoints: number
-  }
+    id: number;
+    name: string;
+    description: string | null;
+    experiencePoints: number;
+  };
 }
 
-type TestState = "lessons" | "testing" | "results"
+type TestState = "lessons" | "testing" | "results";
 
 export function TestSystem({ userId, initialLesson }: TestSystemProps) {
-  const [state, setState] = useState<TestState>("lessons")
-  const [currentTest, setCurrentTest] = useState<TestData | null>(null)
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [state, setState] = useState<TestState>("lessons");
+  const [currentTest, setCurrentTest] = useState<TestData | null>(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<{
-    [questionId: number]: { answer: string; isCorrect: boolean }
-  }>({})
-  const [results, setResults] = useState<TestResultsType | null>(null)
-  const [questionStartTime, setQuestionStartTime] = useState<number>(Date.now())
+    [questionId: number]: { answer: string; isCorrect: boolean };
+  }>({});
+  const [results, setResults] = useState<TestResultsType | null>(null);
+  const [questionStartTime, setQuestionStartTime] = useState<number>(
+    Date.now()
+  );
 
-  const { isLoading, error, startTest, submitAnswer, completeTest } = useTest()
+  const { isLoading, error, startTest, submitAnswer, completeTest } = useTest();
 
   const handleStartTest = async (lessonId: number) => {
-    const testData = await startTest(userId, lessonId)
+    const testData = await startTest(userId, lessonId);
     if (testData) {
-      setCurrentTest(testData)
-      setCurrentQuestionIndex(0)
-      setAnswers({})
-      setQuestionStartTime(Date.now())
-      setState("testing")
+      setCurrentTest(testData);
+      setCurrentQuestionIndex(0);
+      setAnswers({});
+      setQuestionStartTime(Date.now());
+      setState("testing");
     }
-  }
+  };
 
   const handleAnswer = async (questionId: number, answer: string) => {
-    if (!currentTest) return
+    if (!currentTest) return;
 
-    const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000)
+    const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
     const result = await submitAnswer(
       currentTest.testAttemptId,
       questionId,
       answer,
       timeSpent
-    )
+    );
 
     if (result) {
       setAnswers((prev) => ({
         ...prev,
         [questionId]: { answer, isCorrect: result.isCorrect }
-      }))
+      }));
 
       // Mostrar resultado por 2 segundos, luego continuar
       setTimeout(() => {
         if (currentQuestionIndex < currentTest.questions.length - 1) {
-          setCurrentQuestionIndex((prev) => prev + 1)
-          setQuestionStartTime(Date.now())
+          setCurrentQuestionIndex((prev) => prev + 1);
+          setQuestionStartTime(Date.now());
         } else {
-          handleCompleteTest()
+          handleCompleteTest();
         }
-      }, 2000)
+      }, 2000);
     }
-  }
+  };
 
   const handleCompleteTest = async () => {
-    if (!currentTest) return
+    if (!currentTest) return;
 
-    const testResults = await completeTest(currentTest.testAttemptId)
+    const testResults = await completeTest(currentTest.testAttemptId);
     if (testResults) {
-      setResults(testResults)
-      setState("results")
+      setResults(testResults);
+      setState("results");
     }
-  }
+  };
 
   const handleReturnToLessons = () => {
-    setState("lessons")
-    setCurrentTest(null)
-    setResults(null)
-    setCurrentQuestionIndex(0)
-    setAnswers({})
-  }
+    setState("lessons");
+    setCurrentTest(null);
+    setResults(null);
+    setCurrentQuestionIndex(0);
+    setAnswers({});
+  };
 
   const handleRetakeTest = () => {
     if (currentTest) {
-      handleStartTest(currentTest.lesson.id)
+      handleStartTest(currentTest.lesson.id);
     }
-  }
+  };
 
   if (error) {
     return (
@@ -113,7 +115,7 @@ export function TestSystem({ userId, initialLesson }: TestSystemProps) {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   if (state === "lessons") {
@@ -156,12 +158,12 @@ export function TestSystem({ userId, initialLesson }: TestSystemProps) {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (state === "testing" && currentTest) {
-    const currentQuestion = currentTest.questions[currentQuestionIndex]
-    const questionAnswer = answers[currentQuestion.id]
+    const currentQuestion = currentTest.questions[currentQuestionIndex];
+    const questionAnswer = answers[currentQuestion.id];
 
     return (
       <>
@@ -199,7 +201,7 @@ export function TestSystem({ userId, initialLesson }: TestSystemProps) {
           selectedAnswer={questionAnswer?.answer}
         />
       </>
-    )
+    );
   }
 
   if (state === "results" && results && currentTest) {
@@ -210,8 +212,8 @@ export function TestSystem({ userId, initialLesson }: TestSystemProps) {
         onReturnToLessons={handleReturnToLessons}
         onRetakeTest={results.passed ? undefined : handleRetakeTest}
       />
-    )
+    );
   }
 
-  return null
+  return null;
 }

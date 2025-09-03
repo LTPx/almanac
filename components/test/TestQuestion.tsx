@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { CheckCircle } from "lucide-react"
-import { Question } from "@/lib/types"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle } from "lucide-react";
+import { Question } from "@/lib/types";
 
 interface TestQuestionProps {
-  question: Question
-  onAnswer: (questionId: number, answer: string) => void
-  showResult?: boolean
-  isCorrect?: boolean
-  selectedAnswer?: string
+  question: Question;
+  onAnswer: (questionId: number, answer: string) => void;
+  showResult?: boolean;
+  isCorrect?: boolean;
+  selectedAnswer?: string;
 }
 
 export function TestQuestion({
@@ -20,26 +20,26 @@ export function TestQuestion({
   isCorrect = false,
   selectedAnswer
 }: TestQuestionProps) {
-  const [selected, setSelected] = useState<string>(selectedAnswer || "")
-  const [hasAnswered, setHasAnswered] = useState(showResult)
+  const [selected, setSelected] = useState<string>(selectedAnswer || "");
+  const [hasAnswered, setHasAnswered] = useState(showResult);
 
   const handleAnswerSelect = (answerId: string) => {
-    if (hasAnswered) return
-    setSelected(answerId)
-  }
+    if (hasAnswered) return;
+    setSelected(answerId);
+  };
 
   const handleSubmitAnswer = () => {
-    if (!selected || hasAnswered) return
-    onAnswer(question.id, selected)
-    setHasAnswered(true)
-  }
+    if (!selected || hasAnswered) return;
+    onAnswer(question.id, selected);
+    setHasAnswered(true);
+  };
 
   const renderMultipleChoice = () => (
     <div className="space-y-3">
       {question.answers.map((answer) => {
-        const isSelected = selected === answer.id.toString()
-        const shouldShowCorrect = showResult && isSelected && isCorrect
-        const shouldShowIncorrect = showResult && isSelected && !isCorrect
+        const isSelected = selected === answer.id.toString();
+        const shouldShowCorrect = showResult && isSelected && isCorrect;
+        const shouldShowIncorrect = showResult && isSelected && !isCorrect;
 
         return (
           <button
@@ -73,18 +73,18 @@ export function TestQuestion({
           >
             <span className="font-medium">{answer.text}</span>
           </button>
-        )
+        );
       })}
     </div>
-  )
+  );
 
   const renderTrueFalse = () => (
     <div className="space-y-3">
       {["Verdadero", "Falso"].map((option, index) => {
-        const value = (index === 0).toString()
-        const isSelected = selected === value
-        const shouldShowCorrect = showResult && isSelected && isCorrect
-        const shouldShowIncorrect = showResult && isSelected && !isCorrect
+        const value = (index === 0).toString();
+        const isSelected = selected === value;
+        const shouldShowCorrect = showResult && isSelected && isCorrect;
+        const shouldShowIncorrect = showResult && isSelected && !isCorrect;
 
         return (
           <button
@@ -118,10 +118,10 @@ export function TestQuestion({
           >
             <span className="font-medium">{option}</span>
           </button>
-        )
+        );
       })}
     </div>
-  )
+  );
 
   const renderFillInBlank = () => (
     <div className="space-y-4">
@@ -134,7 +134,7 @@ export function TestQuestion({
         className="w-full p-4 rounded-lg bg-gray-800 border-2 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none disabled:opacity-50"
       />
     </div>
-  )
+  );
 
   return (
     <div className="bg-gray-900 min-h-screen p-6">
@@ -193,5 +193,5 @@ export function TestQuestion({
         )}
       </div>
     </div>
-  )
+  );
 }

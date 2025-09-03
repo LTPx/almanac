@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { Clock, Trophy } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Clock, Trophy } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface LessonCardProps {
   lesson: {
-    id: number
-    name: string
-    description: string | null
-    experiencePoints: number
-    totalQuestions?: number
-  }
-  onStartTest: (lessonId: number) => void
-  isLoading?: boolean
+    id: number;
+    name: string;
+    description: string | null;
+    experiencePoints: number;
+    totalQuestions?: number;
+  };
+  onStartTest: (lessonId: number) => void;
+  isLoading?: boolean;
 }
 
 export function LessonCard({
@@ -51,5 +51,5 @@ export function LessonCard({
         </Button>
       </div>
     </div>
-  )
+  );
 }

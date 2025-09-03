@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server"
-import prisma from "@/lib/prisma"
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 export async function GET(
   request: Request,
   { params }: { params: { unitId: string } }
 ) {
   try {
-    const unitId = parseInt(params.unitId)
+    const unitId = parseInt(params.unitId);
     if (isNaN(unitId)) {
-      return NextResponse.json({ error: "Invalid unit ID" }, { status: 400 })
+      return NextResponse.json({ error: "Invalid unit ID" }, { status: 400 });
     }
 
     const unit = await prisma.unit.findUnique({
@@ -36,16 +36,19 @@ export async function GET(
           }
         }
       }
-    })
+    });
 
     if (!unit) {
-      return NextResponse.json({ error: "Unit not found" }, { status: 404 })
+      return NextResponse.json({ error: "Unit not found" }, { status: 404 });
     }
 
-    return NextResponse.json(unit)
+    return NextResponse.json(unit);
   } catch (error) {
-    console.error("Error fetching unit:", error)
-    return NextResponse.json({ error: "Failed to fetch unit" }, { status: 500 })
+    console.error("Error fetching unit:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch unit" },
+      { status: 500 }
+    );
   }
 }
 
@@ -54,13 +57,13 @@ export async function PUT(
   { params }: { params: { unitId: string } }
 ) {
   try {
-    const unitId = parseInt(params.unitId)
+    const unitId = parseInt(params.unitId);
     if (isNaN(unitId)) {
-      return NextResponse.json({ error: "Invalid unit ID" }, { status: 400 })
+      return NextResponse.json({ error: "Invalid unit ID" }, { status: 400 });
     }
 
-    const body = await request.json()
-    const { name, description, order, isActive } = body
+    const body = await request.json();
+    const { name, description, order, isActive } = body;
 
     const unit = await prisma.unit.update({
       where: { id: unitId },
@@ -87,15 +90,15 @@ export async function PUT(
           }
         }
       }
-    })
+    });
 
-    return NextResponse.json(unit)
+    return NextResponse.json(unit);
   } catch (error) {
-    console.error("Error updating unit:", error)
+    console.error("Error updating unit:", error);
     return NextResponse.json(
       { error: "Failed to update unit" },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -104,9 +107,9 @@ export async function DELETE(
   { params }: { params: { unitId: string } }
 ) {
   try {
-    const unitId = parseInt(params.unitId)
+    const unitId = parseInt(params.unitId);
     if (isNaN(unitId)) {
-      return NextResponse.json({ error: "Invalid unit ID" }, { status: 400 })
+      return NextResponse.json({ error: "Invalid unit ID" }, { status: 400 });
     }
 
     // Soft delete - marcar como inactivo
@@ -116,14 +119,14 @@ export async function DELETE(
         isActive: false,
         updatedAt: new Date()
       }
-    })
+    });
 
-    return NextResponse.json({ message: "Unit deleted successfully" })
+    return NextResponse.json({ message: "Unit deleted successfully" });
   } catch (error) {
-    console.error("Error deleting unit:", error)
+    console.error("Error deleting unit:", error);
     return NextResponse.json(
       { error: "Failed to delete unit" },
       { status: 500 }
-    )
+    );
   }
 }

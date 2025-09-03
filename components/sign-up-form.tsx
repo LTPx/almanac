@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -8,16 +8,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { authClient } from "@/lib/auth-client"
-import { formSchema } from "@/lib/auth-schema"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
+import { formSchema } from "@/lib/auth-schema";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { redirect } from "next/navigation"
-import { useForm } from "react-hook-form"
-import { toast } from "sonner"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { redirect } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 export default function SignUpForm() {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -27,10 +27,10 @@ export default function SignUpForm() {
       email: "",
       password: ""
     }
-  })
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { name, email, password } = values
+    const { name, email, password } = values;
     await authClient.signUp.email(
       {
         email,
@@ -39,17 +39,17 @@ export default function SignUpForm() {
       },
       {
         onRequest: () => {
-          toast("Signing up...")
+          toast("Signing up...");
         },
         onSuccess: () => {
-          form.reset()
-          redirect("/sign-in")
+          form.reset();
+          redirect("/sign-in");
         },
         onError: (ctx) => {
-          toast.error(ctx.error.message)
+          toast.error(ctx.error.message);
         }
       }
-    )
+    );
   }
 
   return (
@@ -99,5 +99,5 @@ export default function SignUpForm() {
         </Button>
       </form>
     </Form>
-  )
+  );
 }

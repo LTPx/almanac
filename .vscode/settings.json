@@ -4,5 +4,5 @@
     "editor.defaultFormatter": "Prisma.prisma"
   },
   "editor.formatOnSave": true,
-  "svg.preview.background": "transparent",
+  "svg.preview.background": "transparent"
 }

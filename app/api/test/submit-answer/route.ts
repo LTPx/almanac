@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from "next/server"
-import prisma from "@/lib/prisma"
+import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
     const { testAttemptId, questionId, userAnswer, timeSpent } =
-      await request.json()
+      await request.json();
 
     if (!testAttemptId || !questionId || userAnswer === undefined) {
       return NextResponse.json(
         { error: "testAttemptId, questionId y userAnswer son requeridos" },
         { status: 400 }
-      )
+      );
     }
 
     // Verificar que el intento de test existe y no está completado
@@ -19,30 +19,30 @@ export async function POST(request: NextRequest) {
         id: testAttemptId,
         isCompleted: false
       }
-    })
+    });
 
     if (!testAttempt) {
       return NextResponse.json(
         { error: "Intento de test no encontrado o ya completado" },
         { status: 404 }
-      )
+      );
     }
 
     // Obtener la pregunta con sus respuestas
     const question = await prisma.question.findFirst({
       where: { id: questionId },
       include: { answers: true }
-    })
+    });
 
     if (!question) {
       return NextResponse.json(
         { error: "Pregunta no encontrada" },
         { status: 404 }
-      )
+      );
     }
 
     // Evaluar si la respuesta es correcta
-    let isCorrect = false
+    let isCorrect = false;
 
     switch (question.type) {
       case "MULTIPLE_CHOICE":
@@ -50,21 +50,21 @@ export async function POST(request: NextRequest) {
         // Para opción múltiple, comparar con la respuesta correcta
         const correctAnswer = question.answers.find(
           (answer) => answer.isCorrect
-        )
+        );
         isCorrect = correctAnswer
           ? correctAnswer.id.toString() === userAnswer
-          : false
-        break
+          : false;
+        break;
 
       case "FILL_IN_BLANK":
         // Para completar espacios, comparar texto (case insensitive)
         const correctText = question.answers.find(
           (answer) => answer.isCorrect
-        )?.text
+        )?.text;
         isCorrect = correctText
           ? correctText.toLowerCase().trim() === userAnswer.toLowerCase().trim()
-          : false
-        break
+          : false;
+        break;
 
       case "ORDER_WORDS":
       case "MATCHING":
@@ -73,16 +73,18 @@ export async function POST(request: NextRequest) {
         // Se necesita lógica específica según el contenido de la pregunta
         try {
           const userAnswerObj =
-            typeof userAnswer === "string" ? JSON.parse(userAnswer) : userAnswer
+            typeof userAnswer === "string"
+              ? JSON.parse(userAnswer)
+              : userAnswer;
           // Aquí implementar la lógica específica según question.content
-          isCorrect = false // Placeholder
+          isCorrect = false; // Placeholder
         } catch {
-          isCorrect = false
+          isCorrect = false;
         }
-        break
+        break;
 
       default:
-        isCorrect = false
+        isCorrect = false;
     }
 
     // Verificar si ya existe una respuesta para esta pregunta en este intento
@@ -91,9 +93,9 @@ export async function POST(request: NextRequest) {
         testAttemptId,
         questionId
       }
-    })
+    });
 
-    let testAnswer
+    let testAnswer;
     if (existingAnswer) {
       // Actualizar respuesta existente
       testAnswer = await prisma.testAnswer.update({
@@ -106,7 +108,7 @@ export async function POST(request: NextRequest) {
           isCorrect,
           timeSpent
         }
-      })
+      });
     } else {
       // Crear nueva respuesta
       testAnswer = await prisma.testAnswer.create({
@@ -120,19 +122,19 @@ export async function POST(request: NextRequest) {
           isCorrect,
           timeSpent
         }
-      })
+      });
     }
 
     return NextResponse.json({
       success: true,
       isCorrect,
       answerId: testAnswer.id
-    })
+    });
   } catch (error) {
-    console.error("Error al enviar respuesta:", error)
+    console.error("Error al enviar respuesta:", error);
     return NextResponse.json(
       { error: "Error interno del servidor" },
       { status: 500 }
-    )
+    );
   }
 }

@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -8,16 +8,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { authClient } from "@/lib/auth-client"
-import { signInFormSchema } from "@/lib/auth-schema"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
+import { signInFormSchema } from "@/lib/auth-schema";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { redirect } from "next/navigation"
-import { useForm } from "react-hook-form"
-import { toast } from "sonner"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { redirect } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 export default function SignInForm() {
   const form = useForm<z.infer<typeof signInFormSchema>>({
@@ -26,10 +26,10 @@ export default function SignInForm() {
       email: "",
       password: ""
     }
-  })
+  });
 
   async function onSubmit(values: z.infer<typeof signInFormSchema>) {
-    const { email, password } = values
+    const { email, password } = values;
     await authClient.signIn.email(
       {
         email,
@@ -37,19 +37,19 @@ export default function SignInForm() {
       },
       {
         onRequest: () => {
-          toast.loading("Signing in...")
+          toast.loading("Signing in...");
         },
         onSuccess: () => {
-          toast.dismiss()
-          toast.success("Signed in successfully")
-          redirect("/units")
+          toast.dismiss();
+          toast.success("Signed in successfully");
+          redirect("/units");
         },
         onError: (ctx) => {
-          toast.dismiss()
-          toast.error(ctx.error.message)
+          toast.dismiss();
+          toast.error(ctx.error.message);
         }
       }
-    )
+    );
   }
 
   return (
@@ -86,5 +86,5 @@ export default function SignInForm() {
         </Button>
       </form>
     </Form>
-  )
+  );
 }

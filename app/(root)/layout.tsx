@@ -1,19 +1,19 @@
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
-import { auth } from "@/lib/auth"
-import { headers } from "next/headers"
-import { UserProvider } from "@/context/UserContext"
-import { StarsBackground } from "@/components/animate-ui/backgrounds/stars"
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { UserProvider } from "@/context/UserContext";
+import { StarsBackground } from "@/components/animate-ui/backgrounds/stars";
 
 export default async function HomeLayout({
   children
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   const session = await auth.api.getSession({
     headers: await headers()
-  })
-  const user = session?.user ?? null
+  });
+  const user = session?.user ?? null;
   return (
     <UserProvider user={user}>
       <div className="relative">
@@ -25,5 +25,5 @@ export default async function HomeLayout({
         {/* <Footer /> */}
       </div>
     </UserProvider>
-  )
+  );
 }
