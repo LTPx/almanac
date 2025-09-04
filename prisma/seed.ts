@@ -53,7 +53,7 @@ async function main() {
                 correctAnswer: "8",
                 explanation: "Para que 12 + algo = 20, necesitamos 8"
               },
-              answers: []
+              answers: [{ text: "8", isCorrect: true, order: 1 }]
             }
           ]
         },
@@ -134,7 +134,7 @@ async function main() {
                 explanation:
                   "En una ecuación, la x es la variable que representa el valor desconocido"
               },
-              answers: []
+              answers: [{ text: "ecuación", isCorrect: true, order: 2 }]
             },
             {
               type: QuestionType.ORDER_WORDS,
@@ -263,7 +263,7 @@ async function main() {
                 explanation:
                   'La palabra clave "function" se usa para declarar funciones en JavaScript'
               },
-              answers: []
+              answers: [{ text: "function", isCorrect: true, order: 1 }]
             }
           ]
         },
@@ -380,7 +380,7 @@ async function main() {
                 correctAnswer: "llaves {}",
                 explanation: "Los objetos se definen usando llaves {}."
               },
-              answers: []
+              answers: [{ text: "llaves {}", isCorrect: true, order: 1 }]
             }
           ]
         },
@@ -478,7 +478,7 @@ async function main() {
                 explanation:
                   "console.log permite mostrar mensajes en la consola."
               },
-              answers: []
+              answers: [{ text: "console.log", isCorrect: true, order: 1 }]
             }
           ]
         },
@@ -529,15 +529,16 @@ async function main() {
                 title: q.title,
                 order: q.order,
                 content: q.content,
-                answers: q.answers?.length
-                  ? {
-                      create: q.answers.map((a) => ({
-                        text: a.text,
-                        isCorrect: a.isCorrect,
-                        order: a.order
-                      }))
-                    }
-                  : undefined
+                answers:
+                  q.answers.length > 0
+                    ? {
+                        create: q.answers.map((a) => ({
+                          text: a.text,
+                          isCorrect: a.isCorrect,
+                          order: a.order
+                        }))
+                      }
+                    : undefined
               }))
             }
           }))

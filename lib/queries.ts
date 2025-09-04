@@ -22,19 +22,25 @@ export const getUserProgressByUnit = cache(
   async (userId: string, unitId: number) => {
     if (!userId) return null;
 
-    // 1. Buscar todas las lessons obligatorias de la unidad
-    const mandatoryLessons = await prisma.lesson.findMany({
+    const unit = await prisma.unit.findUnique({
       where: {
-        unitId,
-        mandatory: true
+        id: unitId
       },
-      select: { id: true }
+      select: {
+        id: true,
+        name: true,
+        lessons: {
+          where: {
+            mandatory: true,
+            isActive: true
+          }
+        }
+      }
     });
 
-    const mandatoryLessonIds = mandatoryLessons.map((l) => l.id);
+    const mandatoryLessons = unit?.lessons || [];
 
-    // 2. Buscar progreso del usuario en esa unidad
-    const userProgress = await prisma.userProgress.findMany({
+    const approvedLessonsInUnit = await prisma.userProgress.findMany({
       where: {
         userId,
         unitId,
@@ -46,32 +52,30 @@ export const getUserProgressByUnit = cache(
             name: true,
             id: true
           }
-        },
-        unit: {
-          select: {
-            id: true,
-            name: true
-          }
         }
       }
     });
 
-    if (!userProgress || userProgress.length === 0) return null;
+    if (!approvedLessonsInUnit || approvedLessonsInUnit.length === 0)
+      return null;
 
-    // 3. Sacar solo las lessons aprobadas
-    const approvedLessons = userProgress
+    const isUnitCompleted =
+      mandatoryLessons.length === approvedLessonsInUnit.length;
+
+    const approvedLessons = approvedLessonsInUnit
       .filter((up) => up.lesson)
       .map((up) => up.lesson);
 
-    // 4. Verificar si todas las obligatorias están completadas
-    //@ts-ignore
-    const approvedLessonIds = approvedLessons.map((l) => l.id);
-    const isUnitCompleted = mandatoryLessonIds.every((id) =>
-      approvedLessonIds.includes(id)
-    );
+    const currentXpInUnit = approvedLessonsInUnit.reduce((total, lesson) => {
+      return total + lesson.experiencePoints;
+    }, 0);
 
     return {
-      unit: userProgress[0].unit,
+      unit: {
+        id: unit?.id,
+        name: unit?.name
+      },
+      experiencePoints: currentXpInUnit,
       approvedLessons: approvedLessons,
       isCompleted: isUnitCompleted
     };
