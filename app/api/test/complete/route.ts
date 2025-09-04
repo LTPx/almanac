@@ -79,6 +79,7 @@ export async function POST(request: NextRequest) {
           create: {
             userId: testAttempt.userId,
             lessonId: testAttempt.lessonId,
+            unitId: testAttempt.lesson.unitId,
             isCompleted: true,
             experiencePoints: testAttempt.lesson.experiencePoints,
             completedAt: new Date()
