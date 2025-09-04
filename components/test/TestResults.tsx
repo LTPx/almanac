@@ -2,6 +2,9 @@
 import { Trophy, Target, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TestResultsInterface } from "@/lib/types";
+import Confetti from "react-confetti";
+import { useWindowSize } from "react-use";
+import { ResultCard } from "../result-card";
 
 interface TestResultsProps {
   results: TestResultsInterface;
@@ -18,9 +21,17 @@ export function TestResults({
 }: TestResultsProps) {
   const percentage = Math.round(results.score);
   const isPassed = results.passed;
+  const { width, height } = useWindowSize();
 
   return (
     <div className="bg-gray-900 min-h-screen p-6 flex items-center justify-center">
+      <Confetti
+        recycle={false}
+        numberOfPieces={500}
+        tweenDuration={10_000}
+        width={width}
+        height={height}
+      />
       <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full text-center">
         <div className="mb-6">
           {isPassed ? (
@@ -65,14 +76,18 @@ export function TestResults({
           </div>
 
           {isPassed && results.experienceGained > 0 && (
-            <div className="bg-orange-500/20 border border-orange-500 rounded-lg p-4">
-              <div className="flex items-center justify-center gap-2 text-orange-400">
-                <Award className="w-5 h-5" />
-                <span className="font-medium">
-                  +{results.experienceGained} XP ganados
-                </span>
-              </div>
+            <div className="flex w-full items-center gap-x-4">
+              <ResultCard variant="points" value={results.experienceGained} />
+              <ResultCard variant="hearts" value={5} />
             </div>
+            // <div className="bg-orange-500/20 border border-orange-500 rounded-lg p-4">
+            //   <div className="flex items-center justify-center gap-2 text-orange-400">
+            //     <Award className="w-5 h-5" />
+            //     <span className="font-medium">
+            //       +{results.experienceGained} XP ganados
+            //     </span>
+            //   </div>
+            // </div>
           )}
         </div>
 

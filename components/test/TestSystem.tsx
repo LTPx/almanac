@@ -176,14 +176,6 @@ export function TestSystem({
   if (state === "results" && results && currentTest) {
     return (
       <div className="bg-gray-900 min-h-screen flex flex-col">
-        <div className="p-4 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700"
-          >
-            Cerrar
-          </button>
-        </div>
         <TestResults
           results={results}
           lessonName={currentTest.lesson.name}

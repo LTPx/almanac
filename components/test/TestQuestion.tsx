@@ -50,7 +50,7 @@ export function TestQuestion({
               w-full p-4 text-left rounded-lg border-2 transition-all
               ${
                 isSelected && !showResult
-                  ? "bg-blue-500 border-blue-500 text-white"
+                  ? "bg-[#708BB1] border-[#708BB1] text-white"
                   : ""
               }
               ${
@@ -95,7 +95,7 @@ export function TestQuestion({
               w-full p-4 text-left rounded-lg border-2 transition-all
               ${
                 isSelected && !showResult
-                  ? "bg-blue-500 border-blue-500 text-white"
+                  ? "bg-[#708BB1] border-[#708BB1] text-white"
                   : ""
               }
               ${
