@@ -21,33 +21,93 @@ export const getUserProgress = cache(async (userId: string) => {
 export const getUserProgressByUnit = cache(
   async (userId: string, unitId: number) => {
     if (!userId) return null;
-    const data = await prisma.userProgress.findUnique({
+
+    // 1. Buscar todas las lessons obligatorias de la unidad
+    const mandatoryLessons = await prisma.lesson.findMany({
       where: {
-        userId_unitId: {
-          userId,
-          unitId
-        }
+        unitId,
+        mandatory: true
+      },
+      select: { id: true }
+    });
+
+    const mandatoryLessonIds = mandatoryLessons.map((l) => l.id);
+
+    // 2. Buscar progreso del usuario en esa unidad
+    const userProgress = await prisma.userProgress.findMany({
+      where: {
+        userId,
+        unitId,
+        isCompleted: true
       },
       include: {
+        lesson: {
+          select: {
+            name: true,
+            id: true
+          }
+        },
         unit: {
-          include: {
-            lessons: {
-              include: {
-                _count: {
-                  select: {
-                    questions: true
-                  }
-                }
-              },
-              orderBy: { position: "asc" }
-            }
+          select: {
+            id: true,
+            name: true
           }
         }
       }
     });
-    return data;
+
+    if (!userProgress || userProgress.length === 0) return null;
+
+    // 3. Sacar solo las lessons aprobadas
+    const approvedLessons = userProgress
+      .filter((up) => up.lesson)
+      .map((up) => up.lesson);
+
+    // 4. Verificar si todas las obligatorias están completadas
+    //@ts-ignore
+    const approvedLessonIds = approvedLessons.map((l) => l.id);
+    const isUnitCompleted = mandatoryLessonIds.every((id) =>
+      approvedLessonIds.includes(id)
+    );
+
+    return {
+      unit: userProgress[0].unit,
+      approvedLessons: approvedLessons,
+      isCompleted: isUnitCompleted
+    };
   }
 );
+
+// export const getUserProgressByUnit = cache(
+//   async (userId: string, unitId: number) => {
+//     if (!userId) return null;
+//     const data = await prisma.userProgress.findUnique({
+//       where: {
+//         userId_unitId: {
+//           userId,
+//           unitId
+//         }
+//       },
+//       include: {
+//         unit: {
+//           include: {
+//             lessons: {
+//               include: {
+//                 _count: {
+//                   select: {
+//                     questions: true
+//                   }
+//                 }
+//               },
+//               orderBy: { position: "asc" }
+//             }
+//           }
+//         }
+//       }
+//     });
+//     return data;
+//   }
+// );
 
 export const getUserProgressByLesson = cache(
   async (userId: string, lessonId: number) => {

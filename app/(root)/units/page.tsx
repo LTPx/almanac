@@ -53,6 +53,7 @@ type UserProgress = {
   experiencePoints: number;
   completedAt: Date | null;
   unit: Unit;
+  approvedLessons: { id: number; name: string }[];
 } | null;
 
 export default function HomePage() {
@@ -166,9 +167,8 @@ export default function HomePage() {
   const selectedUnit = units.find(
     (unit) => unit.id.toString() === selectedUnitId
   );
-  const completedLessons = lessons.filter((lesson) =>
-    userProgress?.unit.lessons.some((ul) => ul.id === lesson.id)
-  ).length;
+  const completedLessons = userProgress?.approvedLessons.length || 0;
+
   const totalExperience = userProgress?.experiencePoints || 0;
   const progressPercentage = selectedUnit
     ? (completedLessons / selectedUnit._count.lessons) * 100
@@ -186,6 +186,7 @@ export default function HomePage() {
         userId={userId}
         initialLesson={selectedLesson}
         // onClose={handleCloseTest}
+        onClose={() => {}}
       />
     );
   }
@@ -326,9 +327,10 @@ export default function HomePage() {
                       <>
                         <div className="space-y-4">
                           {lessons.map((lesson) => {
-                            const isCompleted = userProgress?.unit.lessons.some(
-                              (ul) => ul.id === lesson.id
-                            );
+                            const isCompleted =
+                              userProgress?.approvedLessons.some(
+                                (ul) => ul.id === lesson.id
+                              );
 
                             return (
                               <Card
@@ -399,7 +401,7 @@ export default function HomePage() {
                         </div>
                         <LearningGrid
                           lessons={lessons as any}
-                          unitId={selectedUnitId}
+                          unitId={Number(selectedUnitId)}
                         />
                       </>
                     ) : (

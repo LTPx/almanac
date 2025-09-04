@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
 
     // Si el score es >= 70, marcar la lección como completada y otorgar puntos de experiencia
     const passScore = 70;
+
     if (score >= passScore) {
       // Verificar si ya existe progreso para esta lección
       const existingProgress = await prisma.userProgress.findFirst({

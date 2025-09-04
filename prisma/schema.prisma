@@ -154,7 +154,6 @@ model UserProgress {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  @@unique([userId, unitId])
   @@unique([userId, lessonId])
   @@map("user_progress")
 }
