@@ -102,6 +102,10 @@ export function TestSystem({
     }
   };
 
+  const progress = currentTest
+    ? ((currentQuestionIndex + 1) / currentTest.totalQuestions) * 100
+    : 0;
+
   if (error) {
     return (
       <div className="bg-gray-900 min-h-screen p-6 flex items-center justify-center">
@@ -124,11 +128,11 @@ export function TestSystem({
     const questionAnswer = answers[currentQuestion.id];
 
     return (
-      <div className="bg-gray-900 min-h-screen flex flex-col">
+      <div className="bg-background min-h-screen flex flex-col">
         <HeaderBar
           onClose={onClose}
           hearts={5}
-          percentage={20}
+          percentage={progress}
           hasActiveSubscription={false}
         />
         {/* <div className="bg-gray-800 p-4 flex justify-between items-center">

@@ -1,17 +1,11 @@
 "use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 import { Question } from "@/lib/types";
-
-interface TestQuestionProps {
-  question: Question;
-  onAnswer: (questionId: number, answer: string) => void;
-  showResult?: boolean;
-  isCorrect?: boolean;
-  selectedAnswer?: string;
-}
+import { MultipleChoiceQuestion } from "./multiple-choice-question";
+import { TrueFalseQuestion } from "./true-false-question";
+import { FillInBlankQuestion } from "./fill-in-blank-question";
 
 export function TestQuestion({
   question,
@@ -19,14 +13,14 @@ export function TestQuestion({
   showResult = false,
   isCorrect = false,
   selectedAnswer
-}: TestQuestionProps) {
+}: any) {
   const [selected, setSelected] = useState<string>(selectedAnswer || "");
   const [hasAnswered, setHasAnswered] = useState(showResult);
 
-  const handleAnswerSelect = (answerId: string) => {
-    if (hasAnswered) return;
-    setSelected(answerId);
-  };
+  useEffect(() => {
+    setSelected(selectedAnswer || "");
+    setHasAnswered(showResult);
+  }, [question.id, selectedAnswer, showResult]);
 
   const handleSubmitAnswer = () => {
     if (!selected || hasAnswered) return;
@@ -34,164 +28,106 @@ export function TestQuestion({
     setHasAnswered(true);
   };
 
-  const renderMultipleChoice = () => (
-    <div className="space-y-3">
-      {question.answers.map((answer) => {
-        const isSelected = selected === answer.id.toString();
-        const shouldShowCorrect = showResult && isSelected && isCorrect;
-        const shouldShowIncorrect = showResult && isSelected && !isCorrect;
+  const renderCorrectAnswer = () => {
+    if (!showResult) return null;
+    let correctAnswerText =
+      question.type === "FILL_IN_BLANK"
+        ? String(question.content.correctAnswer)
+        : question.answers.find(
+            (a: { text: string; id: { toString: () => string } }) =>
+              a.text === String(question.content.correctAnswer) ||
+              a.id.toString() === String(question.content.correctAnswer)
+          )?.text || "";
+    return (
+      <p className="text-center text-sm text-gray-400">
+        Respuesta correcta:{" "}
+        <span className="font-bold text-white">{correctAnswerText}</span>
+      </p>
+    );
+  };
 
+  const renderQuestionType = () => {
+    switch (question.type) {
+      case "MULTIPLE_CHOICE":
         return (
-          <button
-            key={answer.id}
-            onClick={() => handleAnswerSelect(answer.id.toString())}
-            disabled={hasAnswered}
-            className={`
-              w-full p-4 text-left rounded-lg border-2 transition-all
-              ${
-                isSelected && !showResult
-                  ? "bg-[#708BB1] border-[#708BB1] text-white"
-                  : ""
-              }
-              ${
-                !isSelected && !showResult
-                  ? "bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500"
-                  : ""
-              }
-              ${
-                shouldShowCorrect
-                  ? "bg-green-500 border-green-500 text-white"
-                  : ""
-              }
-              ${
-                shouldShowIncorrect
-                  ? "bg-red-500 border-red-500 text-white"
-                  : ""
-              }
-              ${hasAnswered ? "cursor-not-allowed" : "cursor-pointer"}
-            `}
-          >
-            <span className="font-medium">{answer.text}</span>
-          </button>
+          <MultipleChoiceQuestion
+            {...{
+              question,
+              selected,
+              setSelected,
+              showResult,
+              isCorrect,
+              hasAnswered
+            }}
+          />
         );
-      })}
-    </div>
-  );
-
-  const renderTrueFalse = () => (
-    <div className="space-y-3">
-      {["Verdadero", "Falso"].map((option, index) => {
-        const value = (index === 0).toString();
-        const isSelected = selected === value;
-        const shouldShowCorrect = showResult && isSelected && isCorrect;
-        const shouldShowIncorrect = showResult && isSelected && !isCorrect;
-
+      case "TRUE_FALSE":
         return (
-          <button
-            key={option}
-            onClick={() => handleAnswerSelect(value)}
-            disabled={hasAnswered}
-            className={`
-              w-full p-4 text-left rounded-lg border-2 transition-all
-              ${
-                isSelected && !showResult
-                  ? "bg-[#708BB1] border-[#708BB1] text-white"
-                  : ""
-              }
-              ${
-                !isSelected && !showResult
-                  ? "bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500"
-                  : ""
-              }
-              ${
-                shouldShowCorrect
-                  ? "bg-green-500 border-green-500 text-white"
-                  : ""
-              }
-              ${
-                shouldShowIncorrect
-                  ? "bg-red-500 border-red-500 text-white"
-                  : ""
-              }
-              ${hasAnswered ? "cursor-not-allowed" : "cursor-pointer"}
-            `}
-          >
-            <span className="font-medium">{option}</span>
-          </button>
+          <TrueFalseQuestion
+            {...{
+              question,
+              selected,
+              setSelected,
+              showResult,
+              isCorrect,
+              hasAnswered
+            }}
+          />
         );
-      })}
-    </div>
-  );
-
-  const renderFillInBlank = () => (
-    <div className="space-y-4">
-      <input
-        type="text"
-        value={selected}
-        onChange={(e) => setSelected(e.target.value)}
-        disabled={hasAnswered}
-        placeholder="Escribe tu respuesta..."
-        className="w-full p-4 rounded-lg bg-gray-800 border-2 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none disabled:opacity-50"
-      />
-    </div>
-  );
+      case "FILL_IN_BLANK":
+        return (
+          <FillInBlankQuestion {...{ selected, setSelected, hasAnswered }} />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="flex-1 pt-[70px]">
       <div className="flex h-full items-center justify-center">
-        <div className="flex w-full flex-col gap-y-12 px-6 lg:min-h-[350px] lg:w-[600px] lg:px-0">
-          <h1 className="text-center text-lg font-bold text-white lg:text-start lg:text-3xl">
+        <div className="flex w-full flex-col gap-y-2 px-6 lg:min-h-[350px] lg:w-[600px] lg:px-0">
+          <h1 className="mb-5 text-center text-lg font-bold text-white lg:text-start lg:text-3xl">
             {question.title}
           </h1>
 
-          <div>
-            <div className="mb-6">
-              {question.type === "MULTIPLE_CHOICE" && renderMultipleChoice()}
-              {question.type === "TRUE_FALSE" && renderTrueFalse()}
-              {question.type === "FILL_IN_BLANK" && renderFillInBlank()}
+          <div className="mb-6">{renderQuestionType()}</div>
+
+          {showResult && (
+            <div className="mb-6 flex items-center gap-2">
+              <CheckCircle
+                className={`w-6 h-6 ${isCorrect ? "text-green-500" : "text-red-500"}`}
+              />
+              <span
+                className={`font-medium ${isCorrect ? "text-green-500" : "text-red-500"}`}
+              >
+                {isCorrect ? "¡Correcto!" : "Incorrecto"}
+              </span>
             </div>
+          )}
 
-            {showResult && (
-              <div className="mb-6 flex items-center gap-2">
-                <CheckCircle
-                  className={`w-6 h-6 ${
-                    isCorrect ? "text-green-500" : "text-red-500"
-                  }`}
-                />
-                <span
-                  className={`font-medium ${
-                    isCorrect ? "text-green-500" : "text-red-500"
-                  }`}
-                >
-                  {isCorrect ? "¡Correcto!" : "Incorrecto"}
-                </span>
-              </div>
-            )}
+          {renderCorrectAnswer()}
 
-            {!hasAnswered && (
-              <Button
-                onClick={handleSubmitAnswer}
-                disabled={!selected}
-                className="w-full bg-green-500 hover:bg-green-600 text-white py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {question.type === "MULTIPLE_CHOICE" ||
-                question.type === "TRUE_FALSE"
-                  ? "Check Answer →"
-                  : "Enviar Respuesta"}
-              </Button>
-            )}
+          {!hasAnswered && (
+            <Button
+              onClick={handleSubmitAnswer}
+              disabled={!selected}
+              className="mt-6 w-full bg-green-500 hover:bg-green-600 text-white py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {question.type === "FILL_IN_BLANK"
+                ? "Enviar Respuesta"
+                : "Check Answer →"}
+            </Button>
+          )}
 
-            {hasAnswered && showResult && (
-              <Button
-                onClick={() => {
-                  /* Manejar continuar */
-                }}
-                className="w-full bg-green-500 hover:bg-green-600 text-white py-3 text-lg font-medium"
-              >
-                Continue
-              </Button>
-            )}
-          </div>
+          {hasAnswered && showResult && (
+            <Button
+              onClick={() => {}}
+              className="mt-6 w-full bg-green-500 hover:bg-green-600 text-white py-3 text-lg font-medium"
+            >
+              Continue
+            </Button>
+          )}
         </div>
       </div>
     </div>

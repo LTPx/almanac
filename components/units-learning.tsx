@@ -84,7 +84,7 @@ const LearningPath: React.FC<LearningPathProps> = ({ unit, userId }) => {
   // Si hay una lección activa, mostramos TestSystem en pantalla completa
   if (activeLesson) {
     return (
-      <div className="fixed inset-0 z-100 bg-gray-900">
+      <div className="fixed inset-0 z-100">
         <TestSystem
           userId={userId}
           initialLesson={activeLesson}
