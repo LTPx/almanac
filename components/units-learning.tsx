@@ -29,14 +29,14 @@ const LearningPath: React.FC<LearningPathProps> = ({ unit }) => {
   type Node = Lesson & { type: "lesson"; col: number };
 
   const getRowCol = (position: number) => {
-    const row = Math.floor((position - 1) / 5);
-    const col = (position - 1) % 5;
+    const row = Math.floor(position / 5);
+    const col = position % 5;
     return { row, col };
   };
 
   const generatePathLayout = () => {
     const maxPosition = Math.max(...unit.lessons.map((l) => l.position));
-    const totalRows = Math.floor((maxPosition - 1) / 5) + 1;
+    const totalRows = Math.floor(maxPosition / 5) + 1;
 
     const grid: { row: number; nodes: Node[] }[] = Array.from(
       { length: totalRows },

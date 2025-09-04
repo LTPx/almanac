@@ -4,7 +4,7 @@ import * as React from "react";
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger,
+  PopoverTrigger
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 
@@ -22,8 +22,8 @@ export function StepPopover({
   message = "",
   buttonText,
   onButtonClick,
-  className = "bg-green-500 text-white p-4",
-  children,
+  className = "bg-[#7BBD83] text-white p-4",
+  children
 }: StepPopoverProps) {
   return (
     <Popover>
@@ -32,7 +32,10 @@ export function StepPopover({
         {title && <h3 className="font-bold">{title}</h3>}
         {message && <p className="mt-2">{message}</p>}
         {buttonText && onButtonClick && (
-          <Button className="mt-3" onClick={onButtonClick}>
+          <Button
+            className="bg-white focus-visible:ring-0 hover:bg-white/90 mt-3 text-[#7BBD83]"
+            onClick={onButtonClick}
+          >
             {buttonText}
           </Button>
         )}
