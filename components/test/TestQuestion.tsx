@@ -137,60 +137,62 @@ export function TestQuestion({
   );
 
   return (
-    <div className="bg-gray-900 min-h-screen p-6">
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-white mb-4">
+    <div className="flex-1 pt-[70px]">
+      <div className="flex h-full items-center justify-center">
+        <div className="flex w-full flex-col gap-y-12 px-6 lg:min-h-[350px] lg:w-[600px] lg:px-0">
+          <h1 className="text-center text-lg font-bold text-white lg:text-start lg:text-3xl">
             {question.title}
-          </h2>
-        </div>
+          </h1>
 
-        <div className="mb-8">
-          {question.type === "MULTIPLE_CHOICE" && renderMultipleChoice()}
-          {question.type === "TRUE_FALSE" && renderTrueFalse()}
-          {question.type === "FILL_IN_BLANK" && renderFillInBlank()}
-        </div>
+          <div>
+            <div className="mb-6">
+              {question.type === "MULTIPLE_CHOICE" && renderMultipleChoice()}
+              {question.type === "TRUE_FALSE" && renderTrueFalse()}
+              {question.type === "FILL_IN_BLANK" && renderFillInBlank()}
+            </div>
 
-        {showResult && (
-          <div className="mb-6 flex items-center gap-2">
-            <CheckCircle
-              className={`w-6 h-6 ${
-                isCorrect ? "text-green-500" : "text-red-500"
-              }`}
-            />
-            <span
-              className={`font-medium ${
-                isCorrect ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {isCorrect ? "¡Correcto!" : "Incorrecto"}
-            </span>
+            {showResult && (
+              <div className="mb-6 flex items-center gap-2">
+                <CheckCircle
+                  className={`w-6 h-6 ${
+                    isCorrect ? "text-green-500" : "text-red-500"
+                  }`}
+                />
+                <span
+                  className={`font-medium ${
+                    isCorrect ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {isCorrect ? "¡Correcto!" : "Incorrecto"}
+                </span>
+              </div>
+            )}
+
+            {!hasAnswered && (
+              <Button
+                onClick={handleSubmitAnswer}
+                disabled={!selected}
+                className="w-full bg-green-500 hover:bg-green-600 text-white py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {question.type === "MULTIPLE_CHOICE" ||
+                question.type === "TRUE_FALSE"
+                  ? "Check Answer →"
+                  : "Enviar Respuesta"}
+              </Button>
+            )}
+
+            {hasAnswered && showResult && (
+              <Button
+                onClick={() => {
+                  /* Manejar continuar */
+                }}
+                className="w-full bg-green-500 hover:bg-green-600 text-white py-3 text-lg font-medium"
+              >
+                Continue
+              </Button>
+            )}
           </div>
-        )}
-
-        {!hasAnswered && (
-          <Button
-            onClick={handleSubmitAnswer}
-            disabled={!selected}
-            className="w-full bg-green-500 hover:bg-green-600 text-white py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {question.type === "MULTIPLE_CHOICE" ||
-            question.type === "TRUE_FALSE"
-              ? "Check Answer →"
-              : "Enviar Respuesta"}
-          </Button>
-        )}
-
-        {hasAnswered && showResult && (
-          <Button
-            onClick={() => {
-              /* Manejar continuar */
-            }}
-            className="w-full bg-green-500 hover:bg-green-600 text-white py-3 text-lg font-medium"
-          >
-            Continue
-          </Button>
-        )}
+        </div>
       </div>
     </div>
   );

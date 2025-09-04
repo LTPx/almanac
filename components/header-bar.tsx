@@ -10,19 +10,21 @@ type HeaderProps = {
   hearts: number;
   percentage: number;
   hasActiveSubscription: boolean;
+  onClose: () => void;
 };
 
 export const HeaderBar = ({
   hearts,
   percentage,
   hasActiveSubscription,
+  onClose
 }: HeaderProps) => {
   const { open } = useExitModal();
 
   return (
     <header className="mx-auto flex w-full max-w-[1140px] items-center justify-between gap-x-7 px-10 pt-[20px] lg:pt-[50px]">
       <X
-        onClick={open}
+        onClick={onClose}
         className="cursor-pointer text-slate-500 transition hover:opacity-75"
       />
       <Progress value={percentage} />

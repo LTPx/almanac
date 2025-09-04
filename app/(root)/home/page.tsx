@@ -10,6 +10,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { useUser } from "@/context/UserContext";
 
 // Tipos
 type Lesson = {
@@ -37,6 +38,9 @@ export default function HomePage() {
   const [selectedUnitId, setSelectedUnitId] = useState<string>("");
   const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const user = useUser();
+  const userId = user?.id || "";
 
   // Fetch de todas las unidades (sin lecciones)
   const fetchUnits = async () => {
@@ -120,7 +124,7 @@ export default function HomePage() {
       {loading && <div>Cargando...</div>}
       {!loading && selectedUnit && (
         <div className="h-full">
-          <LearningPath unit={selectedUnit} />
+          <LearningPath unit={selectedUnit} userId={userId} />
         </div>
       )}
       {!loading && !selectedUnit && <div>No se encontraron datos</div>}

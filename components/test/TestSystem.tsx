@@ -1,6 +1,6 @@
 "use client";
+
 import { useState, useEffect } from "react";
-import { LessonCard } from "./LessonCard";
 import { TestQuestion } from "./TestQuestion";
 import { TestResults } from "./TestResults";
 import { useTest } from "@/hooks/useTest";
@@ -10,6 +10,7 @@ import type {
   Question,
   TestResultsInterface as TestResultsType
 } from "@/lib/types";
+import { HeaderBar } from "../header-bar";
 
 interface TestSystemProps {
   userId: string;
@@ -19,12 +20,17 @@ interface TestSystemProps {
     description: string | null;
     experiencePoints: number;
   };
+  onClose: () => void;
 }
 
-type TestState = "lessons" | "testing" | "results";
+type TestState = "testing" | "results";
 
-export function TestSystem({ userId, initialLesson }: TestSystemProps) {
-  const [state, setState] = useState<TestState>("lessons");
+export function TestSystem({
+  userId,
+  initialLesson,
+  onClose
+}: TestSystemProps) {
+  const [state, setState] = useState<TestState>("testing");
   const [currentTest, setCurrentTest] = useState<TestData | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<{
@@ -36,6 +42,10 @@ export function TestSystem({ userId, initialLesson }: TestSystemProps) {
   );
 
   const { isLoading, error, startTest, submitAnswer, completeTest } = useTest();
+
+  useEffect(() => {
+    handleStartTest(initialLesson.id);
+  }, []);
 
   const handleStartTest = async (lessonId: number) => {
     const testData = await startTest(userId, lessonId);
@@ -65,7 +75,6 @@ export function TestSystem({ userId, initialLesson }: TestSystemProps) {
         [questionId]: { answer, isCorrect: result.isCorrect }
       }));
 
-      // Mostrar resultado por 2 segundos, luego continuar
       setTimeout(() => {
         if (currentQuestionIndex < currentTest.questions.length - 1) {
           setCurrentQuestionIndex((prev) => prev + 1);
@@ -87,14 +96,6 @@ export function TestSystem({ userId, initialLesson }: TestSystemProps) {
     }
   };
 
-  const handleReturnToLessons = () => {
-    setState("lessons");
-    setCurrentTest(null);
-    setResults(null);
-    setCurrentQuestionIndex(0);
-    setAnswers({});
-  };
-
   const handleRetakeTest = () => {
     if (currentTest) {
       handleStartTest(currentTest.lesson.id);
@@ -108,54 +109,11 @@ export function TestSystem({ userId, initialLesson }: TestSystemProps) {
           <h2 className="text-xl font-bold text-red-400 mb-2">Error</h2>
           <p className="text-gray-300">{error}</p>
           <button
-            onClick={handleReturnToLessons}
+            onClick={onClose}
             className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
           >
-            Volver
+            Cerrar
           </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (state === "lessons") {
-    return (
-      <div className="bg-gray-900 min-h-screen p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-blue-500 rounded-lg">
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                  />
-                </svg>
-              </div>
-              <h1 className="text-3xl font-bold text-white">
-                Lecciones de Matemáticas Básicas
-              </h1>
-            </div>
-            <p className="text-gray-300 text-lg">
-              Progresa a través de las lecciones para dominar esta unidad
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            <LessonCard
-              key={initialLesson.id}
-              lesson={initialLesson}
-              onStartTest={handleStartTest}
-              isLoading={isLoading}
-            />
-          </div>
         </div>
       </div>
     );
@@ -166,10 +124,15 @@ export function TestSystem({ userId, initialLesson }: TestSystemProps) {
     const questionAnswer = answers[currentQuestion.id];
 
     return (
-      <>
-        {/* Progress bar */}
-        <div className="bg-gray-800 p-4">
-          <div className="max-w-2xl mx-auto">
+      <div className="bg-gray-900 min-h-screen flex flex-col">
+        <HeaderBar
+          onClose={onClose}
+          hearts={5}
+          percentage={20}
+          hasActiveSubscription={false}
+        />
+        {/* <div className="bg-gray-800 p-4 flex justify-between items-center">
+          <div className="max-w-2xl flex-1">
             <div className="flex justify-between items-center mb-2">
               <span className="text-gray-300 text-sm">
                 Pregunta {currentQuestionIndex + 1} de{" "}
@@ -181,7 +144,7 @@ export function TestSystem({ userId, initialLesson }: TestSystemProps) {
             </div>
             <div className="w-full bg-gray-700 rounded-full h-2">
               <div
-                className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                className="bg-blue-100 h-2 rounded-full transition-all duration-300"
                 style={{
                   width: `${
                     ((currentQuestionIndex + 1) / currentTest.totalQuestions) *
@@ -191,7 +154,13 @@ export function TestSystem({ userId, initialLesson }: TestSystemProps) {
               />
             </div>
           </div>
-        </div>
+          <button
+            onClick={onClose}
+            className="ml-4 px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            Cerrar
+          </button>
+        </div> */}
 
         <TestQuestion
           question={currentQuestion}
@@ -200,18 +169,28 @@ export function TestSystem({ userId, initialLesson }: TestSystemProps) {
           isCorrect={questionAnswer?.isCorrect}
           selectedAnswer={questionAnswer?.answer}
         />
-      </>
+      </div>
     );
   }
 
   if (state === "results" && results && currentTest) {
     return (
-      <TestResults
-        results={results}
-        lessonName={currentTest.lesson.name}
-        onReturnToLessons={handleReturnToLessons}
-        onRetakeTest={results.passed ? undefined : handleRetakeTest}
-      />
+      <div className="bg-gray-900 min-h-screen flex flex-col">
+        <div className="p-4 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            Cerrar
+          </button>
+        </div>
+        <TestResults
+          results={results}
+          lessonName={currentTest.lesson.name}
+          onReturnToLessons={onClose}
+          onRetakeTest={results.passed ? undefined : handleRetakeTest}
+        />
+      </div>
     );
   }
 

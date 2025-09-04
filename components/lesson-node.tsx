@@ -7,9 +7,10 @@ import { StepPopover } from "./step-popover";
 type LessonNodeProps = {
   id: number;
   name: string;
-  description?: string;
+  description?: string | null;
   state: "completed" | "active" | "available" | "locked";
-  color?: string; // Para color de locked
+  color?: string;
+  onStartLesson: () => void;
 };
 
 const LessonNode: React.FC<LessonNodeProps> = ({
@@ -17,14 +18,15 @@ const LessonNode: React.FC<LessonNodeProps> = ({
   name,
   description,
   state,
-  color
+  color,
+  onStartLesson
 }) => {
   return (
     <StepPopover
-      onButtonClick={() => console.log("click")}
-      buttonText={"Empezar mi Prueba"}
+      onButtonClick={onStartLesson}
+      buttonText="Empezar mi Prueba"
       title={name}
-      message={description}
+      message={description || ""}
     >
       <div
         className={`

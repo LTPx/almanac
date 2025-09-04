@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import LessonNode from "./lesson-node";
+import { TestSystem } from "./test/TestSystem";
 
+// Tipos
 type Lesson = {
   id: number;
   name: string;
@@ -23,10 +25,13 @@ type Unit = {
 
 type LearningPathProps = {
   unit: Unit;
+  userId: string;
 };
 
-const LearningPath: React.FC<LearningPathProps> = ({ unit }) => {
+const LearningPath: React.FC<LearningPathProps> = ({ unit, userId }) => {
   type Node = Lesson & { type: "lesson"; col: number };
+
+  const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
 
   const getRowCol = (position: number) => {
     const row = Math.floor(position / 5);
@@ -76,6 +81,20 @@ const LearningPath: React.FC<LearningPathProps> = ({ unit }) => {
     return colors[lessonId % colors.length];
   };
 
+  // Si hay una lección activa, mostramos TestSystem en pantalla completa
+  if (activeLesson) {
+    return (
+      <div className="fixed inset-0 z-100 bg-gray-900">
+        <TestSystem
+          userId={userId}
+          initialLesson={activeLesson}
+          onClose={() => setActiveLesson(null)}
+        />
+      </div>
+    );
+  }
+
+  // Si no hay lección activa, mostramos el grid
   return (
     <div className="min-h-screen flex flex-col">
       <div className="text-center py-6">
@@ -97,6 +116,7 @@ const LearningPath: React.FC<LearningPathProps> = ({ unit }) => {
                         description={nodeData.description}
                         state={getLessonState(nodeData.id)}
                         color={getLockedColor(nodeData.id)}
+                        onStartLesson={() => setActiveLesson(nodeData)}
                       />
                     ) : (
                       <div className="w-16 h-16"></div>
