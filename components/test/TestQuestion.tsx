@@ -6,6 +6,7 @@ import { Question } from "@/lib/types";
 import { MultipleChoiceQuestion } from "./multiple-choice-question";
 import { TrueFalseQuestion } from "./true-false-question";
 import { FillInBlankQuestion } from "./fill-in-blank-question";
+import { OrderWordsQuestion } from "./order-words-question";
 
 export function TestQuestion({
   question,
@@ -78,6 +79,15 @@ export function TestQuestion({
         return (
           <FillInBlankQuestion {...{ selected, setSelected, hasAnswered }} />
         );
+      case "ORDER_WORDS":
+        return (
+          <OrderWordsQuestion
+            question={question}
+            hasAnswered={hasAnswered}
+            setHasAnswered={setHasAnswered}
+            onAnswer={onAnswer}
+          />
+        );
       default:
         return null;
     }
@@ -108,7 +118,7 @@ export function TestQuestion({
 
           {renderCorrectAnswer()}
 
-          {!hasAnswered && (
+          {!hasAnswered && question.type !== "ORDER_WORDS" && (
             <Button
               onClick={handleSubmitAnswer}
               disabled={!selected}
