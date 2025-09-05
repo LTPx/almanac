@@ -23,6 +23,17 @@ model User {
   testAttempts TestAttempt[]
   streaks      UserStreak[]
 
+  // GAMIFICATION 
+  hearts              Int      @default(5)
+  zapTokens           Int      @default(0)
+  lastHeartReset      DateTime @default(now())
+  totalUnitsCompleted Int      @default(0)
+
+  // GAMIFICATION - relationships
+  userUnitTokens    UserUnitToken[]
+  heartTransactions HeartTransaction[]
+  zapTransactions   ZapTransaction[]
+
   @@map("user")
 }
 
@@ -81,6 +92,10 @@ model Unit {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   userProgress UserProgress[]
+
+  // GAMIFICATION - relationships
+  userUnitTokens  UserUnitToken[]
+  zapTransactions ZapTransaction[]
 
   @@map("unit")
 }
@@ -172,6 +187,9 @@ model TestAttempt {
   completedAt    DateTime?
   answers        TestAnswer[]
 
+  // GAMIFICATION -  relationships
+  heartTransactions HeartTransaction[]
+
   @@map("test_attempt")
 }
 
@@ -200,6 +218,71 @@ model UserStreak {
   updatedAt     DateTime @updatedAt
 
   @@map("user_streak")
+}
+
+// GAMIFICATION
+model UserUnitToken {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  unit      Unit     @relation(fields: [unitId], references: [id])
+  unitId    Int
+  quantity  Int      @default(1)
+  earnedAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, unitId])
+  @@map("user_unit_token")
+}
+
+model HeartTransaction {
+  id                   Int                  @id @default(autoincrement())
+  user                 User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId               String
+  type                 HeartTransactionType
+  amount               Int // Amount + or -
+  reason               String?
+  relatedTestAttemptId Int?
+  relatedTestAttempt   TestAttempt?         @relation(fields: [relatedTestAttemptId], references: [id])
+  createdAt            DateTime             @default(now())
+
+  @@map("heart_transaction")
+}
+
+model ZapTransaction {
+  id            Int                @id @default(autoincrement())
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  type          ZapTransactionType
+  amount        Int // Cantidad (positivo = ganado, negativo = gastado)
+  reason        String? // Razón de la transacción
+  relatedUnitId Int? // Si está relacionado con completar una unidad
+  relatedUnit   Unit?              @relation(fields: [relatedUnitId], references: [id])
+  createdAt     DateTime           @default(now())
+
+  @@map("zap_transaction")
+}
+
+//ENUMS
+
+enum ZapTransactionType {
+  UNIT_COMPLETED // Ganó ZAPs por completar unidad
+  HEART_PURCHASE // Gastó ZAPs en comprar corazón
+  LESSON_COMPLETED // Ganó ZAPs por completar lección
+  DAILY_BONUS // Bonificación diaria
+  ADMIN_ADJUSTMENT // Ajuste manual por admin
+
+  @@map("zap_transaction_type")
+}
+
+enum HeartTransactionType {
+  DAILY_RESET // Reseteo diario automático
+  TEST_FAILED // Perdió corazón por fallar test
+  PURCHASED // Compró corazón con ZAPs
+  BONUS // Bonificación especial
+  ADMIN_ADJUSTMENT // Ajuste manual por admin
+
+  @@map("heart_transaction_type")
 }
 
 enum QuestionType {
