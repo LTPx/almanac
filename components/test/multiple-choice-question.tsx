@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Question } from "@/lib/types";
 
 interface Props {

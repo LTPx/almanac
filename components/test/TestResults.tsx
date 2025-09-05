@@ -25,13 +25,15 @@ export function TestResults({
 
   return (
     <div className="bg-gray-900 min-h-screen p-6 flex items-center justify-center">
-      <Confetti
-        recycle={false}
-        numberOfPieces={500}
-        tweenDuration={10_000}
-        width={width}
-        height={height}
-      />
+      {isPassed && (
+        <Confetti
+          recycle={false}
+          numberOfPieces={500}
+          tweenDuration={10_000}
+          width={width}
+          height={height}
+        />
+      )}
       <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full text-center">
         <div className="mb-6">
           {isPassed ? (
