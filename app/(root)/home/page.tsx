@@ -11,10 +11,8 @@ export default function HomePage() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [selectedUnitId, setSelectedUnitId] = useState<string>("");
   const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
-
   const user = useUser();
   const userId = user?.id || "";
-
   const { isLoading, error, fetchUnits, fetchUnitWithLessons } = useUnits();
 
   useEffect(() => {

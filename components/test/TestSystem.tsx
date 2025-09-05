@@ -7,19 +7,14 @@ import { useTest } from "@/hooks/useTest";
 
 import type {
   TestData,
-  Question,
-  TestResultsInterface as TestResultsType
+  TestResultsInterface as TestResultsType,
+  Lesson
 } from "@/lib/types";
 import { HeaderBar } from "../header-bar";
 
 interface TestSystemProps {
   userId: string;
-  initialLesson: {
-    id: number;
-    name: string;
-    description: string | null;
-    experiencePoints: number;
-  };
+  initialLesson: Lesson;
   onClose: () => void;
 }
 
@@ -135,37 +130,6 @@ export function TestSystem({
           percentage={progress}
           hasActiveSubscription={false}
         />
-        {/* <div className="bg-gray-800 p-4 flex justify-between items-center">
-          <div className="max-w-2xl flex-1">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-gray-300 text-sm">
-                Pregunta {currentQuestionIndex + 1} de{" "}
-                {currentTest.totalQuestions}
-              </span>
-              <span className="text-gray-300 text-sm">
-                {currentTest.lesson.name}
-              </span>
-            </div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div
-                className="bg-blue-100 h-2 rounded-full transition-all duration-300"
-                style={{
-                  width: `${
-                    ((currentQuestionIndex + 1) / currentTest.totalQuestions) *
-                    100
-                  }%`
-                }}
-              />
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="ml-4 px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700"
-          >
-            Cerrar
-          </button>
-        </div> */}
-
         <TestQuestion
           question={currentQuestion}
           onAnswer={handleAnswer}

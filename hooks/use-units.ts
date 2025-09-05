@@ -1,24 +1,7 @@
 "use client";
 
+import { Unit } from "@/lib/types";
 import { useState } from "react";
-
-type Lesson = {
-  id: number;
-  name: string;
-  description?: string | null;
-  position: number;
-  unitId: number;
-};
-
-type Unit = {
-  id: number;
-  name: string;
-  description: string | null;
-  order: number;
-  isActive: boolean;
-  _count: { lessons: number };
-  lessons?: Lesson[];
-};
 
 export function useUnits() {
   const [isLoading, setIsLoading] = useState(false);
