@@ -39,6 +39,26 @@ const LearningPath: React.FC<LearningPathProps> = ({ unit, userId }) => {
     return { row, col };
   };
 
+  const [approvedLessons, setApprovedLessons] = useState<number[]>([]);
+
+  useEffect(() => {
+    const loadProgress = async () => {
+      if (!userId || !unit.id) return;
+      try {
+        const res = await fetch(
+          `/api/users/${userId}/progress?unitId=${unit.id}`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setApprovedLessons(data.approvedLessons.map((l: any) => l.id));
+        }
+      } catch (err) {
+        console.error("Error cargando progreso", err);
+      }
+    };
+    loadProgress();
+  }, [userId, unit.id]);
+
   const generatePathLayout = () => {
     const maxPosition = Math.max(...unit.lessons.map((l) => l.position));
     const totalRows = Math.floor(maxPosition / 5) + 1;
@@ -65,7 +85,21 @@ const LearningPath: React.FC<LearningPathProps> = ({ unit, userId }) => {
     setPathLayout(generatePathLayout());
   }, [unit]);
 
-  const getLessonState = (lessonId: number) => "locked";
+  const getLessonState = (lessonId: number) => {
+    if (approvedLessons.includes(lessonId)) return "completed";
+
+    // Ordena por posición para identificar la primera pendiente
+    const sortedLessons = [...unit.lessons].sort(
+      (a, b) => a.position - b.position
+    );
+    const firstPending = sortedLessons.find(
+      (l) => !approvedLessons.includes(l.id)
+    );
+
+    if (firstPending?.id === lessonId) return "available";
+
+    return "locked";
+  };
 
   const getLockedColor = (lessonId: number) => {
     const colors = [
@@ -88,7 +122,9 @@ const LearningPath: React.FC<LearningPathProps> = ({ unit, userId }) => {
         <TestSystem
           userId={userId}
           initialLesson={activeLesson}
-          onClose={() => setActiveLesson(null)}
+          onClose={() => {
+            setActiveLesson(null);
+          }}
         />
       </div>
     );

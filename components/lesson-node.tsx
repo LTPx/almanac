@@ -30,22 +30,18 @@ const LessonNode: React.FC<LessonNodeProps> = ({
     >
       <div
         className={`
-          w-16 h-16 flex items-center justify-center
-          transition-all duration-200 relative
-          ${state === "completed" ? "bg-[#5EC16A] border-green-400 shadow-lg" : ""}
-          ${state === "active" ? "bg-blue-500 border-blue-400 animate-pulse shadow-lg" : ""}
-          ${state === "available" ? "bg-gray-600 border-gray-500" : ""}
-          ${state === "locked" ? `${color} border-dashed` : ""}
-          rounded-2xl border-2 cursor-pointer
-        `}
+    w-16 h-16 flex items-center justify-center
+    transition-all duration-200 relative
+    ${state === "completed" ? "bg-[#5EC16A] border-[#5EC16A] shadow-lg" : ""}
+    ${state === "available" ? "bg-gray-600 border-gray-500 hover:border-white" : ""}
+    ${state === "locked" ? `${color} border-dashed` : ""}
+    rounded-2xl border-2 cursor-pointer
+  `}
       >
         {state === "completed" && (
           <CheckCircle className="w-7 h-7 text-white" />
         )}
-        {state === "active" && <BookOpen className="w-7 h-7 text-white" />}
-        {state === "available" && (
-          <div className="w-5 h-5 bg-white rounded-full"></div>
-        )}
+        {state === "available" && <BookOpen className="w-7 h-7 text-white" />}
         {state === "locked" && <Lock className="w-6 h-6 text-white" />}
       </div>
     </StepPopover>
