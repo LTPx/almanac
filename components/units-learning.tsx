@@ -3,25 +3,7 @@
 import React, { useState, useEffect } from "react";
 import LessonNode from "./lesson-node";
 import { TestSystem } from "./test/TestSystem";
-
-// Tipos
-type Lesson = {
-  id: number;
-  name: string;
-  description?: string | null;
-  position: number;
-  unitId: number;
-};
-
-type Unit = {
-  id: number;
-  name: string;
-  description: string | null;
-  order: number;
-  isActive: boolean;
-  _count: { lessons: number };
-  lessons: Lesson[];
-};
+import { Lesson, Unit } from "@/lib/types";
 
 type LearningPathProps = {
   unit: Unit;

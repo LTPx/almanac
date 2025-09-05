@@ -45,3 +45,21 @@ export interface TestResultsInterface {
   passed: boolean;
   experienceGained: number;
 }
+
+export type Lesson = {
+  id: number;
+  name: string;
+  description?: string | null;
+  position: number;
+  unitId: number;
+};
+
+export type Unit = {
+  id: number;
+  name: string;
+  description: string | null;
+  order: number;
+  isActive: boolean;
+  _count: { lessons: number };
+  lessons?: Lesson[];
+};
