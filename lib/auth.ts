@@ -19,5 +19,19 @@ export const auth = betterAuth({
   rateLimit: {
     window: 60, // time window in seconds
     max: 10
+  },
+  user: {
+    additionalFields: {
+      hearts: {
+        type: "number",
+        required: true,
+        defaultValue: 5
+      },
+      zapTokens: {
+        type: "number",
+        required: true,
+        defaultValue: 0
+      }
+    }
   }
 });
