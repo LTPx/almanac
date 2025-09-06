@@ -1,5 +1,8 @@
 {
-  "cSpell.words": ["uuid"],
+  "cSpell.words": [
+    "nfts",
+    "uuid"
+  ],
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
   },
