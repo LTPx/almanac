@@ -22,28 +22,29 @@ export const getUserProgressByUnit = cache(
   async (userId: string, unitId: number) => {
     if (!userId) return null;
 
-    // Traemos la unidad con sus lecciones obligatorias activas
+    // Traemos unidad con todas sus lecciones activas
     const unit = await prisma.unit.findUnique({
       where: { id: unitId },
       select: {
         id: true,
         name: true,
         lessons: {
-          where: { mandatory: true, isActive: true },
-          select: { id: true, name: true }
+          where: { isActive: true },
+          select: { id: true, name: true, mandatory: true }
         }
       }
     });
 
     if (!unit) return null;
 
-    const mandatoryLessons = unit.lessons;
+    const allLessons = unit.lessons;
+    const mandatoryLessons = allLessons.filter((l) => l.mandatory);
 
-    // Traemos progreso de esas lecciones (solo las aprobadas existen en UserLessonProgress)
+    // Traemos progreso del usuario en TODAS las lessons de la unidad
     const approvedLessonsInUnit = await prisma.userLessonProgress.findMany({
       where: {
         userId,
-        lessonId: { in: mandatoryLessons.map((l) => l.id) }
+        lessonId: { in: allLessons.map((l) => l.id) }
       },
       include: {
         lesson: {
@@ -52,19 +53,22 @@ export const getUserProgressByUnit = cache(
       }
     });
 
-    // Si no aprobó ninguna lección obligatoria → no hay progreso
     if (approvedLessonsInUnit.length === 0) return null;
 
-    // Una unidad está completa si todas las lessons obligatorias tienen progreso aprobado
-    const isUnitCompleted =
-      mandatoryLessons.length === approvedLessonsInUnit.length;
+    // ✅ Unidad completada si TODAS las obligatorias están aprobadas
+    const approvedLessonIds = new Set(
+      approvedLessonsInUnit.map((p) => p.lessonId)
+    );
+    const isUnitCompleted = mandatoryLessons.every((l) =>
+      approvedLessonIds.has(l.id)
+    );
 
-    // Lecciones aprobadas con datos básicos
+    // ✅ Aprobadas = todas las lessons activas completadas (obligatorias y opcionales)
     const approvedLessons = approvedLessonsInUnit
       .filter((p) => p.lesson)
       .map((p) => p.lesson);
 
-    // XP acumulada en esta unidad
+    // ✅ XP acumulada = suma de todas las lessons aprobadas
     const currentXpInUnit = approvedLessonsInUnit.reduce(
       (total, p) => total + p.experiencePoints,
       0
