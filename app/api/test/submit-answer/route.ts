@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     // Evaluar si la respuesta es correcta
     let isCorrect = false;
-
+    console.log(question);
     switch (question.type) {
       case "MULTIPLE_CHOICE":
       case "TRUE_FALSE":
@@ -67,6 +67,8 @@ export async function POST(request: NextRequest) {
         break;
 
       case "ORDER_WORDS":
+        console.log("correct place");
+        isCorrect = true; //pending
       case "MATCHING":
       case "DRAG_DROP":
         // Para estos tipos, el userAnswer debería ser un JSON con el orden/matches

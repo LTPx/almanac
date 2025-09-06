@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { completeUnit, reduceHeartsForFailedTest } from "@/lib/gamification";
 import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
@@ -17,7 +18,11 @@ export async function POST(request: NextRequest) {
       where: { id: testAttemptId },
       include: {
         answers: true,
-        lesson: true
+        lesson: {
+          include: {
+            unit: true
+          }
+        }
       }
     });
 
@@ -40,6 +45,8 @@ export async function POST(request: NextRequest) {
       (answer) => answer.isCorrect
     ).length;
     const score = (correctAnswers / testAttempt.totalQuestions) * 100;
+    const passScore = 70;
+    const passed = score >= passScore;
 
     // Actualizar el intento de test
     const updatedTestAttempt = await prisma.testAttempt.update({
@@ -52,10 +59,15 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Si el score es >= 70, marcar la lección como completada y otorgar puntos de experiencia
-    const passScore = 70;
+    let experienceGained = 0;
+    let unitCompleted = false;
+    let unitRewards = null;
+    let heartsLost = 0;
 
-    if (score >= passScore) {
+    if (passed) {
+      // Test pasado - otorgar experiencia y verificar si completó la unidad
+      experienceGained = testAttempt.lesson.experiencePoints;
+
       // Verificar si ya existe progreso para esta lección
       const existingProgress = await prisma.userProgress.findFirst({
         where: {
@@ -87,6 +99,36 @@ export async function POST(request: NextRequest) {
           }
         });
 
+        // Verificar si completó todas las lecciones de la unidad
+        const unitLessons = await prisma.lesson.findMany({
+          where: {
+            unitId: testAttempt.lesson.unit.id,
+            isActive: true,
+            mandatory: true
+          }
+        });
+
+        const completedLessons = await prisma.userProgress.findMany({
+          where: {
+            userId: testAttempt.userId,
+            lesson: { unitId: testAttempt.lesson.unit.id },
+            isCompleted: true
+          }
+        });
+
+        if (completedLessons.length >= unitLessons.length) {
+          // ¡Unidad completada! Otorgar recompensas
+          try {
+            unitRewards = await completeUnit(
+              testAttempt.userId,
+              testAttempt.lesson.unit.id
+            );
+            unitCompleted = true;
+          } catch (error: any) {
+            console.log("Unit already completed or error:", error.message);
+          }
+        }
+
         // Actualizar racha del usuario
         await prisma.userStreak.upsert({
           where: { userId: testAttempt.userId },
@@ -114,6 +156,15 @@ export async function POST(request: NextRequest) {
           });
         }
       }
+    } else {
+      // Test fallado - reducir corazones
+      try {
+        heartsLost = 1;
+        await reduceHeartsForFailedTest(testAttempt.userId, testAttemptId);
+      } catch (error: any) {
+        console.log("Error reducing hearts:", error.message);
+        heartsLost = 0; // No se pudieron reducir corazones (tal vez ya no tiene)
+      }
     }
 
     return NextResponse.json({
@@ -122,9 +173,11 @@ export async function POST(request: NextRequest) {
         score,
         correctAnswers,
         totalQuestions: testAttempt.totalQuestions,
-        passed: score >= passScore,
-        experienceGained:
-          score >= passScore ? testAttempt.lesson.experiencePoints : 0
+        passed,
+        experienceGained,
+        unitCompleted,
+        unitRewards, // { zapTokens: number, unitTokens: number, totalUnitsCompleted: number }
+        heartsLost // Si falló el test
       }
     });
   } catch (error) {
