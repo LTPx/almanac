@@ -19,9 +19,11 @@ model User {
   accounts      Account[]
 
   // Educational relationships
-  userProgress UserProgress[]
-  testAttempts TestAttempt[]
-  streaks      UserStreak[]
+  userProgress       UserProgress[]
+  testAttempts       TestAttempt[]
+  streaks            UserStreak[]
+  userLessonProgress UserLessonProgress[]
+  userUnitProgress   UserUnitProgress[]
 
   // GAMIFICATION 
   hearts              Int      @default(5)
@@ -94,8 +96,9 @@ model Unit {
   userProgress UserProgress[]
 
   // GAMIFICATION - relationships
-  userUnitTokens  UserUnitToken[]
-  zapTransactions ZapTransaction[]
+  userUnitTokens   UserUnitToken[]
+  zapTransactions  ZapTransaction[]
+  UserUnitProgress UserUnitProgress[]
 
   @@map("unit")
 }
@@ -114,9 +117,10 @@ model Lesson {
   updatedAt        DateTime @updatedAt
 
   // relationships
-  questions    Question[]
-  userProgress UserProgress[]
-  TestAttempt  TestAttempt[]
+  questions          Question[]
+  userProgress       UserProgress[]
+  TestAttempt        TestAttempt[]
+  UserLessonProgress UserLessonProgress[]
 
   @@map("lesson")
 }
@@ -171,6 +175,35 @@ model UserProgress {
 
   @@unique([userId, lessonId])
   @@map("user_progress")
+}
+
+model UserLessonProgress {
+  id               Int       @id @default(autoincrement())
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  lesson           Lesson?   @relation(fields: [lessonId], references: [id])
+  lessonId         Int?
+  experiencePoints Int       @default(0)
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([userId, lessonId])
+  @@map("user_lesson_progress")
+}
+
+model UserUnitProgress {
+  id          Int       @id @default(autoincrement())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  unit        Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId      Int
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, unitId])
+  @@map("user_unit_progress")
 }
 
 model TestAttempt {
