@@ -143,7 +143,7 @@ export function TestSystem({
 
   if (state === "results" && results && currentTest) {
     return (
-      <div className="bg-gray-900 min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col">
         <TestResults
           results={results}
           lessonName={currentTest.lesson.name}
