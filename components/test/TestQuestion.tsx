@@ -29,24 +29,6 @@ export function TestQuestion({
     setHasAnswered(true);
   };
 
-  const renderCorrectAnswer = () => {
-    if (!showResult) return null;
-    let correctAnswerText =
-      question.type === "FILL_IN_BLANK"
-        ? String(question.content.correctAnswer)
-        : question.answers.find(
-            (a: { text: string; id: { toString: () => string } }) =>
-              a.text === String(question.content.correctAnswer) ||
-              a.id.toString() === String(question.content.correctAnswer)
-          )?.text || "";
-    return (
-      <p className="text-center text-sm text-gray-400">
-        Respuesta correcta:{" "}
-        <span className="font-bold text-white">{correctAnswerText}</span>
-      </p>
-    );
-  };
-
   const renderQuestionType = () => {
     switch (question.type) {
       case "MULTIPLE_CHOICE":
@@ -116,13 +98,11 @@ export function TestQuestion({
             </div>
           )}
 
-          {renderCorrectAnswer()}
-
           {!hasAnswered && question.type !== "ORDER_WORDS" && (
             <Button
               onClick={handleSubmitAnswer}
               disabled={!selected}
-              className="mt-6 w-full bg-green-500 hover:bg-green-600 text-white py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-6 w-full bg-[#1F941C] hover:bg-[#187515] text-white py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {question.type === "FILL_IN_BLANK"
                 ? "Enviar Respuesta"
@@ -133,7 +113,7 @@ export function TestQuestion({
           {hasAnswered && showResult && (
             <Button
               onClick={() => {}}
-              className="mt-6 w-full bg-green-500 hover:bg-green-600 text-white py-3 text-lg font-medium"
+              className="mt-6 w-full bg-[#1F941C] hover:bg-[#187515] text-white py-3 text-lg font-medium"
             >
               Continue
             </Button>

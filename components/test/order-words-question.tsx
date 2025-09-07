@@ -181,7 +181,7 @@ export function OrderWordsQuestion({
         <Button
           onClick={handleSubmit}
           disabled={slots.some((s) => !s)}
-          className="mt-6 w-full bg-green-500 hover:bg-green-600 text-white py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-6 w-full bg-[#1F941C] hover:bg-[#187515] text-white py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Check Answer →
         </Button>
