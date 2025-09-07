@@ -17,15 +17,17 @@ const LearningPath: React.FC<LearningPathProps> = ({ unit, userId }) => {
 
   if (activeLesson) {
     return (
-      <div className="fixed inset-0 z-100">
-        <TestSystem
-          userId={userId}
-          initialLesson={activeLesson}
-          onClose={() => {
-            setActiveLesson(null);
-            refetch();
-          }}
-        />
+      <div className="fixed inset-0 z-100 flex justify-center items-start bg-black/50 p-4">
+        <div className="w-full max-w-[650px] bg-white rounded-2xl shadow-xl overflow-hidden">
+          <TestSystem
+            userId={userId}
+            initialLesson={activeLesson}
+            onClose={() => {
+              setActiveLesson(null);
+              refetch();
+            }}
+          />
+        </div>
       </div>
     );
   }

@@ -4,6 +4,7 @@ import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "@/components/ui/sonner";
 import FooterNav from "@/components/footer-nav";
+import ClientWrapper from "@/components/client-wrapper";
 
 const notoSansKR = Noto_Sans_KR({
   weight: ["300", "400", "500", "700"],
@@ -34,8 +35,7 @@ export default function RootLayout({
       <body className={` antialiased`}>
         <NextTopLoader showSpinner={false} height={6} color="#000000" />
         <Toaster richColors position="top-right" />
-        <main className="min-h-screen">{children}</main>
-        <FooterNav />
+        <ClientWrapper>{children}</ClientWrapper>
       </body>
     </html>
   );

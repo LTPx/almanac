@@ -70,10 +70,10 @@ const FooterNav = ({
   return (
     <div
       ref={containerRef}
-      className="FooterNav block p-2 bg-white fixed top-auto bottom-0 inset-x-0 z-30 border-t border-neutral-300
+      className="w-[650px] FooterNav block p-2 bg-white fixed top-auto bottom-0 z-30 border-t border-neutral-300
         transition-transform duration-300 ease-in-out"
     >
-      <div className="w-full max-w-lg flex justify-around mx-auto text-sm text-center ">
+      <div className="w-full flex justify-around mx-auto text-sm text-center ">
         {navigationMenu.map((item, index) => {
           const active = location === item.link;
           return (
