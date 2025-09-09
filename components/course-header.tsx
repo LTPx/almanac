@@ -35,9 +35,9 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
 
   return (
     <div
-      className={`sticky top-0 z-50 bg-white border-b border-gray-200 px-4 py-4 shadow-sm ${className}`}
+      className={`w-full max-w-[650px] sticky top-0 z-50 bg-white border-b border-gray-200 px-4 py-4 shadow-sm ${className}`}
     >
-      <div className="flex items-center justify-between max-w-7xl mx-auto">
+      <div className="flex items-center justify-between mx-auto">
         <div className="w-64">
           <Select value={selectedUnitId} onValueChange={onUnitChange}>
             <SelectTrigger className="w-full text-black">

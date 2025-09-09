@@ -123,7 +123,7 @@ export function TestSystem({
     const questionAnswer = answers[currentQuestion.id];
 
     return (
-      <div className="bg-background min-h-screen flex flex-col">
+      <div className="bg-background h-[100dvh] flex flex-col">
         <HeaderBar
           onClose={onClose}
           hearts={5}

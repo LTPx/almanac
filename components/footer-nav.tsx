@@ -81,7 +81,7 @@ const FooterNav = ({
   return (
     <div
       ref={containerRef}
-      className="max-w-[650px] w-full FooterNav block p-2 bg-white fixed bottom-0 z-30 border-t border-neutral-300
+      className="w-full max-w-[650px]  FooterNav block p-2 bg-white fixed bottom-0 z-30 border-t border-neutral-300
         transition-transform duration-300 ease-in-out"
     >
       <div className="max-w-[650px] flex justify-around mx-auto text-sm text-center ">

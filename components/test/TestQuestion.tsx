@@ -77,8 +77,8 @@ export function TestQuestion({
 
   return (
     <div className="flex-1 pt-[70px]">
-      <div className="flex h-full items-center justify-center">
-        <div className="flex w-full flex-col gap-y-2 px-6 lg:min-h-[350px] lg:w-[600px] lg:px-0">
+      <div className="flex items-center justify-center">
+        <div className="flex flex-col w-full max-w-[650px] gap-y-2 px-6">
           <h1 className="mb-5 text-center text-lg font-bold text-white lg:text-start lg:text-3xl">
             {question.title}
           </h1>
