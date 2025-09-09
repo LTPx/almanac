@@ -34,10 +34,7 @@ const LearningPath: React.FC<LearningPathProps> = ({ unit, userId }) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="text-center py-6">
-        <h1 className="text-2xl font-bold text-white">{unit.name}</h1>
-      </div>
-      <div className="flex-1 px-6 pb-8">
+      <div className="flex-1 px-6 py-8">
         {isLoading ? (
           <div>Cargando progreso...</div>
         ) : (

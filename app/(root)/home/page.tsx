@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import LearningPath from "@/components/units-learning";
 import { useUser } from "@/context/UserContext";
 import { useUnits } from "@/hooks/use-units";
-import { SelectUnits } from "@/components/select-units";
 import { Unit } from "@/lib/types";
+import CourseHeader from "@/components/course-header";
 
 export default function HomePage() {
   const [units, setUnits] = useState<Unit[]>([]);
@@ -39,11 +39,11 @@ export default function HomePage() {
   }, [selectedUnitId]);
 
   return (
-    <div className="HomePage p-6">
-      <SelectUnits
+    <div className="HomePage">
+      <CourseHeader
         units={units}
         selectedUnitId={selectedUnitId}
-        onChange={setSelectedUnitId}
+        onUnitChange={setSelectedUnitId}
       />
       {isLoading && <div>Cargando...</div>}
       {error && <div className="text-red-500">{error}</div>}
