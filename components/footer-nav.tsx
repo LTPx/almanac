@@ -81,10 +81,10 @@ const FooterNav = ({
   return (
     <div
       ref={containerRef}
-      className="w-[650px] FooterNav block p-2 bg-white fixed top-auto bottom-0 z-30 border-t border-neutral-300
+      className="max-w-[650px] w-full FooterNav block p-2 bg-white fixed bottom-0 z-30 border-t border-neutral-300
         transition-transform duration-300 ease-in-out"
     >
-      <div className="w-full flex justify-around mx-auto text-sm text-center ">
+      <div className="max-w-[650px] flex justify-around mx-auto text-sm text-center ">
         {navigationMenu.map((item, index) => {
           const active = location === item.link;
           let IconComponent: React.ComponentType<any> = item.icon!;
