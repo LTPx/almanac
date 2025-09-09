@@ -3,9 +3,9 @@ import prisma from "@/lib/prisma";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) {
-  const { userId } = params;
+  const { userId } = await context.params;
 
   try {
     const nfts = await prisma.educationalNFT.findMany({

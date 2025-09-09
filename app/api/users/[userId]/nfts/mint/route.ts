@@ -4,16 +4,16 @@ import prisma from "@/lib/prisma";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) {
-  const { userId } = params;
+  const { userId } = await context.params;
 
   try {
-    const { userUnitTokenId } = await request.json();
+    const { unitId } = await request.json();
 
-    if (!userUnitTokenId || !userId) {
+    if (!unitId || !userId) {
       return NextResponse.json(
-        { error: "userUnitTokenId, userId are required" },
+        { error: "unitId, userId are required" },
         { status: 400 }
       );
     }
@@ -30,13 +30,18 @@ export async function POST(
 
     const unitToken = await prisma.userUnitToken.findUnique({
       where: {
-        id: userUnitTokenId,
-        userId
+        userId_unitId: {
+          userId,
+          unitId: parseInt(unitId)
+        }
       },
       include: {
         unit: true
       }
     });
+
+    console.log("userId: ", userId);
+    console.log("unitId: ", parseInt(unitId));
 
     if (!unitToken) {
       return NextResponse.json(
