@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 
 export default function PremiumCard() {
   return (
-    <Card className="bg-gradient-to-br from-blue-500 via-blue-600 to-green-500 border-none text-white overflow-hidden relative">
+    <Card className="bg-gradient-to-b from-[#1881F0] to-[#1F960D] border-none text-white overflow-hidden relative">
       <CardContent className="p-6">
         <div className="flex justify-between items-start">
           <div className="space-y-4">

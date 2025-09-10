@@ -1,15 +1,23 @@
+"use client";
+
 import React from "react";
 import { ArrowLeft, Zap } from "lucide-react";
+import { useRouter } from "next/navigation";
 import PremiumCard from "@/components/premium-card";
 import SpecialOfferCard from "@/components/offert-card";
 import ZapCard from "@/components/zap-card";
 
 export default function Store() {
+  const router = useRouter();
+
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen text-white">
       <div className="flex items-center justify-between p-4 border-b border-gray-800">
         <div className="flex items-center gap-3">
-          <ArrowLeft className="w-6 h-6 text-gray-400" />
+          <ArrowLeft
+            onClick={() => router.back()}
+            className="w-6 h-6 text-gray-400 cursor-pointer hover:text-gray-200"
+          />{" "}
           <h1 className="text-xl font-semibold">Tienda</h1>
         </div>
         <div className="flex items-center gap-2">
@@ -19,14 +27,10 @@ export default function Store() {
       </div>{" "}
       <div className="p-4 space-y-6">
         <PremiumCard />
-
-        {/* Ofertas especiales */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Ofertas especiales</h3>
           <SpecialOfferCard />
         </div>
-
-        {/* Zaps */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Zaps</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

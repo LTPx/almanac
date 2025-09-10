@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Star, Zap, Heart } from "lucide-react";
+import Link from "next/link";
 import {
   Select,
   SelectContent,
@@ -50,9 +51,6 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
                 <SelectItem key={unit.id} value={unit.id.toString()}>
                   <div className="flex items-center justify-between w-full">
                     <span>{unit.name}</span>
-                    {/* <Badge variant="secondary" className="ml-2">
-                      {unit._count.lessons} lecciones
-                    </Badge> */}
                   </div>
                 </SelectItem>
               ))}
@@ -68,8 +66,12 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
             </span>
           </div> */}
           <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-purple-50">
-            <Zap className="w-5 h-5 text-purple-500 fill-current" />
-            <span className="text-sm font-medium text-purple-600">{zaps}</span>
+            <Link href="/store" className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-purple-500 fill-current" />
+              <span className="text-sm font-medium text-purple-600">
+                {zaps}
+              </span>
+            </Link>
           </div>
           <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-red-50">
             <Heart className="w-5 h-5 text-red-500 fill-current" />
