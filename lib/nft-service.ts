@@ -1,118 +1,181 @@
-// import { ThirdwebSDK } from "@thirdweb-dev/sdk";
-// import { PolygonAmoyTestnet } from "@thirdweb-dev/chains";
-// import prisma from "./prisma";
+import { createThirdwebClient, getContract, sendTransaction } from "thirdweb";
+import { mintTo, tokenURI } from "thirdweb/extensions/erc721";
+import { privateKeyToAccount } from "thirdweb/wallets";
+import { polygonAmoy } from "thirdweb/chains";
+import { getRpcClient, eth_getTransactionReceipt } from "thirdweb/rpc";
 
-// // Configuración del SDK
-// const sdk = ThirdwebSDK.fromPrivateKey(
-//   process.env.ADMIN_PRIVATE_KEY!, // Wallet admin para pagar gas
-//   PolygonAmoyTestnet,
-//   {
-//     clientId: process.env.THIRDWEB_CLIENT_ID!
-//   }
-// );
+const ADMIN_PRIVATE_KEY = process.env.ADMIN_WALLET_PRIVATE_KEY;
+const THIRDWEB_SECRET_KEY = process.env.THIRDWEB_SECRET_KEY;
+const CONTRACT_ADDRESS = process.env.THIRDWEB_CONTRACT_ADDRESS!;
 
-// interface MintNFTParams {
-//   userAddress: string;
-//   unitName: string;
-//   courseName: string;
-//   userId: string;
-//   unitId: string;
-//   userLevel?: number;
-// }
+if (!ADMIN_PRIVATE_KEY)
+  throw new Error("Falta ADMIN_WALLET_PRIVATE_KEY en env");
+if (!THIRDWEB_SECRET_KEY) throw new Error("Falta THIRDWEB_SECRET_KEY en env");
 
-// export async function mintEducationalNFT(params: MintNFTParams) {
-//   const {
-//     userAddress,
-//     unitName,
-//     courseName,
-//     userId,
-//     unitId,
-//     userLevel = 1
-//   } = params;
+/** Evento Transfer topic (ERC-721 estándar) */
+const TRANSFER_TOPIC =
+  "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
-//   try {
-//     console.log(`🎓 Minting NFT for unit: ${unitName}`);
+/** Inicializar thirdweb client + account admin */
+const client = createThirdwebClient({ secretKey: THIRDWEB_SECRET_KEY });
+const account = privateKeyToAccount({ client, privateKey: ADMIN_PRIVATE_KEY });
+const contract = getContract({
+  client,
+  chain: polygonAmoy,
+  address: CONTRACT_ADDRESS
+});
 
-//     // Obtener el contrato
-//     const contract = await sdk.getContract(
-//       process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!
-//     );
+export interface NFTMetadata {
+  name: string;
+  description: string;
+  image: string;
+  attributes: Array<{
+    trait_type: string;
+    value: string;
+  }>;
+}
 
-//     // Metadata del NFT
-//     const metadata = {
-//       name: `${courseName} - ${unitName}`,
-//       description: `Certificado de completitud para la unidad "${unitName}" del curso "${courseName}"`,
-//       image: await generateCertificateImage({
-//         courseName,
-//         unitName,
-//         userLevel,
-//         completedAt: new Date().toLocaleDateString("es-ES")
-//       }),
-//       attributes: [
-//         {
-//           trait_type: "Course",
-//           value: courseName
-//         },
-//         {
-//           trait_type: "Unit",
-//           value: unitName
-//         },
-//         {
-//           trait_type: "Level",
-//           value: userLevel
-//         },
-//         {
-//           trait_type: "Completed Date",
-//           value: new Date().toISOString().split("T")[0]
-//         },
-//         {
-//           trait_type: "Type",
-//           value: "Educational Certificate"
-//         }
-//       ]
-//     };
+export interface MintResult {
+  tokenId: string | null;
+  transactionHash: string;
+  metadataUri: string | null;
+  explorerUrl: string | null;
+}
 
-//     // Mintear NFT
-//     const tx = await contract.erc721.mintTo(userAddress, metadata);
-//     console.log(`✅ NFT minted! Transaction: ${tx.receipt.transactionHash}`);
+/**
+ * Crea los metadatos para el NFT del certificado educativo
+ */
+export function createNFTMetadata(
+  courseName: string,
+  unitName: string
+): NFTMetadata {
+  return {
+    name: `${courseName} - ${unitName}`,
+    description: `Certificado de completitud para la unidad "${unitName}" del curso "${courseName}"`,
+    image:
+      "https://gateway.pinata.cloud/ipfs/bafybeia25ohj632vt35cl242hrqtubxjmqsbgwyrhydjkdeigtxt7thbye",
+    attributes: [
+      { trait_type: "Course", value: courseName },
+      { trait_type: "Unit", value: unitName },
+      {
+        trait_type: "Completed Date",
+        value: new Date().toISOString().split("T")[0]
+      },
+      { trait_type: "Type", value: "Educational Certificate" }
+    ]
+  };
+}
 
-//     // Guardar en base de datos
-//     const nftRecord = await prisma.educationalNFT.create({
-//       data: {
-//         tokenId: tx.id.toString(),
-//         userId,
-//         unitId,
-//         contractAddress: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!,
-//         transactionHash: tx.receipt.transactionHash,
-//         metadataUri: `ipfs://${tx.receipt.logs[0]?.topics[0] || "pending"}`
-//       }
-//     });
+/**
+ * Espera a que la transacción sea confirmada y retorna el receipt
+ */
+async function waitForReceipt(
+  rpcRequest: any,
+  hash: `0x${string}`,
+  maxRetries = 20,
+  delayMs = 3000
+) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const receipt = await eth_getTransactionReceipt(rpcRequest, { hash });
+      if (receipt) return receipt;
+    } catch (err: any) {
+      if (err.message?.includes("not found")) {
+        console.log(
+          `Receipt aún no disponible (intento ${i + 1}/${maxRetries})`
+        );
+      } else {
+        throw err;
+      }
+    }
+    await new Promise((r) => setTimeout(r, delayMs));
+  }
+  throw new Error("Transaction receipt not found after waiting");
+}
 
-//     return {
-//       tokenId: tx.id.toString(),
-//       transactionHash: tx.receipt.transactionHash,
-//       nftRecord
-//     };
-//   } catch (error) {
-//     console.error("❌ Error minting NFT:", error);
-//     throw error;
-//   }
-// }
+/**
+ * Extrae el tokenId de los logs de la transacción
+ */
+function extractTokenIdFromLogs(
+  logs: any[],
+  walletAddress: string
+): string | null {
+  const paddedTo =
+    "0x" + walletAddress.toLowerCase().replace(/^0x/, "").padStart(64, "0");
 
-// // Función para generar imagen del certificado
-// async function generateCertificateImage(params: {
-//   courseName: string;
-//   unitName: string;
-//   userLevel: number;
-//   completedAt: string;
-// }): Promise<string> {
-//   const defaultImages = {
-//     1: "https://gateway.pinata.cloud/ipfs/bafybeibc25ly62n6bt76lxnmd3ql2tm7baefmymycd3jkw3jeq7xp5xccq",
-//     2: "https://gateway.pinata.cloud/ipfs/bafybeia25ohj632vt35cl242hrqtubxjmqsbgwyrhydjkdeigtxt7thbye",
-//     3: "https://gateway.pinata.cloud/ipfs/bafybeibc25ly62n6bt76lxnmd3ql2tm7baefmymycd3jkw3jeq7xp5xccq"
-//   };
-//   return (
-//     defaultImages[params.userLevel as keyof typeof defaultImages] ||
-//     defaultImages[1]
-//   );
-// }
+  for (const log of logs) {
+    if (log.address.toLowerCase() !== CONTRACT_ADDRESS.toLowerCase()) continue;
+    if ((log.topics?.[0] ?? "").toLowerCase() !== TRANSFER_TOPIC) continue;
+
+    const topicTo = (log.topics?.[2] ?? "").toLowerCase();
+    if (topicTo === paddedTo) {
+      const rawId = log.topics?.[3];
+      if (rawId) {
+        return BigInt(rawId).toString();
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Genera la URL del explorador para el NFT
+ */
+function generateExplorerUrl(tokenId: string | null): string | null {
+  return tokenId
+    ? `https://amoy.polygonscan.com/token/${CONTRACT_ADDRESS}?a=${tokenId}`
+    : null;
+}
+
+/**
+ * Obtiene el URI de metadatos del token
+ */
+async function getTokenMetadataUri(tokenId: string): Promise<string | null> {
+  try {
+    return await tokenURI({ contract, tokenId: BigInt(tokenId) });
+  } catch (err) {
+    console.error("Error fetching tokenURI:", err);
+    return null;
+  }
+}
+
+/**
+ * Mintea un NFT educativo para el usuario especificado
+ */
+export async function mintEducationalNFT(
+  walletAddress: string,
+  metadata: NFTMetadata
+): Promise<MintResult> {
+  // 1) Crear y enviar transacción
+  const transaction = mintTo({
+    contract,
+    to: walletAddress,
+    //@ts-ignore
+    nft: metadata
+  });
+
+  const { transactionHash } = await sendTransaction({ account, transaction });
+  if (!transactionHash) {
+    throw new Error("No se obtuvo transactionHash");
+  }
+
+  // 2) Esperar por el receipt
+  const rpcRequest = getRpcClient({ client, chain: polygonAmoy });
+  const receipt = await waitForReceipt(rpcRequest, transactionHash);
+
+  // 3) Extraer tokenId de los logs
+  const tokenId = extractTokenIdFromLogs(receipt.logs, walletAddress);
+
+  // 4) Obtener metadataUri si tenemos tokenId
+  const metadataUri = tokenId ? await getTokenMetadataUri(tokenId) : null;
+
+  // 5) Generar URL del explorador
+  const explorerUrl = generateExplorerUrl(tokenId);
+
+  return {
+    tokenId,
+    transactionHash,
+    metadataUri,
+    explorerUrl
+  };
+}
