@@ -1,6 +1,7 @@
 import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
 
 export default function ProfileHeader({
   avatar,
@@ -12,13 +13,12 @@ export default function ProfileHeader({
   return (
     <>
       <div className="flex justify-end mb-8">
-        {/* <Button
-          variant="ghost"
-          // size="icon"
-          className="text-white hover:bg-white/10 h-12 w-12"
-        > */}
-        <Settings className="h-8 w-8" />
-        {/* </Button> */}
+        <Link
+          href="/profile/settings"
+          className="text-white hover:bg-white/10 h-12 w-12 flex items-center justify-center rounded-full"
+        >
+          <Settings className="h-8 w-8" />
+        </Link>
       </div>
 
       <div className="flex justify-center mb-6">

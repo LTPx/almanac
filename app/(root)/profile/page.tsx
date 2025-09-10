@@ -1,12 +1,17 @@
+"use client";
+
 import ProfileHeader from "@/components/profile-header";
 import ProfileInfo from "@/components/profile-info";
 import StatsGrid from "@/components/stats-grid";
 import AchievementsProfile from "@/components/achievements-profile";
+import { useUser } from "@/context/UserContext";
 
-async function Profile() {
+export default function Profile() {
+  const user = useUser();
+
   const userData = {
-    name: "Carlos Huerta",
-    username: "@carloshuerta",
+    name: user?.name || "",
+    username: "",
     joinDate: "Enero 2025",
     avatar: "",
     stats: {
@@ -30,5 +35,3 @@ async function Profile() {
     </div>
   );
 }
-
-export default Profile;
