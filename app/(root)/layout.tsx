@@ -18,7 +18,7 @@ export default async function HomeLayout({
   return (
     <UserProvider user={user}>
       <div className="relative">
-        {/* <Navbar /> */}
+        <Navbar />
         <main>{children}</main>
         <FooterNav />
         {/* <Footer /> */}

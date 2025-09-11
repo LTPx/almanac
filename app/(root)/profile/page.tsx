@@ -11,9 +11,9 @@ export default function Profile() {
 
   const userData = {
     name: user?.name || "",
-    username: "",
+    username: user?.email,
     joinDate: "Enero 2025",
-    avatar: "",
+    avatar: user?.image || "",
     stats: {
       streak: 3,
       xp: 5200,
