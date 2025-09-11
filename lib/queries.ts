@@ -86,37 +86,6 @@ export const getUserProgressByUnit = cache(
   }
 );
 
-// export const getUserProgressByUnit = cache(
-//   async (userId: string, unitId: number) => {
-//     if (!userId) return null;
-//     const data = await prisma.userProgress.findUnique({
-//       where: {
-//         userId_unitId: {
-//           userId,
-//           unitId
-//         }
-//       },
-//       include: {
-//         unit: {
-//           include: {
-//             lessons: {
-//               include: {
-//                 _count: {
-//                   select: {
-//                     questions: true
-//                   }
-//                 }
-//               },
-//               orderBy: { position: "asc" }
-//             }
-//           }
-//         }
-//       }
-//     });
-//     return data;
-//   }
-// );
-
 export const getUserProgressByLesson = cache(
   async (userId: string, lessonId: number) => {
     if (!userId) return null;
