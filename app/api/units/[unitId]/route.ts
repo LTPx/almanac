@@ -1,19 +1,22 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function GET(
-  request: Request,
-  { params }: { params: { unitId: string } }
+  request: NextRequest,
+  context: { params: Promise<{ unitId: string }> }
 ) {
+  const { unitId } = await context.params;
+
   try {
-    const unitId = parseInt(params.unitId);
-    if (isNaN(unitId)) {
+    const id = parseInt(unitId);
+
+    if (isNaN(id)) {
       return NextResponse.json({ error: "Invalid unit ID" }, { status: 400 });
     }
 
     const unit = await prisma.unit.findUnique({
       where: {
-        id: unitId,
+        id: id,
         isActive: true
       },
       include: {
@@ -53,12 +56,14 @@ export async function GET(
 }
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { unitId: string } }
+  request: NextRequest,
+  context: { params: Promise<{ unitId: string }> }
 ) {
+  const { unitId } = await context.params;
+
   try {
-    const unitId = parseInt(params.unitId);
-    if (isNaN(unitId)) {
+    const id = parseInt(unitId);
+    if (isNaN(id)) {
       return NextResponse.json({ error: "Invalid unit ID" }, { status: 400 });
     }
 
@@ -66,7 +71,7 @@ export async function PUT(
     const { name, description, order, isActive } = body;
 
     const unit = await prisma.unit.update({
-      where: { id: unitId },
+      where: { id },
       data: {
         ...(name && { name }),
         ...(description !== undefined && { description }),

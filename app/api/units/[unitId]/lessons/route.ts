@@ -1,17 +1,19 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getLessonsByUnitId } from "@/lib/queries";
 
 export async function GET(
-  request: Request,
-  { params }: { params: { unitId: string } }
+  request: NextRequest,
+  context: { params: Promise<{ unitId: string }> }
 ) {
+  const { unitId } = await context.params;
+
   try {
-    const unitId = parseInt(params.unitId);
-    if (isNaN(unitId)) {
+    const id = parseInt(unitId);
+    if (isNaN(id)) {
       return NextResponse.json({ error: "Invalid unit ID" }, { status: 400 });
     }
 
-    const lessons = await getLessonsByUnitId(unitId);
+    const lessons = await getLessonsByUnitId(id);
     return NextResponse.json(lessons);
   } catch (error) {
     console.error("Error fetching lessons:", error);

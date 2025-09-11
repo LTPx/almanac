@@ -1,16 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getLessonsByUnitId } from "@/lib/queries";
 import prisma from "@/lib/prisma";
 
 export async function POST(
-  request: Request,
-  { params }: { params: { unitId: string } }
+  request: NextRequest,
+  context: { params: Promise<{ unitId: string }> }
 ) {
+  const { unitId } = await context.params;
+
   try {
-    const unitId = parseInt(params.unitId);
+    const id = parseInt(unitId);
     const lessonsOrder = await request.json();
 
-    if (isNaN(unitId)) {
+    if (isNaN(id)) {
       return NextResponse.json({ error: "Invalid unit ID" }, { status: 400 });
     }
 
@@ -22,7 +24,7 @@ export async function POST(
     }
 
     // Obtener todas las lessons de la unidad
-    const lessons = await getLessonsByUnitId(unitId);
+    const lessons = await getLessonsByUnitId(id);
 
     // Crear un map para acceso rápido
     const orderMap = new Map<number, number>(); // lessonId -> position

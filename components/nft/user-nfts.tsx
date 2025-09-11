@@ -183,7 +183,7 @@ const UserNFTs: React.FC<UserNFTsProps> = ({ userId, useThirdweb = false }) => {
           </p>
         </div>
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
+          {/* <div className="flex items-center space-x-2">
             <Switch
               id="thirdweb-mode"
               checked={isThirdwebEnabled}
@@ -192,7 +192,7 @@ const UserNFTs: React.FC<UserNFTsProps> = ({ userId, useThirdweb = false }) => {
             <Label htmlFor="thirdweb-mode" className="text-sm">
               Usar Thirdweb
             </Label>
-          </div>
+          </div> */}
           <Button
             variant="outline"
             size="sm"

@@ -1,10 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getUserProgressByUnit } from "@/lib/queries";
 
 export async function GET(
-  request: Request,
-  { params }: { params: { userId: string } }
+  request: NextRequest,
+  context: { params: Promise<{ userId: string }> }
 ) {
+  const { userId } = await context.params;
+
   try {
     const { searchParams } = new URL(request.url);
     const unitId = searchParams.get("unitId");
@@ -21,7 +23,7 @@ export async function GET(
       return NextResponse.json({ error: "Invalid unit ID" }, { status: 400 });
     }
 
-    const progress = await getUserProgressByUnit(params.userId, unitIdInt);
+    const progress = await getUserProgressByUnit(userId, unitIdInt);
     return NextResponse.json(progress);
   } catch (error) {
     console.error("Error fetching user progress:", error);

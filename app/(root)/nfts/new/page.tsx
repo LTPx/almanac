@@ -16,7 +16,7 @@ interface CompletedUnit {
   unitName: string;
   courseName: string;
   completedAt: string;
-  hasNFT: boolean; // Si ya tiene NFT para esta unidad
+  hasNFT: boolean;
 }
 
 export default function CreateCertificatePage() {

@@ -1,6 +1,5 @@
 "use client";
 
-import UserCertificates from "@/components/nft/user-certificates";
 import { useUser } from "@/context/UserContext";
 
 async function Achievements() {
@@ -12,9 +11,7 @@ async function Achievements() {
   }
   return (
     <div className="AchievementPage">
-      <div>
-        <UserCertificates userId={userId} />
-      </div>
+      <div></div>
     </div>
   );
 }

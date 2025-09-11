@@ -15,7 +15,7 @@ if (typeof window !== "undefined") {
 const NAV = [
   { name: "Home", link: "/home", icon: Home },
   { name: "Contents", link: "/contents", icon: BookOpen },
-  { name: "Achievements", link: "/achievements", icon: Medal },
+  { name: "Nfts", link: "/nfts", icon: Medal },
   { name: "Profile", link: "/profile", icon: User }
 ];
 
