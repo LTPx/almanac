@@ -24,7 +24,7 @@ export function TestResults({
   const { width, height } = useWindowSize();
 
   return (
-    <div className="bg-gray-900 min-h-screen p-6 flex items-center justify-center">
+    <div className="bg-background min-h-screen p-6 flex items-center justify-center">
       {isPassed && (
         <Confetti
           recycle={false}
@@ -34,7 +34,7 @@ export function TestResults({
           height={height}
         />
       )}
-      <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full text-center">
+      <div className="rounded-lg p-8 max-w-md w-full text-center">
         <div className="mb-6">
           {isPassed ? (
             <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">

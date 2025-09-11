@@ -33,9 +33,9 @@ export function MultipleChoiceQuestion({
             disabled={hasAnswered}
             className={`
               w-full p-4 text-left rounded-lg border-2 transition-all
-              ${isSelected && !showResult ? "bg-[#708BB1] border-[#708BB1] text-white" : ""}
-              ${!isSelected && !showResult ? "bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500" : ""}
-              ${shouldShowCorrect ? "bg-green-500 border-green-500 text-white" : ""}
+              ${isSelected && !showResult ? "bg-[#1983DD] border-[#1983DD] text-white" : ""}
+              ${!isSelected && !showResult ? "text-gray-300 hover:border-[#1983DD]" : ""}
+              ${shouldShowCorrect ? "bg-[1F941C] border-1F941C text-white" : ""}
               ${shouldShowIncorrect ? "bg-red-500 border-red-500 text-white" : ""}
               ${hasAnswered ? "cursor-not-allowed" : "cursor-pointer"}
             `}

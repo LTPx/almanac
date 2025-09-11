@@ -4,7 +4,8 @@ import * as React from "react";
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger
+  PopoverTrigger,
+  PopoverArrow
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 
@@ -22,23 +23,24 @@ export function StepPopover({
   message = "",
   buttonText,
   onButtonClick,
-  className = "bg-[#7BBD83] text-white p-4",
+  className = "bg-[#1F941C] text-white p-4",
   children
 }: StepPopoverProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className={`${className} rounded-md`}>
+      <PopoverContent className={`${className} rounded-md relative`}>
         {title && <h3 className="font-bold">{title}</h3>}
         {message && <p className="mt-2">{message}</p>}
         {buttonText && onButtonClick && (
           <Button
-            className="bg-white focus-visible:ring-0 hover:bg-white/90 mt-3 text-[#7BBD83]"
+            className="text-[15px] font-bold bg-white h-[60px] w-full focus-visible:ring-0 hover:bg-white/90 mt-3 text-[#1F941C]"
             onClick={onButtonClick}
           >
             {buttonText}
           </Button>
         )}
+        <PopoverArrow className="fill-[#1F941C] w-4 h-4" />
       </PopoverContent>
     </Popover>
   );

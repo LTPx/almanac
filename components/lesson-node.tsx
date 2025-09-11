@@ -30,7 +30,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
     >
       <div
         className={`
-    w-16 h-16 flex items-center justify-center
+    w-full h-16 flex items-center justify-center
     transition-all duration-200 relative
     ${state === "completed" ? "bg-[#5EC16A] border-[#5EC16A] shadow-lg" : ""}
     ${state === "available" ? "bg-gray-600 border-gray-500 hover:border-white" : ""}
