@@ -1,39 +1,82 @@
+"use client";
+
 import { CardNFT } from "@/components/car-nft";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { useNFTs } from "@/hooks/useNfts";
+import { useUser } from "@/context/UserContext";
 
-async function Achievements() {
-  const medals = [
-    {
-      id: 1,
-      name: "Algebra 3",
-      year: "2025",
-      image: "/api/placeholder/120/120"
-    },
-    {
-      id: 2,
-      name: "Algebra 2",
-      year: "2024",
-      image: "/api/placeholder/120/120"
-    },
-    {
-      id: 3,
-      name: "Curso",
-      year: "2025",
-      image: "/api/placeholder/120/120"
-    }
-  ];
+function Achievements() {
+  const user = useUser();
+  const userId = user?.id;
+
+  if (!userId) {
+    return <div>Login...</div>;
+  }
+  const { nfts, loading, error, refetch } = useNFTs(userId);
 
   return (
-    <div className="AchievementPage min-h-screen">
-      <h4 className="text-[30px] pt-[20px]">Medallas</h4>
-      <div className="px-4 pt-6">
+    <div className="AchievementPage min-h-screen px-4">
+      <div className="flex items-center justify-between pt-[20px]">
+        <h4 className="text-[30px] font-bold">Medallas</h4>
+        <div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={refetch}
+            disabled={loading}
+            className="w-full"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            Actualizar
+          </Button>
+        </div>
+      </div>
+
+      <div className="pt-6">
+        {loading && (
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-40 w-full rounded-lg" />
+            ))}
+          </div>
+        )}
+
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {error}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={refetch}
+                className="ml-3"
+              >
+                Reintentar
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {!loading && !error && nfts.length === 0 && (
+          <p className="text-gray-400 mb-6">
+            Aún no tienes medallas (NFTs). Completa cursos para obtenerlas 🎖️
+          </p>
+        )}
+
         <div className="grid grid-cols-2 gap-4 mb-8">
-          {medals.map((medal) => (
-            <CardNFT key={medal.id} image={medal.image} title={medal.name} />
+          {nfts.map((nft) => (
+            <CardNFT
+              key={nft.id}
+              image={nft.metadata?.image || "/api/placeholder/120/120"}
+              title={nft.metadata?.name || `Certificado #${nft.tokenId}`}
+              description={nft.metadata?.description}
+            />
           ))}
         </div>
-
         <Button className="w-full h-[60px] bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 text-base font-medium rounded-lg mb-8">
           Crear Nueva Medalla (NFT)
         </Button>
