@@ -9,7 +9,9 @@ export async function GET(
 
   try {
     const unitTokens = await prisma.userUnitToken.findMany({
-      where: {},
+      where: {
+        userId
+      },
       include: {
         unit: true
       }
