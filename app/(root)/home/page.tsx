@@ -58,7 +58,11 @@ export default function HomePage() {
       {error && <div className="text-red-500">{error}</div>}
       {!isLoading && selectedUnit && (
         <div className="h-full">
-          <LearningPath unit={selectedUnit} userId={userId} />
+          <LearningPath
+            hearts={gamification?.hearts ?? 0}
+            unit={selectedUnit}
+            userId={userId}
+          />
         </div>
       )}
       {!isLoading && !selectedUnit && <div>No se encontraron datos</div>}

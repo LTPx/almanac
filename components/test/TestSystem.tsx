@@ -16,6 +16,7 @@ interface TestSystemProps {
   userId: string;
   initialLesson: Lesson;
   onClose: () => void;
+  hearts: number;
 }
 
 type TestState = "testing" | "results";
@@ -23,7 +24,8 @@ type TestState = "testing" | "results";
 export function TestSystem({
   userId,
   initialLesson,
-  onClose
+  onClose,
+  hearts
 }: TestSystemProps) {
   const [state, setState] = useState<TestState>("testing");
   const [currentTest, setCurrentTest] = useState<TestData | null>(null);
@@ -126,7 +128,7 @@ export function TestSystem({
       <div className="bg-background h-[100dvh] flex flex-col">
         <HeaderBar
           onClose={onClose}
-          hearts={5}
+          hearts={hearts}
           percentage={progress}
           hasActiveSubscription={false}
         />

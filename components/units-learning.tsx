@@ -9,9 +9,14 @@ import { useProgress } from "@/hooks/useProgress";
 type LearningPathProps = {
   unit: Unit;
   userId: string;
+  hearts: number;
 };
 
-const LearningPath: React.FC<LearningPathProps> = ({ unit, userId }) => {
+const LearningPath: React.FC<LearningPathProps> = ({
+  unit,
+  userId,
+  hearts
+}) => {
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
   const { progress, isLoading, refetch } = useProgress(userId, unit.id);
 
@@ -20,6 +25,7 @@ const LearningPath: React.FC<LearningPathProps> = ({ unit, userId }) => {
       <div className="fixed inset-0 z-100 flex justify-center items-start bg-black/50">
         <div className="w-full max-w-[650px] bg-white shadow-xl overflow-hidden">
           <TestSystem
+            hearts={hearts || 0}
             userId={userId}
             initialLesson={activeLesson}
             onClose={() => {
