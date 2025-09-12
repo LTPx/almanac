@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Star, Zap, Heart } from "lucide-react";
+import { Zap, Heart } from "lucide-react";
 import Link from "next/link";
 import {
   Select,
@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Unit } from "@/lib/types";
 
 interface CourseHeaderProps {
@@ -27,9 +26,9 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
   units,
   selectedUnitId,
   onUnitChange,
-  streakDays = 5,
-  zaps = 120,
-  lives = 4,
+  streakDays,
+  zaps,
+  lives,
   className = ""
 }) => {
   const selectedUnit = units.find((u) => u.id.toString() === selectedUnitId);

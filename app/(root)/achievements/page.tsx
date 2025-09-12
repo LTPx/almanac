@@ -18,7 +18,7 @@ function Achievements() {
   const { nfts, loading, error, refetch } = useNFTs(userId);
 
   return (
-    <div className="AchievementPage min-h-screen px-4">
+    <div className="AchievementPage px-4 h-[70dvh]">
       <div className="flex items-center justify-between pt-[20px]">
         <h4 className="text-[30px] font-bold">Medallas</h4>
         <div>
@@ -35,7 +35,7 @@ function Achievements() {
         </div>
       </div>
 
-      <div className="pt-6">
+      <div className="h-full pt-6 flex flex-col justify-between">
         {loading && (
           <div className="grid grid-cols-2 gap-4 mb-8">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -68,16 +68,17 @@ function Achievements() {
         )}
 
         <div className="grid grid-cols-2 gap-4 mb-8">
-          {nfts.map((nft) => (
-            <CardNFT
-              key={nft.id}
-              image={nft.metadata?.image || "/api/placeholder/120/120"}
-              title={nft.metadata?.name || `Certificado #${nft.tokenId}`}
-              description={nft.metadata?.description}
-            />
-          ))}
+          {!loading &&
+            nfts.map((nft) => (
+              <CardNFT
+                key={nft.id}
+                image={nft.metadata?.image || ""}
+                title={nft.metadata?.name || `Certificado #${nft.tokenId}`}
+                description={nft.metadata?.description}
+              />
+            ))}
         </div>
-        <Button className="w-full h-[60px] bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 text-base font-medium rounded-lg mb-8">
+        <Button className="w-full h-[50px] bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 text-base font-medium rounded-lg mb-8">
           Crear Nueva Medalla (NFT)
         </Button>
       </div>

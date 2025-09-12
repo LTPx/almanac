@@ -6,6 +6,7 @@ import { useUser } from "@/context/UserContext";
 import { useUnits } from "@/hooks/use-units";
 import { Unit } from "@/lib/types";
 import CourseHeader from "@/components/course-header";
+import { useGamification } from "@/hooks/useGamification";
 
 export default function HomePage() {
   const [units, setUnits] = useState<Unit[]>([]);
@@ -14,6 +15,12 @@ export default function HomePage() {
   const user = useUser();
   const userId = user?.id || "";
   const { isLoading, error, fetchUnits, fetchUnitWithLessons } = useUnits();
+  const {
+    gamification,
+    isLoading: gamificationLoading,
+    error: gamificationError,
+    refetch
+  } = useGamification(userId);
 
   useEffect(() => {
     const loadUnits = async () => {
@@ -44,6 +51,8 @@ export default function HomePage() {
         units={units}
         selectedUnitId={selectedUnitId}
         onUnitChange={setSelectedUnitId}
+        lives={gamification?.hearts ?? 0}
+        zaps={gamification?.zapTokens ?? 0}
       />
       {isLoading && <div>Cargando...</div>}
       {error && <div className="text-red-500">{error}</div>}
