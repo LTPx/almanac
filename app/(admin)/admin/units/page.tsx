@@ -1,292 +1,234 @@
+// app/admin/units/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, BookOpen } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-// import { useToast } from '@/hooks/use-toast';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  BookOpen,
+  Users,
+  MoreHorizontal,
+  Eye,
+  ToggleLeft,
+  ToggleRight
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from "@/components/ui/alert-dialog";
 
-type Unit = {
-  id: number;
-  name: string;
-  description: string | null;
-  order: number;
-  isActive: boolean;
-  _count: {
-    lessons: number;
-  };
-};
-
-export default function UnitsAdminPage() {
-  const [units, setUnits] = useState<Unit[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingUnit, setEditingUnit] = useState<Unit | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    order: 1
-  });
-  // const { toast } = useToast();
-
-  // Fetch units
-  const fetchUnits = async () => {
-    try {
-      const response = await fetch("/api/units");
-      if (!response.ok) throw new Error("Failed to fetch");
-      const data = await response.json();
-      setUnits(data);
-    } catch (error) {
-      // toast({
-      //   title: "Error",
-      //   description: "No se pudieron cargar las unidades",
-      //   variant: "destructive",
-      // });
-      toast.error("No se pudieron cargar las unidades");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUnits();
-  }, []);
-
-  // Handle form submit
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const url = editingUnit ? `/api/units/${editingUnit.id}` : "/api/units";
-      const method = editingUnit ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      });
-
-      if (!response.ok) throw new Error("Failed to save");
-
-      // toast({
-      //   title: "Éxito",
-      //   description: `Unidad ${editingUnit ? 'actualizada' : 'creada'} correctamente`,
-      // });
-      toast.success(
-        `Unidad ${editingUnit ? "actualizada" : "creada"} correctamente`
-      );
-
-      setDialogOpen(false);
-      setEditingUnit(null);
-      setFormData({ name: "", description: "", order: 1 });
-      fetchUnits();
-    } catch (error) {
-      toast.error("No se pudo guardar la unidad");
-
-      // toast({
-      //   title: "Error",
-      //   description: "No se pudo guardar la unidad",
-      //   variant: "destructive",
-      // });
-    }
-  };
-
-  // Handle edit
-  const handleEdit = (unit: Unit) => {
-    setEditingUnit(unit);
-    setFormData({
-      name: unit.name,
-      description: unit.description || "",
-      order: unit.order
-    });
-    setDialogOpen(true);
-  };
-
-  // Handle delete
-  const handleDelete = async (unit: Unit) => {
-    if (!confirm(`¿Estás seguro de eliminar "${unit.name}"?`)) return;
-
-    try {
-      const response = await fetch(`/api/units/${unit.id}`, {
-        method: "DELETE"
-      });
-
-      if (!response.ok) throw new Error("Failed to delete");
-
-      // toast({
-      //   title: "Éxito",
-      //   description: "Unidad eliminada correctamente",
-      // });
-      toast.success("Unidad eliminada correctamente");
-
-      fetchUnits();
-    } catch (error) {
-      // toast({
-      //   title: "Error",
-      //   description: "No se pudo eliminar la unidad",
-      //   variant: "destructive",
-      // });
-      toast.error("No se pudo eliminar la unidad");
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+// Mock data - reemplazar con datos reales de tu API
+const mockUnits = [
+  {
+    id: 1,
+    name: "Introducción a Blockchain",
+    description: "Conceptos básicos de la tecnología blockchain",
+    lessonsCount: 8,
+    studentsCount: 124,
+    isActive: true,
+    order: 1,
+    createdAt: "2024-01-15"
+  },
+  {
+    id: 2,
+    name: "Smart Contracts",
+    description: "Desarrollo y despliegue de contratos inteligentes",
+    lessonsCount: 12,
+    studentsCount: 89,
+    isActive: true,
+    order: 2,
+    createdAt: "2024-01-20"
+  },
+  {
+    id: 3,
+    name: "DeFi Fundamentals",
+    description: "Finanzas descentralizadas y protocolos DeFi",
+    lessonsCount: 6,
+    studentsCount: 67,
+    isActive: false,
+    order: 3,
+    createdAt: "2024-02-01"
   }
+];
+
+export default function UnitsPage() {
+  const [units, setUnits] = useState(mockUnits);
+  const [deleteUnitId, setDeleteUnitId] = useState<number | null>(null);
+
+  const handleDeleteUnit = (id: number) => {
+    setUnits(units.filter((unit) => unit.id !== id));
+    setDeleteUnitId(null);
+  };
+
+  const toggleUnitStatus = (id: number) => {
+    setUnits(
+      units.map((unit) =>
+        unit.id === id ? { ...unit, isActive: !unit.isActive } : unit
+      )
+    );
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Gestión de Unidades</h1>
-          <p className="text-muted-foreground">
-            Administra las unidades de aprendizaje
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Unidades</h1>
+          <p className="text-gray-600">Gestiona las unidades del curso</p>
         </div>
-
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              onClick={() => {
-                setEditingUnit(null);
-                setFormData({ name: "", description: "", order: 1 });
-              }}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Nueva Unidad
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {editingUnit ? "Editar Unidad" : "Crear Nueva Unidad"}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="name">Nombre</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  placeholder="Nombre de la unidad"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="description">Descripción</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  placeholder="Descripción opcional"
-                />
-              </div>
-              <div>
-                <Label htmlFor="order">Orden</Label>
-                <Input
-                  id="order"
-                  type="number"
-                  value={formData.order}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      order: parseInt(e.target.value)
-                    })
-                  }
-                  min="1"
-                />
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setDialogOpen(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  {editingUnit ? "Actualizar" : "Crear"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Link href="/admin/units/new">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Nueva Unidad
+          </Button>
+        </Link>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6">
         {units.map((unit) => (
-          <Card key={unit.id} className="hover:shadow-lg transition-shadow">
+          <Card key={unit.id}>
             <CardHeader>
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <CardTitle className="text-xl mb-2">{unit.name}</CardTitle>
-                  <Badge variant="secondary">Orden: {unit.order}</Badge>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div>
+                    <CardTitle className="flex items-center space-x-2">
+                      <span>{unit.name}</span>
+                      <Badge variant={unit.isActive ? "default" : "secondary"}>
+                        {unit.isActive ? "Activo" : "Inactivo"}
+                      </Badge>
+                    </CardTitle>
+                    <CardDescription className="mt-1">
+                      {unit.description}
+                    </CardDescription>
+                  </div>
                 </div>
-                <div className="flex space-x-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleEdit(unit)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleDelete(unit)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link href={`/admin/units/${unit.id}`}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        Ver detalles
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/admin/units/${unit.id}/edit`}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Editar
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => toggleUnitStatus(unit.id)}>
+                      {unit.isActive ? (
+                        <>
+                          <ToggleLeft className="mr-2 h-4 w-4" />
+                          Desactivar
+                        </>
+                      ) : (
+                        <>
+                          <ToggleRight className="mr-2 h-4 w-4" />
+                          Activar
+                        </>
+                      )}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="text-red-600"
+                      onClick={() => setDeleteUnitId(unit.id)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Eliminar
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </CardHeader>
+
             <CardContent>
-              {unit.description && (
-                <p className="text-muted-foreground mb-4">{unit.description}</p>
-              )}
-              <div className="flex items-center text-sm text-muted-foreground">
-                <BookOpen className="h-4 w-4 mr-2" />
-                <span>{unit._count.lessons} lecciones</span>
+              <div className="flex items-center space-x-6 text-sm text-gray-600">
+                <div className="flex items-center space-x-2">
+                  <BookOpen className="h-4 w-4" />
+                  <span>{unit.lessonsCount} lecciones</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Users className="h-4 w-4" />
+                  <span>{unit.studentsCount} estudiantes</span>
+                </div>
+                <div>
+                  <span>Orden: {unit.order}</span>
+                </div>
+                <div>
+                  <span>
+                    Creado: {new Date(unit.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-4 flex space-x-2">
+                <Link href={`/admin/units/${unit.id}/lessons`}>
+                  <Button variant="outline" size="sm">
+                    Ver lecciones
+                  </Button>
+                </Link>
+                <Link href={`/admin/units/${unit.id}/progress`}>
+                  <Button variant="outline" size="sm">
+                    Ver progreso
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {units.length === 0 && (
-        <div className="text-center py-12">
-          <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-lg font-semibold mb-2">No hay unidades</h3>
-          <p className="text-muted-foreground mb-4">
-            Crea tu primera unidad para comenzar
-          </p>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Crear Primera Unidad
-          </Button>
-        </div>
-      )}
+      <AlertDialog
+        open={deleteUnitId !== null}
+        onOpenChange={() => setDeleteUnitId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará permanentemente la unidad y todas sus
+              lecciones asociadas. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={() => deleteUnitId && handleDeleteUnit(deleteUnitId)}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
