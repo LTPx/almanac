@@ -35,7 +35,7 @@ export function MultipleChoiceQuestion({
               w-full p-4 text-left rounded-lg border-2 transition-all
               ${isSelected && !showResult ? "bg-[#1983DD] border-[#1983DD] text-white" : ""}
               ${!isSelected && !showResult ? "text-gray-300 hover:border-[#1983DD]" : ""}
-              ${shouldShowCorrect ? "bg-[1F941C] border-1F941C text-white" : ""}
+              ${shouldShowCorrect ? "bg-[#32C781] border-[#32C781] text-white" : ""}
               ${shouldShowIncorrect ? "bg-red-500 border-red-500 text-white" : ""}
               ${hasAnswered ? "cursor-not-allowed" : "cursor-pointer"}
             `}

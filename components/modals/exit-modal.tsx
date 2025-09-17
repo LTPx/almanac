@@ -31,6 +31,15 @@ export const ExitModal = () => {
       <DialogOverlay className="fixed inset-0 bg-black/50 z-[199]" />
       <DialogContent className="max-w-md z-[200]">
         <DialogHeader>
+          <div className="mb-5 flex w-full items-center justify-center">
+            <Image
+              src="/mascot_sad.svg"
+              alt="Mascot Sad"
+              height={80}
+              width={80}
+            />
+          </div>
+
           <DialogTitle className="text-center text-2xl font-bold">
             Wait, don&apos;t go!
           </DialogTitle>
@@ -44,7 +53,7 @@ export const ExitModal = () => {
           <div className="flex w-full flex-col gap-y-4">
             <Button
               // variant="primary"
-              className="w-full"
+              className="w-full rounded-[10px] py-[25px] text-[15px]"
               size="lg"
               onClick={close}
             >
@@ -52,7 +61,7 @@ export const ExitModal = () => {
             </Button>
 
             <Button
-              // variant="dangerOutline"
+              variant="ghost"
               className="w-full"
               size="lg"
               onClick={() => {

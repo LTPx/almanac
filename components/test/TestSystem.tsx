@@ -4,13 +4,14 @@ import { useState, useEffect } from "react";
 import { TestQuestion } from "./TestQuestion";
 import { TestResults } from "./TestResults";
 import { useTest } from "@/hooks/useTest";
+import { HeaderBar } from "../header-bar";
+import { motion, AnimatePresence } from "framer-motion";
 
 import type {
   TestData,
   TestResultsInterface as TestResultsType,
   Lesson
 } from "@/lib/types";
-import { HeaderBar } from "../header-bar";
 
 interface TestSystemProps {
   userId: string;
@@ -85,7 +86,6 @@ export function TestSystem({
 
   const handleCompleteTest = async () => {
     if (!currentTest) return;
-
     const testResults = await completeTest(currentTest.testAttemptId);
     if (testResults) {
       setResults(testResults);
@@ -125,20 +125,35 @@ export function TestSystem({
     const questionAnswer = answers[currentQuestion.id];
 
     return (
-      <div className="bg-background h-[100dvh] flex flex-col">
+      <div className="bg-background h-[100dvh] flex flex-col overflow-hidden">
         <HeaderBar
           onClose={onClose}
           hearts={hearts}
           percentage={progress}
           hasActiveSubscription={false}
+          justAnsweredCorrect={questionAnswer?.isCorrect}
         />
-        <TestQuestion
-          question={currentQuestion}
-          onAnswer={handleAnswer}
-          showResult={!!questionAnswer}
-          isCorrect={questionAnswer?.isCorrect}
-          selectedAnswer={questionAnswer?.answer}
-        />
+
+        <div className="relative flex-1 flex items-center justify-center">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentQuestionIndex}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              className="absolute w-full h-full flex"
+            >
+              <TestQuestion
+                question={currentQuestion}
+                onAnswer={handleAnswer}
+                showResult={!!questionAnswer}
+                isCorrect={questionAnswer?.isCorrect}
+                selectedAnswer={questionAnswer?.answer}
+              />
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
     );
   }

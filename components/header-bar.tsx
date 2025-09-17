@@ -2,22 +2,23 @@
 
 import { InfinityIcon, X } from "lucide-react";
 import Image from "next/image";
-
-import { Progress } from "@/components/ui/progress";
 import { useExitModal } from "@/store/use-exit-modal";
 import { ExitModal } from "./modals/exit-modal";
+import { SuccessProgressBar } from "./animate.progress-bar";
 
 type HeaderProps = {
   hearts: number;
   percentage: number;
   hasActiveSubscription: boolean;
-  onClose: () => void;
+  justAnsweredCorrect?: boolean;
+  onClose?: () => void;
 };
 
 export const HeaderBar = ({
   hearts,
   percentage,
   hasActiveSubscription,
+  justAnsweredCorrect = false,
   onClose
 }: HeaderProps) => {
   const { open } = useExitModal();
@@ -29,7 +30,14 @@ export const HeaderBar = ({
           onClick={open}
           className="cursor-pointer text-slate-500 transition hover:opacity-75"
         />
-        <Progress value={percentage} />
+
+        <div className="flex-1 mx-4">
+          <SuccessProgressBar
+            value={percentage}
+            triggerSuccess={justAnsweredCorrect}
+          />
+        </div>
+
         <div className="flex items-center font-bold text-rose-500">
           <Image
             src="/heart.svg"
@@ -45,6 +53,7 @@ export const HeaderBar = ({
           )}
         </div>
       </header>
+
       <ExitModal />
     </>
   );
