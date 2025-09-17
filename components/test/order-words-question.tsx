@@ -3,19 +3,24 @@
 import { useState, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 interface Props {
   question: any;
   hasAnswered: boolean;
   setHasAnswered: (val: boolean) => void;
   onAnswer: (questionId: number, answer: string) => void;
+  showResult: boolean;
+  isCorrect: boolean;
 }
 
 export function OrderWordsQuestion({
   question,
   hasAnswered,
   setHasAnswered,
-  onAnswer
+  onAnswer,
+  showResult,
+  isCorrect
 }: Props) {
   const totalSlots = question.content.words.length;
 
@@ -97,10 +102,23 @@ export function OrderWordsQuestion({
     setHasAnswered(true);
   };
 
+  const slotFeedback =
+    showResult && isCorrect
+      ? "bg-[#32C781] border-[#32C781] text-white"
+      : showResult && !isCorrect
+        ? "bg-red-500 border-red-500 text-white"
+        : "border-b-2 border-white";
+
   return (
     <div className="space-y-6">
       <DragDropContext onDragEnd={handleOnDragEnd}>
-        <div className="flex gap-2 flex-wrap mb-8">
+        <motion.div
+          animate={
+            showResult && !isCorrect ? { x: [-8, 8, -6, 6, -4, 4, 0] } : {}
+          }
+          transition={{ duration: 0.4 }}
+          className="flex gap-2 flex-wrap mb-8"
+        >
           {slots.map((word, index) => (
             <Droppable droppableId={`slot-${index}`} key={`slot-${index}`}>
               {(provided, snapshot) => (
@@ -108,7 +126,8 @@ export function OrderWordsQuestion({
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   className={`
-                    min-w-[90px] min-h-[50px] border-b-2 border-white flex items-center justify-center
+                    min-w-[90px] min-h-[50px] flex items-center justify-center rounded-lg transition-all
+                    ${slotFeedback}
                     ${snapshot.isDraggingOver ? "border-blue-400 bg-blue-500/10" : ""}
                   `}
                 >
@@ -124,7 +143,7 @@ export function OrderWordsQuestion({
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           className={`
-                            px-3 py-2 rounded-lg bg-gray-700 text-white select-none font-medium
+                            px-3 py-2 rounded-2xl text-white select-none font-medium shadow-md
                             ${snapshot.isDragging ? "scale-110 shadow-lg" : ""}
                           `}
                         >
@@ -138,14 +157,15 @@ export function OrderWordsQuestion({
               )}
             </Droppable>
           ))}
-        </div>
+        </motion.div>
+
         <Droppable droppableId="available" direction="horizontal">
           {(provided, snapshot) => (
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
               className={`
-                flex flex-wrap gap-2 p-4 border-2 rounded-lg min-h-[80px]
+                flex flex-wrap gap-2 p-4 border-2 rounded-2xl min-h-[80px]
                 ${snapshot.isDraggingOver ? "" : ""}
               `}
             >
@@ -162,7 +182,7 @@ export function OrderWordsQuestion({
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
                       className={`
-                        px-3 py-2 rounded-lg bg-gray-700 text-white select-none font-medium
+                        px-3 py-2 rounded-2xl text-white select-none font-medium shadow-md
                         ${snapshot.isDragging ? "scale-110 shadow-lg" : ""}
                       `}
                     >
@@ -181,7 +201,7 @@ export function OrderWordsQuestion({
         <Button
           onClick={handleSubmit}
           disabled={slots.some((s) => !s)}
-          className="bottom-0  w-full bg-[#1F941C] hover:bg-[#187515] text-white py-8 text-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-[#1F941C] hover:bg-[#187515] text-white py-8 text-xl font-medium rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Check Answer →
         </Button>

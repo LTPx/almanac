@@ -1,3 +1,7 @@
+"use client";
+
+import { motion } from "framer-motion";
+
 interface Props {
   selected: string;
   setSelected: (val: string) => void;
@@ -16,21 +20,31 @@ export function FillInBlankQuestion({
   let resultClasses = "";
   if (showResult && isCorrect) {
     resultClasses =
-      "bg-[#32C781] border-[#32C781] text-white placeholder-white";
+      "bg-[#32C781] border-[#32C781] text-white placeholder-white shadow-[0_0_20px_#32C781]";
   } else if (showResult && !isCorrect) {
-    resultClasses = "bg-red-500 border-red-500 text-white placeholder-white";
+    resultClasses =
+      "bg-red-500 border-red-500 text-white placeholder-white shadow-[0_0_20px_red]";
   } else {
     resultClasses = "text-white placeholder-gray-400 focus:border-[#1983DD]";
   }
 
   return (
-    <input
-      type="text"
-      value={selected}
-      onChange={(e) => setSelected(e.target.value)}
-      disabled={hasAnswered}
-      placeholder="Escribe tu respuesta..."
-      className={`w-full p-4 rounded-lg border-2 transition-colors ${resultClasses}`}
-    />
+    <motion.div
+      animate={
+        showResult && !isCorrect
+          ? { x: [-8, 8, -6, 6, -4, 4, 0] } // 👈 shake si está mal
+          : {}
+      }
+      transition={{ duration: 0.4 }}
+    >
+      <input
+        type="text"
+        value={selected}
+        onChange={(e) => setSelected(e.target.value)}
+        disabled={hasAnswered}
+        placeholder="Escribe tu respuesta..."
+        className={`w-full p-4 rounded-2xl border-2 transition-all shadow-md ${resultClasses}`}
+      />
+    </motion.div>
   );
 }

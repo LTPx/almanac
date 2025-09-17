@@ -101,6 +101,8 @@ export function TestQuestion({
             hasAnswered={hasAnswered}
             setHasAnswered={setHasAnswered}
             onAnswer={onAnswer}
+            isCorrect={isCorrect}
+            showResult={showResult}
           />
         );
       default:
@@ -141,7 +143,11 @@ export function TestQuestion({
               <Button
                 onClick={handleSubmitAnswer}
                 disabled={!selected}
-                className="w-full bg-[#32C781] hover:bg-[#28a36a] text-white py-8 text-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="
+    w-full py-8 text-xl font-semibold rounded-2xl shadow-lg
+    bg-[#32C781] hover:bg-[#28a36a] text-white
+  "
+                // className="w-full bg-[#32C781] hover:bg-[#28a36a] text-white py-8 text-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {question.type === "FILL_IN_BLANK"
                   ? "Enviar Respuesta"
@@ -150,15 +156,23 @@ export function TestQuestion({
             )}
 
             {hasAnswered && showResult && (
-              <Button
-                onClick={() => {}}
-                className="mt-6 w-full bg-[#32C781] hover:bg-[#28a36a] text-white py-8 text-xl font-medium"
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 15 }}
               >
-                Continue
-              </Button>
+                <Button
+                  onClick={() => {}}
+                  className={`
+      mt-6 w-full text-white py-8 text-xl font-medium rounded-2xl shadow-md
+      ${isCorrect ? "bg-[#32C781] hover:bg-[#28a36a]" : "bg-red-500 hover:bg-red-600"}
+    `}
+                >
+                  {isCorrect ? "¡Bien hecho!" : "Vuelve a intentarlo"}
+                </Button>
+              </motion.div>
             )}
 
-            {/* Incluir tags de audio para precarga (opcional) */}
             {correctAudio}
             {incorrectAudio}
           </div>
