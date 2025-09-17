@@ -2,23 +2,22 @@
 
 import { useState, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
 interface Props {
   question: any;
+  selected: string;
+  setSelected: (val: string) => void;
   hasAnswered: boolean;
-  setHasAnswered: (val: boolean) => void;
-  onAnswer: (questionId: number, answer: string) => void;
   showResult: boolean;
   isCorrect: boolean;
 }
 
 export function OrderWordsQuestion({
   question,
+  selected,
+  setSelected,
   hasAnswered,
-  setHasAnswered,
-  onAnswer,
   showResult,
   isCorrect
 }: Props) {
@@ -32,10 +31,16 @@ export function OrderWordsQuestion({
     ...question.content.words
   ]);
 
+  // Reset cuando cambia la pregunta
   useEffect(() => {
     setSlots(Array(totalSlots).fill(null));
     setAvailableWords([...question.content.words]);
   }, [question.id]);
+
+  // Pasamos lo que arma el usuario como "selected"
+  useEffect(() => {
+    setSelected(JSON.stringify(slots));
+  }, [slots, setSelected]);
 
   const handleOnDragEnd = (result: any) => {
     if (!result.destination || hasAnswered) return;
@@ -95,11 +100,6 @@ export function OrderWordsQuestion({
       ];
       setSlots(newSlots);
     }
-  };
-
-  const handleSubmit = () => {
-    onAnswer(question.id, JSON.stringify(slots));
-    setHasAnswered(true);
   };
 
   const slotFeedback =
@@ -196,16 +196,6 @@ export function OrderWordsQuestion({
           )}
         </Droppable>
       </DragDropContext>
-
-      {!hasAnswered && (
-        <Button
-          onClick={handleSubmit}
-          disabled={slots.some((s) => !s)}
-          className="w-full bg-[#1F941C] hover:bg-[#187515] text-white py-8 text-xl font-medium rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Check Answer →
-        </Button>
-      )}
     </div>
   );
 }

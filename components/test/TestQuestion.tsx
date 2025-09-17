@@ -55,7 +55,13 @@ export function TestQuestion({
   }, [question.id]);
 
   const handleSubmitAnswer = () => {
-    if (!selected || hasAnswered) return;
+    if (hasAnswered) return;
+    if (question.type === "ORDER_WORDS") {
+      const slots = JSON.parse(selected || "[]");
+      if (!Array.isArray(slots) || slots.some((s: string | null) => !s)) return;
+    }
+    if (!selected) return;
+
     onAnswer(question.id, selected);
     setHasAnswered(true);
   };
@@ -98,9 +104,9 @@ export function TestQuestion({
         return (
           <OrderWordsQuestion
             question={question}
+            selected={selected}
+            setSelected={setSelected}
             hasAnswered={hasAnswered}
-            setHasAnswered={setHasAnswered}
-            onAnswer={onAnswer}
             isCorrect={isCorrect}
             showResult={showResult}
           />
@@ -139,15 +145,18 @@ export function TestQuestion({
               </motion.div>
             )}
 
-            {!hasAnswered && question.type !== "ORDER_WORDS" && (
+            {!hasAnswered && (
               <Button
                 onClick={handleSubmitAnswer}
-                disabled={!selected}
+                disabled={
+                  !selected ||
+                  (question.type === "ORDER_WORDS" &&
+                    JSON.parse(selected || "[]").some((s: string | null) => !s))
+                }
                 className="
     w-full py-8 text-xl font-semibold rounded-2xl shadow-lg
     bg-[#32C781] hover:bg-[#28a36a] text-white
   "
-                // className="w-full bg-[#32C781] hover:bg-[#28a36a] text-white py-8 text-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {question.type === "FILL_IN_BLANK"
                   ? "Enviar Respuesta"
