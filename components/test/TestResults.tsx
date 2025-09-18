@@ -1,10 +1,11 @@
 "use client";
-import { Trophy, Target, Award } from "lucide-react";
+import { Trophy, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TestResultsInterface } from "@/lib/types";
 import Confetti from "react-confetti";
-import { useWindowSize } from "react-use";
+import { useWindowSize, useAudio } from "react-use";
 import { ResultCard } from "../result-card";
+import { useEffect, useState } from "react";
 
 interface TestResultsProps {
   results: TestResultsInterface;
@@ -23,6 +24,19 @@ export function TestResults({
   const isPassed = results.passed;
   const { width, height } = useWindowSize();
 
+  const [finishAudio, , finishControls] = useAudio({
+    src: "/finish.mp3",
+    autoPlay: false
+  });
+  const [hasPlayed, setHasPlayed] = useState(false);
+
+  useEffect(() => {
+    if (isPassed && !hasPlayed) {
+      finishControls.play();
+      setHasPlayed(true);
+    }
+  }, [isPassed, hasPlayed, finishControls]);
+
   return (
     <div className="bg-background min-h-screen p-6 flex items-center justify-center">
       {isPassed && (
@@ -34,6 +48,7 @@ export function TestResults({
           height={height}
         />
       )}
+
       <div className="rounded-lg p-8 max-w-md w-full text-center">
         <div className="mb-6">
           {isPassed ? (
@@ -82,14 +97,6 @@ export function TestResults({
               <ResultCard variant="points" value={results.experienceGained} />
               <ResultCard variant="hearts" value={5} />
             </div>
-            // <div className="bg-orange-500/20 border border-orange-500 rounded-lg p-4">
-            //   <div className="flex items-center justify-center gap-2 text-orange-400">
-            //     <Award className="w-5 h-5" />
-            //     <span className="font-medium">
-            //       +{results.experienceGained} XP ganados
-            //     </span>
-            //   </div>
-            // </div>
           )}
         </div>
 
@@ -111,6 +118,7 @@ export function TestResults({
             </Button>
           )}
         </div>
+        {finishAudio}
       </div>
     </div>
   );
