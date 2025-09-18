@@ -30,11 +30,10 @@ export function FillInBlankQuestion({
 
   return (
     <motion.div
-      animate={
-        showResult && !isCorrect
-          ? { x: [-8, 8, -6, 6, -4, 4, 0] } // 👈 shake si está mal
-          : {}
-      }
+      animate={{
+        x: showResult && !isCorrect ? [-8, 8, -6, 6, -4, 4, 0] : 0,
+        scale: showResult && isCorrect ? [1, 1.05, 1] : 1
+      }}
       transition={{ duration: 0.4 }}
     >
       <input
