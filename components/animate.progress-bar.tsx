@@ -31,24 +31,6 @@ export const SuccessProgressBar = ({
         transition={{ type: "spring", stiffness: 120, damping: 20 }}
         className="absolute left-0 top-0 h-full bg-[#32C781] rounded-full"
       />
-      <AnimatePresence>
-        {showConfetti && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            className="absolute inset-0 pointer-events-none"
-          >
-            <Confetti
-              width={300}
-              height={20}
-              recycle={false}
-              numberOfPieces={30}
-              gravity={0.1}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
