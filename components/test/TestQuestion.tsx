@@ -129,9 +129,9 @@ export function TestQuestion({
           <div>
             {showResult && (
               <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 200, damping: 30 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20 }}
                 className="mb-6 flex items-center gap-2"
               >
                 <CheckCircle
@@ -144,7 +144,6 @@ export function TestQuestion({
                 </span>
               </motion.div>
             )}
-
             {!hasAnswered && (
               <Button
                 onClick={handleSubmitAnswer}
