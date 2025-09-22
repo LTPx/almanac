@@ -1,5 +1,3 @@
-// app/api/units/[unitId]/lessons/positions/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
@@ -19,12 +17,11 @@ export async function GET(
       );
     }
 
-    // Buscar las lecciones con sus posiciones ordenadas
     const lessonPositions = await prisma.lesson.findMany({
       where: {
         unitId: unitId,
         position: {
-          not: null // Solo lecciones que tienen posición asignada
+          not: null
         }
       },
       select: {
@@ -36,7 +33,6 @@ export async function GET(
       }
     });
 
-    // Mapear a formato esperado por el frontend
     const positions = lessonPositions.map((lesson) => ({
       lessonId: lesson.id,
       position: lesson.position

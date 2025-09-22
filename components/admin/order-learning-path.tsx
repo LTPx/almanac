@@ -1,20 +1,24 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   DndContext,
   useDraggable,
   useDroppable,
   DragEndEvent,
   DragOverlay,
-  closestCenter
+  closestCenter,
+  DragStartEvent
 } from "@dnd-kit/core";
 import { Lesson } from "@prisma/client";
+import React from "react";
 
 type LessonGrid = { id: string; lessonId: number; label: string };
+type CellId = string;
+type LessonId = string;
+type Assignments = Record<CellId, LessonId | null>;
 
-// === Draggable ===
-function Draggable({
+const Draggable = React.memo(function Draggable({
   id,
   label,
   isDragOverlay = false
@@ -25,11 +29,6 @@ function Draggable({
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({ id });
-  const [alert, setAlert] = useState<{
-    type: "success" | "error";
-    title: string;
-    description?: string;
-  } | null>(null);
 
   return (
     <div
@@ -52,10 +51,9 @@ function Draggable({
       {label}
     </div>
   );
-}
+});
 
-// === Droppable ===
-function Droppable({
+const Droppable = React.memo(function Droppable({
   id,
   children,
   isPanel = false
@@ -100,131 +98,126 @@ function Droppable({
       {children}
     </div>
   );
+});
+
+function HeaderStatus({
+  assignedCount,
+  availableCount,
+  total
+}: {
+  assignedCount: number;
+  availableCount: number;
+  total: number;
+}) {
+  return (
+    <div className="flex gap-6 text-sm">
+      <div className="flex items-center gap-2">
+        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+        <span className="text-black">
+          Asignadas: <strong>{assignedCount}</strong>
+        </span>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+        <span className="text-black">
+          Disponibles: <strong>{availableCount}</strong>
+        </span>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+        <span className="text-black">
+          Total: <strong>{total}</strong>
+        </span>
+      </div>
+    </div>
+  );
 }
 
-export default function OrderLearningPath({
-  lessons,
-  unitId,
-  initialPositions = []
-}: {
-  lessons: Lesson[];
-  unitId: number;
-  initialPositions?: { lessonId: number; position: number }[];
-}) {
-  // Estados
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">(
-    "idle"
-  );
-  const [activeId, setActiveId] = useState<string | null>(null);
+function useAssignments(
+  initialLessons: LessonGrid[],
+  initialPositions: { lessonId: number; position: number }[]
+) {
+  const [assignments, setAssignments] = useState<Assignments>(() => {
+    const grid: Assignments = Object.fromEntries(
+      Array.from({ length: 12 * 5 }).map((_, i) => [`cell-${i}`, null])
+    );
+    initialPositions.forEach((pos) => {
+      grid[`cell-${pos.position}`] = `lesson-${pos.lessonId}`;
+    });
+    return grid;
+  });
 
-  // Mapear lecciones a formato Drag & Drop
-  const initialLessons: LessonGrid[] = lessons.map((lesson) => ({
-    id: `lesson-${lesson.id}`,
-    lessonId: lesson.id,
-    label: lesson.name
-  }));
-
-  // Filtrar lecciones ya asignadas
   const [availableLessons, setAvailableLessons] = useState<LessonGrid[]>(() => {
     const assignedIds = initialPositions.map((p) => `lesson-${p.lessonId}`);
     return initialLessons.filter((l) => !assignedIds.includes(l.id));
   });
 
-  // Inicializar grid con posiciones previas
-  const [assignments, setAssignments] = useState<Record<string, string | null>>(
-    () => {
-      const grid: Record<string, string | null> = Object.fromEntries(
-        Array.from({ length: 12 * 5 }).map((_, i) => [`cell-${i}`, null])
-      );
+  const moveLesson = useCallback(
+    (lessonKey: string, overId: string) => {
+      setAssignments((prev) => {
+        const updated = { ...prev };
+        const sourceCell = Object.keys(updated).find(
+          (k) => updated[k] === lessonKey
+        );
 
-      initialPositions.forEach((pos) => {
-        const lessonKey = `lesson-${pos.lessonId}`;
-        grid[`cell-${pos.position}`] = lessonKey;
+        if (overId === "panel") {
+          if (sourceCell) updated[sourceCell] = null;
+          return updated;
+        }
+
+        const targetLesson = updated[overId];
+        if (sourceCell) updated[sourceCell] = targetLesson ?? null;
+        updated[overId] = lessonKey;
+
+        return updated;
       });
 
-      return grid;
-    }
-  );
-
-  // Manejar inicio del drag
-  const handleDragStart = useCallback((event: { active: { id: string } }) => {
-    setActiveId(event.active.id);
-  }, []);
-
-  // Manejar fin del drag
-  const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      const { active, over } = event;
-      setActiveId(null);
-
-      if (!over) return;
-
-      const lessonKey = active.id as string;
-
-      // Soltar en panel lateral
-      if (over.id === "panel") {
-        setAssignments((prev) => {
-          const updated = { ...prev };
-          for (const key of Object.keys(updated)) {
-            if (updated[key] === lessonKey) updated[key] = null;
-          }
-          return updated;
-        });
-
-        if (!availableLessons.find((u) => u.id === lessonKey)) {
-          const lesson = initialLessons.find((u) => u.id === lessonKey);
-          if (lesson) setAvailableLessons((prev) => [...prev, lesson]);
+      if (overId === "panel") {
+        const lesson = initialLessons.find((l) => l.id === lessonKey);
+        if (lesson && !availableLessons.find((l) => l.id === lessonKey)) {
+          setAvailableLessons((prev) => [...prev, lesson]);
         }
-        return;
-      }
-
-      // Soltar en celda
-      if (over.id.toString().startsWith("cell-")) {
-        setAssignments((prev) => {
-          const updated = { ...prev };
-
-          // Si hay una lección en la celda de destino, intercambiarlas
-          const existingLessonInTarget = updated[over.id as string];
-          const sourceCell = Object.entries(updated).find(
-            ([_, value]) => value === lessonKey
-          )?.[0];
-
-          if (existingLessonInTarget && sourceCell) {
-            // Intercambio
-            updated[sourceCell] = existingLessonInTarget;
-          } else if (sourceCell) {
-            // Mover desde otra celda
-            updated[sourceCell] = null;
-          }
-
-          // Si había una lección en el destino y venía del panel, regresarla al panel
-          if (existingLessonInTarget && !sourceCell) {
-            const existingLesson = initialLessons.find(
-              (l) => l.id === existingLessonInTarget
-            );
-            if (existingLesson) {
-              setAvailableLessons((prev) => [...prev, existingLesson]);
-            }
-          }
-
-          updated[over.id as string] = lessonKey;
-          return updated;
-        });
-
-        setAvailableLessons((prev) => prev.filter((u) => u.id !== lessonKey));
+      } else {
+        setAvailableLessons((prev) => prev.filter((l) => l.id !== lessonKey));
       }
     },
     [availableLessons, initialLessons]
   );
 
-  // Obtener la lección que se está arrastrando
-  const draggedLesson = activeId
-    ? initialLessons.find((l) => l.id === activeId)
-    : null;
+  const clearAll = useCallback(() => {
+    const allAssignedLessons = Object.values(assignments)
+      .filter(Boolean)
+      .map((lessonKey) => initialLessons.find((l) => l.id === lessonKey))
+      .filter(Boolean) as LessonGrid[];
 
-  // Guardar path en backend con mejor manejo de errores
-  const handleSave = async () => {
+    setAvailableLessons((prev) => [...prev, ...allAssignedLessons]);
+    setAssignments((prev) => {
+      const updated = { ...prev };
+      Object.keys(updated).forEach((key) => (updated[key] = null));
+      return updated;
+    });
+  }, [assignments, initialLessons]);
+
+  return {
+    assignments,
+    availableLessons,
+    moveLesson,
+    clearAll,
+    setAssignments
+  };
+}
+
+function useSavePath(
+  assignments: Assignments,
+  initialLessons: LessonGrid[],
+  unitId: number
+) {
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">(
+    "idle"
+  );
+
+  const handleSave = useCallback(async () => {
     setIsSaving(true);
     setSaveStatus("idle");
 
@@ -243,43 +236,72 @@ export default function OrderLearningPath({
         body: JSON.stringify(payload)
       });
 
-      if (res.ok) {
-        setSaveStatus("success");
-        setTimeout(() => setSaveStatus("idle"), 3000);
-      } else {
-        throw new Error("Error en la respuesta del servidor");
-      }
+      if (!res.ok) throw new Error("Error en la respuesta del servidor");
+
+      setSaveStatus("success");
+      setTimeout(() => setSaveStatus("idle"), 3000);
     } catch (error) {
-      console.error("Error saving learning path:", error);
+      console.error(error);
       setSaveStatus("error");
       setTimeout(() => setSaveStatus("idle"), 5000);
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [assignments, initialLessons, unitId]);
 
-  // Limpiar todo el grid
-  const handleClearAll = useCallback(() => {
-    if (confirm("¿Estás seguro de que quieres limpiar todo el grid?")) {
-      const allAssignedLessons = Object.values(assignments)
-        .filter(Boolean)
-        .map((lessonKey) => initialLessons.find((l) => l.id === lessonKey))
-        .filter(Boolean) as LessonGrid[];
+  return { isSaving, saveStatus, handleSave };
+}
 
-      setAvailableLessons((prev) => [...prev, ...allAssignedLessons]);
-      setAssignments((prev) => {
-        const updated = { ...prev };
-        Object.keys(updated).forEach((key) => {
-          updated[key] = null;
-        });
-        return updated;
-      });
-    }
-  }, [assignments, initialLessons]);
+export default function OrderLearningPath({
+  lessons,
+  unitId,
+  initialPositions = []
+}: {
+  lessons: Lesson[];
+  unitId: number;
+  initialPositions?: { lessonId: number; position: number }[];
+}) {
+  const initialLessons: LessonGrid[] = useMemo(
+    () =>
+      lessons.map((l) => ({
+        id: `lesson-${l.id}`,
+        lessonId: l.id,
+        label: l.name
+      })),
+    [lessons]
+  );
 
-  // Contadores para estadísticas
+  const { assignments, availableLessons, moveLesson, clearAll } =
+    useAssignments(initialLessons, initialPositions);
+  const { isSaving, saveStatus, handleSave } = useSavePath(
+    assignments,
+    initialLessons,
+    unitId
+  );
+
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const lessonMap = useMemo(
+    () => new Map(initialLessons.map((l) => [l.id, l])),
+    [initialLessons]
+  );
+  const draggedLesson = activeId ? lessonMap.get(activeId) : null;
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveId(String(event.active.id));
+  }, []);
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      setActiveId(null);
+      const { active, over } = event;
+      if (!over) return;
+      moveLesson(String(active.id), String(over.id));
+    },
+    [moveLesson]
+  );
+
   const assignedCount = Object.values(assignments).filter(Boolean).length;
-  const totalLessons = lessons.length;
 
   return (
     <DndContext
@@ -288,31 +310,15 @@ export default function OrderLearningPath({
       collisionDetection={closestCenter}
     >
       <div className="flex flex-col gap-6">
-        {/* Header con estadísticas */}
         <div className="flex items-center justify-between bg-gray-50 p-4 rounded-xl">
-          <div className="flex gap-6 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span className="text-black">
-                Asignadas: <strong>{assignedCount}</strong>
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-              <span className="text-black">
-                Disponibles: <strong>{availableLessons.length}</strong>
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span className="text-black">
-                Total: <strong>{totalLessons}</strong>
-              </span>
-            </div>
-          </div>
+          <HeaderStatus
+            assignedCount={assignedCount}
+            availableCount={availableLessons.length}
+            total={lessons.length}
+          />
 
           <button
-            onClick={handleClearAll}
+            onClick={clearAll}
             disabled={assignedCount === 0}
             className="px-3 py-1 text-xs text-gray-600 border border-gray-300 
               rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed
@@ -323,7 +329,6 @@ export default function OrderLearningPath({
         </div>
 
         <div className="flex gap-6">
-          {/* Panel lateral */}
           <Droppable id="panel" isPanel>
             {availableLessons.length === 0 && (
               <div className="text-xs text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
@@ -339,11 +344,10 @@ export default function OrderLearningPath({
             <div className="grid grid-cols-5 gap-3 p-4 bg-gray-50 rounded-xl">
               {Object.keys(assignments).map((cellId, index) => {
                 const lessonKey = assignments[cellId];
-                const lesson = initialLessons.find((u) => u.id === lessonKey);
+                const lesson = lessonMap.get(lessonKey!);
 
                 return (
                   <div key={cellId} className="relative">
-                    {/* Número de posición */}
                     <div
                       className="absolute -top-2 -left-2 w-5 h-5 bg-gray-400 text-white 
                       text-xs rounded-full flex items-center justify-center font-medium z-10"
@@ -362,7 +366,6 @@ export default function OrderLearningPath({
           </div>
         </div>
 
-        {/* Controles */}
         <div className="flex items-center gap-4">
           <button
             onClick={handleSave}
@@ -376,24 +379,6 @@ export default function OrderLearningPath({
           >
             {isSaving ? "Guardando..." : "Guardar Path"}
           </button>
-
-          {/* Status de guardado */}
-          {saveStatus === "success" && (
-            <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
-              <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs">✓</span>
-              </div>
-              Path guardado correctamente
-            </div>
-          )}
-          {saveStatus === "error" && (
-            <div className="flex items-center gap-2 text-red-600 text-sm font-medium">
-              <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs">✕</span>
-              </div>
-              Error al guardar el path
-            </div>
-          )}
         </div>
       </div>
 
@@ -406,6 +391,26 @@ export default function OrderLearningPath({
           />
         ) : null}
       </DragOverlay>
+
+      {["success", "error"].map((status) => (
+        <div
+          key={status}
+          className={`fixed bottom-5 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-500
+            ${saveStatus === status ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}
+        >
+          <div
+            className={`${
+              status === "success" ? "bg-green-600" : "bg-red-600"
+            } text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-2`}
+          >
+            <span className="font-medium">
+              {status === "success"
+                ? "✓ Path guardado correctamente"
+                : "✕ Error al guardar el path"}
+            </span>
+          </div>
+        </div>
+      ))}
     </DndContext>
   );
 }

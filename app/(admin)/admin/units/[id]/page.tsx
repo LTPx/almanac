@@ -28,7 +28,6 @@ export default function UnitPage(nextParams: { params: { id: string } }) {
         fetch(`/api/units/${id}/lessons/positions`)
       ]);
 
-      // Verificar si ambas respuestas son exitosas
       if (!lessonsRes.ok || !positionsRes.ok) {
         throw new Error(
           `Error en la API: ${lessonsRes.status} / ${positionsRes.status}`
@@ -124,7 +123,7 @@ export default function UnitPage(nextParams: { params: { id: string } }) {
       case "success":
         return (
           <OrderLearningPath
-            lessons={lessons}
+            lessons={lessons as any}
             unitId={Number(id)}
             initialPositions={lessonPositions}
           />
@@ -138,7 +137,6 @@ export default function UnitPage(nextParams: { params: { id: string } }) {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-2">
             <h1 className="text-3xl font-bold text-gray-900">Unidad {id}</h1>
@@ -154,7 +152,6 @@ export default function UnitPage(nextParams: { params: { id: string } }) {
           </p>
         </div>
 
-        {/* Contenido principal */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           {renderContent()}
         </div>
