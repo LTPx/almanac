@@ -145,9 +145,9 @@ export default function CreateCertificatePage() {
           <div
             className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${
               currentStep === num
-                ? "bg-green-500 text-white"
+                ? "bg-[#32C781] text-white"
                 : currentStep > num
-                  ? "bg-green-500 text-white"
+                  ? "bg-[#32C781] text-white"
                   : "bg-gray-300 text-gray-600"
             }`}
           >
@@ -156,7 +156,7 @@ export default function CreateCertificatePage() {
           {i < 2 && (
             <div
               className={`w-16 h-0.5 mx-2 ${
-                currentStep > num ? "bg-green-500" : "bg-gray-300"
+                currentStep > num ? "bg-[#32C781]" : "bg-gray-300"
               }`}
             />
           )}
@@ -190,7 +190,7 @@ export default function CreateCertificatePage() {
   if (availableUnits.length === 0 && currentStep !== 3) {
     return (
       <div className="min-h-screen bg-gray-900 py-8 px-4">
-        <div className="max-w-md mx-auto">
+        <div className="max-w-lg mx-auto">
           <div className="bg-gray-800 rounded-xl p-8 text-center">
             <CheckCircle className="mx-auto text-green-500 mb-4" size={64} />
             <h3 className="text-xl font-semibold text-white mb-2">
@@ -206,8 +206,8 @@ export default function CreateCertificatePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-8 px-4">
-      <div className="max-w-md mx-auto">
+    <div className="min-h-screen py-8 px-4">
+      <div className="max-w-lg mx-auto">
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={handleBack}
@@ -228,7 +228,7 @@ export default function CreateCertificatePage() {
           </h2>
         </div>
 
-        <div className="bg-gray-800 rounded-xl p-6">
+        <div className="rounded-xl p-6">
           {currentStep === 1 && (
             <div className="space-y-6">
               <div>
@@ -238,7 +238,7 @@ export default function CreateCertificatePage() {
                 <select
                   value={selectedUnitId}
                   onChange={(e) => setSelectedUnitId(e.target.value)}
-                  className="w-full p-4 bg-gray-800 border border-gray-600 rounded-lg text-white"
+                  className="w-full p-4 border border-gray-600 rounded-lg text-white"
                   required
                 >
                   <option value="">Selecciona una unidad...</option>
@@ -258,7 +258,7 @@ export default function CreateCertificatePage() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Dedico este logro a..."
-                  className="w-full p-4 bg-gray-800 border border-gray-600 rounded-lg text-white resize-none"
+                  className="w-full p-4 border border-gray-600 rounded-lg text-white resize-none"
                   rows={4}
                   maxLength={250}
                 />
@@ -267,7 +267,7 @@ export default function CreateCertificatePage() {
               <button
                 onClick={handleContinue}
                 disabled={!selectedUnitId}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2"
+                className="w-full bg-[#1983DD] hover:bg-blue-700 disabled:opacity-50 text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2"
               >
                 Continuar
                 <ArrowRight size={20} />
@@ -285,14 +285,14 @@ export default function CreateCertificatePage() {
               <div className="flex gap-3">
                 <button
                   onClick={handleBack}
-                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-4 px-6 rounded-lg"
+                  className="flex items-center justify-center gap-2 flex-1 bg-gray-600 hover:bg-gray-700 text-white py-4 px-6 rounded-lg"
                 >
                   <ArrowLeft size={20} /> Atrás
                 </button>
                 <button
                   onClick={handleContinue}
                   disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-pink-500 to-red-500 text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2"
+                  className="cursor-pointer flex-1 bg-[#1983DD] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
