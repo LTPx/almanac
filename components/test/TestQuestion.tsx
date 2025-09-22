@@ -1,12 +1,14 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
-import { Question } from "@/lib/types";
 import { MultipleChoiceQuestion } from "./multiple-choice-question";
 import { TrueFalseQuestion } from "./true-false-question";
 import { FillInBlankQuestion } from "./fill-in-blank-question";
 import { OrderWordsQuestion } from "./order-words-question";
+import { motion } from "framer-motion";
+import { useAudio } from "react-use";
 
 export function TestQuestion({
   question,
@@ -18,13 +20,48 @@ export function TestQuestion({
   const [selected, setSelected] = useState<string>(selectedAnswer || "");
   const [hasAnswered, setHasAnswered] = useState(showResult);
 
+  const [correctAudio, , correctControls] = useAudio({ src: "/correct.wav" });
+  const [incorrectAudio, , incorrectControls] = useAudio({
+    src: "/incorrect.wav"
+  });
+
   useEffect(() => {
     setSelected(selectedAnswer || "");
     setHasAnswered(showResult);
   }, [question.id, selectedAnswer, showResult]);
 
+  const [hasPlayedAudio, setHasPlayedAudio] = useState(false);
+
+  useEffect(() => {
+    if (showResult && !hasPlayedAudio) {
+      if (isCorrect) {
+        correctControls.play();
+      } else {
+        incorrectControls.play();
+      }
+      setHasPlayedAudio(true);
+    }
+  }, [
+    showResult,
+    isCorrect,
+    hasPlayedAudio,
+    correctControls,
+    incorrectControls
+  ]);
+
+  useEffect(() => {
+    setHasPlayedAudio(false);
+    setHasAnswered(false);
+  }, [question.id]);
+
   const handleSubmitAnswer = () => {
-    if (!selected || hasAnswered) return;
+    if (hasAnswered) return;
+    if (question.type === "ORDER_WORDS") {
+      const slots = JSON.parse(selected || "[]");
+      if (!Array.isArray(slots) || slots.some((s: string | null) => !s)) return;
+    }
+    if (!selected) return;
+
     onAnswer(question.id, selected);
     setHasAnswered(true);
   };
@@ -59,15 +96,19 @@ export function TestQuestion({
         );
       case "FILL_IN_BLANK":
         return (
-          <FillInBlankQuestion {...{ selected, setSelected, hasAnswered }} />
+          <FillInBlankQuestion
+            {...{ selected, setSelected, hasAnswered, isCorrect, showResult }}
+          />
         );
       case "ORDER_WORDS":
         return (
           <OrderWordsQuestion
             question={question}
+            selected={selected}
+            setSelected={setSelected}
             hasAnswered={hasAnswered}
-            setHasAnswered={setHasAnswered}
-            onAnswer={onAnswer}
+            isCorrect={isCorrect}
+            showResult={showResult}
           />
         );
       default:
@@ -87,36 +128,61 @@ export function TestQuestion({
           </div>
           <div>
             {showResult && (
-              <div className="mb-6 flex items-center gap-2">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                className="mb-6 flex items-center gap-2"
+              >
                 <CheckCircle
-                  className={`w-6 h-6 ${isCorrect ? "text-green-500" : "text-red-500"}`}
+                  className={`w-6 h-6 ${isCorrect ? "text-[#32C781]" : "text-red-500"}`}
                 />
                 <span
-                  className={`font-medium ${isCorrect ? "text-green-500" : "text-red-500"}`}
+                  className={`font-medium ${isCorrect ? "text-[#32C781]" : "text-red-500"}`}
                 >
                   {isCorrect ? "¡Correcto!" : "Incorrecto"}
                 </span>
-              </div>
+              </motion.div>
             )}
-            {!hasAnswered && question.type !== "ORDER_WORDS" && (
+            {!hasAnswered && (
               <Button
                 onClick={handleSubmitAnswer}
-                disabled={!selected}
-                className="w-full bg-[#1F941C] hover:bg-[#187515] text-white py-8 text-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={
+                  !selected ||
+                  (question.type === "ORDER_WORDS" &&
+                    JSON.parse(selected || "[]").some((s: string | null) => !s))
+                }
+                className="
+    w-full py-8 text-xl font-semibold rounded-2xl shadow-lg
+    bg-[#32C781] hover:bg-[#28a36a] text-white
+  "
               >
                 {question.type === "FILL_IN_BLANK"
                   ? "Enviar Respuesta"
                   : "Check Answer →"}
               </Button>
             )}
+
             {hasAnswered && showResult && (
-              <Button
-                onClick={() => {}}
-                className="mt-6 w-full bg-[#1F941C] hover:bg-[#187515] text-white py-8 text-xl font-medium"
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 15 }}
               >
-                Continue
-              </Button>
+                <Button
+                  onClick={() => {}}
+                  className={`
+      mt-6 w-full text-white py-8 text-xl font-medium rounded-2xl shadow-md
+      ${isCorrect ? "bg-[#32C781] hover:bg-[#28a36a]" : "bg-red-500 hover:bg-red-600"}
+    `}
+                >
+                  {isCorrect ? "¡Bien hecho!" : "Vuelve a intentarlo"}
+                </Button>
+              </motion.div>
             )}
+
+            {correctAudio}
+            {incorrectAudio}
           </div>
         </div>
       </div>

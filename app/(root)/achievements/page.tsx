@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { useNFTs } from "@/hooks/useNfts";
 import { useUser } from "@/context/UserContext";
+import Link from "next/link";
 
 function Achievements() {
   const user = useUser();
@@ -78,9 +79,12 @@ function Achievements() {
               />
             ))}
         </div>
-        <Button className="w-full h-[50px] bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 text-base font-medium rounded-lg mb-8">
+        <Link
+          href={"/achievements/new"}
+          className="w-full h-[50px] text-center bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 text-base font-medium rounded-lg mb-8"
+        >
           Crear Nueva Medalla (NFT)
-        </Button>
+        </Link>
       </div>
     </div>
   );
