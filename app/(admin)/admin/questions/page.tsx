@@ -124,8 +124,8 @@ export default function QuestionsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Preguntas</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold text-foreground">Preguntas</h1>
+          <p className="text-muted-foreground">
             Gestiona las preguntas de las lecciones
           </p>
         </div>
@@ -143,7 +143,7 @@ export default function QuestionsPage() {
           <div className="flex items-center space-x-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Buscar preguntas..."
                   value={searchTerm}
@@ -178,13 +178,13 @@ export default function QuestionsPage() {
           const TypeIcon = getTypeIcon(question.type);
 
           return (
-            <Card key={question.id}>
+            <Card key={question.id} className="bg-card border-border">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <TypeIcon className="h-5 w-5 text-gray-500" />
-                      <CardTitle className="text-lg">
+                      <TypeIcon className="h-5 w-5 text-muted-foreground" />
+                      <CardTitle className="text-lg text-foreground">
                         {question.title}
                       </CardTitle>
                       <Badge
@@ -194,14 +194,14 @@ export default function QuestionsPage() {
                       </Badge>
                     </div>
                     <CardDescription className="mt-2">
-                      <div className="flex items-center space-x-4 text-sm">
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                        <span className="px-2 py-1 bg-card border border-border rounded text-xs">
                           {question.unitName}
                         </span>
-                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                        <span className="px-2 py-1 bg-card border border-border rounded text-xs">
                           {question.lessonName}
                         </span>
-                        <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                        <span className="px-2 py-1 bg-card border border-border rounded text-xs">
                           {
                             questionTypeLabels[
                               question.type as keyof typeof questionTypeLabels
@@ -259,13 +259,13 @@ export default function QuestionsPage() {
         })}
 
         {filteredQuestions.length === 0 && (
-          <Card>
-            <CardContent className="text-center py-8">
-              <HelpCircle className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-4 text-lg font-semibold text-gray-900">
+          <Card className="bg-card border-border">
+            <CardContent className="text-center py-8 text-muted-foreground">
+              <HelpCircle className="mx-auto h-12 w-12" />
+              <h3 className="mt-4 text-lg font-semibold text-foreground">
                 No hay preguntas
               </h3>
-              <p className="mt-2 text-gray-600">
+              <p className="mt-2">
                 {searchTerm || selectedType !== "all"
                   ? "No se encontraron preguntas con los filtros actuales."
                   : "Comienza creando tu primera pregunta."}

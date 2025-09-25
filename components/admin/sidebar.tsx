@@ -92,11 +92,13 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
-      <div className="flex h-16 items-center px-6 border-b">
-        <h1 className="text-xl font-bold text-gray-900">EduAdmin</h1>
+    <div className="fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
+      {/* Header */}
+      <div className="flex h-16 items-center px-6 border-b border-sidebar-border">
+        <h1 className="text-xl font-bold">EduAdmin</h1>
       </div>
 
+      {/* Navigation */}
       <nav className="mt-6 px-3">
         <ul className="space-y-1">
           {navigation.map((item) => {
@@ -110,21 +112,22 @@ export function Sidebar() {
                   className={cn(
                     "group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-blue-50 text-blue-700"
-                      : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   )}
                 >
                   <item.icon
                     className={cn(
                       "mr-3 h-5 w-5 flex-shrink-0",
                       isActive
-                        ? "text-blue-500"
-                        : "text-gray-400 group-hover:text-gray-500"
+                        ? "text-sidebar-primary-foreground"
+                        : "text-muted-foreground group-hover:text-sidebar-accent-foreground"
                     )}
                   />
                   {item.name}
                 </Link>
 
+                {/* Children */}
                 {item.children && isActive && (
                   <ul className="mt-2 space-y-1 ml-6">
                     {item.children.map((child) => {
@@ -137,16 +140,16 @@ export function Sidebar() {
                             className={cn(
                               "group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                               isChildActive
-                                ? "bg-blue-50 text-blue-700"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                             )}
                           >
                             <child.icon
                               className={cn(
                                 "mr-3 h-4 w-4 flex-shrink-0",
                                 isChildActive
-                                  ? "text-blue-500"
-                                  : "text-gray-400 group-hover:text-gray-500"
+                                  ? "text-sidebar-primary-foreground"
+                                  : "text-muted-foreground group-hover:text-sidebar-accent-foreground"
                               )}
                             />
                             {child.name}

@@ -1,4 +1,3 @@
-// app/admin/lessons/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -39,7 +38,6 @@ import {
   SelectValue
 } from "@/components/ui/select";
 
-// Mock data - reemplazar con datos reales
 const mockLessons = [
   {
     id: 1,
@@ -104,13 +102,16 @@ export default function LessonsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Lecciones</h1>
-          <p className="text-gray-600">Gestiona las lecciones del curso</p>
+          <h1 className="text-3xl font-bold text-foreground">Lecciones</h1>
+          <p className="text-muted-foreground">
+            Gestiona las lecciones del curso
+          </p>
         </div>
         <Link href="/admin/lessons/new">
-          <Button>
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Plus className="mr-2 h-4 w-4" />
             Nueva Lección
           </Button>
@@ -118,27 +119,25 @@ export default function LessonsPage() {
       </div>
 
       {/* Filtros */}
-      <Card>
+      <Card className="bg-card border-border">
         <CardContent className="pt-6">
           <div className="flex items-center space-x-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <Input
-                  placeholder="Buscar lecciones..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Buscar lecciones..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-background text-foreground border-border"
+              />
             </div>
             <div className="w-48">
               <Select value={selectedUnit} onValueChange={setSelectedUnit}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-background text-foreground border-border">
                   <Filter className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Todas las unidades" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-card text-foreground border-border">
                   <SelectItem value="all">Todas las unidades</SelectItem>
                   {mockUnits.map((unit) => (
                     <SelectItem key={unit.id} value={unit.id.toString()}>
@@ -155,14 +154,19 @@ export default function LessonsPage() {
       {/* Lista de lecciones */}
       <div className="grid gap-4">
         {filteredLessons.map((lesson) => (
-          <Card key={lesson.id}>
+          <Card key={lesson.id} className="bg-card border-border">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-2">
-                    <CardTitle className="text-lg">{lesson.name}</CardTitle>
+                    <CardTitle className="text-lg text-foreground">
+                      {lesson.name}
+                    </CardTitle>
                     {lesson.mandatory && (
-                      <Badge variant="destructive" className="text-xs">
+                      <Badge
+                        variant="destructive"
+                        className="text-xs flex items-center"
+                      >
                         <Star className="mr-1 h-3 w-3" />
                         Obligatoria
                       </Badge>
@@ -171,10 +175,10 @@ export default function LessonsPage() {
                       {lesson.isActive ? "Activa" : "Inactiva"}
                     </Badge>
                   </div>
-                  <CardDescription className="mt-1">
+                  <CardDescription className="mt-1 text-muted-foreground">
                     {lesson.description}
                   </CardDescription>
-                  <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                  <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
                     <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
                       {lesson.unitName}
                     </span>
@@ -193,7 +197,10 @@ export default function LessonsPage() {
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent
+                    align="end"
+                    className="bg-card border-border text-foreground"
+                  >
                     <DropdownMenuItem asChild>
                       <Link href={`/admin/lessons/${lesson.id}`}>
                         <Eye className="mr-2 h-4 w-4" />
@@ -224,20 +231,20 @@ export default function LessonsPage() {
         ))}
 
         {filteredLessons.length === 0 && (
-          <Card>
-            <CardContent className="text-center py-8">
-              <BookOpen className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-4 text-lg font-semibold text-gray-900">
+          <Card className="bg-card border-border">
+            <CardContent className="text-center py-8 text-muted-foreground">
+              <BookOpen className="mx-auto h-12 w-12" />
+              <h3 className="mt-4 text-lg font-semibold text-foreground">
                 No hay lecciones
               </h3>
-              <p className="mt-2 text-gray-600">
+              <p className="mt-2">
                 {searchTerm || selectedUnit !== "all"
                   ? "No se encontraron lecciones con los filtros actuales."
                   : "Comienza creando tu primera lección."}
               </p>
               {!searchTerm && selectedUnit === "all" && (
                 <Link href="/admin/lessons/new">
-                  <Button className="mt-4">
+                  <Button className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90">
                     <Plus className="mr-2 h-4 w-4" />
                     Crear primera lección
                   </Button>

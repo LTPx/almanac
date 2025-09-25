@@ -59,28 +59,28 @@ const gamificationStats = [
     name: "ZAP Tokens",
     value: "89,432",
     icon: Zap,
-    color: "text-yellow-500"
+    color: "text-primary" // adaptado a tu primario (#32C781)
   },
   {
     name: "Rachas Activas",
     value: "1,847",
     icon: Trophy,
-    color: "text-blue-500"
+    color: "text-accent" // armonizado con tu paleta de acento
   },
   {
     name: "NFTs Minteados",
     value: "432",
     icon: TrendingUp,
-    color: "text-green-500"
+    color: "text-secondary" // armonizado con tu paleta secundaria
   }
 ];
 
 export default function AdminDashboard() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-background text-foreground min-h-screen p-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground">
           Panel de administración del sistema educativo
         </p>
       </div>
@@ -90,7 +90,10 @@ export default function AdminDashboard() {
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.name}>
+            <Card
+              key={stat.name}
+              className="bg-card text-card-foreground border border-border"
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   {stat.name}
@@ -102,8 +105,8 @@ export default function AdminDashboard() {
                 <p
                   className={`text-xs ${
                     stat.changeType === "positive"
-                      ? "text-green-600"
-                      : "text-red-600"
+                      ? "text-green-500"
+                      : "text-destructive"
                   }`}
                 >
                   {stat.change} desde el mes pasado
@@ -116,14 +119,15 @@ export default function AdminDashboard() {
 
       {/* Stats de gamificación */}
       <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">
-          Sistema de Gamificación
-        </h2>
+        <h2 className="text-xl font-bold mb-4">Sistema de Gamificación</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {gamificationStats.map((stat) => {
             const Icon = stat.icon;
             return (
-              <Card key={stat.name}>
+              <Card
+                key={stat.name}
+                className="bg-card text-card-foreground border border-border"
+              >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
                     {stat.name}
@@ -139,9 +143,9 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Actividad reciente */}
+      {/* Actividad reciente y usuarios más activos */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card>
+        <Card className="bg-card text-card-foreground border border-border">
           <CardHeader>
             <CardTitle>Actividad Reciente</CardTitle>
             <CardDescription>Últimas acciones en el sistema</CardDescription>
@@ -176,7 +180,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-card text-card-foreground border border-border">
           <CardHeader>
             <CardTitle>Usuarios Más Activos</CardTitle>
             <CardDescription>
@@ -185,39 +189,45 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div>
-                    <p className="text-sm font-medium leading-none">
-                      alice@example.com
-                    </p>
-                    <p className="text-sm text-muted-foreground">1,250 XP</p>
+              {[
+                {
+                  name: "alice@example.com",
+                  xp: "1,250",
+                  rank: "#1",
+                  color: "text-green-500"
+                },
+                {
+                  name: "bob@example.com",
+                  xp: "980",
+                  rank: "#2",
+                  color: "text-primary"
+                },
+                {
+                  name: "charlie@example.com",
+                  xp: "875",
+                  rank: "#3",
+                  color: "text-accent"
+                }
+              ].map((user) => (
+                <div
+                  key={user.name}
+                  className="flex items-center justify-between"
+                >
+                  <div className="flex items-center space-x-4">
+                    <div>
+                      <p className="text-sm font-medium leading-none">
+                        {user.name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {user.xp} XP
+                      </p>
+                    </div>
+                  </div>
+                  <div className={`text-sm font-medium ${user.color}`}>
+                    {user.rank}
                   </div>
                 </div>
-                <div className="text-sm font-medium text-green-600">#1</div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div>
-                    <p className="text-sm font-medium leading-none">
-                      bob@example.com
-                    </p>
-                    <p className="text-sm text-muted-foreground">980 XP</p>
-                  </div>
-                </div>
-                <div className="text-sm font-medium text-blue-600">#2</div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div>
-                    <p className="text-sm font-medium leading-none">
-                      charlie@example.com
-                    </p>
-                    <p className="text-sm text-muted-foreground">875 XP</p>
-                  </div>
-                </div>
-                <div className="text-sm font-medium text-orange-600">#3</div>
-              </div>
+              ))}
             </div>
           </CardContent>
         </Card>

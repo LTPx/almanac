@@ -1,4 +1,3 @@
-// app/admin/lessons/new/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -48,7 +47,6 @@ export default function CreateLessonPage() {
     isActive: true
   });
 
-  // Actualizar posición cuando se selecciona una unidad
   useEffect(() => {
     if (formData.unitId) {
       const unit = mockUnits.find((u) => u.id.toString() === formData.unitId);
@@ -67,24 +65,12 @@ export default function CreateLessonPage() {
     setIsLoading(true);
 
     try {
-      // Aquí iría la lógica para crear/editar la lección
-      // const response = await fetch('/api/lessons', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     ...formData,
-      //     unitId: parseInt(formData.unitId),
-      //   }),
-      // })
-
       console.log("Creando lección:", {
         ...formData,
         unitId: parseInt(formData.unitId)
       });
 
-      // Simulamos una petición
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
       router.push("/admin/lessons");
     } catch (error) {
       console.error("Error al crear lección:", error);
@@ -119,23 +105,26 @@ export default function CreateLessonPage() {
   const xpRecommendation = getXPRecommendation(formData.experiencePoints);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-foreground">
+      {/* Header */}
       <div className="flex items-center space-x-4">
         <Link href="/admin/lessons">
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" className="text-foreground">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Volver
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Nueva Lección</h1>
-          <p className="text-gray-600">Crea una nueva lección para el curso</p>
+          <h1 className="text-3xl font-bold text-foreground">Nueva Lección</h1>
+          <p className="text-muted-foreground">
+            Crea una nueva lección para el curso
+          </p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Información básica */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle>Información Básica</CardTitle>
             <CardDescription>Datos principales de la lección</CardDescription>
@@ -149,6 +138,7 @@ export default function CreateLessonPage() {
                 onChange={(e) => handleInputChange("name", e.target.value)}
                 placeholder="Ej: ¿Qué es un Smart Contract?"
                 required
+                className="bg-background text-foreground border-border"
               />
             </div>
 
@@ -162,6 +152,7 @@ export default function CreateLessonPage() {
                 }
                 placeholder="Describe brevemente el contenido de esta lección..."
                 rows={4}
+                className="bg-background text-foreground border-border"
               />
             </div>
 
@@ -172,10 +163,10 @@ export default function CreateLessonPage() {
                 onValueChange={(value) => handleInputChange("unitId", value)}
                 required
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-background text-foreground border-border">
                   <SelectValue placeholder="Selecciona una unidad" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-card text-foreground border-border">
                   {mockUnits.map((unit) => (
                     <SelectItem key={unit.id} value={unit.id.toString()}>
                       <div className="flex items-center justify-between w-full">
@@ -189,7 +180,7 @@ export default function CreateLessonPage() {
                 </SelectContent>
               </Select>
               {selectedUnit && (
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Esta lección se agregará a "{selectedUnit.name}"
                 </p>
               )}
@@ -198,7 +189,7 @@ export default function CreateLessonPage() {
         </Card>
 
         {/* Configuración avanzada */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle>Configuración de la Lección</CardTitle>
             <CardDescription>
@@ -222,12 +213,13 @@ export default function CreateLessonPage() {
                         parseInt(e.target.value) || 25
                       )
                     }
+                    className="bg-background text-foreground border-border"
                   />
                   <Badge className={xpRecommendation.color}>
                     {xpRecommendation.text}
                   </Badge>
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   Recomendado: 25-50 XP para lecciones estándar
                 </p>
               </div>
@@ -242,9 +234,10 @@ export default function CreateLessonPage() {
                   onChange={(e) =>
                     handleInputChange("position", parseInt(e.target.value) || 1)
                   }
+                  className="bg-background text-foreground border-border"
                 />
                 {selectedUnit && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     Posición {formData.position} de{" "}
                     {selectedUnit.lessonsCount + 1}
                   </p>
@@ -269,7 +262,7 @@ export default function CreateLessonPage() {
                   <span>Lección obligatoria</span>
                 </Label>
               </div>
-              <p className="text-sm text-gray-600 ml-6">
+              <p className="text-sm text-muted-foreground ml-6">
                 Las lecciones obligatorias deben completarse para avanzar
               </p>
 
@@ -283,7 +276,7 @@ export default function CreateLessonPage() {
                 />
                 <Label htmlFor="isActive">Lección activa</Label>
               </div>
-              <p className="text-sm text-gray-600 ml-6">
+              <p className="text-sm text-muted-foreground ml-6">
                 Solo las lecciones activas serán visibles para los estudiantes
               </p>
             </div>
@@ -291,7 +284,7 @@ export default function CreateLessonPage() {
         </Card>
 
         {/* Vista previa */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle>Vista Previa</CardTitle>
             <CardDescription>
@@ -299,12 +292,12 @@ export default function CreateLessonPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 bg-gray-50">
+            <div className="rounded-lg border-2 border-dashed border-border p-6 bg-background">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
-                    <BookOpen className="h-5 w-5 text-blue-600" />
-                    <h3 className="font-semibold text-lg">
+                    <BookOpen className="h-5 w-5 text-primary" />
+                    <h3 className="font-semibold text-lg text-foreground">
                       {formData.name || "Nombre de la lección"}
                     </h3>
                     {formData.mandatory && (
@@ -315,12 +308,12 @@ export default function CreateLessonPage() {
                     )}
                   </div>
 
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-muted-foreground mb-4">
                     {formData.description ||
                       "Descripción de la lección aparecerá aquí"}
                   </p>
 
-                  <div className="flex items-center space-x-6 text-sm text-gray-500">
+                  <div className="flex items-center space-x-6 text-sm text-muted-foreground">
                     <div className="flex items-center space-x-1">
                       <Target className="h-4 w-4" />
                       <span>{formData.experiencePoints} XP</span>
@@ -340,14 +333,14 @@ export default function CreateLessonPage() {
                 </div>
 
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-blue-600">
+                  <div className="text-2xl font-bold text-primary">
                     #{formData.position}
                   </div>
-                  <div className="text-xs text-gray-500">Posición</div>
+                  <div className="text-xs text-muted-foreground">Posición</div>
                 </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="mt-4 pt-4 border-t border-border">
                 <Button disabled className="w-full">
                   Comenzar Lección
                 </Button>
@@ -374,32 +367,32 @@ export default function CreateLessonPage() {
       </form>
 
       {/* Tips y recomendaciones */}
-      <Card className="bg-blue-50 border-blue-200">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-blue-900">
+          <CardTitle className="text-foreground">
             💡 Tips para crear lecciones efectivas
           </CardTitle>
         </CardHeader>
-        <CardContent className="text-blue-800 text-sm space-y-2">
-          <ul className="space-y-1">
+        <CardContent className="text-muted-foreground text-sm space-y-2">
+          <ul className="space-y-1 list-disc list-inside">
             <li>
-              • <strong>Nombres claros:</strong> Usa títulos descriptivos que
+              <strong>Nombres claros:</strong> Usa títulos descriptivos que
               indiquen qué aprenderán
             </li>
             <li>
-              • <strong>Progresión lógica:</strong> Ordena las lecciones de
-              básico a avanzado
+              <strong>Progresión lógica:</strong> Ordena las lecciones de básico
+              a avanzado
             </li>
             <li>
-              • <strong>XP balanceado:</strong> 25-35 XP para lecciones básicas,
+              <strong>XP balanceado:</strong> 25-35 XP para lecciones básicas,
               40-60 XP para avanzadas
             </li>
             <li>
-              • <strong>Lecciones obligatorias:</strong> Úsalas para conceptos
+              <strong>Lecciones obligatorias:</strong> Úsalas para conceptos
               fundamentales
             </li>
             <li>
-              • <strong>Descripciones útiles:</strong> Explica brevemente qué
+              <strong>Descripciones útiles:</strong> Explica brevemente qué
               cubrirá la lección
             </li>
           </ul>

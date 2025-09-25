@@ -134,8 +134,8 @@ export default function CreateQuestionPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Nueva Pregunta</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold text-foreground">Nueva Pregunta</h1>
+          <p className="text-muted-foreground">
             Crea una nueva pregunta para las lecciones
           </p>
         </div>
@@ -143,7 +143,7 @@ export default function CreateQuestionPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Información básica */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle>Información Básica</CardTitle>
             <CardDescription>Datos principales de la pregunta</CardDescription>
@@ -158,6 +158,7 @@ export default function CreateQuestionPage() {
                 placeholder="Escribe aquí tu pregunta..."
                 rows={3}
                 required
+                className="bg-card border-border text-foreground"
               />
             </div>
 
@@ -212,6 +213,7 @@ export default function CreateQuestionPage() {
                   onChange={(e) =>
                     handleInputChange("order", parseInt(e.target.value))
                   }
+                  className="bg-card border-border text-foreground"
                 />
               </div>
             </div>
@@ -231,7 +233,7 @@ export default function CreateQuestionPage() {
 
         {/* Respuestas para opción múltiple */}
         {formData.type === "MULTIPLE_CHOICE" && (
-          <Card>
+          <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle>Opciones de Respuesta</CardTitle>
               <CardDescription>
@@ -242,7 +244,7 @@ export default function CreateQuestionPage() {
               {answers.map((answer, index) => (
                 <div
                   key={index}
-                  className="flex items-center space-x-4 p-4 border rounded-lg"
+                  className="flex items-center space-x-4 p-4 border border-border rounded-lg bg-card"
                 >
                   <div className="flex-1">
                     <Input
@@ -251,6 +253,7 @@ export default function CreateQuestionPage() {
                       onChange={(e) =>
                         handleAnswerChange(index, "text", e.target.value)
                       }
+                      className="bg-card border-border text-foreground"
                     />
                   </div>
                   <Button
@@ -346,7 +349,7 @@ export default function CreateQuestionPage() {
         )}
 
         {/* Vista previa */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle>Vista Previa</CardTitle>
             <CardDescription>
@@ -354,8 +357,8 @@ export default function CreateQuestionPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="p-6 bg-gray-50 rounded-lg">
-              <h3 className="font-semibold text-lg mb-4">
+            <div className="p-6 bg-card rounded-lg border border-border">
+              <h3 className="font-semibold text-lg mb-4 text-foreground">
                 {formData.title || "Tu pregunta aparecerá aquí..."}
               </h3>
 
@@ -369,8 +372,8 @@ export default function CreateQuestionPage() {
                           key={index}
                           className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                             answer.isCorrect
-                              ? "border-green-300 bg-green-50"
-                              : "border-gray-200 hover:bg-gray-50"
+                              ? "border-green-300 bg-green-50 text-foreground"
+                              : "border-border hover:bg-card text-foreground"
                           }`}
                         >
                           {answer.text}
@@ -383,26 +386,6 @@ export default function CreateQuestionPage() {
                       ))}
                   </div>
                 )}
-
-              {formData.type === "TRUE_FALSE" && (
-                <div className="flex space-x-4">
-                  <div className="flex-1 p-3 border rounded-lg text-center">
-                    Verdadero
-                  </div>
-                  <div className="flex-1 p-3 border rounded-lg text-center">
-                    Falso
-                  </div>
-                </div>
-              )}
-
-              {formData.type === "FILL_IN_BLANK" && (
-                <div className="p-3 border rounded-lg">
-                  <Input
-                    placeholder="Completa aquí..."
-                    className="border-dashed"
-                  />
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>
