@@ -152,7 +152,7 @@ export default function UnitPage(nextParams: { params: { id: string } }) {
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
           {renderContent()}
         </div>
       </div>

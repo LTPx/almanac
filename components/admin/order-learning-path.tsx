@@ -69,17 +69,19 @@ const Droppable = React.memo(function Droppable({
       <div
         ref={setNodeRef}
         className={`min-w-[200px] p-4 rounded-xl border-2 border-dashed
-          transition-all duration-200 min-h-[400px]
-          ${
-            isOver
-              ? "border-blue-400 bg-blue-50 shadow-lg"
-              : "border-gray-300 bg-gray-50 hover:border-gray-400"
-          }`}
+    transition-all duration-200 min-h-[400px] max-h-[550px]
+    ${
+      isOver
+        ? "border-blue-400 bg-blue-50 shadow-lg"
+        : "border-gray-300 bg-gray-50 hover:border-gray-400"
+    }`}
       >
         <div className="text-sm font-medium text-gray-700 mb-3">
           Lecciones Disponibles
         </div>
-        <div className="flex flex-col gap-3">{children}</div>
+        <div className="flex flex-col gap-3 overflow-y-auto max-h-[480px] pr-1">
+          {children}
+        </div>
       </div>
     );
   }
@@ -328,19 +330,21 @@ export default function OrderLearningPath({
           </button>
         </div>
 
-        <div className="flex gap-6">
-          <Droppable id="panel" isPanel>
-            {availableLessons.length === 0 && (
-              <div className="text-xs text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
-                Todas las lecciones están asignadas
-              </div>
-            )}
-            {availableLessons.map((u) => (
-              <Draggable key={u.id} id={u.id} label={u.label} />
-            ))}
-          </Droppable>
+        <div className="flex gap-6 h-full">
+          <div className="sticky top-20 self-start">
+            <Droppable id="panel" isPanel>
+              {availableLessons.length === 0 && (
+                <div className="text-xs text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
+                  Todas las lecciones están asignadas
+                </div>
+              )}
+              {availableLessons.map((u) => (
+                <Draggable key={u.id} id={u.id} label={u.label} />
+              ))}
+            </Droppable>
+          </div>
 
-          <div className="flex-1">
+          <div className="flex-1 pb-[50px]">
             <div className="grid grid-cols-5 gap-3 p-4 bg-gray-50 rounded-xl">
               {Object.keys(assignments).map((cellId, index) => {
                 const lessonKey = assignments[cellId];
@@ -365,17 +369,19 @@ export default function OrderLearningPath({
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="flex items-center gap-4">
+      <div className="fixed bottom-0 left-0 w-full bg-white z-10 border-t shadow-md">
+        <div className="max-w-7xl mx-auto flex justify-end px-6 py-4">
           <button
             onClick={handleSave}
             disabled={isSaving || assignedCount === 0}
             className={`px-6 py-3 rounded-xl shadow-md font-medium transition-all duration-200
-              ${
-                isSaving || assignedCount === 0
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:shadow-lg"
-              }`}
+          ${
+            isSaving || assignedCount === 0
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:shadow-lg"
+          }`}
           >
             {isSaving ? "Guardando..." : "Guardar Path"}
           </button>
