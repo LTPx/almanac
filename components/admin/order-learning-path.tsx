@@ -21,14 +21,20 @@ type Assignments = Record<CellId, LessonId | null>;
 const Draggable = React.memo(function Draggable({
   id,
   label,
+  isMandatory = false, // <-- nuevo prop
   isDragOverlay = false
 }: {
   id: string;
   label: string;
+  isMandatory?: boolean;
   isDragOverlay?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({ id });
+
+  const bgColor = isMandatory
+    ? "bg-green-600 text-white"
+    : "bg-yellow-600 text-white";
 
   return (
     <div
@@ -41,10 +47,9 @@ const Draggable = React.memo(function Draggable({
           : undefined,
         opacity: isDragging && !isDragOverlay ? 0.5 : 1
       }}
-      className={`px-3 py-2 bg-gradient-to-r from-primary to-primary/90 
-        text-primary-foreground rounded-lg shadow-md cursor-grab active:cursor-grabbing 
-        text-sm font-medium transition-all duration-200 hover:shadow-lg 
-        select-none ${isDragOverlay ? "rotate-3 scale-105" : ""} ${
+      className={`px-3 py-2 rounded-lg shadow-md cursor-grab active:cursor-grabbing 
+        text-sm font-medium transition-all duration-200 hover:shadow-lg select-none 
+        ${bgColor} ${isDragOverlay ? "rotate-3 scale-105" : ""} ${
           isDragging && !isDragOverlay ? "cursor-grabbing" : ""
         }`}
     >
@@ -318,7 +323,9 @@ export default function OrderLearningPath({
           <button
             onClick={clearAll}
             disabled={assignedCount === 0}
-            className="px-3 py-1 text-xs text-foreground border border-border rounded-lg hover:bg-muted/10 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="cursor-pointer px-4 py-2 text-sm font-medium text-foreground border rounded-lg 
+              disabled:opacity-50 disabled:cursor-not-allowed
+              transition-all duration-200 flex items-center gap-2"
           >
             Limpiar Todo
           </button>
@@ -329,13 +336,25 @@ export default function OrderLearningPath({
           <div className="sticky top-20 self-start">
             <Droppable id="panel" isPanel>
               {availableLessons.length === 0 && (
-                <div className="text-xs text-muted-foreground text-center py-8 border-2 border-dashed border-border rounded-lg">
+                <div
+                  className="text-sm text-muted-foreground text-center py-8 px-4 border-2 border-dashed 
+                   rounded-lg"
+                >
+                  <div className="mb-2">📚</div>
                   Todas las lecciones están asignadas
                 </div>
               )}
-              {availableLessons.map((u) => (
-                <Draggable key={u.id} id={u.id} label={u.label} />
-              ))}
+              {availableLessons.map((u) => {
+                const lessonData = lessons.find((l) => l.id === u.lessonId);
+                return (
+                  <Draggable
+                    key={u.id}
+                    id={u.id}
+                    label={u.label}
+                    isMandatory={lessonData?.mandatory}
+                  />
+                );
+              })}
             </Droppable>
           </div>
 
@@ -355,7 +374,14 @@ export default function OrderLearningPath({
                     </div>
                     <Droppable id={cellId}>
                       {lesson && (
-                        <Draggable id={lesson.id} label={lesson.label} />
+                        <Draggable
+                          id={lesson.id}
+                          label={lesson.label}
+                          isMandatory={
+                            lessons.find((l) => l.id === lesson.lessonId)
+                              ?.mandatory
+                          }
+                        />
                       )}
                     </Droppable>
                   </div>
@@ -367,7 +393,7 @@ export default function OrderLearningPath({
       </div>
 
       {/* Bottom Save Button */}
-      <div className="fixed bottom-0 left-0 w-full bg-background z-10 border-t border-border shadow-md">
+      <div className="fixed bottom-0 left-0 w-full bg-black/10 backdrop-blur-sm z-10 border-t border-border shadow-md">
         <div className="max-w-7xl mx-auto flex justify-end px-6 py-4">
           <button
             onClick={handleSave}
@@ -391,6 +417,9 @@ export default function OrderLearningPath({
             id={draggedLesson.id}
             label={draggedLesson.label}
             isDragOverlay
+            isMandatory={
+              lessons.find((l) => l.id === draggedLesson.lessonId)?.mandatory
+            }
           />
         )}
       </DragOverlay>
