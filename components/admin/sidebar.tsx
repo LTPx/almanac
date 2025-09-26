@@ -19,77 +19,34 @@ import {
 } from "lucide-react";
 
 const navigation = [
-  {
-    name: "Dashboard",
-    href: "/admin",
-    icon: LayoutDashboard
-  },
-  {
-    name: "Unidades",
-    href: "/admin/units",
-    icon: BookOpen
-  },
-  {
-    name: "Lecciones",
-    href: "/admin/lessons",
-    icon: GraduationCap
-  },
-  {
-    name: "Preguntas",
-    href: "/admin/questions",
-    icon: HelpCircle
-  },
-  {
-    name: "Usuarios",
-    href: "/admin/users",
-    icon: Users
-  },
-  {
-    name: "Progreso",
-    href: "/admin/progress",
-    icon: BarChart3
-  },
+  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Unidades", href: "/admin/units", icon: BookOpen },
+  { name: "Lecciones", href: "/admin/lessons", icon: GraduationCap },
+  { name: "Preguntas", href: "/admin/questions", icon: HelpCircle },
+  { name: "Usuarios", href: "/admin/users", icon: Users },
+  { name: "Progreso", href: "/admin/progress", icon: BarChart3 },
   {
     name: "Gamificación",
     href: "/admin/gamification",
     icon: Trophy,
     children: [
-      {
-        name: "Corazones",
-        href: "/admin/gamification/hearts",
-        icon: Heart
-      },
-      {
-        name: "ZAP Tokens",
-        href: "/admin/gamification/zaps",
-        icon: Zap
-      },
-      {
-        name: "Rachas",
-        href: "/admin/gamification/streaks",
-        icon: Trophy
-      }
+      { name: "Corazones", href: "/admin/gamification/hearts", icon: Heart },
+      { name: "ZAP Tokens", href: "/admin/gamification/zaps", icon: Zap },
+      { name: "Rachas", href: "/admin/gamification/streaks", icon: Trophy }
     ]
   },
-  {
-    name: "NFTs",
-    href: "/admin/nfts",
-    icon: Coins
-  },
-  {
-    name: "Analytics",
-    href: "/admin/analytics",
-    icon: Database
-  },
-  {
-    name: "Configuración",
-    href: "/admin/settings",
-    icon: Settings
-  }
+  { name: "NFTs", href: "/admin/nfts", icon: Coins },
+  { name: "Analytics", href: "/admin/analytics", icon: Database },
+  { name: "Configuración", href: "/admin/settings", icon: Settings }
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+
+  const isActiveLink = (href: string, exact = false) => {
+    if (exact) return pathname === href;
+    return pathname === href || pathname.startsWith(href + "/");
+  };
 
   return (
     <div className="fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
@@ -102,8 +59,11 @@ export function Sidebar() {
       <nav className="mt-6 px-3">
         <ul className="space-y-1">
           {navigation.map((item) => {
-            const isActive =
-              pathname === item.href || pathname.startsWith(item.href + "/");
+            const hasChildren = item.children && item.children.length > 0;
+
+            const isParentActive = hasChildren
+              ? item.children.some((child) => isActiveLink(child.href, true))
+              : isActiveLink(item.href, true);
 
             return (
               <li key={item.name}>
@@ -111,7 +71,7 @@ export function Sidebar() {
                   href={item.href}
                   className={cn(
                     "group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    isActive
+                    isParentActive
                       ? "bg-sidebar-primary text-sidebar-primary-foreground"
                       : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   )}
@@ -119,7 +79,7 @@ export function Sidebar() {
                   <item.icon
                     className={cn(
                       "mr-3 h-5 w-5 flex-shrink-0",
-                      isActive
+                      isParentActive
                         ? "text-sidebar-primary-foreground"
                         : "text-muted-foreground group-hover:text-sidebar-accent-foreground"
                     )}
@@ -128,10 +88,10 @@ export function Sidebar() {
                 </Link>
 
                 {/* Children */}
-                {item.children && isActive && (
+                {hasChildren && isParentActive && (
                   <ul className="mt-2 space-y-1 ml-6">
                     {item.children.map((child) => {
-                      const isChildActive = pathname === child.href;
+                      const isChildActive = isActiveLink(child.href, true);
 
                       return (
                         <li key={child.name}>
