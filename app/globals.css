@@ -208,3 +208,11 @@
 .animate-shimmer {
   animation: shimmer 1.5s linear infinite;
 }
+
+[data-next-badge] {
+  display: none !important;
+}
+
+[data-nextjs-dev-tools-button] {
+  display: none !important;
+}

@@ -27,12 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${notoSansKR.variable}`}
-      suppressHydrationWarning
-    >
-      <body className={` antialiased`}>
+    <html lang="en" className={notoSansKR.variable} suppressHydrationWarning>
+      <body className="antialiased" suppressHydrationWarning>
         <NextTopLoader showSpinner={false} height={6} color="#000000" />
         <Toaster richColors position="top-right" />
         <ClientWrapper>{children}</ClientWrapper>
