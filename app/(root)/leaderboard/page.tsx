@@ -20,28 +20,28 @@ function Leaderboard() {
           <span className="text-xl font-semibold">3 Días</span>
         </div>
       </div>
-      <div className="flex justify-center gap-8 mb-12">
+      <div className="flex justify-center gap-4 lg:gap-8 mb-12">
         <div className="flex flex-col items-center">
           <Award
-            className="w-20 h-20 text-amber-500 fill-amber-600"
+            className="w-14 h-14 lg:w-20 lg:h-20 text-amber-500 fill-amber-600"
             strokeWidth={1.5}
           />
         </div>
         <div className="flex flex-col items-center">
           <Award
-            className="w-20 h-20 text-slate-300 fill-slate-400"
+            className="w-14 h-14 lg:w-20 lg:h-20 text-slate-300 fill-slate-400"
             strokeWidth={1.5}
           />
         </div>
         <div className="flex flex-col items-center">
           <Award
-            className="w-20 h-20 text-green-500 fill-green-600"
+            className="w-14 h-14 lg:w-20 lg:h-20 text-green-500 fill-green-600"
             strokeWidth={1.5}
           />
         </div>
         <div className="flex flex-col items-center">
           <Award
-            className="w-20 h-20 text-red-600 fill-red-700"
+            className="w-14 h-14 lg:w-20 lg:h-20 text-red-600 fill-red-700"
             strokeWidth={1.5}
           />
         </div>

@@ -39,7 +39,7 @@ export function TestResults({
   }, [isPassed, hasPlayed, finishControls]);
 
   return (
-    <div className="bg-background min-h-screen p-6 flex flex-col items-center justify-center">
+    <div className="bg-background min-h-screen lg:p-6 flex flex-col items-center justify-center">
       {isPassed && (
         <Confetti
           recycle={false}

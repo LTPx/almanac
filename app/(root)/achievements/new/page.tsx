@@ -167,7 +167,7 @@ export default function CreateCertificatePage() {
 
   if (!session) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center p-8">
           <Trophy className="mx-auto text-gray-400 mb-4" size={64} />
           <h1 className="text-2xl font-bold text-white mb-4">Inicia Sesión</h1>
@@ -189,9 +189,9 @@ export default function CreateCertificatePage() {
 
   if (availableUnits.length === 0 && currentStep !== 3) {
     return (
-      <div className="min-h-screen bg-gray-900 py-8 px-4">
+      <div className="min-h-screen flex items-center py-8 px-4">
         <div className="max-w-lg mx-auto">
-          <div className="bg-gray-800 rounded-xl p-8 text-center">
+          <div className="rounded-xl p-8 text-center">
             <CheckCircle className="mx-auto text-green-500 mb-4" size={64} />
             <h3 className="text-xl font-semibold text-white mb-2">
               ¡Todos tus certificados están creados!
