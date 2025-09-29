@@ -13,12 +13,14 @@ interface TestResultsProps {
   lessonName: string;
   onReturnToLessons: () => void;
   onRetakeTest?: () => void;
+  hearts?: number;
 }
 
 export function TestResults({
   results,
   lessonName,
   onReturnToLessons,
+  hearts,
   onRetakeTest
 }: TestResultsProps) {
   const percentage = Math.round(results.score);
@@ -71,7 +73,7 @@ export function TestResults({
         </h1>
         <div className="flex w-full items-center gap-x-4">
           <ResultCard variant="points" value={results.experienceGained} />
-          <ResultCard variant="hearts" value={5} />
+          <ResultCard variant="hearts" value={hearts || 0} />
         </div>
       </div>
 

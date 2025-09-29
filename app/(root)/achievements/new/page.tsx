@@ -181,7 +181,7 @@ export default function CreateCertificatePage() {
 
   if (loadingData) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="animate-spin text-white" size={32} />
       </div>
     );
@@ -221,14 +221,14 @@ export default function CreateCertificatePage() {
         </div>
         <StepIndicator />
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-[22px] font-bold text-white">
             {currentStep === 1 && "Crea tu Medalla NFT"}
             {currentStep === 2 && "Confirma los datos"}
             {currentStep === 3 && "¡Éxito!"}
           </h2>
         </div>
 
-        <div className="rounded-xl p-6">
+        <div className="rounded-xl py-6 px-2 lg:p-6 pb-[100px]">
           {currentStep === 1 && (
             <div className="space-y-6">
               <div>

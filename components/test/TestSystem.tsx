@@ -176,6 +176,7 @@ export function TestSystem({
             className="absolute inset-0 w-full h-full flex items-center justify-center"
           >
             <TestResults
+              hearts={hearts}
               results={results}
               lessonName={currentTest.lesson.name}
               onReturnToLessons={onClose}
