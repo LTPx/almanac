@@ -21,19 +21,7 @@ function Achievements() {
   return (
     <div className="AchievementPage px-4 h-[70dvh]">
       <div className="flex items-center justify-between pt-[20px]">
-        <h4 className="text-[30px] font-bold">Medallas</h4>
-        <div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={refetch}
-            disabled={loading}
-            className="w-full"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            Actualizar
-          </Button>
-        </div>
+        <h4 className="text-[22px] font-bold">Medallas</h4>
       </div>
 
       <div className="h-full pt-6 flex flex-col justify-between">

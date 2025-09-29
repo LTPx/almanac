@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-import { Home, BookOpen, Medal, User, Book } from "lucide-react"; // 👈 reemplazo de react-icons
+import { Home, BookOpen, Medal, User, Book, Trophy } from "lucide-react"; // 👈 reemplazo de react-icons
 import isInViewport from "@/lib/utils";
 
 let WIN_PREV_POSITION = 0;
@@ -26,6 +26,7 @@ const NAV: {
     iconOpen: BookOpen,
     iconClosed: Book
   },
+  { name: "Leaderboard", link: "/leaderboard", icon: Trophy },
   { name: "Achievements", link: "/achievements", icon: Medal },
   { name: "Profile", link: "/profile", icon: User }
 ];
