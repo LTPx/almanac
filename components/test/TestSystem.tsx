@@ -72,15 +72,17 @@ export function TestSystem({
         ...prev,
         [questionId]: { answer, isCorrect: result.isCorrect }
       }));
+    }
+  };
 
-      setTimeout(() => {
-        if (currentQuestionIndex < currentTest.questions.length - 1) {
-          setCurrentQuestionIndex((prev) => prev + 1);
-          setQuestionStartTime(Date.now());
-        } else {
-          handleCompleteTest();
-        }
-      }, 2000);
+  const handleNext = () => {
+    if (!currentTest) return;
+
+    if (currentQuestionIndex < currentTest.questions.length - 1) {
+      setCurrentQuestionIndex((prev) => prev + 1);
+      setQuestionStartTime(Date.now());
+    } else {
+      handleCompleteTest();
     }
   };
 
@@ -147,6 +149,7 @@ export function TestSystem({
                 <TestQuestion
                   question={currentTest.questions[currentQuestionIndex]}
                   onAnswer={handleAnswer}
+                  onNext={handleNext}
                   showResult={
                     !!answers[currentTest.questions[currentQuestionIndex].id]
                   }
