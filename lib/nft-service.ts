@@ -47,11 +47,14 @@ export interface MintResult {
  */
 export function createNFTMetadata(
   courseName: string,
-  unitName: string
+  unitName: string,
+  customDescription?: string
 ): NFTMetadata {
+  const defaultDescription = `Certificado de completitud para la unidad "${unitName}" del curso "${courseName}"`;
+
   return {
     name: `${courseName} - ${unitName}`,
-    description: `Certificado de completitud para la unidad "${unitName}" del curso "${courseName}"`,
+    description: customDescription || defaultDescription,
     image:
       "https://gateway.pinata.cloud/ipfs/bafybeia25ohj632vt35cl242hrqtubxjmqsbgwyrhydjkdeigtxt7thbye",
     attributes: [

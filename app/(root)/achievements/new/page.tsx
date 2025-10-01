@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { QRCodeSVG } from "qrcode.react";
+import { useRouter } from "next/navigation";
+
 import {
   Trophy,
   Loader2,
@@ -16,6 +19,7 @@ import {
 import { useSession } from "@/lib/auth-client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface CompletedUnit {
   unitId: string;
@@ -50,11 +54,12 @@ interface NFT {
 
 export default function CreateCertificatePage() {
   const { data: session } = useSession();
+  const router = useRouter();
 
   const [completedUnits, setCompletedUnits] = useState<CompletedUnit[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -96,7 +101,9 @@ export default function CreateCertificatePage() {
   };
 
   const handleBack = () => {
-    if (currentStep > 1) {
+    if (currentStep === 0) {
+      router.push("/achievements");
+    } else if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
   };
@@ -212,16 +219,16 @@ export default function CreateCertificatePage() {
           <button
             onClick={handleBack}
             className="text-white hover:text-gray-300"
-            disabled={currentStep === 1}
           >
             <ArrowLeft size={24} />
           </button>
           <h1 className="text-xl font-semibold text-white">Minting</h1>
           <div className="w-6" />
         </div>
-        <StepIndicator />
-        <div className="text-center mb-8">
+        {currentStep !== 0 && currentStep !== 3 && <StepIndicator />}
+        <div className="text-center mb-4">
           <h2 className="text-[22px] font-bold text-white">
+            {currentStep === 0 && "Crea una Medalla NFT"}
             {currentStep === 1 && "Crea tu Medalla NFT"}
             {currentStep === 2 && "Confirma los datos"}
             {currentStep === 3 && "¡Éxito!"}
@@ -229,6 +236,49 @@ export default function CreateCertificatePage() {
         </div>
 
         <div className="rounded-xl py-6 px-2 lg:p-6 pb-[100px]">
+          {currentStep === 0 && (
+            <div className="space-y-6">
+              <div className="flex gap-4 overflow-x-auto pb-4">
+                <div className="flex-shrink-0 w-40">
+                  <div className="rounded-xl overflow-hidden border-2 border-gray-600">
+                    <div className="aspect-square bg-gradient-to-br from-pink-300 via-blue-200 to-green-200 flex items-center justify-center"></div>
+                  </div>
+                  <p className="text-blue-400 font-semibold mt-2">Marvlyn</p>
+                  <p className="text-white text-sm">Social S...4 '24</p>
+                </div>
+                <div className="flex-shrink-0 w-40">
+                  <div className="rounded-xl overflow-hidden border-2 border-gray-600">
+                    <div className="aspect-square bg-gradient-to-br from-blue-900 via-blue-700 to-blue-900 flex items-center justify-center"></div>
+                  </div>
+                  <p className="text-white font-semibold mt-2">Charlie</p>
+                  <p className="text-white text-sm">Astronomy '25</p>
+                </div>
+
+                <div className="flex-shrink-0 w-40">
+                  <div className="rounded-xl overflow-hidden border-2 border-gray-600">
+                    <div className="aspect-square bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-300 flex items-center justify-center"></div>
+                  </div>
+                  <p className="text-white font-semibold mt-2">Petey</p>
+                  <p className="text-white text-sm">Scien...</p>
+                </div>
+              </div>
+
+              {/* Texto informativo */}
+              <div className="text-gray-300 space-y-4">
+                <p>
+                  Tus medallas (NFT's) contienen tus resultados educativos y los
+                  preservan de una manera permanente. Los NFT's son fáciles de
+                  compartir e intercambiar
+                </p>
+              </div>
+              <button
+                onClick={() => setCurrentStep(1)}
+                className="w-full bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2 font-medium"
+              >
+                Iniciar nuevo Minting (NFT)
+              </button>
+            </div>
+          )}
           {currentStep === 1 && (
             <div className="space-y-6">
               <div>
@@ -267,7 +317,7 @@ export default function CreateCertificatePage() {
               <button
                 onClick={handleContinue}
                 disabled={!selectedUnitId}
-                className="w-full bg-[#1983DD] hover:bg-blue-700 disabled:opacity-50 text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2"
+                className="w-full bg-[#1983DD] hover:bg-[#1A73E8] disabled:opacity-50 text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2"
               >
                 Continuar
                 <ArrowRight size={20} />
@@ -310,13 +360,8 @@ export default function CreateCertificatePage() {
 
           {currentStep === 3 && mintedNFT && (
             <div className="space-y-6">
-              <div className="text-center">
-                <CheckCircle className="mx-auto text-green-500" size={64} />
-                <p className="text-white font-bold">{success}</p>
-              </div>
-
-              <div className="overflow-hidden rounded-lg shadow-lg bg-gray-900">
-                <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <div className="overflow-hidden rounded-lg">
+                <div className="relative h-48 flex items-center justify-center">
                   {mintedNFT.metadata?.image ? (
                     <img
                       src={mintedNFT.metadata.image}
@@ -326,62 +371,60 @@ export default function CreateCertificatePage() {
                   ) : (
                     <Award className="h-16 w-16 text-white opacity-80" />
                   )}
-                  <Badge className="absolute top-2 right-2" variant="secondary">
-                    #{mintedNFT.tokenId}
-                  </Badge>
                 </div>
 
-                <div className="p-4 space-y-2">
-                  <h3 className="text-lg font-bold text-white">
-                    {mintedNFT.metadata?.name ||
-                      `Certificado #${mintedNFT.tokenId}`}
-                  </h3>
-                  {mintedNFT.metadata?.description && (
-                    <p className="text-gray-300 text-sm">
-                      {mintedNFT.metadata.description}
-                    </p>
-                  )}
-
-                  <div className="flex items-center text-sm text-gray-400">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    {new Date(mintedNFT.mintedAt).toLocaleDateString("es-ES")}
-                  </div>
-
-                  <div className="flex space-x-2 pt-2">
-                    <Button asChild size="sm">
-                      <a
-                        href={`https://amoy.polygonscan.com/token/${mintedNFT.contractAddress}?a=${mintedNFT.tokenId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Explorer
-                      </a>
-                    </Button>
-                    {mintedNFT.metadataUri && (
-                      <Button asChild variant="outline" size="sm">
-                        <a
-                          href={
-                            mintedNFT.metadataUri.startsWith("ipfs://")
-                              ? mintedNFT.metadataUri.replace(
-                                  "ipfs://",
-                                  "https://ipfs.io/ipfs/"
-                                )
-                              : mintedNFT.metadataUri
-                          }
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Metadata
-                        </a>
-                      </Button>
-                    )}
+                <div className="p-4">
+                  <div className="grid grid-cols-4">
+                    <div className="col-span-3 space-y-2">
+                      <h3 className="text-lg font-bold text-white">
+                        {mintedNFT.metadata?.name ||
+                          `Certificado #${mintedNFT.tokenId}`}
+                      </h3>
+                      {mintedNFT.metadata?.description && (
+                        <p className="text-gray-300 text-sm">
+                          {mintedNFT.metadata.description}
+                        </p>
+                      )}
+                      <div className="flex items-center text-sm text-gray-400">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        {new Date(mintedNFT.mintedAt).toLocaleDateString(
+                          "es-ES"
+                        )}
+                      </div>
+                      <div className="flex space-x-2 pt-2">
+                        <Button asChild size="sm">
+                          <a
+                            href={`https://amoy.polygonscan.com/token/${mintedNFT.contractAddress}?a=${mintedNFT.tokenId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            Explorer
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="col-span-1 flex justify-end items-end">
+                      <QRCodeSVG
+                        value={`https://amoy.polygonscan.com/token/${mintedNFT.contractAddress}?a=${mintedNFT.tokenId}`}
+                        size={80}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2">
+              <button className="w-full bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2">
                 <Share2 size={20} /> Compartir
               </button>
+              <div className="flex justify-center">
+                <Link
+                  href={"/achievements"}
+                  onClick={() => setCurrentStep(1)}
+                  className="text-center cursor-pointer w-full text-[#708BB1] hover:text-[#8FA6C7] text-center py-2 transition-colors"
+                >
+                  Volver a Mis Medallas
+                </Link>
+              </div>
             </div>
           )}
         </div>
