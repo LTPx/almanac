@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TestQuestion } from "./TestQuestion";
 import { TestResults } from "./TestResults";
@@ -39,22 +39,25 @@ export function TestSystem({
     Date.now()
   );
 
-  const { isLoading, error, startTest, submitAnswer, completeTest } = useTest();
+  const { error, startTest, submitAnswer, completeTest } = useTest();
+
+  const handleStartTest = useCallback(
+    async (lessonId: number) => {
+      const testData = await startTest(userId, lessonId);
+      if (testData) {
+        setCurrentTest(testData);
+        setCurrentQuestionIndex(0);
+        setAnswers({});
+        setQuestionStartTime(Date.now());
+        setState("testing");
+      }
+    },
+    [startTest, userId]
+  );
 
   useEffect(() => {
     handleStartTest(initialLesson.id);
-  }, []);
-
-  const handleStartTest = async (lessonId: number) => {
-    const testData = await startTest(userId, lessonId);
-    if (testData) {
-      setCurrentTest(testData);
-      setCurrentQuestionIndex(0);
-      setAnswers({});
-      setQuestionStartTime(Date.now());
-      setState("testing");
-    }
-  };
+  }, [handleStartTest, initialLesson.id]);
 
   const handleAnswer = async (questionId: number, answer: string) => {
     if (!currentTest) return;

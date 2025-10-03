@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import FooterNav from "@/components/footer-nav";
 
 export default function ClientWrapper({
   children

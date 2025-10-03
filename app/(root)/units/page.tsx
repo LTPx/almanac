@@ -123,7 +123,7 @@ export default function HomePage() {
     };
 
     loadUnits();
-  }, [toast]);
+  }, []);
 
   // Cargar lecciones y progreso cuando cambia la unidad seleccionada
   useEffect(() => {
@@ -154,7 +154,7 @@ export default function HomePage() {
     };
 
     loadUnitData();
-  }, [selectedUnitId, userId, toast]);
+  }, [selectedUnitId, userId]);
 
   if (loading) {
     return (

@@ -4,7 +4,7 @@ import { CardNFT } from "@/components/car-nft";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useNFTs } from "@/hooks/useNfts";
 import { useUser } from "@/context/UserContext";
 import Link from "next/link";
@@ -16,6 +16,11 @@ function Achievements() {
   if (!userId) {
     return <div>Login...</div>;
   }
+
+  return <AchievementsContent userId={userId} />;
+}
+
+function AchievementsContent({ userId }: { userId: string }) {
   const { nfts, loading, error, refetch } = useNFTs(userId);
 
   return (
@@ -67,6 +72,7 @@ function Achievements() {
               />
             ))}
         </div>
+
         <Link
           href={"/achievements/new"}
           className="w-full h-[50px] text-center bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 text-base font-medium rounded-lg mb-8"

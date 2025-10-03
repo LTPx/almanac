@@ -20,7 +20,7 @@ function Contents() {
       if (data) setUnits(data);
     };
     loadUnits();
-  }, []);
+  }, [fetchUnits]);
 
   if (isLoading) {
     return (

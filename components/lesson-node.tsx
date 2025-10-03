@@ -14,7 +14,7 @@ type LessonNodeProps = {
 };
 
 const LessonNode: React.FC<LessonNodeProps> = ({
-  id,
+  // id,
   name,
   description,
   state,

@@ -18,8 +18,8 @@ export const HeaderBar = ({
   hearts,
   percentage,
   hasActiveSubscription,
-  justAnsweredCorrect = false,
-  onClose
+  justAnsweredCorrect = false
+  // onClose
 }: HeaderProps) => {
   const { open } = useExitModal();
 

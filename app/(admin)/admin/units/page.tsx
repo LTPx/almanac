@@ -48,7 +48,8 @@ export default function UnitsAdminPage() {
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
       setUnits(data);
-    } catch (error) {
+    } catch (_error) {
+      console.error(_error);
       // toast({
       //   title: "Error",
       //   description: "No se pudieron cargar las unidades",
@@ -92,7 +93,9 @@ export default function UnitsAdminPage() {
       setEditingUnit(null);
       setFormData({ name: "", description: "", order: 1 });
       fetchUnits();
-    } catch (error) {
+    } catch (_error) {
+      console.error(_error);
+
       toast.error("No se pudo guardar la unidad");
 
       // toast({
@@ -132,7 +135,8 @@ export default function UnitsAdminPage() {
       toast.success("Unidad eliminada correctamente");
 
       fetchUnits();
-    } catch (error) {
+    } catch (_error) {
+      console.error(_error);
       // toast({
       //   title: "Error",
       //   description: "No se pudo eliminar la unidad",

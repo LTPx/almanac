@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-import { Home, BookOpen, Medal, User, Book, Trophy } from "lucide-react"; // 👈 reemplazo de react-icons
+import { Home, BookOpen, Medal, User, Book, Trophy } from "lucide-react";
 import isInViewport from "@/lib/utils";
 
 let WIN_PREV_POSITION = 0;
@@ -31,17 +31,15 @@ const NAV: {
   { name: "Profile", link: "/profile", icon: User }
 ];
 
-const FooterNav = ({
-  guestMode,
-  cartLink
-}: {
-  guestMode?: boolean;
-  cartLink?: string;
-}) => {
+const FooterNav = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const location = usePathname();
 
   const navigationMenu = NAV;
+
+  const handleEvent = useCallback(() => {
+    window.requestAnimationFrame(showHideHeaderMenu);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -50,11 +48,7 @@ const FooterNav = ({
     return () => {
       window.removeEventListener("scroll", handleEvent);
     };
-  }, []);
-
-  const handleEvent = () => {
-    window.requestAnimationFrame(showHideHeaderMenu);
-  };
+  }, [handleEvent]);
 
   const showHideHeaderMenu = () => {
     const currentScrollPos = window.pageYOffset;

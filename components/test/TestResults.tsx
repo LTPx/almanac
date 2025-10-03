@@ -1,5 +1,4 @@
 "use client";
-import { Trophy, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TestResultsInterface } from "@/lib/types";
 import Confetti from "react-confetti";
@@ -18,12 +17,12 @@ interface TestResultsProps {
 
 export function TestResults({
   results,
-  lessonName,
+  // lessonName,
   onReturnToLessons,
   hearts,
   onRetakeTest
 }: TestResultsProps) {
-  const percentage = Math.round(results.score);
+  // const percentage = Math.round(results.score);
   const isPassed = results.passed;
   const { width, height } = useWindowSize();
 

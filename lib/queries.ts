@@ -507,7 +507,7 @@ export const getLessonStatistics = cache(async (lessonId: number) => {
 
 // ============== SEARCH QUERIES ==============
 
-export const searchContent = cache(async (query: string, userId?: string) => {
+export const searchContent = cache(async (query: string) => {
   const searchTerms = query.split(" ").filter((term) => term.length > 2);
 
   const [units, lessons, questions] = await Promise.all([

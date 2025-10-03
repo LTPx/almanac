@@ -153,7 +153,7 @@ export async function mintEducationalNFT(
   const transaction = mintTo({
     contract,
     to: walletAddress,
-    //@ts-ignore
+    //@ts-expect-error - thirdweb typing issue - see
     nft: metadata
   });
 
