@@ -27,7 +27,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
           <TestSystem
             hearts={hearts || 0}
             userId={userId}
-            initialLesson={activeLesson}
+            initialLessonId={activeLesson.id}
             onClose={() => {
               setActiveLesson(null);
               refetch();

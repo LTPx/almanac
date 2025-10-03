@@ -9,13 +9,13 @@ import { HeaderBar } from "../header-bar";
 
 import type {
   TestData,
-  TestResultsInterface as TestResultsType,
-  Lesson
+  TestResultsInterface as TestResultsType
+  // Lesson
 } from "@/lib/types";
 
 interface TestSystemProps {
   userId: string;
-  initialLesson: Lesson;
+  initialLessonId: number;
   onClose: () => void;
   hearts: number;
 }
@@ -24,7 +24,7 @@ type TestState = "testing" | "results";
 
 export function TestSystem({
   userId,
-  initialLesson,
+  initialLessonId,
   onClose,
   hearts
 }: TestSystemProps) {
@@ -56,8 +56,8 @@ export function TestSystem({
   );
 
   useEffect(() => {
-    handleStartTest(initialLesson.id);
-  }, [handleStartTest, initialLesson.id]);
+    handleStartTest(initialLessonId);
+  }, [handleStartTest, initialLessonId]);
 
   const handleAnswer = async (questionId: number, answer: string) => {
     if (!currentTest) return;

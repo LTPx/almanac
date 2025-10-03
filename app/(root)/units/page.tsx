@@ -184,9 +184,10 @@ export default function HomePage() {
     return (
       <TestSystem
         userId={userId}
-        initialLesson={selectedLesson}
+        initialLessonId={selectedLesson.id}
         // onClose={handleCloseTest}
         onClose={() => {}}
+        hearts={0}
       />
     );
   }
