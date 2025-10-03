@@ -1,0 +1,60 @@
+"use client";
+
+import { InfinityIcon, X } from "lucide-react";
+import Image from "next/image";
+import { useExitModal } from "@/store/use-exit-modal";
+import { ExitModal } from "./modals/exit-modal";
+import { SuccessProgressBar } from "./animate.progress-bar";
+
+type HeaderProps = {
+  hearts: number;
+  percentage: number;
+  hasActiveSubscription: boolean;
+  justAnsweredCorrect?: boolean;
+  onClose?: () => void;
+};
+
+export const HeaderBar = ({
+  hearts,
+  percentage,
+  hasActiveSubscription,
+  justAnsweredCorrect = false,
+  onClose
+}: HeaderProps) => {
+  const { open } = useExitModal();
+
+  return (
+    <>
+      <header className="mx-auto flex w-full max-w-[1140px] items-center justify-between gap-x-4 lg:gap-x-7 px-6 lg:px-10 pt-[20px] lg:pt-[50px]">
+        <X
+          onClick={open}
+          className="cursor-pointer text-slate-500 transition hover:opacity-75"
+        />
+
+        <div className="flex-1 lg:mx-4">
+          <SuccessProgressBar
+            value={percentage}
+            triggerSuccess={justAnsweredCorrect}
+          />
+        </div>
+
+        <div className="flex items-center font-bold text-rose-500">
+          <Image
+            src="/heart.svg"
+            height={28}
+            width={28}
+            alt="Heart"
+            className="mr-2"
+          />
+          {hasActiveSubscription ? (
+            <InfinityIcon className="h-6 w-6 shrink-0 stroke-[3]" />
+          ) : (
+            hearts
+          )}
+        </div>
+      </header>
+
+      <ExitModal />
+    </>
+  );
+};

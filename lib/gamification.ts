@@ -1,0 +1,281 @@
+import prisma from "./prisma";
+
+const GAME_CONFIG = {
+  MAX_HEARTS: 5,
+  HEARTS_RESET_HOUR: 0, // Midnight
+  ZAPS_PER_UNIT_COMPLETE: 100,
+  ZAPS_PER_HEART_PURCHASE: 10,
+  TOKENS_PER_UNIT_COMPLETE: 1
+};
+
+export async function resetDailyHearts(userId: string) {
+  const now = new Date();
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { lastHeartReset: true, hearts: true }
+  });
+
+  if (!user) throw new Error("User not found");
+
+  // Verificar si ya se resetearon hoy
+  const lastReset = new Date(user.lastHeartReset);
+  const shouldReset = now.getTime() - lastReset.getTime() > 24 * 60 * 60 * 1000; // 24 horas
+
+  if (shouldReset && user.hearts < GAME_CONFIG.MAX_HEARTS) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        hearts: GAME_CONFIG.MAX_HEARTS,
+        lastHeartReset: now
+      }
+    });
+
+    // Registrar transacción
+    await prisma.heartTransaction.create({
+      data: {
+        userId,
+        type: "DAILY_RESET",
+        amount: GAME_CONFIG.MAX_HEARTS - user.hearts,
+        reason: "Reseteo diario de corazones"
+      }
+    });
+
+    return true;
+  }
+
+  return false;
+}
+
+export async function reduceHeartsForFailedTest(
+  userId: string,
+  testAttemptId: number
+) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { hearts: true }
+  });
+
+  if (!user) throw new Error("User not found");
+  if (user.hearts <= 0) throw new Error("No hay corazones disponibles");
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { hearts: { decrement: 1 } }
+  });
+
+  // Registrar transacción
+  await prisma.heartTransaction.create({
+    data: {
+      userId,
+      type: "TEST_FAILED",
+      amount: -1,
+      reason: "Test Failed",
+      relatedTestAttemptId: testAttemptId
+    }
+  });
+
+  return user.hearts - 1;
+}
+
+export async function purchaseHeartWithZaps(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { hearts: true, zapTokens: true }
+  });
+
+  if (!user) throw new Error("User not found");
+  if (user.hearts >= GAME_CONFIG.MAX_HEARTS)
+    throw new Error("Ya tienes el máximo de corazones");
+  if (user.zapTokens < GAME_CONFIG.ZAPS_PER_HEART_PURCHASE)
+    throw new Error("No tienes suficientes ZAPs");
+
+  // Actualizar usuario
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      hearts: { increment: 1 },
+      zapTokens: { decrement: GAME_CONFIG.ZAPS_PER_HEART_PURCHASE }
+    }
+  });
+
+  // Registrar transacciones
+  await Promise.all([
+    prisma.heartTransaction.create({
+      data: {
+        userId,
+        type: "PURCHASED",
+        amount: 1,
+        reason: "Hearts buys with ZAPs"
+      }
+    }),
+    prisma.zapTransaction.create({
+      data: {
+        userId,
+        type: "HEART_PURCHASE",
+        amount: -GAME_CONFIG.ZAPS_PER_HEART_PURCHASE,
+        reason: "ZAPs gastados en comprar corazón"
+      }
+    })
+  ]);
+
+  return {
+    hearts: user.hearts + 1,
+    zapTokens: user.zapTokens - GAME_CONFIG.ZAPS_PER_HEART_PURCHASE
+  };
+}
+
+export async function completeUnit(userId: string, unitId: number) {
+  const existingProgress = await prisma.userProgress.findFirst({
+    where: {
+      userId,
+      unitId,
+      isCompleted: true
+    }
+  });
+
+  if (existingProgress) {
+    throw new Error("Esta unidad ya fue completada anteriormente");
+  }
+
+  // Marcar unidad como completada y otorgar recompensas
+  const [updatedUser, unitToken] = await prisma.$transaction(async (tx) => {
+    // Actualizar usuario con ZAPs y contador de unidades
+    const user = await tx.user.update({
+      where: { id: userId },
+      data: {
+        zapTokens: { increment: GAME_CONFIG.ZAPS_PER_UNIT_COMPLETE },
+        totalUnitsCompleted: { increment: 1 }
+      }
+    });
+
+    // Crear o actualizar token de unidad
+    const unitToken = await tx.userUnitToken.upsert({
+      where: {
+        userId_unitId: { userId, unitId }
+      },
+      update: {
+        quantity: { increment: GAME_CONFIG.TOKENS_PER_UNIT_COMPLETE },
+        updatedAt: new Date()
+      },
+      create: {
+        userId,
+        unitId,
+        quantity: GAME_CONFIG.TOKENS_PER_UNIT_COMPLETE
+      }
+    });
+
+    // Marcar progreso como completado
+    // await tx.userProgress.upsert({
+    //   where: {
+    //     userId_unitId: { userId, unitId }
+    //   },
+    //   update: {
+    //     isCompleted: true,
+    //     completedAt: new Date()
+    //   },
+    //   create: {
+    //     userId,
+    //     unitId,
+    //     isCompleted: true,
+    //     completedAt: new Date()
+    //   }
+    // });
+
+    // Registrar transacción de ZAPs
+    await tx.zapTransaction.create({
+      data: {
+        userId,
+        type: "UNIT_COMPLETED",
+        amount: GAME_CONFIG.ZAPS_PER_UNIT_COMPLETE,
+        reason: "ZAPs ganados por completar unidad",
+        relatedUnitId: unitId
+      }
+    });
+
+    return [user, unitToken];
+  });
+
+  return {
+    zapTokens: updatedUser.zapTokens,
+    unitTokens: unitToken.quantity,
+    totalUnitsCompleted: updatedUser.totalUnitsCompleted
+  };
+}
+
+export async function getUserGamificationStats(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      hearts: true,
+      zapTokens: true,
+      totalUnitsCompleted: true,
+      lastHeartReset: true,
+      userUnitTokens: {
+        include: {
+          unit: {
+            select: {
+              id: true,
+              name: true
+            }
+          }
+        }
+      }
+    }
+  });
+
+  if (!user) throw new Error("User not found");
+
+  // Verificar si necesita reseteo de corazones
+  const now = new Date();
+  const hoursSinceReset =
+    (now.getTime() - new Date(user.lastHeartReset).getTime()) /
+    (1000 * 60 * 60);
+  const needsHeartReset =
+    hoursSinceReset >= 24 && user.hearts < GAME_CONFIG.MAX_HEARTS;
+
+  return {
+    hearts: user.hearts,
+    maxHearts: GAME_CONFIG.MAX_HEARTS,
+    zapTokens: user.zapTokens,
+    totalUnitsCompleted: user.totalUnitsCompleted,
+    unitTokens: user.userUnitTokens,
+    needsHeartReset,
+    canPurchaseHeart:
+      user.zapTokens >= GAME_CONFIG.ZAPS_PER_HEART_PURCHASE &&
+      user.hearts < GAME_CONFIG.MAX_HEARTS
+  };
+}
+
+export async function dailyHeartResetCronJob() {
+  const now = new Date();
+  const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  // Encontrar usuarios que necesitan reseteo
+  const usersNeedingReset = await prisma.user.findMany({
+    where: {
+      AND: [
+        { lastHeartReset: { lt: twentyFourHoursAgo } },
+        { hearts: { lt: GAME_CONFIG.MAX_HEARTS } }
+      ]
+    },
+    select: { id: true, hearts: true }
+  });
+
+  const results = [];
+
+  for (const user of usersNeedingReset) {
+    try {
+      await resetDailyHearts(user.id);
+      results.push({ userId: user.id, success: true });
+    } catch (error: any) {
+      results.push({ userId: user.id, success: false, error: error.message });
+    }
+  }
+
+  return {
+    totalProcessed: results.length,
+    successful: results.filter((r) => r.success).length,
+    failed: results.filter((r) => !r.success).length,
+    results
+  };
+}

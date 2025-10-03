@@ -1,0 +1,348 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String?
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+  sessions      Session[]
+  accounts      Account[]
+  walletAddress String?   @unique
+  encryptedKey  String?
+
+  // Educational relationships
+  userProgress       UserProgress[]
+  testAttempts       TestAttempt[]
+  streaks            UserStreak[]
+  userLessonProgress UserLessonProgress[]
+  userUnitProgress   UserUnitProgress[]
+
+  //Blockchain
+  nfts EducationalNFT[]
+
+  // GAMIFICATION 
+  hearts              Int      @default(5)
+  zapTokens           Int      @default(0)
+  lastHeartReset      DateTime @default(now())
+  totalUnitsCompleted Int      @default(0)
+
+  // GAMIFICATION - relationships
+  userUnitTokens    UserUnitToken[]
+  heartTransactions HeartTransaction[]
+  zapTransactions   ZapTransaction[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+model Unit {
+  id           Int            @id @default(autoincrement())
+  name         String
+  description  String?
+  lessons      Lesson[]
+  order        Int
+  isActive     Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  userProgress UserProgress[]
+
+  // GAMIFICATION - relationships
+  userUnitTokens   UserUnitToken[]
+  zapTransactions  ZapTransaction[]
+  userUnitProgress UserUnitProgress[]
+
+  @@map("unit")
+}
+
+model Lesson {
+  id               Int      @id @default(autoincrement())
+  name             String
+  description      String?
+  unit             Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId           Int
+  mandatory        Boolean  @default(false)
+  experiencePoints Int      @default(25)
+  position         Int?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // relationships
+  questions          Question[]
+  userProgress       UserProgress[]
+  testAttempts       TestAttempt[]
+  UserLessonProgress UserLessonProgress[]
+
+  @@map("lesson")
+}
+
+model Question {
+  id        Int          @id @default(autoincrement())
+  lesson    Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId  Int
+  type      QuestionType
+  title     String // Texto de la pregunta
+  order     Int // Orden dentro de la lección
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  // Datos específicos por tipo de pregunta (JSON)
+  content Json // Contenido flexible según el tipo
+
+  // relationships
+  answers     Answer[]
+  testAnswers TestAnswer[]
+
+  @@map("question")
+}
+
+model Answer {
+  id         Int      @id @default(autoincrement())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId Int
+  text       String // Texto de la respuesta
+  isCorrect  Boolean // Si es la respuesta correcta
+  order      Int // Orden de la opción
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("answer")
+}
+
+model UserProgress {
+  id               Int       @id @default(autoincrement())
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  unit             Unit?     @relation(fields: [unitId], references: [id])
+  unitId           Int?
+  lesson           Lesson?   @relation(fields: [lessonId], references: [id])
+  lessonId         Int?
+  isCompleted      Boolean   @default(false)
+  experiencePoints Int       @default(0)
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([userId, lessonId])
+  @@map("user_progress")
+}
+
+model UserLessonProgress {
+  id               Int       @id @default(autoincrement())
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  lesson           Lesson?   @relation(fields: [lessonId], references: [id])
+  lessonId         Int?
+  experiencePoints Int       @default(0)
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([userId, lessonId])
+  @@map("user_lesson_progress")
+}
+
+model UserUnitProgress {
+  id          Int       @id @default(autoincrement())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  unit        Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId      Int
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, unitId])
+  @@map("user_unit_progress")
+}
+
+model TestAttempt {
+  id             Int          @id @default(autoincrement())
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  lesson         Lesson       @relation(fields: [lessonId], references: [id])
+  lessonId       Int
+  score          Float // Puntuación obtenida (0-100)
+  totalQuestions Int // Total de preguntas en el test
+  correctAnswers Int // Respuestas correctas
+  isCompleted    Boolean      @default(false)
+  startedAt      DateTime     @default(now())
+  completedAt    DateTime?
+  answers        TestAnswer[]
+
+  // GAMIFICATION -  relationships
+  heartTransactions HeartTransaction[]
+
+  @@map("test_attempt")
+}
+
+model TestAnswer {
+  id            Int         @id @default(autoincrement())
+  testAttempt   TestAttempt @relation(fields: [testAttemptId], references: [id], onDelete: Cascade)
+  testAttemptId Int
+  question      Question    @relation(fields: [questionId], references: [id])
+  questionId    Int
+  userAnswer    String // Respuesta del usuario (puede ser texto, JSON, etc.)
+  isCorrect     Boolean
+  timeSpent     Int? // Tiempo en segundos
+  createdAt     DateTime    @default(now())
+
+  @@map("test_answer")
+}
+
+model UserStreak {
+  id            Int      @id @default(autoincrement())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String   @unique
+  currentStreak Int      @default(0)
+  longestStreak Int      @default(0)
+  lastActivity  DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("user_streak")
+}
+
+// GAMIFICATION
+model UserUnitToken {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  unit      Unit     @relation(fields: [unitId], references: [id])
+  unitId    Int
+  quantity  Int      @default(1)
+  earnedAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, unitId])
+  @@map("user_unit_token")
+}
+
+model HeartTransaction {
+  id                   Int                  @id @default(autoincrement())
+  user                 User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId               String
+  type                 HeartTransactionType
+  amount               Int // Amount + or -
+  reason               String?
+  relatedTestAttemptId Int?
+  relatedTestAttempt   TestAttempt?         @relation(fields: [relatedTestAttemptId], references: [id])
+  createdAt            DateTime             @default(now())
+
+  @@map("heart_transaction")
+}
+
+model ZapTransaction {
+  id            Int                @id @default(autoincrement())
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  type          ZapTransactionType
+  amount        Int // Cantidad (positivo = ganado, negativo = gastado)
+  reason        String? // Razón de la transacción
+  relatedUnitId Int? // Si está relacionado con completar una unidad
+  relatedUnit   Unit?              @relation(fields: [relatedUnitId], references: [id])
+  createdAt     DateTime           @default(now())
+
+  @@map("zap_transaction")
+}
+
+//BLOCKCHAIN
+model EducationalNFT {
+  id              String   @id @default(cuid())
+  tokenId         String
+  userId          String
+  unitId          String
+  contractAddress String
+  transactionHash String?
+  metadataUri     String
+  mintedAt        DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id])
+}
+
+//ENUMS
+
+enum ZapTransactionType {
+  UNIT_COMPLETED // Ganó ZAPs por completar unidad
+  HEART_PURCHASE // Gastó ZAPs en comprar corazón
+  LESSON_COMPLETED // Ganó ZAPs por completar lección
+  DAILY_BONUS // Bonificación diaria
+  ADMIN_ADJUSTMENT // Ajuste manual por admin
+
+  @@map("zap_transaction_type")
+}
+
+enum HeartTransactionType {
+  DAILY_RESET // Reseteo diario automático
+  TEST_FAILED // Perdió corazón por fallar test
+  PURCHASED // Compró corazón con ZAPs
+  BONUS // Bonificación especial
+  ADMIN_ADJUSTMENT // Ajuste manual por admin
+
+  @@map("heart_transaction_type")
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE // Pregunta de opción múltiple
+  FILL_IN_BLANK // Completar espacios en blanco
+  ORDER_WORDS // Ordenar palabras/oraciones
+  TRUE_FALSE // Verdadero/Falso
+  MATCHING // Emparejar elementos
+  DRAG_DROP // Arrastrar y soltar
+
+  @@map("question_type")
+}
