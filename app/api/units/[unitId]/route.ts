@@ -109,17 +109,19 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { unitId: string } }
+  context: { params: Promise<{ unitId: string }> }
 ) {
+  const { unitId } = await context.params;
+  const id = parseInt(unitId);
+
   try {
-    const unitId = parseInt(params.unitId);
-    if (isNaN(unitId)) {
+    if (isNaN(id)) {
       return NextResponse.json({ error: "Invalid unit ID" }, { status: 400 });
     }
 
     // Soft delete - marcar como inactivo
     await prisma.unit.update({
-      where: { id: unitId },
+      where: { id: id },
       data: {
         isActive: false,
         updatedAt: new Date()
