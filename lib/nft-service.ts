@@ -3,6 +3,7 @@ import { mintTo, tokenURI } from "thirdweb/extensions/erc721";
 import { privateKeyToAccount } from "thirdweb/wallets";
 import { polygonAmoy } from "thirdweb/chains";
 import { getRpcClient, eth_getTransactionReceipt } from "thirdweb/rpc";
+import prisma from "./prisma";
 
 const ADMIN_PRIVATE_KEY = process.env.ADMIN_WALLET_PRIVATE_KEY;
 const THIRDWEB_SECRET_KEY = process.env.THIRDWEB_SECRET_KEY;
@@ -45,19 +46,26 @@ export interface MintResult {
 /**
  * Crea los metadatos para el NFT del certificado educativo
  */
-export function createNFTMetadata(
-  courseName: string,
-  unitName: string,
-  customDescription?: string
-): NFTMetadata {
+export function createNFTMetadata({
+  courseName,
+  unitName,
+  rarity,
+  imageUrl,
+  customDescription
+}: {
+  courseName: string;
+  unitName: string;
+  rarity: "NORMAL" | "RARE" | "EPIC" | "UNIQUE";
+  imageUrl: string;
+  customDescription?: string;
+}): NFTMetadata {
   const defaultDescription = `Certificado de completitud para la unidad "${unitName}" del curso "${courseName}"`;
-
   return {
     name: `${courseName} - ${unitName}`,
     description: customDescription || defaultDescription,
-    image:
-      "https://gateway.pinata.cloud/ipfs/bafybeia25ohj632vt35cl242hrqtubxjmqsbgwyrhydjkdeigtxt7thbye",
+    image: imageUrl,
     attributes: [
+      { trait_type: "Rarity", value: rarity },
       { trait_type: "Course", value: courseName },
       { trait_type: "Unit", value: unitName },
       {
@@ -66,6 +74,31 @@ export function createNFTMetadata(
       },
       { trait_type: "Type", value: "Educational Certificate" }
     ]
+  };
+}
+
+/**
+ * Obtiene una imagen/nft disponible basado en rareza
+ */
+export async function getAvailableNFTImage(
+  rarity: "NORMAL" | "RARE" | "EPIC" | "UNIQUE"
+) {
+  const image = await prisma.nFTAsset.findFirst({
+    where: { rarity, isUsed: false },
+    orderBy: { id: "asc" }
+  });
+
+  if (!image)
+    throw new Error(`No hay imágenes disponibles para rareza ${rarity}`);
+
+  await prisma.nFTAsset.update({
+    where: { id: image.id },
+    data: { isUsed: true, usedAt: new Date() }
+  });
+
+  return {
+    nftImage: image.imageUrl,
+    nftImageId: image.id
   };
 }
 

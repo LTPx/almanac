@@ -19,7 +19,8 @@ import {
   Sparkles,
   CheckCircle,
   XCircle,
-  ExternalLink
+  ExternalLink,
+  ChevronsLeftRightEllipsis
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -46,6 +47,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { NFTAsset, NFTAssetsResponse } from "@/lib/types";
+import { getExplorerUrl } from "@/lib/utils";
 
 const rarityConfig = {
   NORMAL: { label: "Normal", color: "bg-gray-100 text-gray-800", icon: "⚪" },
@@ -169,7 +171,7 @@ export default function NFTsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Usados</p>
+                <p className="text-sm font-medium text-gray-600">Minted</p>
                 <p className="text-2xl font-bold text-gray-600">{stats.used}</p>
               </div>
               <XCircle className="h-8 w-8 text-gray-400" />
@@ -181,7 +183,7 @@ export default function NFTsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Legendarios</p>
+                <p className="text-sm font-medium text-gray-600">Unicos</p>
                 <p className="text-2xl font-bold text-yellow-600">
                   {stats.byRarity.LEGENDARY}
                 </p>
@@ -230,7 +232,7 @@ export default function NFTsPage() {
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="available">Disponibles</SelectItem>
-                  <SelectItem value="used">Usados</SelectItem>
+                  <SelectItem value="used">Minted</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -243,7 +245,6 @@ export default function NFTsPage() {
         {filteredNFTs.map((nft) => {
           const rarityInfo =
             rarityConfig[nft.rarity as keyof typeof rarityConfig];
-          console.log("Rarity Info:", nft);
           return (
             <Card
               key={nft.id}
@@ -252,8 +253,8 @@ export default function NFTsPage() {
               <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200">
                 <img
                   src={nft.imageUrl}
-                  alt={`NFT #${nft.id}`}
-                  className="w-full h-full object-cover"
+                  alt={`NFT #${nft.educationalNFT ? nft.educationalNFT.tokenId : "-"}`}
+                  className={`w-full h-full object-cover ${nft.isUsed && "backdrop-blur-md"}`}
                 />
                 <div className="absolute top-2 right-2">
                   <DropdownMenu>
@@ -263,7 +264,7 @@ export default function NFTsPage() {
                         size="icon"
                         className="h-8 w-8 bg-white/90 hover:bg-white"
                       >
-                        <MoreHorizontal className="h-4 w-4" />
+                        <MoreHorizontal className="h-4 w-4" color="black" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -273,7 +274,7 @@ export default function NFTsPage() {
                           Ver detalles
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
+                      <DropdownMenuItem asChild disabled={nft.isUsed}>
                         <Link href={`/admin/nfts/${nft.id}/edit`}>
                           <Edit className="mr-2 h-4 w-4" />
                           Editar
@@ -304,13 +305,27 @@ export default function NFTsPage() {
                     {rarityInfo.label}
                   </Badge>
                 </div>
-                {nft.isUsed && (
+                {nft.isUsed && nft.educationalNFT && (
                   <div className="absolute bottom-2 left-2">
                     <Badge
                       variant="secondary"
                       className="bg-gray-800/80 text-white"
                     >
-                      Usado
+                      <Link
+                        href={
+                          nft.educationalNFT
+                            ? getExplorerUrl(
+                                nft.educationalNFT?.contractAddress,
+                                nft.educationalNFT?.tokenId
+                              )
+                            : "#"
+                        }
+                        target="_blank"
+                        className="flex gap-1"
+                      >
+                        <ChevronsLeftRightEllipsis className="h-4 w-4" />
+                        View Transaction
+                      </Link>
                     </Badge>
                   </div>
                 )}
@@ -319,7 +334,11 @@ export default function NFTsPage() {
               <CardContent className="p-4">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-lg">NFT #{nft.id}</h3>
+                    <h3 className="font-semibold text-lg">
+                      {nft.educationalNFT
+                        ? `NFT #${nft.educationalNFT.tokenId}`
+                        : "NO MINTED"}
+                    </h3>
                     {nft.isUsed ? (
                       <XCircle className="h-5 w-5 text-gray-400" />
                     ) : (
@@ -332,10 +351,11 @@ export default function NFTsPage() {
                       Creado: {new Date(nft.createdAt).toLocaleDateString()}
                     </p>
                     {nft.isUsed && nft.usedAt && (
-                      <p>Usado: {new Date(nft.usedAt).toLocaleDateString()}</p>
+                      <p>
+                        Minteado: {new Date(nft.usedAt).toLocaleDateString()}
+                      </p>
                     )}
                   </div>
-
                   {nft.metadataUri && (
                     <p
                       className="text-xs text-gray-600 truncate"

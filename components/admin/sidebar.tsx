@@ -52,7 +52,7 @@ export function Sidebar() {
     <div className="fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
       {/* Header */}
       <div className="flex h-16 items-center px-6 border-b border-sidebar-border">
-        <h1 className="text-xl font-bold">EduAdmin</h1>
+        <h1 className="text-xl font-bold">Almanac</h1>
       </div>
 
       {/* Navigation */}

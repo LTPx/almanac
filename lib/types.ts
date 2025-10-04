@@ -82,6 +82,18 @@ export type Unit = {
   createdAt: Date;
 };
 
+export type EducationalNFT = {
+  id: string;
+  tokenId: string;
+  userId: string;
+  unitId: string;
+  contractAddress: string;
+  transactionHash?: string;
+  metadataUri: string;
+  mintedAt: string;
+  nftAssetId: number;
+};
+
 export type NFTAsset = {
   id: number;
   imageUrl: string;
@@ -90,6 +102,7 @@ export type NFTAsset = {
   metadataUri?: string;
   createdAt: Date;
   usedAt?: Date;
+  educationalNFT?: EducationalNFT;
 };
 
 export type Pagination = {

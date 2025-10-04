@@ -15,3 +15,7 @@ export default function isInViewport(element: HTMLElement) {
     rect.right <= (window.innerWidth || document.documentElement.clientWidth)
   );
 }
+
+export const getExplorerUrl = (contractAddress: string, tokenId: string) => {
+  return `https://amoy.polygonscan.com/token/${contractAddress}?a=${tokenId}`;
+};
