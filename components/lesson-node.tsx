@@ -21,6 +21,27 @@ const LessonNode: React.FC<LessonNodeProps> = ({
   color,
   onStartLesson
 }) => {
+  const nodeContent = (
+    <div
+      className={`
+        w-full h-14 lg:h-16 flex items-center justify-center
+        transition-all duration-200 relative
+        ${state === "completed" ? "bg-[#5EC16A] border-[#5EC16A] shadow-lg" : ""}
+        ${state === "available" ? "bg-gray-600 border-gray-500 hover:border-white" : ""}
+        ${state === "locked" ? `${color} border-dashed` : ""}
+        rounded-2xl border-2 cursor-pointer
+      `}
+    >
+      {state === "completed" && <CheckCircle className="w-7 h-7 text-white" />}
+      {state === "available" && <BookOpen className="w-7 h-7 text-white" />}
+      {state === "locked" && <Lock className="w-6 h-6 text-white" />}
+    </div>
+  );
+
+  if (state === "completed") {
+    return nodeContent;
+  }
+
   return (
     <StepPopover
       onButtonClick={onStartLesson}
@@ -28,22 +49,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       title={name}
       message={description || ""}
     >
-      <div
-        className={`
-    w-full h-14 lg:h-16 flex items-center justify-center
-    transition-all duration-200 relative
-    ${state === "completed" ? "bg-[#5EC16A] border-[#5EC16A] shadow-lg" : ""}
-    ${state === "available" ? "bg-gray-600 border-gray-500 hover:border-white" : ""}
-    ${state === "locked" ? `${color} border-dashed` : ""}
-    rounded-2xl border-2 cursor-pointer
-  `}
-      >
-        {state === "completed" && (
-          <CheckCircle className="w-7 h-7 text-white" />
-        )}
-        {state === "available" && <BookOpen className="w-7 h-7 text-white" />}
-        {state === "locked" && <Lock className="w-6 h-6 text-white" />}
-      </div>
+      {nodeContent}
     </StepPopover>
   );
 };
