@@ -89,6 +89,48 @@ model Verification {
   @@map("verification")
 }
 
+model Curriculum {
+  id               String          @id @default(cuid())
+  title            String
+  audienceAgeRange String?
+  difficulty       DifficultyLevel
+  units            Unit[]
+  metadata         Json?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model LearningObjective {
+  id       Int     @id @default(autoincrement())
+  text     String
+  unit     Unit?   @relation(fields: [unitId], references: [id])
+  unitId   Int?
+  lesson   Lesson? @relation(fields: [lessonId], references: [id])
+  lessonId Int?
+}
+
+model Fact {
+  id        Int        @id @default(autoincrement())
+  lesson    Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId  Int
+  text      String
+  core      Boolean    @default(false)
+  citations Citation[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Citation {
+  id         Int       @id @default(autoincrement())
+  title      String
+  authors    String?
+  year       Int?
+  fact       Fact?     @relation(fields: [factId], references: [id])
+  factId     Int?
+  question   Question? @relation(fields: [questionId], references: [id])
+  questionId Int?
+}
+
 model Unit {
   id           Int            @id @default(autoincrement())
   name         String
@@ -104,6 +146,11 @@ model Unit {
   userUnitTokens   UserUnitToken[]
   zapTransactions  ZapTransaction[]
   userUnitProgress UserUnitProgress[]
+
+  //Education - relationships
+  curriculum         Curriculum?         @relation(fields: [curriculumId], references: [id])
+  curriculumId       String?
+  learningObjectives LearningObjective[]
 
   @@map("unit")
 }
@@ -125,7 +172,9 @@ model Lesson {
   questions          Question[]
   userProgress       UserProgress[]
   testAttempts       TestAttempt[]
-  UserLessonProgress UserLessonProgress[]
+  userLessonProgress UserLessonProgress[]
+  learningObjectives LearningObjective[]
+  facts              Fact[]
 
   @@map("lesson")
 }
@@ -147,6 +196,7 @@ model Question {
   // relationships
   answers     Answer[]
   testAnswers TestAnswer[]
+  citations   Citation[]
 
   @@map("question")
 }
@@ -332,7 +382,6 @@ model NFTAsset {
 }
 
 //ENUMS
-
 enum ZapTransactionType {
   UNIT_COMPLETED // Ganó ZAPs por completar unidad
   HEART_PURCHASE // Gastó ZAPs en comprar corazón
@@ -371,4 +420,12 @@ enum NFTRarity {
   UNIQUE
 
   @@map("nft_rarity")
+}
+
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+
+  @@map("difficulty_level")
 }
