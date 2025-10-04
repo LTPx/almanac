@@ -1,4 +1,3 @@
-// components/admin/header.tsx
 "use client";
 
 import { Bell, Search, User, LogOut } from "lucide-react";
@@ -12,9 +11,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 export function Header() {
+  const router = useRouter();
+  const handleLogout = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onRequest: () => {
+          toast.loading("Logging out...");
+        },
+        onSuccess: () => {
+          toast.dismiss();
+          // setUser(null);
+          router.push("/");
+          toast.success("Logged out successfully");
+        },
+        onError: (ctx) => {
+          toast.dismiss();
+          toast.error(ctx.error.message);
+        }
+      }
+    });
+  };
+
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background text-foreground">
       <div className="flex h-16 items-center justify-between px-6">
@@ -73,9 +97,12 @@ export function Header() {
                 <User className="mr-2 h-4 w-4" />
                 <span>Perfil</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-accent hover:text-accent-foreground">
+              <DropdownMenuItem
+                className="hover:bg-accent hover:text-accent-foreground"
+                onClick={handleLogout}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Cerrar sesión</span>
+                <span>Logout</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
