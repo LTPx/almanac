@@ -127,8 +127,8 @@ export async function POST(request: NextRequest) {
       { message: "NFT Asset subido exitosamente", nftAsset },
       { status: 201 }
     );
-  } catch (error) {
-    console.error("Error al subir NFT:", error);
+  } catch (error: any) {
+    console.error("Error al subir NFT:", error.details || error);
     return NextResponse.json(
       {
         error: "Error interno del servidor",

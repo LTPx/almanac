@@ -35,8 +35,8 @@ import { Textarea } from "@/components/ui/textarea";
 
 const rarityOptions = [
   {
-    value: "COMMON",
-    label: "Común",
+    value: "NORMAL",
+    label: "Normal",
     icon: "⚪",
     color: "bg-gray-100 text-gray-800",
     description: "NFT básico para completar unidades iniciales"
@@ -56,8 +56,8 @@ const rarityOptions = [
     description: "NFT premium para unidades avanzadas"
   },
   {
-    value: "LEGENDARY",
-    label: "Legendario",
+    value: "UNIQUE",
+    label: "Unico",
     icon: "⭐",
     color: "bg-yellow-100 text-yellow-800",
     description: "NFT exclusivo para logros excepcionales"
@@ -81,20 +81,32 @@ export default function CreateNFTPage() {
     setIsLoading(true);
 
     try {
-      // Aquí iría la lógica para subir la imagen y crear el NFT
-      // 1. Subir imagen a tu storage (AWS S3, Cloudinary, IPFS, etc.)
-      // 2. Crear metadata JSON
-      // 3. Subir metadata a IPFS
-      // 4. Guardar en la base de datos
+      if (!formData.imageFile && !formData.imageUrl) {
+        alert("Debes subir un archivo o proporcionar una URL");
+        return;
+      }
 
-      console.log("Creando NFT:", formData);
+      const data = new FormData();
+      if (formData.imageFile) data.append("file", formData.imageFile);
+      if (formData.imageUrl) data.append("imageUrl", formData.imageUrl);
+      data.append("rarity", formData.rarity);
+      if (formData.metadataUri)
+        data.append("metadataUri", formData.metadataUri);
 
-      // Simulamos una petición
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const res = await fetch("/api/nft-assets", {
+        method: "POST",
+        body: data
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Error al crear NFT Asset");
+      }
 
       router.push("/admin/nfts");
     } catch (error) {
       console.error("Error al crear NFT:", error);
+      alert("Ocurrió un error al crear el NFT");
     } finally {
       setIsLoading(false);
     }
