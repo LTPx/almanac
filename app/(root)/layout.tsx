@@ -13,6 +13,7 @@ export default async function HomeLayout({
     headers: await headers()
   });
   const user = session?.user ?? null;
+
   return (
     <UserProvider user={user}>
       <div className="relative">

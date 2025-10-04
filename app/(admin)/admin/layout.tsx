@@ -1,22 +1,33 @@
 // app/admin/layout.tsx
 import { Sidebar } from "@/components/admin/sidebar";
 import { Header } from "@/components/admin/header";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { AdminProvider } from "@/context/AdminContext";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });
+
+  const user = session?.user ?? null;
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Sidebar />
-      <div className="pl-64">
-        <Header />
-        <main className="p-6">
-          <div className="mx-auto max-w-7xl">{children}</div>
-        </main>
+    <AdminProvider user={user}>
+      <div className="min-h-screen bg-background text-foreground">
+        <Sidebar />
+        <div className="pl-64">
+          <Header />
+          <main className="p-6">
+            <div className="mx-auto max-w-7xl">{children}</div>
+          </main>
+        </div>
       </div>
-    </div>
+    </AdminProvider>
   );
 }
 

@@ -5,12 +5,13 @@ const prisma = new PrismaClient();
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { unitId: string } }
+  context: { params: Promise<{ unitId: string }> }
 ) {
   try {
-    const unitId = parseInt(params.unitId);
+    const { unitId } = await context.params;
+    const id = parseInt(unitId, 10);
 
-    if (isNaN(unitId)) {
+    if (isNaN(id)) {
       return NextResponse.json(
         { error: "ID de unidad inválido" },
         { status: 400 }
@@ -19,7 +20,7 @@ export async function GET(
 
     const lessonPositions = await prisma.lesson.findMany({
       where: {
-        unitId: unitId,
+        unitId: id,
         position: {
           not: null
         }
