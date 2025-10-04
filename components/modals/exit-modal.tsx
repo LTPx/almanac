@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,7 +15,11 @@ import {
 } from "@/components/ui/dialog";
 import { useExitModal } from "@/store/use-exit-modal";
 
-export const ExitModal = () => {
+interface ExitModalProps {
+  onEndSession?: () => void;
+}
+
+export const ExitModal = ({ onEndSession }: ExitModalProps) => {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
   const { isOpen, close } = useExitModal();
@@ -52,7 +54,6 @@ export const ExitModal = () => {
         <DialogFooter className="mb-4">
           <div className="flex w-full flex-col gap-y-4">
             <Button
-              // variant="primary"
               className="w-full rounded-[10px] py-[25px] text-[15px]"
               size="lg"
               onClick={close}
@@ -66,7 +67,10 @@ export const ExitModal = () => {
               size="lg"
               onClick={() => {
                 close();
-                router.push("/home");
+                if (onEndSession) {
+                  onEndSession();
+                }
+                // router.push("/home");
               }}
             >
               End session

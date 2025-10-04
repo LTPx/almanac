@@ -139,7 +139,6 @@ export function TestSystem({
               answers[currentTest.questions[currentQuestionIndex].id]?.isCorrect
             }
           />
-
           <div className="relative flex-1 flex items-center justify-center">
             <AnimatePresence mode="wait">
               <motion.div
