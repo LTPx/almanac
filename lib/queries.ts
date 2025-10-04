@@ -210,6 +210,23 @@ export const getUnitsWithUserProgress = cache(async (userId: string) => {
 
 // ============== LESSON QUERIES ==============
 
+export const getAllLessons = cache(async () => {
+  const data = await prisma.lesson.findMany({
+    where: {
+      isActive: true
+    },
+    include: {
+      _count: {
+        select: {
+          questions: true
+        }
+      }
+    },
+    orderBy: { createdAt: "asc" }
+  });
+  return data;
+});
+
 export const getLessonById = cache(async (lessonId: number) => {
   const data = await prisma.lesson.findUnique({
     where: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,6 +37,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 const mockLessons = [
   {
@@ -87,10 +88,17 @@ const mockUnits = [
 ];
 
 export default function LessonsPage() {
-  // const [lessons, setLessons] = useState(mockLessons);
-  const lessons = mockLessons;
+  const [lessons, setLessons] = useState(mockLessons);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUnit, setSelectedUnit] = useState<string>("all");
+
+  const fetchLessons = async () => {
+    const response = await fetch("/api/lessons");
+    if (!response.ok) {
+      throw new Error("Failed to fetch lessons");
+    }
+    return response.json();
+  };
 
   const filteredLessons = lessons.filter((lesson) => {
     const matchesSearch =
@@ -100,6 +108,22 @@ export default function LessonsPage() {
       selectedUnit === "all" || lesson.unitId.toString() === selectedUnit;
     return matchesSearch && matchesUnit;
   });
+
+  useEffect(() => {
+    const loadUnits = async () => {
+      try {
+        const unitsData = await fetchLessons();
+        setLessons(unitsData);
+      } catch (error) {
+        console.error("Error loading lessons:", error);
+        toast.error("Error loading lessons");
+      } finally {
+        // setLoading(false);
+      }
+    };
+
+    loadUnits();
+  }, []);
 
   return (
     <div className="space-y-6">
