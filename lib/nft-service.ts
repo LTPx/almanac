@@ -80,26 +80,38 @@ export function createNFTMetadata({
 /**
  * Obtiene una imagen/nft disponible basado en rareza
  */
-export async function getAvailableNFTImage(
-  rarity: "NORMAL" | "RARE" | "EPIC" | "UNIQUE"
-) {
-  const image = await prisma.nFTAsset.findFirst({
-    where: { rarity, isUsed: false },
-    orderBy: { id: "asc" }
-  });
 
-  if (!image)
-    throw new Error(`No hay imágenes disponibles para rareza ${rarity}`);
+export const RARITIES = ["NORMAL", "RARE", "EPIC", "UNIQUE"] as const;
+export type Rarity = (typeof RARITIES)[number];
 
-  await prisma.nFTAsset.update({
-    where: { id: image.id },
-    data: { isUsed: true, usedAt: new Date() }
-  });
+export async function getAvailableNFTImage(preferredRarity: Rarity) {
+  // fallback ordenado: primero la preferida, luego el resto en orden definido
+  const rarityPriority: Rarity[] = [
+    preferredRarity,
+    ...RARITIES.filter((r) => r !== preferredRarity)
+  ];
 
-  return {
-    nftImage: image.imageUrl,
-    nftImageId: image.id
-  };
+  for (const rarity of rarityPriority) {
+    const image = await prisma.nFTAsset.findFirst({
+      where: { rarity, isUsed: false },
+      orderBy: { id: "asc" }
+    });
+
+    if (image) {
+      const updated = await prisma.nFTAsset.update({
+        where: { id: image.id },
+        data: { isUsed: true, usedAt: new Date() }
+      });
+
+      return {
+        nftImage: updated.imageUrl,
+        nftImageId: updated.id,
+        rarityUsed: rarity
+      };
+    }
+  }
+
+  throw new Error("No hay imágenes disponibles en ninguna rareza");
 }
 
 /**
@@ -214,4 +226,13 @@ export async function mintEducationalNFT(
     metadataUri,
     explorerUrl
   };
+}
+
+export function getRandomRarity(): Rarity {
+  const random = Math.random() * 100;
+
+  if (random < 95) return "NORMAL";
+  if (random < 99) return "RARE";
+  if (random < 99.8) return "EPIC";
+  return "UNIQUE";
 }

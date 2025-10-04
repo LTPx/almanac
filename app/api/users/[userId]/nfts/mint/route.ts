@@ -3,7 +3,8 @@ import prisma from "@/lib/prisma";
 import {
   mintEducationalNFT,
   createNFTMetadata,
-  getAvailableNFTImage
+  getAvailableNFTImage,
+  getRandomRarity
 } from "@/lib/nft-service";
 
 const CONTRACT_ADDRESS = process.env.THIRDWEB_CONTRACT_ADDRESS!;
@@ -49,13 +50,16 @@ export async function POST(
     // 2) Crear metadatos del NFT con descripción personalizada
     const courseName = "Almanac";
     const unitName = userUnitToken.unit.name;
-    const rarity = "NORMAL";
-    const { nftImage, nftImageId } = await getAvailableNFTImage(rarity);
+    // const rarity = "NORMAL";
+    const rarity = getRandomRarity();
+    const { nftImage, nftImageId, rarityUsed } =
+      await getAvailableNFTImage(rarity);
+
     const metadata = createNFTMetadata({
       courseName,
       unitName,
       customDescription: description,
-      rarity: rarity,
+      rarity: rarityUsed,
       imageUrl: nftImage
     });
 
