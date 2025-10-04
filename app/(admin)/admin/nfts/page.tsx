@@ -1,0 +1,427 @@
+// app/admin/nfts/page.tsx
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  MoreHorizontal,
+  Eye,
+  Search,
+  Filter,
+  Image as ImageIcon,
+  Sparkles,
+  CheckCircle,
+  XCircle,
+  ExternalLink
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from "@/components/ui/alert-dialog";
+
+// Mock data - reemplazar con datos reales
+const mockNFTs = [
+  {
+    id: 1,
+    imageUrl: "https://placehold.co/400x400/3b82f6/white?text=Common+NFT",
+    rarity: "COMMON",
+    isUsed: false,
+    metadataUri: "ipfs://QmXxxx...",
+    createdAt: "2024-01-15",
+    usedAt: null
+  },
+  {
+    id: 2,
+    imageUrl: "https://placehold.co/400x400/8b5cf6/white?text=Rare+NFT",
+    rarity: "RARE",
+    isUsed: true,
+    metadataUri: "ipfs://QmYyyy...",
+    createdAt: "2024-01-20",
+    usedAt: "2024-02-01"
+  },
+  {
+    id: 3,
+    imageUrl: "https://placehold.co/400x400/f59e0b/white?text=Epic+NFT",
+    rarity: "EPIC",
+    isUsed: false,
+    metadataUri: "ipfs://QmZzzz...",
+    createdAt: "2024-02-05",
+    usedAt: null
+  },
+  {
+    id: 4,
+    imageUrl: "https://placehold.co/400x400/ec4899/white?text=Legendary+NFT",
+    rarity: "LEGENDARY",
+    isUsed: true,
+    metadataUri: "ipfs://QmWwww...",
+    createdAt: "2024-02-10",
+    usedAt: "2024-02-15"
+  }
+];
+
+const rarityConfig = {
+  COMMON: { label: "Común", color: "bg-gray-100 text-gray-800", icon: "⚪" },
+  RARE: { label: "Raro", color: "bg-blue-100 text-blue-800", icon: "🔵" },
+  EPIC: { label: "Épico", color: "bg-purple-100 text-purple-800", icon: "🟣" },
+  LEGENDARY: {
+    label: "Legendario",
+    color: "bg-yellow-100 text-yellow-800",
+    icon: "⭐"
+  }
+};
+
+export default function NFTsPage() {
+  const [nfts, setNfts] = useState(mockNFTs);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRarity, setSelectedRarity] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [deleteNFTId, setDeleteNFTId] = useState<number | null>(null);
+
+  const filteredNFTs = nfts.filter((nft) => {
+    const matchesSearch =
+      nft.id.toString().includes(searchTerm) ||
+      nft.metadataUri?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRarity =
+      selectedRarity === "all" || nft.rarity === selectedRarity;
+    const matchesStatus =
+      selectedStatus === "all" ||
+      (selectedStatus === "used" && nft.isUsed) ||
+      (selectedStatus === "available" && !nft.isUsed);
+    return matchesSearch && matchesRarity && matchesStatus;
+  });
+
+  const handleDeleteNFT = (id: number) => {
+    setNfts(nfts.filter((nft) => nft.id !== id));
+    setDeleteNFTId(null);
+  };
+
+  const stats = {
+    total: nfts.length,
+    used: nfts.filter((n) => n.isUsed).length,
+    available: nfts.filter((n) => !n.isUsed).length,
+    byRarity: {
+      COMMON: nfts.filter((n) => n.rarity === "COMMON").length,
+      RARE: nfts.filter((n) => n.rarity === "RARE").length,
+      EPIC: nfts.filter((n) => n.rarity === "EPIC").length,
+      LEGENDARY: nfts.filter((n) => n.rarity === "LEGENDARY").length
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">NFT Assets</h1>
+          <p className="text-gray-600">
+            Gestiona los NFTs disponibles para recompensas
+          </p>
+        </div>
+        <Link href="/admin/nfts/new">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Nuevo NFT Asset
+          </Button>
+        </Link>
+      </div>
+
+      {/* Estadísticas */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total NFTs</p>
+                <p className="text-2xl font-bold">{stats.total}</p>
+              </div>
+              <ImageIcon className="h-8 w-8 text-gray-400" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Disponibles</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {stats.available}
+                </p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-green-400" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Usados</p>
+                <p className="text-2xl font-bold text-gray-600">{stats.used}</p>
+              </div>
+              <XCircle className="h-8 w-8 text-gray-400" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Legendarios</p>
+                <p className="text-2xl font-bold text-yellow-600">
+                  {stats.byRarity.LEGENDARY}
+                </p>
+              </div>
+              <Sparkles className="h-8 w-8 text-yellow-400" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filtros */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center space-x-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Input
+                  placeholder="Buscar por ID o metadata URI..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div className="w-40">
+              <Select value={selectedRarity} onValueChange={setSelectedRarity}>
+                <SelectTrigger>
+                  <Filter className="mr-2 h-4 w-4" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las rarezas</SelectItem>
+                  <SelectItem value="COMMON">Común</SelectItem>
+                  <SelectItem value="RARE">Raro</SelectItem>
+                  <SelectItem value="EPIC">Épico</SelectItem>
+                  <SelectItem value="LEGENDARY">Legendario</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-40">
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="available">Disponibles</SelectItem>
+                  <SelectItem value="used">Usados</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Grid de NFTs */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {filteredNFTs.map((nft) => {
+          const rarityInfo =
+            rarityConfig[nft.rarity as keyof typeof rarityConfig];
+
+          return (
+            <Card
+              key={nft.id}
+              className="overflow-hidden hover:shadow-lg transition-shadow"
+            >
+              <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200">
+                <img
+                  src={nft.imageUrl}
+                  alt={`NFT #${nft.id}`}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-2 right-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="h-8 w-8 bg-white/90 hover:bg-white"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link href={`/admin/nfts/${nft.id}`}>
+                          <Eye className="mr-2 h-4 w-4" />
+                          Ver detalles
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/admin/nfts/${nft.id}/edit`}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Editar
+                        </Link>
+                      </DropdownMenuItem>
+                      {nft.metadataUri && (
+                        <DropdownMenuItem
+                          onClick={() => window.open(nft.metadataUri, "_blank")}
+                        >
+                          <ExternalLink className="mr-2 h-4 w-4" />
+                          Ver metadata
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem
+                        className="text-red-600"
+                        onClick={() => setDeleteNFTId(nft.id)}
+                        disabled={nft.isUsed}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Eliminar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="absolute top-2 left-2">
+                  <Badge className={rarityInfo.color}>
+                    <span className="mr-1">{rarityInfo.icon}</span>
+                    {rarityInfo.label}
+                  </Badge>
+                </div>
+                {nft.isUsed && (
+                  <div className="absolute bottom-2 left-2">
+                    <Badge
+                      variant="secondary"
+                      className="bg-gray-800/80 text-white"
+                    >
+                      Usado
+                    </Badge>
+                  </div>
+                )}
+              </div>
+
+              <CardContent className="p-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-lg">NFT #{nft.id}</h3>
+                    {nft.isUsed ? (
+                      <XCircle className="h-5 w-5 text-gray-400" />
+                    ) : (
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                    )}
+                  </div>
+
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <p>
+                      Creado: {new Date(nft.createdAt).toLocaleDateString()}
+                    </p>
+                    {nft.isUsed && nft.usedAt && (
+                      <p>Usado: {new Date(nft.usedAt).toLocaleDateString()}</p>
+                    )}
+                  </div>
+
+                  {nft.metadataUri && (
+                    <p
+                      className="text-xs text-gray-600 truncate"
+                      title={nft.metadataUri}
+                    >
+                      {nft.metadataUri}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {filteredNFTs.length === 0 && (
+        <Card>
+          <CardContent className="text-center py-12">
+            <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-4 text-lg font-semibold text-gray-900">
+              No hay NFTs
+            </h3>
+            <p className="mt-2 text-gray-600">
+              {searchTerm ||
+              selectedRarity !== "all" ||
+              selectedStatus !== "all"
+                ? "No se encontraron NFTs con los filtros actuales."
+                : "Comienza agregando tu primer NFT asset."}
+            </p>
+            {!searchTerm &&
+              selectedRarity === "all" &&
+              selectedStatus === "all" && (
+                <Link href="/admin/nfts/new">
+                  <Button className="mt-4">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Crear primer NFT
+                  </Button>
+                </Link>
+              )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Dialog de confirmación para eliminar */}
+      <AlertDialog
+        open={deleteNFTId !== null}
+        onOpenChange={() => setDeleteNFTId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará permanentemente el NFT asset. Esta acción no
+              se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={() => deleteNFTId && handleDeleteNFT(deleteNFTId)}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
