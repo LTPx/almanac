@@ -18,7 +18,6 @@ import {
   Image as ImageIcon,
   Sparkles,
   CheckCircle,
-  XCircle,
   ExternalLink,
   ChevronsLeftRightEllipsis
 } from "lucide-react";
