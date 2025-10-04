@@ -226,7 +226,7 @@ function useSavePath(
 
     try {
       const payload = Object.entries(assignments)
-        .filter(([_, lessonKey]) => lessonKey !== null)
+        .filter(([, lessonKey]) => lessonKey !== null)
         .map(([cellId, lessonKey]) => {
           const position = parseInt(cellId.replace("cell-", ""), 10);
           const lesson = initialLessons.find((l) => l.id === lessonKey);

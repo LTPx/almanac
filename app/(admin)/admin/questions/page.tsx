@@ -101,7 +101,8 @@ const questionTypeIcons = {
 };
 
 export default function QuestionsPage() {
-  const [questions, setQuestions] = useState(mockQuestions);
+  // const [questions, setQuestions] = useState(mockQuestions);
+  const questions = mockQuestions;
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
 

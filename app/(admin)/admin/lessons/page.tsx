@@ -87,7 +87,8 @@ const mockUnits = [
 ];
 
 export default function LessonsPage() {
-  const [lessons, setLessons] = useState(mockLessons);
+  // const [lessons, setLessons] = useState(mockLessons);
+  const lessons = mockLessons;
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUnit, setSelectedUnit] = useState<string>("all");
 
