@@ -38,48 +38,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { toast } from "sonner";
-
-const mockLessons = [
-  {
-    id: 1,
-    name: "¿Qué es Blockchain?",
-    description: "Introducción a los conceptos básicos de blockchain",
-    unitId: 1,
-    unitName: "Introducción a Blockchain",
-    mandatory: true,
-    experiencePoints: 25,
-    position: 1,
-    questionsCount: 5,
-    isActive: true,
-    createdAt: "2024-01-15"
-  },
-  {
-    id: 2,
-    name: "Historia de Bitcoin",
-    description: "El origen y evolución de Bitcoin",
-    unitId: 1,
-    unitName: "Introducción a Blockchain",
-    mandatory: true,
-    experiencePoints: 30,
-    position: 2,
-    questionsCount: 8,
-    isActive: true,
-    createdAt: "2024-01-16"
-  },
-  {
-    id: 3,
-    name: "Smart Contracts Básicos",
-    description: "Fundamentos de los contratos inteligentes",
-    unitId: 2,
-    unitName: "Smart Contracts",
-    mandatory: false,
-    experiencePoints: 50,
-    position: 1,
-    questionsCount: 12,
-    isActive: true,
-    createdAt: "2024-01-20"
-  }
-];
+import { LessonAdmin } from "@/lib/types";
 
 const mockUnits = [
   { id: 1, name: "Introducción a Blockchain" },
@@ -88,7 +47,7 @@ const mockUnits = [
 ];
 
 export default function LessonsPage() {
-  const [lessons, setLessons] = useState(mockLessons);
+  const [lessons, setLessons] = useState<LessonAdmin[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUnit, setSelectedUnit] = useState<string>("all");
 
@@ -103,7 +62,7 @@ export default function LessonsPage() {
   const filteredLessons = lessons.filter((lesson) => {
     const matchesSearch =
       lesson.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lesson.description.toLowerCase().includes(searchTerm.toLowerCase());
+      lesson.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesUnit =
       selectedUnit === "all" || lesson.unitId.toString() === selectedUnit;
     return matchesSearch && matchesUnit;
@@ -205,11 +164,11 @@ export default function LessonsPage() {
                   </CardDescription>
                   <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
                     <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                      {lesson.unitName}
+                      {lesson.unit.name}
                     </span>
                     <div className="flex items-center space-x-1">
                       <HelpCircle className="h-4 w-4" />
-                      <span>{lesson.questionsCount} preguntas</span>
+                      <span>{lesson._count.questions} preguntas</span>
                     </div>
                     <span>{lesson.experiencePoints} XP</span>
                     <span>Posición: {lesson.position}</span>

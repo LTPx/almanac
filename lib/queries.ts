@@ -216,6 +216,11 @@ export const getAllLessons = cache(async () => {
       isActive: true
     },
     include: {
+      unit: {
+        select: {
+          name: true
+        }
+      },
       _count: {
         select: {
           questions: true

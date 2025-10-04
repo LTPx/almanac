@@ -54,6 +54,23 @@ export type Lesson = {
   unitId: number;
 };
 
+export type LessonAdmin = {
+  id: number;
+  name: string;
+  description?: string | null;
+  position: number;
+  unitId: number;
+  createdAt: string;
+  updatedAt: string;
+  experiencePoints: number;
+  isActive: boolean;
+  mandatory: boolean;
+  unit: {
+    name: string;
+  };
+  _count: { questions: number };
+};
+
 export type Unit = {
   id: number;
   name: string;
