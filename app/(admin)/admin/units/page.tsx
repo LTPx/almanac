@@ -1,7 +1,7 @@
 // app/admin/units/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,44 +39,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from "@/components/ui/alert-dialog";
-
-// Mock data - reemplazar con datos reales de tu API
-const mockUnits = [
-  {
-    id: 1,
-    name: "Introducción a Blockchain",
-    description: "Conceptos básicos de la tecnología blockchain",
-    lessonsCount: 8,
-    studentsCount: 124,
-    isActive: true,
-    order: 1,
-    createdAt: "2024-01-15"
-  },
-  {
-    id: 2,
-    name: "Smart Contracts",
-    description: "Desarrollo y despliegue de contratos inteligentes",
-    lessonsCount: 12,
-    studentsCount: 89,
-    isActive: true,
-    order: 2,
-    createdAt: "2024-01-20"
-  },
-  {
-    id: 3,
-    name: "DeFi Fundamentals",
-    description: "Finanzas descentralizadas y protocolos DeFi",
-    lessonsCount: 6,
-    studentsCount: 67,
-    isActive: false,
-    order: 3,
-    createdAt: "2024-02-01"
-  }
-];
+import { toast } from "sonner";
+import { Unit } from "@/lib/types";
 
 export default function UnitsPage() {
-  const [units, setUnits] = useState(mockUnits);
+  const [units, setUnits] = useState<Unit[]>([]);
   const [deleteUnitId, setDeleteUnitId] = useState<number | null>(null);
+
+  const fetchUnits = async () => {
+    const response = await fetch("/api/units");
+    if (!response.ok) {
+      throw new Error("Failed to fetch units");
+    }
+    return response.json();
+  };
 
   const handleDeleteUnit = (id: number) => {
     setUnits(units.filter((unit) => unit.id !== id));
@@ -91,9 +67,24 @@ export default function UnitsPage() {
     );
   };
 
+  useEffect(() => {
+    const loadUnits = async () => {
+      try {
+        const unitsData = await fetchUnits();
+        setUnits(unitsData);
+      } catch (error) {
+        console.error("Error loading units:", error);
+        toast.error("No se pudieron cargar las unidades");
+      } finally {
+        // setLoading(false);
+      }
+    };
+
+    loadUnits();
+  }, []);
+
   return (
     <div className="space-y-6 bg-background text-foreground min-h-screen p-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Unidades</h1>
@@ -191,11 +182,7 @@ export default function UnitsPage() {
               <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
                 <div className="flex items-center space-x-2">
                   <BookOpen className="h-4 w-4" />
-                  <span>{unit.lessonsCount} lecciones</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Users className="h-4 w-4" />
-                  <span>{unit.studentsCount} estudiantes</span>
+                  <span>{unit._count.lessons} lecciones</span>
                 </div>
                 <div>
                   <span>Orden: {unit.order}</span>

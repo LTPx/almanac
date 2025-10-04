@@ -62,4 +62,5 @@ export type Unit = {
   isActive: boolean;
   _count: { lessons: number };
   lessons?: Lesson[];
+  createdAt: Date;
 };
