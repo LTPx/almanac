@@ -7,6 +7,7 @@ const CONTRACT_ADDRESS = process.env.THIRDWEB_CONTRACT_ADDRESS!;
 interface MintRequestBody {
   unitId?: string | number;
   tokenUnit?: string | number;
+  description?: string; // Agregar descripción personalizada
 }
 
 export async function POST(
@@ -17,6 +18,7 @@ export async function POST(
     const { userId } = await context.params;
     const body: MintRequestBody = await request.json();
     const unitId = body.unitId ?? body.tokenUnit;
+    const description = body.description;
 
     if (!unitId) {
       return NextResponse.json(
@@ -39,10 +41,10 @@ export async function POST(
 
     const { user, userUnitToken } = validationResult.data!;
 
-    // 2) Crear metadatos del NFT
+    // 2) Crear metadatos del NFT con descripción personalizada
     const courseName = "Almanac";
     const unitName = userUnitToken.unit.name;
-    const metadata = createNFTMetadata(courseName, unitName);
+    const metadata = createNFTMetadata(courseName, unitName, description);
 
     // 3) Mintear el NFT
     const mintResult = await mintEducationalNFT(user.walletAddress!, metadata);
@@ -56,9 +58,13 @@ export async function POST(
       metadata
     });
 
+    // 5) IMPORTANTE: Devolver el NFT con los metadatos incluidos
     return NextResponse.json({
       success: true,
-      nft: savedNFT,
+      nft: {
+        ...savedNFT,
+        metadata: metadata // Incluir metadatos directamente
+      },
       ...mintResult
     });
   } catch (err: any) {
@@ -70,9 +76,6 @@ export async function POST(
   }
 }
 
-/**
- * Valida que el usuario existe y tiene tokens disponibles para la unidad
- */
 async function validateUserAndTokens(userId: string, unitId: number) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -112,9 +115,6 @@ async function validateUserAndTokens(userId: string, unitId: number) {
   };
 }
 
-/**
- * Guarda el NFT en la base de datos y actualiza los tokens del usuario
- */
 async function saveNFTToDatabase({
   userId,
   unitId,
@@ -131,7 +131,6 @@ async function saveNFTToDatabase({
   const now = new Date();
 
   return prisma.$transaction(async (tx) => {
-    // Actualizar cantidad de tokens del usuario
     const newQuantity = userUnitToken.quantity - 1;
 
     if (newQuantity <= 0) {
@@ -143,7 +142,6 @@ async function saveNFTToDatabase({
       });
     }
 
-    // Crear registro del NFT
     return tx.educationalNFT.create({
       data: {
         tokenId: mintResult.tokenId ?? "",

@@ -26,7 +26,7 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
   units,
   selectedUnitId,
   onUnitChange,
-  streakDays,
+  // streakDays,
   zaps,
   lives,
   className = ""

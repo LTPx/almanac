@@ -15,12 +15,7 @@ export default function HomePage() {
   const user = useUser();
   const userId = user?.id || "";
   const { isLoading, error, fetchUnits, fetchUnitWithLessons } = useUnits();
-  const {
-    gamification,
-    isLoading: gamificationLoading,
-    error: gamificationError,
-    refetch
-  } = useGamification(userId);
+  const { gamification } = useGamification(userId);
 
   useEffect(() => {
     const loadUnits = async () => {
@@ -33,6 +28,7 @@ export default function HomePage() {
       }
     };
     loadUnits();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -43,6 +39,7 @@ export default function HomePage() {
       if (unit) setSelectedUnit(unit);
     };
     loadUnit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedUnitId]);
 
   return (

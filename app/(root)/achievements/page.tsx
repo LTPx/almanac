@@ -4,7 +4,7 @@ import { CardNFT } from "@/components/car-nft";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useNFTs } from "@/hooks/useNfts";
 import { useUser } from "@/context/UserContext";
 import Link from "next/link";
@@ -16,24 +16,17 @@ function Achievements() {
   if (!userId) {
     return <div>Login...</div>;
   }
+
+  return <AchievementsContent userId={userId} />;
+}
+
+function AchievementsContent({ userId }: { userId: string }) {
   const { nfts, loading, error, refetch } = useNFTs(userId);
 
   return (
     <div className="AchievementPage px-4 h-[70dvh]">
       <div className="flex items-center justify-between pt-[20px]">
-        <h4 className="text-[30px] font-bold">Medallas</h4>
-        <div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={refetch}
-            disabled={loading}
-            className="w-full"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            Actualizar
-          </Button>
-        </div>
+        <h4 className="text-[22px] font-bold">Medallas</h4>
       </div>
 
       <div className="h-full pt-6 flex flex-col justify-between">
@@ -68,7 +61,7 @@ function Achievements() {
           </p>
         )}
 
-        <div className="grid grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           {!loading &&
             nfts.map((nft) => (
               <CardNFT
@@ -79,6 +72,7 @@ function Achievements() {
               />
             ))}
         </div>
+
         <Link
           href={"/achievements/new"}
           className="w-full h-[50px] text-center bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 text-base font-medium rounded-lg mb-8"

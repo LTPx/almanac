@@ -3,7 +3,6 @@ import { Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "@/components/ui/sonner";
-import FooterNav from "@/components/footer-nav";
 import ClientWrapper from "@/components/client-wrapper";
 
 const notoSansKR = Noto_Sans_KR({
@@ -27,12 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${notoSansKR.variable}`}
-      suppressHydrationWarning
-    >
-      <body className={` antialiased`}>
+    <html lang="en" className={notoSansKR.variable} suppressHydrationWarning>
+      <body className="antialiased" suppressHydrationWarning>
         <NextTopLoader showSpinner={false} height={6} color="#000000" />
         <Toaster richColors position="top-right" />
         <ClientWrapper>{children}</ClientWrapper>

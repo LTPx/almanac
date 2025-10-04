@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TestQuestion } from "./TestQuestion";
 import { TestResults } from "./TestResults";
@@ -9,13 +9,13 @@ import { HeaderBar } from "../header-bar";
 
 import type {
   TestData,
-  TestResultsInterface as TestResultsType,
-  Lesson
+  TestResultsInterface as TestResultsType
+  // Lesson
 } from "@/lib/types";
 
 interface TestSystemProps {
   userId: string;
-  initialLesson: Lesson;
+  initialLessonId: number;
   onClose: () => void;
   hearts: number;
 }
@@ -24,7 +24,7 @@ type TestState = "testing" | "results";
 
 export function TestSystem({
   userId,
-  initialLesson,
+  initialLessonId,
   onClose,
   hearts
 }: TestSystemProps) {
@@ -39,22 +39,26 @@ export function TestSystem({
     Date.now()
   );
 
-  const { isLoading, error, startTest, submitAnswer, completeTest } = useTest();
+  const { error, startTest, submitAnswer, completeTest } = useTest();
+
+  const handleStartTest = useCallback(
+    async (lessonId: number) => {
+      const testData = await startTest(userId, lessonId);
+      if (testData) {
+        setCurrentTest(testData);
+        setCurrentQuestionIndex(0);
+        setAnswers({});
+        setQuestionStartTime(Date.now());
+        setState("testing");
+      }
+    },
+    [startTest, userId]
+  );
 
   useEffect(() => {
-    handleStartTest(initialLesson.id);
+    handleStartTest(initialLessonId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const handleStartTest = async (lessonId: number) => {
-    const testData = await startTest(userId, lessonId);
-    if (testData) {
-      setCurrentTest(testData);
-      setCurrentQuestionIndex(0);
-      setAnswers({});
-      setQuestionStartTime(Date.now());
-      setState("testing");
-    }
-  };
 
   const handleAnswer = async (questionId: number, answer: string) => {
     if (!currentTest) return;
@@ -72,15 +76,17 @@ export function TestSystem({
         ...prev,
         [questionId]: { answer, isCorrect: result.isCorrect }
       }));
+    }
+  };
 
-      setTimeout(() => {
-        if (currentQuestionIndex < currentTest.questions.length - 1) {
-          setCurrentQuestionIndex((prev) => prev + 1);
-          setQuestionStartTime(Date.now());
-        } else {
-          handleCompleteTest();
-        }
-      }, 2000);
+  const handleNext = () => {
+    if (!currentTest) return;
+
+    if (currentQuestionIndex < currentTest.questions.length - 1) {
+      setCurrentQuestionIndex((prev) => prev + 1);
+      setQuestionStartTime(Date.now());
+    } else {
+      handleCompleteTest();
     }
   };
 
@@ -147,6 +153,7 @@ export function TestSystem({
                 <TestQuestion
                   question={currentTest.questions[currentQuestionIndex]}
                   onAnswer={handleAnswer}
+                  onNext={handleNext}
                   showResult={
                     !!answers[currentTest.questions[currentQuestionIndex].id]
                   }
@@ -176,6 +183,7 @@ export function TestSystem({
             className="absolute inset-0 w-full h-full flex items-center justify-center"
           >
             <TestResults
+              hearts={hearts}
               results={results}
               lessonName={currentTest.lesson.name}
               onReturnToLessons={onClose}

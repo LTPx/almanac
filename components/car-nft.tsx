@@ -9,16 +9,11 @@ interface CardNFTProps {
   onClick?: () => void;
 }
 
-export const CardNFT: React.FC<CardNFTProps> = ({
-  image,
-  title,
-  description,
-  onClick
-}) => {
+export const CardNFT: React.FC<CardNFTProps> = ({ image, title, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className="cursor-pointer rounded-lg overflow-hidden border border-gray-700 hover:shadow-lg transition-shadow"
+      className="cursor-pointer rounded-lg overflow-hidden border border-gray-700"
     >
       <img
         src={image}
@@ -26,10 +21,9 @@ export const CardNFT: React.FC<CardNFTProps> = ({
         className="w-full h-32 object-cover bg-gray-800"
       />
       <div className="p-2">
-        <h3 className="text-white text-base font-medium">{title}</h3>
-        {description && (
-          <p className="text-xs text-gray-400 truncate">{description}</p>
-        )}
+        <h3 className="text-center text-white text-base font-medium">
+          {title}
+        </h3>
       </div>
     </div>
   );

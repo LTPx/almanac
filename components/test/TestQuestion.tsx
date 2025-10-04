@@ -13,6 +13,7 @@ import { useAudio } from "react-use";
 export function TestQuestion({
   question,
   onAnswer,
+  onNext,
   showResult = false,
   isCorrect = false,
   selectedAnswer
@@ -153,9 +154,9 @@ export function TestQuestion({
                     JSON.parse(selected || "[]").some((s: string | null) => !s))
                 }
                 className="
-    w-full py-8 text-xl font-semibold rounded-2xl shadow-lg
-    bg-[#32C781] hover:bg-[#28a36a] text-white
-  "
+                  w-full py-8 text-xl font-semibold rounded-2xl shadow-lg
+                  bg-[#32C781] hover:bg-[#28a36a] text-white
+                "
               >
                 {question.type === "FILL_IN_BLANK"
                   ? "Enviar Respuesta"
@@ -170,13 +171,13 @@ export function TestQuestion({
                 transition={{ type: "spring", stiffness: 300, damping: 15 }}
               >
                 <Button
-                  onClick={() => {}}
+                  onClick={onNext}
                   className={`
-      mt-6 w-full text-white py-8 text-xl font-medium rounded-2xl shadow-md
-      ${isCorrect ? "bg-[#32C781] hover:bg-[#28a36a]" : "bg-red-500 hover:bg-red-600"}
-    `}
+                    mt-6 w-full text-white py-8 text-xl font-medium rounded-2xl shadow-md
+                    ${isCorrect ? "bg-[#32C781] hover:bg-[#28a36a]" : "bg-red-500 hover:bg-red-600"}
+                  `}
                 >
-                  {isCorrect ? "¡Bien hecho!" : "Vuelve a intentarlo"}
+                  Continuar →
                 </Button>
               </motion.div>
             )}

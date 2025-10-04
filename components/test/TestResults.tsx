@@ -1,5 +1,4 @@
 "use client";
-import { Trophy, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TestResultsInterface } from "@/lib/types";
 import Confetti from "react-confetti";
@@ -13,15 +12,17 @@ interface TestResultsProps {
   lessonName: string;
   onReturnToLessons: () => void;
   onRetakeTest?: () => void;
+  hearts?: number;
 }
 
 export function TestResults({
   results,
-  lessonName,
+  // lessonName,
   onReturnToLessons,
+  hearts,
   onRetakeTest
 }: TestResultsProps) {
-  const percentage = Math.round(results.score);
+  // const percentage = Math.round(results.score);
   const isPassed = results.passed;
   const { width, height } = useWindowSize();
 
@@ -39,7 +40,7 @@ export function TestResults({
   }, [isPassed, hasPlayed, finishControls]);
 
   return (
-    <div className="bg-background min-h-screen p-6 flex flex-col items-center justify-center">
+    <div className="bg-background min-h-screen lg:p-6 flex flex-col items-center justify-center">
       {isPassed && (
         <Confetti
           recycle={false}
@@ -71,7 +72,7 @@ export function TestResults({
         </h1>
         <div className="flex w-full items-center gap-x-4">
           <ResultCard variant="points" value={results.experienceGained} />
-          <ResultCard variant="hearts" value={5} />
+          <ResultCard variant="hearts" value={hearts || 0} />
         </div>
       </div>
 

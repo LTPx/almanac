@@ -12,7 +12,7 @@
   --popover-foreground: oklch(0.9219 0 0);
 
   /* Primario unificado */
-  --primary: #32C781;
+  --primary: #32c781;
   --primary-foreground: #ffffff;
 
   --secondary: oklch(0.2686 0 0);
@@ -30,23 +30,23 @@
 
   --border: oklch(0.3715 0 0);
   --input: oklch(0.3715 0 0);
-  --ring: #32C781;
+  --ring: #32c781;
 
   /* Charts → variaciones del verde */
   --chart-1: oklch(0.78 0.15 145);
   --chart-2: oklch(0.65 0.14 145);
   --chart-3: oklch(0.52 0.13 145);
-  --chart-4: oklch(0.40 0.12 145);
-  --chart-5: oklch(0.30 0.10 145);
+  --chart-4: oklch(0.4 0.12 145);
+  --chart-5: oklch(0.3 0.1 145);
 
   --sidebar: oklch(0.1684 0 0);
   --sidebar-foreground: oklch(0.9219 0 0);
-  --sidebar-primary: #32C781;
+  --sidebar-primary: #32c781;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: oklch(0.40 0.12 145);
+  --sidebar-accent: oklch(0.4 0.12 145);
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: oklch(0.3715 0 0);
-  --sidebar-ring: #32C781;
+  --sidebar-ring: #32c781;
 
   --font-sans: Inter, sans-serif;
   --font-serif: Source Serif 4, serif;
@@ -82,7 +82,7 @@
   --popover: oklch(0.2686 0 0);
   --popover-foreground: oklch(0.9219 0 0);
 
-  --primary: #32C781;
+  --primary: #32c781;
   --primary-foreground: #ffffff;
   --secondary: oklch(0.2686 0 0);
   --secondary-foreground: oklch(0.9219 0 0);
@@ -96,22 +96,22 @@
 
   --border: oklch(0.3715 0 0);
   --input: oklch(0.3715 0 0);
-  --ring: #32C781;
+  --ring: #32c781;
 
   --chart-1: oklch(0.78 0.15 145);
   --chart-2: oklch(0.65 0.14 145);
   --chart-3: oklch(0.52 0.13 145);
-  --chart-4: oklch(0.40 0.12 145);
-  --chart-5: oklch(0.30 0.10 145);
+  --chart-4: oklch(0.4 0.12 145);
+  --chart-5: oklch(0.3 0.1 145);
 
   --sidebar: oklch(0.1684 0 0);
   --sidebar-foreground: oklch(0.9219 0 0);
-  --sidebar-primary: #32C781;
+  --sidebar-primary: #32c781;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: oklch(0.40 0.12 145);
+  --sidebar-accent: oklch(0.4 0.12 145);
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: oklch(0.3715 0 0);
-  --sidebar-ring: #32C781;
+  --sidebar-ring: #32c781;
 
   --font-sans: Inter, sans-serif;
   --font-serif: Source Serif 4, serif;
@@ -210,10 +210,22 @@
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .animate-shimmer {
   animation: shimmer 1.5s linear infinite;
+}
+
+[data-next-badge] {
+  display: none !important;
+}
+
+[data-nextjs-dev-tools-button] {
+  display: none !important;
 }

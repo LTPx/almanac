@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -9,8 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Loader2,
@@ -49,18 +47,14 @@ const UserNFTs: React.FC<UserNFTsProps> = ({ userId, useThirdweb = false }) => {
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isThirdwebEnabled, setIsThirdwebEnabled] = useState(useThirdweb);
+  // const [isThirdwebEnabled, setIsThirdwebEnabled] = useState(useThirdweb);
 
-  useEffect(() => {
-    fetchNFTs();
-  }, [userId, isThirdwebEnabled]);
-
-  const fetchNFTs = async () => {
+  const fetchNFTs = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const endpoint = isThirdwebEnabled
+      const endpoint = useThirdweb
         ? `/api/users/${userId}/nfts/thirdweb`
         : `/api/users/${userId}/nfts`;
 
@@ -78,21 +72,27 @@ const UserNFTs: React.FC<UserNFTsProps> = ({ userId, useThirdweb = false }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, useThirdweb]);
 
-  const parseMetadata = (metadataUri: string) => {
-    try {
-      if (
-        metadataUri.startsWith("ipfs://") ||
-        metadataUri.startsWith("https://")
-      ) {
-        return { metadataUrl: metadataUri };
-      }
-      return JSON.parse(metadataUri);
-    } catch {
-      return null;
-    }
-  };
+  useEffect(() => {
+    fetchNFTs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  // }, [userId, isThirdwebEnabled]);
+
+  // const parseMetadata = (metadataUri: string) => {
+  //   try {
+  //     if (
+  //       metadataUri.startsWith("ipfs://") ||
+  //       metadataUri.startsWith("https://")
+  //     ) {
+  //       return { metadataUrl: metadataUri };
+  //     }
+  //     return JSON.parse(metadataUri);
+  //   } catch {
+  //     return null;
+  //   }
+  // };
 
   const getExplorerUrl = (contractAddress: string, tokenId: string) => {
     return `https://amoy.polygonscan.com/token/${contractAddress}?a=${tokenId}`;

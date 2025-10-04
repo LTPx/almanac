@@ -18,20 +18,20 @@ export const HeaderBar = ({
   hearts,
   percentage,
   hasActiveSubscription,
-  justAnsweredCorrect = false,
-  onClose
+  justAnsweredCorrect = false
+  // onClose
 }: HeaderProps) => {
   const { open } = useExitModal();
 
   return (
     <>
-      <header className="mx-auto flex w-full max-w-[1140px] items-center justify-between gap-x-7 px-10 pt-[20px] lg:pt-[50px]">
+      <header className="mx-auto flex w-full max-w-[1140px] items-center justify-between gap-x-4 lg:gap-x-7 px-6 lg:px-10 pt-[20px] lg:pt-[50px]">
         <X
           onClick={open}
           className="cursor-pointer text-slate-500 transition hover:opacity-75"
         />
 
-        <div className="flex-1 mx-4">
+        <div className="flex-1 lg:mx-4">
           <SuccessProgressBar
             value={percentage}
             triggerSuccess={justAnsweredCorrect}
