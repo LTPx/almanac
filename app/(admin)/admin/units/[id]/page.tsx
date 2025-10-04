@@ -2,14 +2,17 @@
 
 import OrderLearningPath from "@/components/admin/order-learning-path";
 import { Lesson } from "@/lib/types";
+import React from "react";
 import { useEffect, useState, useCallback } from "react";
 
 type LoadingState = "loading" | "success" | "error" | "empty";
 
-export default function UnitPage(nextParams: { params: { id: string } }) {
-  const {
-    params: { id }
-  } = nextParams;
+export default function UnitPage({
+  params
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = React.use(params);
 
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [lessonPositions, setLessonPositions] = useState<
@@ -54,7 +57,8 @@ export default function UnitPage(nextParams: { params: { id: string } }) {
 
   useEffect(() => {
     fetchLessons();
-  }, [fetchLessons]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const renderContent = () => {
     switch (loadingState) {
