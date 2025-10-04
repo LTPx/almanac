@@ -1,16 +1,10 @@
 // app/admin/nfts/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -50,64 +44,34 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from "@/components/ui/alert-dialog";
-
-// Mock data - reemplazar con datos reales
-const mockNFTs = [
-  {
-    id: 1,
-    imageUrl: "https://placehold.co/400x400/3b82f6/white?text=Common+NFT",
-    rarity: "COMMON",
-    isUsed: false,
-    metadataUri: "ipfs://QmXxxx...",
-    createdAt: "2024-01-15",
-    usedAt: null
-  },
-  {
-    id: 2,
-    imageUrl: "https://placehold.co/400x400/8b5cf6/white?text=Rare+NFT",
-    rarity: "RARE",
-    isUsed: true,
-    metadataUri: "ipfs://QmYyyy...",
-    createdAt: "2024-01-20",
-    usedAt: "2024-02-01"
-  },
-  {
-    id: 3,
-    imageUrl: "https://placehold.co/400x400/f59e0b/white?text=Epic+NFT",
-    rarity: "EPIC",
-    isUsed: false,
-    metadataUri: "ipfs://QmZzzz...",
-    createdAt: "2024-02-05",
-    usedAt: null
-  },
-  {
-    id: 4,
-    imageUrl: "https://placehold.co/400x400/ec4899/white?text=Legendary+NFT",
-    rarity: "LEGENDARY",
-    isUsed: true,
-    metadataUri: "ipfs://QmWwww...",
-    createdAt: "2024-02-10",
-    usedAt: "2024-02-15"
-  }
-];
+import { toast } from "sonner";
+import { NFTAsset, NFTAssetsResponse } from "@/lib/types";
 
 const rarityConfig = {
-  COMMON: { label: "Común", color: "bg-gray-100 text-gray-800", icon: "⚪" },
+  NORMAL: { label: "Normal", color: "bg-gray-100 text-gray-800", icon: "⚪" },
   RARE: { label: "Raro", color: "bg-blue-100 text-blue-800", icon: "🔵" },
   EPIC: { label: "Épico", color: "bg-purple-100 text-purple-800", icon: "🟣" },
-  LEGENDARY: {
-    label: "Legendario",
+  UNIQUE: {
+    label: "Unico",
     color: "bg-yellow-100 text-yellow-800",
     icon: "⭐"
   }
 };
 
 export default function NFTsPage() {
-  const [nfts, setNfts] = useState(mockNFTs);
+  const [nfts, setNfts] = useState<NFTAsset[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRarity, setSelectedRarity] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [deleteNFTId, setDeleteNFTId] = useState<number | null>(null);
+
+  const fetchNftAssets = async () => {
+    const response = await fetch("/api/nft-assets");
+    if (!response.ok) {
+      throw new Error("Failed to fetch lessons");
+    }
+    return response.json();
+  };
 
   const filteredNFTs = nfts.filter((nft) => {
     const matchesSearch =
@@ -132,12 +96,29 @@ export default function NFTsPage() {
     used: nfts.filter((n) => n.isUsed).length,
     available: nfts.filter((n) => !n.isUsed).length,
     byRarity: {
-      COMMON: nfts.filter((n) => n.rarity === "COMMON").length,
+      COMMON: nfts.filter((n) => n.rarity === "NORMAL").length,
       RARE: nfts.filter((n) => n.rarity === "RARE").length,
       EPIC: nfts.filter((n) => n.rarity === "EPIC").length,
-      LEGENDARY: nfts.filter((n) => n.rarity === "LEGENDARY").length
+      LEGENDARY: nfts.filter((n) => n.rarity === "UNIQUE").length
     }
   };
+
+  useEffect(() => {
+    const loadAssets = async () => {
+      try {
+        const response: NFTAssetsResponse = await fetchNftAssets();
+        const { nftAssets, pagination, stats } = response;
+        setNfts(nftAssets);
+      } catch (error) {
+        console.error("Error loading lessons:", error);
+        toast.error("Error loading lessons");
+      } finally {
+        // setLoading(false);
+      }
+    };
+
+    loadAssets();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -234,10 +215,10 @@ export default function NFTsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas las rarezas</SelectItem>
-                  <SelectItem value="COMMON">Común</SelectItem>
+                  <SelectItem value="NORMAL">Común</SelectItem>
                   <SelectItem value="RARE">Raro</SelectItem>
                   <SelectItem value="EPIC">Épico</SelectItem>
-                  <SelectItem value="LEGENDARY">Legendario</SelectItem>
+                  <SelectItem value="UNIQUE">Unico</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -262,7 +243,7 @@ export default function NFTsPage() {
         {filteredNFTs.map((nft) => {
           const rarityInfo =
             rarityConfig[nft.rarity as keyof typeof rarityConfig];
-
+          console.log("Rarity Info:", nft);
           return (
             <Card
               key={nft.id}

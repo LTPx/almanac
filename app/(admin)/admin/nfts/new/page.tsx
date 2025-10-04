@@ -72,7 +72,7 @@ export default function CreateNFTPage() {
   const [formData, setFormData] = useState({
     imageUrl: "",
     imageFile: null as File | null,
-    rarity: "COMMON",
+    rarity: "NORMAL",
     metadataUri: ""
   });
 

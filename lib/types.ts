@@ -81,3 +81,30 @@ export type Unit = {
   lessons?: Lesson[];
   createdAt: Date;
 };
+
+export type NFTAsset = {
+  id: number;
+  imageUrl: string;
+  rarity: "NORMAL" | "RARE" | "EPIC" | "UNIQUE";
+  isUsed: boolean;
+  metadataUri?: string;
+  createdAt: Date;
+  usedAt?: Date;
+};
+
+export type Pagination = {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export type NFTAssetsResponse = {
+  nftAssets: NFTAsset[];
+  pagination: Pagination;
+  stats: {
+    rarity: string;
+    isUsed: boolean;
+    _count: number;
+  }[];
+};
