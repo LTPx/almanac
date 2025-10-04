@@ -20,7 +20,7 @@ export default function Navbar() {
             {user ? (
               <>
                 <Link
-                  href="/admin/dashboard"
+                  href="/admin"
                   className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <Button variant="outline">Dashboard</Button>

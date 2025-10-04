@@ -39,7 +39,11 @@ export default function SignInForm() {
         onRequest: () => {
           toast.loading("Signing in...");
         },
-        onSuccess: () => {
+        onSuccess: (response: any) => {
+          const {
+            data: { user }
+          } = response;
+          console.log(user);
           toast.dismiss();
           toast.success("Signed in successfully");
           redirect("/home");
