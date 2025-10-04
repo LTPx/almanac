@@ -3,11 +3,11 @@ import prisma from "@/lib/prisma";
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ nftId: string }> }
+  context: { params: Promise<{ assetId: string }> }
 ) {
   try {
-    const { nftId } = await context.params;
-    const id = parseInt(nftId, 10);
+    const { assetId } = await context.params;
+    const id = parseInt(assetId, 10);
 
     if (isNaN(id)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
@@ -50,11 +50,11 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: Promise<{ nftId: string }> }
+  context: { params: Promise<{ assetId: string }> }
 ) {
   try {
-    const { nftId } = await context.params;
-    const id = parseInt(nftId, 10);
+    const { assetId } = await context.params;
+    const id = parseInt(assetId, 10);
 
     if (isNaN(id)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
@@ -84,11 +84,11 @@ export async function PATCH(
     }
 
     if (rarity) {
-      const validRarities = ["COMMON", "RARE", "EPIC", "LEGENDARY"];
+      const validRarities = ["NORMAL", "RARE", "EPIC", "UNIQUE"];
       if (!validRarities.includes(rarity)) {
         return NextResponse.json(
           {
-            error: "Rareza inválida. Debe ser: COMMON, RARE, EPIC o LEGENDARY"
+            error: "Rareza inválida. Debe ser: NORMAL, RARE, EPIC o UNIQUE"
           },
           { status: 400 }
         );
@@ -148,11 +148,11 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ nftId: string }> }
+  context: { params: Promise<{ assetId: string }> }
 ) {
   try {
-    const { nftId } = await context.params;
-    const id = parseInt(nftId, 10);
+    const { assetId } = await context.params;
+    const id = parseInt(assetId, 10);
 
     if (isNaN(id)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });

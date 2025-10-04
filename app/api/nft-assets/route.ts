@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { PinataSDK } from "pinata";
+
+const PINATA_GATEWAY = process.env.PINATA_GATEWAY || "gateway.pinata.cloud";
+
+const pinata = new PinataSDK({
+  pinataJwt: process.env.PINATA_JWT!,
+  pinataGateway: PINATA_GATEWAY
+});
 
 export async function GET(request: NextRequest) {
   try {
@@ -74,17 +82,20 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { imageUrl, rarity, metadataUri } = body;
+    const formData = await request.formData();
+    const file = formData.get("file") as File;
+    const rarity = formData.get("rarity") as string;
+    const metadataUri = formData.get("metadataUri") as string | null;
 
-    if (!imageUrl || !rarity) {
+    if (!file || !rarity) {
       return NextResponse.json(
-        { error: "imageUrl y rarity son requeridos" },
+        { error: "file y rarity son requeridos" },
         { status: 400 }
       );
     }
 
     const validRarities = ["NORMAL", "RARE", "EPIC", "UNIQUE"];
+
     if (!validRarities.includes(rarity)) {
       return NextResponse.json(
         {
@@ -95,50 +106,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    try {
-      new URL(imageUrl);
-    } catch {
-      return NextResponse.json(
-        { error: "imageUrl debe ser una URL válida" },
-        { status: 400 }
-      );
-    }
-
-    if (metadataUri) {
-      if (
-        !metadataUri.startsWith("ipfs://") &&
-        !metadataUri.startsWith("http")
-      ) {
-        return NextResponse.json(
-          {
-            error:
-              "metadataUri debe ser una URL válida o un URI de IPFS (ipfs://...)"
-          },
-          { status: 400 }
-        );
+    const upload = await pinata.upload.public.file(file, {
+      metadata: {
+        name: `NFT-${rarity}-${file.name}`,
+        keyvalues: { rarity }
       }
-    }
+    });
 
+    const imageUrl = `https://${PINATA_GATEWAY}/ipfs/${upload.cid}`;
     const nftAsset = await prisma.nFTAsset.create({
       data: {
         imageUrl,
-        rarity,
+        rarity: rarity as any,
         metadataUri,
         isUsed: false
       }
     });
 
     return NextResponse.json(
-      {
-        message: "NFT Asset creado exitosamente",
-        nftAsset
-      },
+      { message: "NFT Asset subido exitosamente", nftAsset },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error al crear NFT Asset:", error);
+    console.error("Error al subir NFT:", error);
     return NextResponse.json(
-      { error: "Error interno del servidor" },
+      {
+        error: "Error interno del servidor",
+        details: (error as Error).message
+      },
       { status: 500 }
     );
   }
