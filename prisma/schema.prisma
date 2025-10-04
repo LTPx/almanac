@@ -303,15 +303,32 @@ model ZapTransaction {
 
 //BLOCKCHAIN
 model EducationalNFT {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   tokenId         String
   userId          String
   unitId          String
   contractAddress String
   transactionHash String?
   metadataUri     String
-  mintedAt        DateTime @default(now())
-  user            User     @relation(fields: [userId], references: [id])
+  mintedAt        DateTime  @default(now())
+  user            User      @relation(fields: [userId], references: [id])
+  nftAsset        NFTAsset? @relation(fields: [nftAssetId], references: [id])
+  nftAssetId      Int?      @unique
+
+  @@map("educational_nft")
+}
+
+model NFTAsset {
+  id             Int             @id @default(autoincrement())
+  imageUrl       String
+  rarity         NFTRarity
+  isUsed         Boolean         @default(false)
+  metadataUri    String?
+  createdAt      DateTime        @default(now())
+  usedAt         DateTime?
+  educationalNFT EducationalNFT?
+
+  @@map("nft_asset")
 }
 
 //ENUMS
@@ -345,4 +362,13 @@ enum QuestionType {
   DRAG_DROP // Arrastrar y soltar
 
   @@map("question_type")
+}
+
+enum NFTRarity {
+  NORMAL
+  RARE
+  EPIC
+  UNIQUE
+
+  @@map("nft_rarity")
 }
