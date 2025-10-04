@@ -28,7 +28,8 @@ export default function HomePage() {
       }
     };
     loadUnits();
-  }, [fetchUnits]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!selectedUnitId) return;
@@ -38,7 +39,8 @@ export default function HomePage() {
       if (unit) setSelectedUnit(unit);
     };
     loadUnit();
-  }, [selectedUnitId, fetchUnitWithLessons]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedUnitId]);
 
   return (
     <div className="HomePage">

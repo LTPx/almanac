@@ -76,7 +76,8 @@ const UserNFTs: React.FC<UserNFTsProps> = ({ userId, useThirdweb = false }) => {
 
   useEffect(() => {
     fetchNFTs();
-  }, [fetchNFTs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // }, [userId, isThirdwebEnabled]);
 
   // const parseMetadata = (metadataUri: string) => {

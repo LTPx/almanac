@@ -66,7 +66,7 @@ export const ExitModal = () => {
               size="lg"
               onClick={() => {
                 close();
-                router.push("/");
+                router.push("/home");
               }}
             >
               End session

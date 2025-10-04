@@ -57,7 +57,8 @@ export function TestSystem({
 
   useEffect(() => {
     handleStartTest(initialLessonId);
-  }, [handleStartTest, initialLessonId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAnswer = async (questionId: number, answer: string) => {
     if (!currentTest) return;
