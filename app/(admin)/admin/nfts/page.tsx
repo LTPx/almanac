@@ -123,18 +123,18 @@ export default function NFTsPage() {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-background text-foreground min-h-screen p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">NFT Assets</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold">NFT Assets</h1>
+          <p className="text-muted-foreground">
             Gestiona los NFTs disponibles para recompensas
           </p>
         </div>
         <Link href="/admin/nfts/new">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Nuevo NFT Asset
+            New NFT Asset
           </Button>
         </Link>
       </div>
@@ -145,7 +145,9 @@ export default function NFTsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total NFTs</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total NFTs
+                </p>
                 <p className="text-2xl font-bold">{stats.total}</p>
               </div>
               <ImageIcon className="h-8 w-8 text-gray-400" />
@@ -157,12 +159,27 @@ export default function NFTsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Disponibles</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  No minted
+                </p>
+                <p className="text-2xl font-bold">{stats.available}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Minted
+                </p>
                 <p className="text-2xl font-bold text-green-600">
-                  {stats.available}
+                  {stats.used}
                 </p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-400" />
+              <CheckCircle className="h-6 w-6 text-green-400" />
             </div>
           </CardContent>
         </Card>
@@ -171,19 +188,9 @@ export default function NFTsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Minted</p>
-                <p className="text-2xl font-bold text-gray-600">{stats.used}</p>
-              </div>
-              <XCircle className="h-8 w-8 text-gray-400" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Unicos</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Unicos
+                </p>
                 <p className="text-2xl font-bold text-yellow-600">
                   {stats.byRarity.LEGENDARY}
                 </p>
@@ -209,7 +216,7 @@ export default function NFTsPage() {
                 />
               </div>
             </div>
-            <div className="w-40">
+            <div className="w-40s">
               <Select value={selectedRarity} onValueChange={setSelectedRarity}>
                 <SelectTrigger>
                   <Filter className="mr-2 h-4 w-4" />
@@ -231,7 +238,7 @@ export default function NFTsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="available">Disponibles</SelectItem>
+                  <SelectItem value="available">No Minted</SelectItem>
                   <SelectItem value="used">Minted</SelectItem>
                 </SelectContent>
               </Select>
@@ -340,25 +347,23 @@ export default function NFTsPage() {
                         : "NO MINTED"}
                     </h3>
                     {nft.isUsed ? (
-                      <XCircle className="h-5 w-5 text-gray-400" />
-                    ) : (
                       <CheckCircle className="h-5 w-5 text-green-500" />
+                    ) : (
+                      <></>
                     )}
                   </div>
 
-                  <div className="text-xs text-gray-500 space-y-1">
+                  <div className="text-xs text-muted-foreground space-y-1">
                     <p>
-                      Creado: {new Date(nft.createdAt).toLocaleDateString()}
+                      Created: {new Date(nft.createdAt).toLocaleDateString()}
                     </p>
                     {nft.isUsed && nft.usedAt && (
-                      <p>
-                        Minteado: {new Date(nft.usedAt).toLocaleDateString()}
-                      </p>
+                      <p>Minted: {new Date(nft.usedAt).toLocaleDateString()}</p>
                     )}
                   </div>
                   {nft.metadataUri && (
                     <p
-                      className="text-xs text-gray-600 truncate"
+                      className="text-xs text-muted-foreground truncate"
                       title={nft.metadataUri}
                     >
                       {nft.metadataUri}
@@ -378,7 +383,7 @@ export default function NFTsPage() {
             <h3 className="mt-4 text-lg font-semibold text-gray-900">
               No hay NFTs
             </h3>
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-muted-foreground">
               {searchTerm ||
               selectedRarity !== "all" ||
               selectedStatus !== "all"
