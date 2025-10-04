@@ -31,7 +31,6 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 
 const rarityOptions = [
   {

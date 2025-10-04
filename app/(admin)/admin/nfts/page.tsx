@@ -107,7 +107,7 @@ export default function NFTsPage() {
     const loadAssets = async () => {
       try {
         const response: NFTAssetsResponse = await fetchNftAssets();
-        const { nftAssets, pagination, stats } = response;
+        const { nftAssets } = response;
         setNfts(nftAssets);
       } catch (error) {
         console.error("Error loading lessons:", error);
