@@ -38,7 +38,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
       grid[row].nodes.push({ ...lesson, type: "lesson", col });
     });
 
-    return grid;
+    return grid.filter((rowData) => rowData.nodes.length > 0);
   };
 
   const getLessonState = (lessonId: number) => {
@@ -68,14 +68,37 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     return colors[lessonId % colors.length];
   };
 
+  const firstLesson =
+    lessons.length > 0
+      ? lessons.reduce((min, lesson) =>
+          lesson.position < min.position ? lesson : min
+        )
+      : null;
+
+  const startCol = firstLesson ? getRowCol(firstLesson.position).col : null;
+
   const pathLayout = generatePathLayout();
 
   return (
     <div className="max-w-sm mx-auto">
+      <div className="grid grid-cols-5 gap-3 lg:gap-6 mb-6 lg:mb-6">
+        {Array.from({ length: 5 }, (_, col) => (
+          <div key={col} className="flex justify-center">
+            {startCol === col ? (
+              <div className="w-full h-full lg:h-16 flex flex-col items-center">
+                <div className="bg-[#F9F0B6] rounded-t-full w-full h-full lg:h-16 flex items-center justify-center shadow-lg"></div>
+              </div>
+            ) : (
+              <div className="w-full h-16 lg:h-16"></div>
+            )}
+          </div>
+        ))}
+      </div>
+
       {pathLayout.map((rowData, rowIndex) => (
         <div
           key={rowIndex}
-          className="grid grid-cols-5 gap-4 lg:gap-6 mb-4 lg:mb-6"
+          className="grid grid-cols-5 gap-3 lg:gap-6 mb-6 lg:mb-6"
         >
           {Array.from({ length: 5 }, (_, col) => {
             const nodeData = rowData.nodes.find((n) => n.col === col);
