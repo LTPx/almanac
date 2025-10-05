@@ -52,6 +52,7 @@ export type Lesson = {
   description?: string | null;
   position: number;
   unitId: number;
+  mandatory: boolean;
 };
 
 export type LessonAdmin = {

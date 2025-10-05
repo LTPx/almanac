@@ -15,7 +15,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
   approvedLessons,
   onStartLesson
 }) => {
-  type Node = Lesson & { type: "lesson"; col: number };
+  type Node = Lesson & { type: "lesson"; col: number; row: number };
 
   const getRowCol = (position: number) => {
     const row = Math.floor(position / 5);
@@ -35,37 +35,50 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     lessons.forEach((lesson) => {
       const { row, col } = getRowCol(lesson.position);
       if (!grid[row]) grid[row] = { row, nodes: [] };
-      grid[row].nodes.push({ ...lesson, type: "lesson", col });
+      grid[row].nodes.push({ ...lesson, type: "lesson", col, row });
     });
 
     return grid.filter((rowData) => rowData.nodes.length > 0);
   };
 
-  const getLessonState = (lessonId: number) => {
-    if (approvedLessons.includes(lessonId)) return "completed";
+  const isRowUnlocked = (targetRow: number): boolean => {
+    const pathLayout = generatePathLayout();
 
-    const sortedLessons = [...lessons].sort((a, b) => a.position - b.position);
-    const firstPending = sortedLessons.find(
-      (l) => !approvedLessons.includes(l.id)
-    );
+    const maxRow = Math.max(...pathLayout.map((r) => r.row));
+    if (targetRow === maxRow) return true;
 
-    if (firstPending?.id === lessonId) return "available";
+    for (let row = maxRow; row > targetRow; row--) {
+      const rowData = pathLayout.find((r) => r.row === row);
+      if (!rowData) continue;
 
-    return "locked";
+      const mandatoryLessons = rowData.nodes.filter((n) => n.mandatory);
+
+      if (mandatoryLessons.length > 0) {
+        const allMandatoryCompleted = mandatoryLessons.every((lesson) =>
+          approvedLessons.includes(lesson.id)
+        );
+
+        if (!allMandatoryCompleted) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   };
 
-  const getLockedColor = (lessonId: number) => {
-    const colors = [
-      "border-purple-400",
-      "border-blue-400",
-      "border-pink-400",
-      "border-orange-400",
-      "border-red-400",
-      "border-cyan-400",
-      "border-indigo-400",
-      "border-emerald-400"
-    ];
-    return colors[lessonId % colors.length];
+  const getLessonState = (
+    lesson: Node
+  ): "completed" | "available" | "locked" => {
+    if (approvedLessons.includes(lesson.id)) return "completed";
+
+    if (!isRowUnlocked(lesson.row)) return "locked";
+
+    return "available";
+  };
+
+  const getLockedColor = (mandatory: boolean) => {
+    return mandatory ? "border-[#90D398]" : "border-[#708BB1]";
   };
 
   const firstLesson =
@@ -109,8 +122,9 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                     id={nodeData.id}
                     name={nodeData.name}
                     description={nodeData.description}
-                    state={getLessonState(nodeData.id)}
-                    color={getLockedColor(nodeData.id)}
+                    state={getLessonState(nodeData)}
+                    color={getLockedColor(nodeData.mandatory)}
+                    mandatory={nodeData.mandatory}
                     onStartLesson={() => onStartLesson(nodeData)}
                   />
                 ) : (

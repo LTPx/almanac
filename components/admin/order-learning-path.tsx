@@ -34,7 +34,7 @@ const Draggable = React.memo(function Draggable({
 
   const bgColor = isMandatory
     ? "bg-green-600 text-white"
-    : "bg-yellow-600 text-white";
+    : "bg-[#1983DD] text-white";
 
   return (
     <div
