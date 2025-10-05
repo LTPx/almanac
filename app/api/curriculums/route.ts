@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
                 isActive: true
               }
             }
-          : false,
+          : true,
         _count: {
           select: { units: true }
         }
@@ -84,26 +84,29 @@ export async function POST(request: NextRequest) {
     }
 
     // Validar que hay al menos una unidad
-    if (!unitIds || !Array.isArray(unitIds) || unitIds.length === 0) {
-      return NextResponse.json(
-        { error: "Debes seleccionar al menos una unidad" },
-        { status: 400 }
-      );
-    }
+    // if (!unitIds || !Array.isArray(unitIds) || unitIds.length === 0) {
+    //   return NextResponse.json(
+    //     { error: "Debes seleccionar al menos una unidad" },
+    //     { status: 400 }
+    //   );
+    // }
 
-    // Verificar que todas las unidades existen
-    const existingUnits = await prisma.unit.findMany({
-      where: {
-        id: { in: unitIds }
-      },
-      select: { id: true }
-    });
+    console.log("unitIds:", unitIds);
+    if (unitIds !== undefined) {
+      // Verificar que todas las unidades existen
+      const existingUnits = await prisma.unit.findMany({
+        where: {
+          id: { in: unitIds }
+        },
+        select: { id: true }
+      });
 
-    if (existingUnits.length !== unitIds.length) {
-      return NextResponse.json(
-        { error: "Algunas unidades seleccionadas no existen" },
-        { status: 400 }
-      );
+      if (existingUnits.length !== unitIds.length) {
+        return NextResponse.json(
+          { error: "Algunas unidades seleccionadas no existen" },
+          { status: 400 }
+        );
+      }
     }
 
     // Crear el curriculum con transacción
@@ -117,13 +120,13 @@ export async function POST(request: NextRequest) {
           metadata: metadata || null
         }
       });
-
+      const units = unitIds || [];
       // 2. Conectar las unidades manteniendo el orden
       await tx.curriculum.update({
         where: { id: newCurriculum.id },
         data: {
           units: {
-            connect: unitIds.map((id: number) => ({ id }))
+            connect: units.map((id: number) => ({ id }))
           }
         }
       });

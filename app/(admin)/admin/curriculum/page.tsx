@@ -17,7 +17,6 @@ import {
   Edit,
   Trash2,
   MoreHorizontal,
-  Eye,
   BookOpen,
   Users,
   GraduationCap
@@ -61,21 +60,9 @@ const difficultyConfig = {
 
 export default function CurriculumPage() {
   const [curriculums, setCurriculums] = useState<Curriculum[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
   const [deleteCurriculumId, setDeleteCurriculumId] = useState<string | null>(
     null
   );
-
-  const filteredCurriculums = curriculums.filter((curriculum) => {
-    const matchesSearch = curriculum.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesDifficulty =
-      selectedDifficulty === "all" ||
-      curriculum.difficulty === selectedDifficulty;
-    return matchesSearch && matchesDifficulty;
-  });
 
   const handleDeleteCurriculum = (id: string) => {
     setCurriculums(curriculums.filter((c) => c.id !== id));
@@ -126,7 +113,7 @@ export default function CurriculumPage() {
 
       {/* Lista de curriculums */}
       <div className="grid gap-6">
-        {filteredCurriculums.map((curriculum) => {
+        {curriculums.map((curriculum) => {
           const difficultyInfo =
             difficultyConfig[
               curriculum.difficulty as keyof typeof difficultyConfig
@@ -163,7 +150,7 @@ export default function CurriculumPage() {
                           <span>{curriculum.units.length} unidades</span>
                         </div>
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-muted-foreground">
                         Actualizado:{" "}
                         {new Date(curriculum.updatedAt).toLocaleDateString()}
                       </div>
@@ -177,12 +164,6 @@ export default function CurriculumPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link href={`/admin/curriculum/${curriculum.id}`}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          Ver detalles
-                        </Link>
-                      </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href={`/admin/curriculum/${curriculum.id}/edit`}>
                           <Edit className="mr-2 h-4 w-4" />
@@ -210,7 +191,7 @@ export default function CurriculumPage() {
               <CardContent>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">
+                    <p className="text-sm font-medium text-muted-foreground mb-2">
                       Unidades incluidas:
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -245,24 +226,17 @@ export default function CurriculumPage() {
         })}
       </div>
 
-      {filteredCurriculums.length === 0 && (
+      {curriculums.length === 0 && (
         <Card>
           <CardContent className="text-center py-12">
             <GraduationCap className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-4 text-lg font-semibold">No hay curriculums</h3>
-            <p className="mt-2 text-muted-foreground">
-              {searchTerm || selectedDifficulty !== "all"
-                ? "No se encontraron curriculums con los filtros actuales."
-                : "Comienza creando tu primer curriculum."}
-            </p>
-            {!searchTerm && selectedDifficulty === "all" && (
-              <Link href="/admin/curriculum/new">
-                <Button className="mt-4">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Crear primer curriculum
-                </Button>
-              </Link>
-            )}
+            <Link href="/admin/curriculum/new">
+              <Button className="mt-4">
+                <Plus className="mr-2 h-4 w-4" />
+                Crear primer curriculum
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       )}
