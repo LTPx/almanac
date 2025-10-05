@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { motion, Variants } from "framer-motion";
 import LessonNode from "./lesson-node";
 import { Lesson } from "@/lib/types";
 
@@ -92,31 +93,114 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
 
   const pathLayout = generatePathLayout();
 
+  const containerVariants: Variants = {
+    hidden: {
+      opacity: 0
+    },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.3,
+        stiffness: 150,
+        damping: 25
+      }
+    }
+  };
+
+  const itemVariants: Variants = {
+    hidden: {
+      opacity: 0,
+      y: 30,
+      scale: 0.9
+    },
+    show: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 200,
+        damping: 20,
+        duration: 0.6
+      }
+    }
+  };
+
+  const startIndicatorVariants: Variants = {
+    hidden: {
+      opacity: 0,
+      scale: 0,
+      y: -20
+    },
+    show: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 150,
+        damping: 18,
+        duration: 0.8
+      }
+    },
+    float: {
+      y: [0, -8, 0],
+      transition: {
+        duration: 2.5,
+        repeat: Infinity,
+        ease: "easeInOut",
+        delay: 0.5
+      }
+    }
+  };
+
   return (
     <div className="max-w-sm mx-auto">
-      <div className="grid grid-cols-5 gap-3 lg:gap-6 mb-6 lg:mb-6">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-5 gap-3 lg:gap-6 mb-6 lg:mb-6"
+      >
         {Array.from({ length: 5 }, (_, col) => (
-          <div key={col} className="flex justify-center">
+          <motion.div
+            key={col}
+            variants={itemVariants}
+            className="flex justify-center"
+          >
             {startCol === col ? (
-              <div className="w-full h-full lg:h-16 flex flex-col items-center">
+              <motion.div
+                initial="hidden"
+                animate={["show", "float"]}
+                variants={startIndicatorVariants}
+                className="w-full h-full lg:h-16 flex flex-col items-center"
+              >
                 <div className="bg-[#F9F0B6] rounded-t-full w-full h-full lg:h-16 flex items-center justify-center shadow-lg"></div>
-              </div>
+              </motion.div>
             ) : (
               <div className="w-full h-16 lg:h-16"></div>
             )}
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {pathLayout.map((rowData, rowIndex) => (
-        <div
+        <motion.div
           key={rowIndex}
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
           className="grid grid-cols-5 gap-3 lg:gap-6 mb-6 lg:mb-6"
         >
           {Array.from({ length: 5 }, (_, col) => {
             const nodeData = rowData.nodes.find((n) => n.col === col);
             return (
-              <div key={col} className="flex justify-center">
+              <motion.div
+                key={col}
+                variants={itemVariants}
+                className="flex justify-center"
+              >
                 {nodeData ? (
                   <LessonNode
                     id={nodeData.id}
@@ -130,10 +214,10 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                 ) : (
                   <div className="w-16 h-16"></div>
                 )}
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       ))}
     </div>
   );

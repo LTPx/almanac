@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { motion } from "framer-motion";
 import { Lock, CheckCircle, BookOpen } from "lucide-react";
 import { StepPopover } from "./step-popover";
 
@@ -44,22 +45,39 @@ const LessonNode: React.FC<LessonNodeProps> = ({
   };
 
   const nodeContent = (
-    <div
+    <motion.div
+      whileHover={state !== "completed" ? { scale: 1.05, y: -2 } : {}}
+      whileTap={{ scale: 0.95 }}
+      transition={{
+        type: "spring",
+        stiffness: 400,
+        damping: 17
+      }}
       className={`
         w-full h-full lg:h-16 flex items-center justify-center
-        transition-all duration-200 relative
+        relative
         ${getBackgroundColor()}
-        ${state === "available" ? "hover:border-white" : ""}
         ${state === "locked" ? `${color} border-dashed` : "shadow-lg"}
         rounded-2xl border-2 cursor-pointer
       `}
     >
-      {state === "completed" && (
-        <CheckCircle className={`w-7 h-7 ${getIconColor()}`} />
-      )}
-      {state === "available" && <BookOpen className="w-7 h-7 text-white" />}
-      {state === "locked" && <Lock className="w-6 h-6 text-white" />}
-    </div>
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{
+          type: "spring",
+          stiffness: 260,
+          damping: 10,
+          delay: 0.1
+        }}
+      >
+        {state === "completed" && (
+          <CheckCircle className={`w-7 h-7 ${getIconColor()}`} />
+        )}
+        {state === "available" && <BookOpen className="w-7 h-7 text-white" />}
+        {state === "locked" && <Lock className="w-6 h-6 text-white" />}
+      </motion.div>
+    </motion.div>
   );
 
   if (state === "completed") {
