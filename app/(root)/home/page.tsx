@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import LearningPath from "@/components/units-learning";
 import { useUser } from "@/context/UserContext";
 import { useUnits } from "@/hooks/use-units";
@@ -15,7 +15,8 @@ export default function HomePage() {
   const user = useUser();
   const userId = user?.id || "";
   const { isLoading, error, fetchUnits, fetchUnitWithLessons } = useUnits();
-  const { gamification } = useGamification(userId);
+  const { gamification, refetch: refetchGamification } =
+    useGamification(userId);
 
   useEffect(() => {
     const loadUnits = async () => {
@@ -28,8 +29,7 @@ export default function HomePage() {
       }
     };
     loadUnits();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchUnits]);
 
   useEffect(() => {
     if (!selectedUnitId) return;
@@ -39,8 +39,11 @@ export default function HomePage() {
       if (unit) setSelectedUnit(unit);
     };
     loadUnit();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedUnitId]);
+  }, [selectedUnitId, fetchUnitWithLessons]);
+
+  const handleTestComplete = useCallback(async () => {
+    await refetchGamification();
+  }, [refetchGamification]);
 
   return (
     <div className="HomePage">
@@ -59,6 +62,7 @@ export default function HomePage() {
             hearts={gamification?.hearts ?? 0}
             unit={selectedUnit}
             userId={userId}
+            onTestComplete={handleTestComplete}
           />
         </div>
       )}

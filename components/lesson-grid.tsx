@@ -92,6 +92,8 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
   const startCol = firstLesson ? getRowCol(firstLesson.position).col : null;
 
   const pathLayout = generatePathLayout();
+  const maxRow =
+    pathLayout.length > 0 ? Math.max(...pathLayout.map((r) => r.row)) : 0;
 
   const containerVariants: Variants = {
     hidden: {
@@ -101,9 +103,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
       opacity: 1,
       transition: {
         staggerChildren: 0.1,
-        delayChildren: 0.3,
-        stiffness: 150,
-        damping: 25
+        delayChildren: 0.3
       }
     }
   };
@@ -143,15 +143,6 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
         damping: 18,
         duration: 0.8
       }
-    },
-    float: {
-      y: [0, -8, 0],
-      transition: {
-        duration: 2.5,
-        repeat: Infinity,
-        ease: "easeInOut",
-        delay: 0.5
-      }
     }
   };
 
@@ -172,7 +163,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
             {startCol === col ? (
               <motion.div
                 initial="hidden"
-                animate={["show", "float"]}
+                animate="show"
                 variants={startIndicatorVariants}
                 className="w-full h-full lg:h-16 flex flex-col items-center"
               >
@@ -185,40 +176,51 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
         ))}
       </motion.div>
 
-      {pathLayout.map((rowData, rowIndex) => (
-        <motion.div
-          key={rowIndex}
-          variants={containerVariants}
-          initial="hidden"
-          animate="show"
-          className="grid grid-cols-5 gap-3 lg:gap-6 mb-6 lg:mb-6"
-        >
-          {Array.from({ length: 5 }, (_, col) => {
-            const nodeData = rowData.nodes.find((n) => n.col === col);
-            return (
-              <motion.div
-                key={col}
-                variants={itemVariants}
-                className="flex justify-center"
-              >
-                {nodeData ? (
-                  <LessonNode
-                    id={nodeData.id}
-                    name={nodeData.name}
-                    description={nodeData.description}
-                    state={getLessonState(nodeData)}
-                    color={getLockedColor(nodeData.mandatory)}
-                    mandatory={nodeData.mandatory}
-                    onStartLesson={() => onStartLesson(nodeData)}
-                  />
-                ) : (
-                  <div className="w-16 h-16"></div>
-                )}
-              </motion.div>
-            );
-          })}
-        </motion.div>
-      ))}
+      {pathLayout.map((rowData, rowIndex) => {
+        const isBottomRow = rowData.row === maxRow;
+
+        return (
+          <motion.div
+            key={rowIndex}
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-5 gap-3 lg:gap-6 mb-6 lg:mb-6"
+          >
+            {Array.from({ length: 5 }, (_, col) => {
+              const nodeData = rowData.nodes.find((n) => n.col === col);
+              const isCompleted = nodeData
+                ? approvedLessons.includes(nodeData.id)
+                : false;
+
+              return (
+                <motion.div
+                  key={col}
+                  variants={itemVariants}
+                  className="flex justify-center"
+                >
+                  {nodeData ? (
+                    <LessonNode
+                      id={nodeData.id}
+                      name={nodeData.name}
+                      description={nodeData.description}
+                      state={getLessonState(nodeData)}
+                      color={getLockedColor(nodeData.mandatory)}
+                      mandatory={nodeData.mandatory}
+                      shouldFloat={
+                        isBottomRow && nodeData.mandatory && !isCompleted
+                      }
+                      onStartLesson={() => onStartLesson(nodeData)}
+                    />
+                  ) : (
+                    <div className="w-16 h-16"></div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        );
+      })}
     </div>
   );
 };

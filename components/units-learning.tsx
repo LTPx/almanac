@@ -10,15 +10,25 @@ type LearningPathProps = {
   unit: Unit;
   userId: string;
   hearts: number;
+  onTestComplete?: () => void;
 };
 
 const LearningPath: React.FC<LearningPathProps> = ({
   unit,
   userId,
-  hearts
+  hearts,
+  onTestComplete
 }) => {
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
   const { progress, isLoading, refetch } = useProgress(userId, unit.id);
+
+  const handleCloseTest = () => {
+    setActiveLesson(null);
+    refetch();
+    if (onTestComplete) {
+      onTestComplete();
+    }
+  };
 
   if (activeLesson) {
     return (
@@ -28,10 +38,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
             hearts={hearts || 0}
             userId={userId}
             initialLessonId={activeLesson.id}
-            onClose={() => {
-              setActiveLesson(null);
-              refetch();
-            }}
+            onClose={handleCloseTest}
           />
         </div>
       </div>

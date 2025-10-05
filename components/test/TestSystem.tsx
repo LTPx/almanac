@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TestQuestion } from "./TestQuestion";
 import { TestResults } from "./TestResults";
@@ -10,7 +10,6 @@ import { HeaderBar } from "../header-bar";
 import type {
   TestData,
   TestResultsInterface as TestResultsType
-  // Lesson
 } from "@/lib/types";
 
 interface TestSystemProps {
@@ -40,6 +39,7 @@ export function TestSystem({
   );
 
   const { error, startTest, submitAnswer, completeTest } = useTest();
+  const hasInitialized = useRef(false);
 
   const handleStartTest = useCallback(
     async (lessonId: number) => {
@@ -56,7 +56,10 @@ export function TestSystem({
   );
 
   useEffect(() => {
-    handleStartTest(initialLessonId);
+    if (!hasInitialized.current) {
+      handleStartTest(initialLessonId);
+      hasInitialized.current = true;
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -101,6 +104,7 @@ export function TestSystem({
 
   const handleRetakeTest = () => {
     if (currentTest) {
+      hasInitialized.current = false;
       handleStartTest(currentTest.lesson.id);
     }
   };

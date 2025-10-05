@@ -99,59 +99,6 @@ export function TestResults({
         )}
       </div>
       {finishAudio}
-
-      {/* <div className="rounded-lg p-8 max-w-md w-full text-center">
-        <div className="mb-6">
-          {isPassed ? (
-            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Trophy className="w-8 h-8 text-white" />
-            </div>
-          ) : (
-            <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Target className="w-8 h-8 text-white" />
-            </div>
-          )}
-
-          <h2 className="text-2xl font-bold text-white mb-2">
-            {isPassed ? "¡Felicitaciones!" : "No alcanzaste el puntaje mínimo"}
-          </h2>
-
-          <p className="text-gray-300">{lessonName}</p>
-        </div>
-
-        <div className="space-y-4 mb-8">
-          <div className="bg-gray-700 rounded-lg p-4">
-            <div className="text-3xl font-bold text-white mb-1">
-              {percentage}%
-            </div>
-            <div className="text-gray-300 text-sm">Puntaje obtenido</div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-700 rounded-lg p-4">
-              <div className="text-xl font-bold text-green-400 mb-1">
-                {results.correctAnswers}
-              </div>
-              <div className="text-gray-300 text-sm">Correctas</div>
-            </div>
-
-            <div className="bg-gray-700 rounded-lg p-4">
-              <div className="text-xl font-bold text-red-400 mb-1">
-                {results.totalQuestions - results.correctAnswers}
-              </div>
-              <div className="text-gray-300 text-sm">Incorrectas</div>
-            </div>
-          </div>
-
-          {isPassed && results.experienceGained > 0 && (
-            <div className="flex w-full items-center gap-x-4">
-              <ResultCard variant="points" value={results.experienceGained} />
-              <ResultCard variant="hearts" value={5} />
-            </div>
-          )}
-        </div>
-
-      </div> */}
     </div>
   );
 }

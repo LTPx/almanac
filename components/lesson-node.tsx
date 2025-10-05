@@ -12,6 +12,7 @@ type LessonNodeProps = {
   state: "completed" | "available" | "locked";
   color?: string;
   mandatory?: boolean;
+  shouldFloat?: boolean;
   onStartLesson: () => void;
 };
 
@@ -21,6 +22,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
   state,
   color,
   mandatory = false,
+  shouldFloat = false,
   onStartLesson
 }) => {
   const getBackgroundColor = () => {
@@ -48,11 +50,27 @@ const LessonNode: React.FC<LessonNodeProps> = ({
     <motion.div
       whileHover={state !== "completed" ? { scale: 1.05, y: -2 } : {}}
       whileTap={{ scale: 0.95 }}
-      transition={{
-        type: "spring",
-        stiffness: 400,
-        damping: 17
-      }}
+      animate={shouldFloat ? { y: [0, -8, 0] } : {}}
+      transition={
+        shouldFloat
+          ? {
+              y: {
+                duration: 2.5,
+                repeat: Infinity,
+                ease: "easeInOut"
+              },
+              scale: {
+                type: "spring",
+                stiffness: 400,
+                damping: 17
+              }
+            }
+          : {
+              type: "spring",
+              stiffness: 400,
+              damping: 17
+            }
+      }
       className={`
         w-full h-full lg:h-16 flex items-center justify-center
         relative
@@ -67,7 +85,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
         transition={{
           type: "spring",
           stiffness: 260,
-          damping: 10,
+          damping: 20,
           delay: 0.1
         }}
       >
