@@ -204,13 +204,13 @@ export default function UnitsPage() {
                     Ver lecciones
                   </Button>
                 </Link>
-                <Link href={`/admin/units/${unit.id}/progress`}>
+                <Link href={`/admin/units/${unit.id}`}>
                   <Button
                     variant="outline"
                     size="sm"
                     className="border-border text-foreground hover:bg-primary/10"
                   >
-                    Ver progreso
+                    Path de aprendizaje
                   </Button>
                 </Link>
               </div>
