@@ -7,15 +7,15 @@ import {
   LayoutDashboard,
   BookOpen,
   GraduationCap,
-  Users,
+  // Users,
   HelpCircle,
-  BarChart3,
+  // BarChart3,
   Heart,
   Zap,
   Trophy,
-  Coins,
-  Settings,
-  Database
+  Coins
+  // Settings,
+  // Database
 } from "lucide-react";
 
 const navigation = [
