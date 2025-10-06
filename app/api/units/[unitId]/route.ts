@@ -6,6 +6,7 @@ export async function GET(
   context: { params: Promise<{ unitId: string }> }
 ) {
   const { unitId } = await context.params;
+  console.log("unitId:", unitId);
 
   try {
     const id = parseInt(unitId);
@@ -16,8 +17,8 @@ export async function GET(
 
     const unit = await prisma.unit.findUnique({
       where: {
-        id: id,
-        isActive: true
+        id: id
+        // isActive: true
       },
       include: {
         lessons: {
