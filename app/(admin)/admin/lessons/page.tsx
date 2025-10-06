@@ -69,7 +69,7 @@ export default function LessonsPage() {
   });
 
   useEffect(() => {
-    const loadUnits = async () => {
+    const loadLessons = async () => {
       try {
         const unitsData = await fetchLessons();
         setLessons(unitsData);
@@ -81,7 +81,7 @@ export default function LessonsPage() {
       }
     };
 
-    loadUnits();
+    loadLessons();
   }, []);
 
   return (

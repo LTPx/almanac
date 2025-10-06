@@ -247,6 +247,34 @@ export const getUnitsWithUserProgress = cache(async (userId: string) => {
 
 // ============== LESSON QUERIES ==============
 
+export const getLessons = cache(async (search: string) => {
+  const whereClause = {
+    isActive: true,
+    ...(search
+      ? {
+          name: {
+            contains: search,
+            mode: "insensitive" // no distingue mayúsculas/minúsculas
+          }
+        }
+      : {})
+  };
+
+  const data = await prisma.lesson.findMany({
+    //@ts-expect-error // --- IGNORE ---
+    where: whereClause,
+    include: {
+      questions: true,
+      _count: {
+        select: { questions: true }
+      }
+    },
+    orderBy: { position: "asc" }
+  });
+
+  return data;
+});
+
 export const getAllLessons = cache(async () => {
   const data = await prisma.lesson.findMany({
     where: {
@@ -345,6 +373,34 @@ export const getLessonWithUserProgress = cache(
 );
 
 // ============== QUESTION QUERIES ==============
+
+export const getQuestions = cache(async (search: string) => {
+  const whereClause = {
+    isActive: true,
+    ...(search
+      ? {
+          title: {
+            contains: search,
+            mode: "insensitive"
+          }
+        }
+      : {})
+  };
+
+  const data = await prisma.question.findMany({
+    //@ts-expect-error // --- IGNORE ---
+    where: whereClause,
+    include: {
+      answers: true,
+      _count: {
+        select: { answers: true }
+      }
+    },
+    orderBy: { createdAt: "asc" }
+  });
+
+  return data;
+});
 
 export const getQuestionsByLessonId = cache(async (lessonId: number) => {
   const data = await prisma.question.findMany({
