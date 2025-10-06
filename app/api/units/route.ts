@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUnits } from "@/lib/queries";
+import prisma from "@/lib/prisma";
 
-// GET /api/units
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);

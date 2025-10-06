@@ -88,7 +88,9 @@ export default function CurriculumForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="audienceAgeRange">Rango de edad (opcional)</Label>
+            <Label htmlFor="audienceAgeRange">
+              Rango de edad años (opcional)
+            </Label>
             <Input
               id="audienceAgeRange"
               value={formData.audienceAgeRange || ""}

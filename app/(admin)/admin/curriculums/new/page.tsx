@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import CurriculumForm, {
   CurriculumInput
-} from "@/components/admin/curriculums-form";
+} from "@/components/admin/curriculum-form";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
