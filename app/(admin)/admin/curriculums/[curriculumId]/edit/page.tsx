@@ -45,7 +45,7 @@ export default function EditCurriculumPage() {
       });
       if (!res.ok) throw new Error("Error al guardar cambios");
       toast.success("Curriculum actualizado correctamente");
-      router.push("/admin/curriculum");
+      router.push("/admin/curriculums");
     } catch {
       toast.error("No se pudo actualizar el curriculum");
     } finally {
@@ -59,7 +59,7 @@ export default function EditCurriculumPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center space-x-4">
-        <Link href="/admin/curriculum">
+        <Link href="/admin/curriculums">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Volver

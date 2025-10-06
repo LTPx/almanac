@@ -20,7 +20,7 @@ import {
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { name: "Curriculum", href: "/admin/curriculum", icon: BookOpen },
+  { name: "Curriculum", href: "/admin/curriculums", icon: BookOpen },
   { name: "Unidades", href: "/admin/units", icon: BookOpen },
   { name: "Lecciones", href: "/admin/lessons", icon: GraduationCap },
   { name: "Preguntas", href: "/admin/questions", icon: HelpCircle },

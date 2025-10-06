@@ -116,6 +116,43 @@ export const getUserProgressByLesson = cache(
 
 // ============== UNIT QUERIES ==============
 
+export const getUnits = cache(async (search: string) => {
+  console.log("search: ", search);
+  const whereClause = {
+    isActive: true,
+    ...(search
+      ? {
+          name: {
+            contains: search,
+            mode: "insensitive" // no distingue mayúsculas/minúsculas
+          }
+        }
+      : {})
+  };
+
+  const data = await prisma.unit.findMany({
+    //@ts-expect-error // --- IGNORE ---
+    where: whereClause,
+    include: {
+      lessons: {
+        where: { isActive: true },
+        include: {
+          _count: {
+            select: { questions: true }
+          }
+        },
+        orderBy: { position: "asc" }
+      },
+      _count: {
+        select: { lessons: true }
+      }
+    },
+    orderBy: { order: "asc" }
+  });
+
+  return data;
+});
+
 export const getAllUnits = cache(async () => {
   const data = await prisma.unit.findMany({
     where: {

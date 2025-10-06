@@ -1,4 +1,4 @@
-// app/admin/curriculum/page.tsx
+// app/admin/curriculums/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -98,12 +98,12 @@ export default function CurriculumPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Curriculum</h1>
+          <h1 className="text-3xl font-bold">Curriculums</h1>
           <p className="text-muted-foreground">
             Gestiona los currículums educativos
           </p>
         </div>
-        <Link href="/admin/curriculum/new">
+        <Link href="/admin/curriculums/new">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
             Nuevo Curriculum
@@ -165,13 +165,15 @@ export default function CurriculumPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
-                        <Link href={`/admin/curriculum/${curriculum.id}/edit`}>
+                        <Link href={`/admin/curriculums/${curriculum.id}/edit`}>
                           <Edit className="mr-2 h-4 w-4" />
                           Editar
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href={`/admin/curriculum/${curriculum.id}/units`}>
+                        <Link
+                          href={`/admin/curriculums/${curriculum.id}/units`}
+                        >
                           <BookOpen className="mr-2 h-4 w-4" />
                           Gestionar unidades
                         </Link>
@@ -206,19 +208,6 @@ export default function CurriculumPage() {
                       ))}
                     </div>
                   </div>
-
-                  <div className="flex space-x-2 pt-2">
-                    <Link href={`/admin/curriculum/${curriculum.id}`}>
-                      <Button variant="outline" size="sm">
-                        Ver completo
-                      </Button>
-                    </Link>
-                    <Link href={`/admin/curriculum/${curriculum.id}/units`}>
-                      <Button variant="outline" size="sm">
-                        Editar unidades
-                      </Button>
-                    </Link>
-                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -231,7 +220,7 @@ export default function CurriculumPage() {
           <CardContent className="text-center py-12">
             <GraduationCap className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-4 text-lg font-semibold">No hay curriculums</h3>
-            <Link href="/admin/curriculum/new">
+            <Link href="/admin/curriculums/new">
               <Button className="mt-4">
                 <Plus className="mr-2 h-4 w-4" />
                 Crear primer curriculum

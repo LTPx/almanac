@@ -99,7 +99,7 @@ export default function CurriculumForm({
       </Card>
 
       <div className="flex justify-end space-x-4">
-        <Link href="/admin/curriculum">
+        <Link href="/admin/curriculums">
           <Button variant="outline" type="button">
             Cancelar
           </Button>
