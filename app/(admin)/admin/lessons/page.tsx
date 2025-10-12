@@ -37,6 +37,18 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from "@/components/ui/alert-dialog";
+
 import { toast } from "sonner";
 import { LessonAdmin } from "@/lib/types";
 
@@ -50,6 +62,7 @@ export default function LessonsPage() {
   const [lessons, setLessons] = useState<LessonAdmin[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUnit, setSelectedUnit] = useState<string>("all");
+  const [deleteLessonId, setDeleteLessonId] = useState<number | null>(null);
 
   const fetchLessons = async () => {
     const response = await fetch("/api/lessons");
@@ -68,8 +81,30 @@ export default function LessonsPage() {
     return matchesSearch && matchesUnit;
   });
 
+  const deleteLesson = async (unitId: number) => {
+    const response = await fetch(`/api/lessons/${unitId}`, {
+      method: "DELETE"
+    });
+    if (!response.ok) {
+      throw new Error("Failed to delete unit");
+    }
+    return response.json();
+  };
+
+  const handleDeleteLesson = async (id: number) => {
+    try {
+      await deleteLesson(id);
+      setLessons(lessons.filter((lesson) => lesson.id !== id));
+      setDeleteLessonId(null);
+      toast.success("Leccion eliminada correctamente");
+    } catch (error) {
+      console.log(error);
+      toast.error("No se pudo eliminar la leccion");
+    }
+  };
+
   useEffect(() => {
-    const loadUnits = async () => {
+    const loadLessons = async () => {
       try {
         const unitsData = await fetchLessons();
         setLessons(unitsData);
@@ -81,7 +116,7 @@ export default function LessonsPage() {
       }
     };
 
-    loadUnits();
+    loadLessons();
   }, []);
 
   return (
@@ -203,7 +238,10 @@ export default function LessonsPage() {
                         Gestionar preguntas
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600">
+                    <DropdownMenuItem
+                      className="text-red-600"
+                      onClick={() => setDeleteLessonId(lesson.id)}
+                    >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Eliminar
                     </DropdownMenuItem>
@@ -238,6 +276,34 @@ export default function LessonsPage() {
           </Card>
         )}
       </div>
+
+      {/* Confirmar eliminación */}
+      <AlertDialog
+        open={deleteLessonId !== null}
+        onOpenChange={() => setDeleteLessonId(null)}
+      >
+        <AlertDialogContent className="bg-card text-card-foreground border border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Esta acción eliminará permanentemente la lección.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-border text-foreground hover:bg-muted/10">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() =>
+                deleteLessonId && handleDeleteLesson(deleteLessonId)
+              }
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

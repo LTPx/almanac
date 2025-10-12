@@ -7,24 +7,28 @@ import {
   LayoutDashboard,
   BookOpen,
   GraduationCap,
-  Users,
+  // Users,
   HelpCircle,
-  BarChart3,
+  // BarChart3,
   Heart,
   Zap,
   Trophy,
   Coins,
-  Settings,
-  Database
+  Settings
+  // Settings,
+  // Database
 } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Curriculum", href: "/admin/curriculums", icon: BookOpen },
   { name: "Unidades", href: "/admin/units", icon: BookOpen },
   { name: "Lecciones", href: "/admin/lessons", icon: GraduationCap },
   { name: "Preguntas", href: "/admin/questions", icon: HelpCircle },
-  { name: "Usuarios", href: "/admin/users", icon: Users },
-  { name: "Progreso", href: "/admin/progress", icon: BarChart3 },
+  { name: "NFTs", href: "/admin/nfts", icon: Coins },
+  // { name: "Usuarios", href: "/admin/users", icon: Users },
+  // { name: "Progreso", href: "/admin/progress", icon: BarChart3 },
+  { name: "Configuración", href: "/admin/settings", icon: Settings },
   {
     name: "Gamificación",
     href: "/admin/gamification",
@@ -34,10 +38,8 @@ const navigation = [
       { name: "ZAP Tokens", href: "/admin/gamification/zaps", icon: Zap },
       { name: "Rachas", href: "/admin/gamification/streaks", icon: Trophy }
     ]
-  },
-  { name: "NFTs", href: "/admin/nfts", icon: Coins },
-  { name: "Analytics", href: "/admin/analytics", icon: Database },
-  { name: "Configuración", href: "/admin/settings", icon: Settings }
+  }
+  // { name: "Analytics", href: "/admin/analytics", icon: Database },
 ];
 
 export function Sidebar() {

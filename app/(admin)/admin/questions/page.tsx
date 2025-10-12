@@ -1,7 +1,7 @@
 // app/admin/questions/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,6 +41,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 // Mock data - reemplazar con datos reales
 const mockQuestions = [
@@ -101,10 +102,18 @@ const questionTypeIcons = {
 };
 
 export default function QuestionsPage() {
-  // const [questions, setQuestions] = useState(mockQuestions);
-  const questions = mockQuestions;
+  const [questions, setQuestions] = useState(mockQuestions);
+  // const questions = mockQuestions;
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
+
+  const fetchQuestions = async () => {
+    const response = await fetch("/api/questions");
+    if (!response.ok) {
+      throw new Error("Failed to fetch lessons");
+    }
+    return response.json();
+  };
 
   const filteredQuestions = questions.filter((question) => {
     const matchesSearch = question.title
@@ -120,6 +129,22 @@ export default function QuestionsPage() {
       questionTypeIcons[type as keyof typeof questionTypeIcons] || HelpCircle;
     return Icon;
   };
+
+  useEffect(() => {
+    const loadQuestions = async () => {
+      try {
+        const unitsData = await fetchQuestions();
+        setQuestions(unitsData);
+      } catch (error) {
+        console.error("Error loading questions:", error);
+        toast.error("Error loading questions");
+      } finally {
+        // setLoading(false);
+      }
+    };
+
+    loadQuestions();
+  }, []);
 
   return (
     <div className="space-y-6">

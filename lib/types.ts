@@ -122,3 +122,14 @@ export type NFTAssetsResponse = {
     _count: number;
   }[];
 };
+
+export type Curriculum = {
+  id: string;
+  title: string;
+  audienceAgeRange: string;
+  difficulty: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+  metadata?: any;
+  createdAt: Date;
+  updatedAt: Date;
+  units: Unit[];
+};
