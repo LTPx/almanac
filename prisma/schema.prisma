@@ -161,7 +161,7 @@ model Lesson {
   description      String?
   unit             Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
   unitId           Int
-  mandatory        Boolean  @default(false)
+  mandatory        Boolean  @default(true)
   experiencePoints Int      @default(25)
   position         Int?
   isActive         Boolean  @default(true)
