@@ -17,7 +17,6 @@ import {
   ExternalLink
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -61,7 +60,7 @@ export default function CreateCertificatePage() {
 
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState<string | null>(null);
+  // const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [mintedNFT, setMintedNFT] = useState<NFT | null>(null);
@@ -113,7 +112,7 @@ export default function CreateCertificatePage() {
 
     setLoading(true);
     setError(null);
-    setSuccess(null);
+    // setSuccess(null);
 
     try {
       const response = await fetch(`/api/users/${session.user.id}/nfts/mint`, {
@@ -129,9 +128,9 @@ export default function CreateCertificatePage() {
 
       if (response.ok) {
         setMintedNFT(data.nft);
-        setSuccess(
-          `¡Tu certificado digital ha sido creado! Token ID: ${data.nft.tokenId}`
-        );
+        // setSuccess(
+        //   `¡Tu certificado digital ha sido creado! Token ID: ${data.nft.tokenId}`
+        // );
         setCurrentStep(3);
         fetchCompletedUnits(session.user.id);
       } else {

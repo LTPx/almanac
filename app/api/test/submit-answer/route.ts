@@ -74,10 +74,10 @@ export async function POST(request: NextRequest) {
         // Para estos tipos, el userAnswer debería ser un JSON con el orden/matches
         // Se necesita lógica específica según el contenido de la pregunta
         try {
-          const userAnswerObj =
-            typeof userAnswer === "string"
-              ? JSON.parse(userAnswer)
-              : userAnswer;
+          // const userAnswerObj =
+          //   typeof userAnswer === "string"
+          //     ? JSON.parse(userAnswer)
+          //     : userAnswer;
           // Aquí implementar la lógica específica según question.content
           isCorrect = false; // Placeholder
         } catch {

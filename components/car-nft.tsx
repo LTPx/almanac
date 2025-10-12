@@ -9,12 +9,7 @@ interface CardNFTProps {
   onClick?: () => void;
 }
 
-export const CardNFT: React.FC<CardNFTProps> = ({
-  image,
-  title,
-  description,
-  onClick
-}) => {
+export const CardNFT: React.FC<CardNFTProps> = ({ image, title, onClick }) => {
   return (
     <div
       onClick={onClick}

@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { mintEducationalNFT, createNFTMetadata } from "@/lib/nft-service";
+import {
+  mintEducationalNFT,
+  createNFTMetadata,
+  getAvailableNFTImage,
+  getRandomRarity
+} from "@/lib/nft-service";
 
 const CONTRACT_ADDRESS = process.env.THIRDWEB_CONTRACT_ADDRESS!;
 
 interface MintRequestBody {
   unitId?: string | number;
   tokenUnit?: string | number;
-  description?: string; // Agregar descripción personalizada
+  description?: string;
 }
 
 export async function POST(
@@ -32,6 +37,7 @@ export async function POST(
       userId,
       Number(unitId)
     );
+
     if (validationResult.error) {
       return NextResponse.json(
         { error: validationResult.error },
@@ -44,7 +50,18 @@ export async function POST(
     // 2) Crear metadatos del NFT con descripción personalizada
     const courseName = "Almanac";
     const unitName = userUnitToken.unit.name;
-    const metadata = createNFTMetadata(courseName, unitName, description);
+    // const rarity = "NORMAL";
+    const rarity = getRandomRarity();
+    const { nftImage, nftImageId, rarityUsed } =
+      await getAvailableNFTImage(rarity);
+
+    const metadata = createNFTMetadata({
+      courseName,
+      unitName,
+      customDescription: description,
+      rarity: rarityUsed,
+      imageUrl: nftImage
+    });
 
     // 3) Mintear el NFT
     const mintResult = await mintEducationalNFT(user.walletAddress!, metadata);
@@ -55,7 +72,8 @@ export async function POST(
       unitId: String(unitId),
       userUnitToken,
       mintResult,
-      metadata
+      metadata,
+      nftImageId
     });
 
     // 5) IMPORTANTE: Devolver el NFT con los metadatos incluidos
@@ -120,13 +138,15 @@ async function saveNFTToDatabase({
   unitId,
   userUnitToken,
   mintResult,
-  metadata
+  metadata,
+  nftImageId
 }: {
   userId: string;
   unitId: string;
   userUnitToken: any;
   mintResult: any;
   metadata: any;
+  nftImageId: number;
 }) {
   const now = new Date();
 
@@ -150,7 +170,8 @@ async function saveNFTToDatabase({
         contractAddress: CONTRACT_ADDRESS,
         transactionHash: mintResult.transactionHash,
         metadataUri: mintResult.metadataUri ?? JSON.stringify(metadata),
-        mintedAt: now
+        mintedAt: now,
+        nftAssetId: nftImageId
       }
     });
   });

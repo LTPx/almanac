@@ -6,6 +6,7 @@ export async function GET(
   context: { params: Promise<{ unitId: string }> }
 ) {
   const { unitId } = await context.params;
+  console.log("unitId:", unitId);
 
   try {
     const id = parseInt(unitId);
@@ -16,8 +17,8 @@ export async function GET(
 
     const unit = await prisma.unit.findUnique({
       where: {
-        id: id,
-        isActive: true
+        id: id
+        // isActive: true
       },
       include: {
         lessons: {
@@ -109,24 +110,45 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { unitId: string } }
+  context: { params: Promise<{ unitId: string }> }
 ) {
+  const { unitId } = await context.params;
+  const id = parseInt(unitId);
+
   try {
-    const unitId = parseInt(params.unitId);
-    if (isNaN(unitId)) {
+    if (isNaN(id)) {
       return NextResponse.json({ error: "Invalid unit ID" }, { status: 400 });
     }
 
-    // Soft delete - marcar como inactivo
+    const { removeLessons } = await request
+      .json()
+      .catch(() => ({ removeLessons: false }));
+
+    // Marcar la unidad como inactiva (soft delete)
     await prisma.unit.update({
-      where: { id: unitId },
+      where: { id },
       data: {
         isActive: false,
         updatedAt: new Date()
       }
     });
 
-    return NextResponse.json({ message: "Unit deleted successfully" });
+    // Si el usuario eligió eliminar las lecciones también
+    if (removeLessons) {
+      await prisma.lesson.updateMany({
+        where: { unitId: id },
+        data: {
+          isActive: false,
+          updatedAt: new Date()
+        }
+      });
+    }
+
+    return NextResponse.json({
+      message: `Unidad eliminada correctamente${
+        removeLessons ? " y lecciones desactivadas" : ""
+      }`
+    });
   } catch (error) {
     console.error("Error deleting unit:", error);
     return NextResponse.json(

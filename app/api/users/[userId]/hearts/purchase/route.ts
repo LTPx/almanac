@@ -3,10 +3,10 @@ import { purchaseHeartWithZaps } from "@/lib/gamification";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const { userId } = params;
+    const { userId } = await context.params;
 
     const result = await purchaseHeartWithZaps(userId);
 

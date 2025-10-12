@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
-import { getAllUnits } from "@/lib/queries";
+import { getUnits } from "@/lib/queries";
+import prisma from "@/lib/prisma";
 
-// GET /api/units
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const units = await getAllUnits();
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get("search")?.trim() || "";
+    const units = await getUnits(search);
     return NextResponse.json(units);
   } catch (error) {
     console.error("Error fetching units:", error);

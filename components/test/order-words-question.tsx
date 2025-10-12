@@ -15,7 +15,7 @@ interface Props {
 
 export function OrderWordsQuestion({
   question,
-  selected,
+  // selected,
   setSelected,
   hasAnswered,
   showResult,
@@ -35,7 +35,8 @@ export function OrderWordsQuestion({
   useEffect(() => {
     setSlots(Array(totalSlots).fill(null));
     setAvailableWords([...question.content.words]);
-  }, [question.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [question.content.words]);
 
   // Pasamos lo que arma el usuario como "selected"
   useEffect(() => {

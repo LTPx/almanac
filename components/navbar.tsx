@@ -5,7 +5,6 @@ import React from "react";
 import { Button } from "./ui/button";
 import SignOutForm from "./sign-out-form";
 import Logo from "./logo";
-import { GithubStars } from "./github-stars";
 import { useUser } from "@/context/UserContext";
 
 export default function Navbar() {
@@ -21,7 +20,7 @@ export default function Navbar() {
             {user ? (
               <>
                 <Link
-                  href="/admin/dashboard"
+                  href="/admin"
                   className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <Button variant="outline">Dashboard</Button>

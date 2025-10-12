@@ -130,6 +130,7 @@ async function fetchMetadataFromURL(url: string): Promise<any> {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
   } catch (error) {
+    console.log(`Error fetching metadata from URL ${url}:`, error);
     throw new Error(`No se pudo obtener metadata desde URL: ${url}`);
   }
 }

@@ -3,11 +3,10 @@ import { getUserGamificationStats, resetDailyHearts } from "@/lib/gamification";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) {
+  const { userId } = await context.params;
   try {
-    const { userId } = params;
-
     // Intentar reseteo automático de corazones
     await resetDailyHearts(userId);
 

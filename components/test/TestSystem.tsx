@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TestQuestion } from "./TestQuestion";
 import { TestResults } from "./TestResults";
@@ -9,13 +9,12 @@ import { HeaderBar } from "../header-bar";
 
 import type {
   TestData,
-  TestResultsInterface as TestResultsType,
-  Lesson
+  TestResultsInterface as TestResultsType
 } from "@/lib/types";
 
 interface TestSystemProps {
   userId: string;
-  initialLesson: Lesson;
+  initialLessonId: number;
   onClose: () => void;
   hearts: number;
 }
@@ -24,7 +23,7 @@ type TestState = "testing" | "results";
 
 export function TestSystem({
   userId,
-  initialLesson,
+  initialLessonId,
   onClose,
   hearts
 }: TestSystemProps) {
@@ -39,22 +38,30 @@ export function TestSystem({
     Date.now()
   );
 
-  const { isLoading, error, startTest, submitAnswer, completeTest } = useTest();
+  const { error, startTest, submitAnswer, completeTest } = useTest();
+  const hasInitialized = useRef(false);
+
+  const handleStartTest = useCallback(
+    async (lessonId: number) => {
+      const testData = await startTest(userId, lessonId);
+      if (testData) {
+        setCurrentTest(testData);
+        setCurrentQuestionIndex(0);
+        setAnswers({});
+        setQuestionStartTime(Date.now());
+        setState("testing");
+      }
+    },
+    [startTest, userId]
+  );
 
   useEffect(() => {
-    handleStartTest(initialLesson.id);
-  }, []);
-
-  const handleStartTest = async (lessonId: number) => {
-    const testData = await startTest(userId, lessonId);
-    if (testData) {
-      setCurrentTest(testData);
-      setCurrentQuestionIndex(0);
-      setAnswers({});
-      setQuestionStartTime(Date.now());
-      setState("testing");
+    if (!hasInitialized.current) {
+      handleStartTest(initialLessonId);
+      hasInitialized.current = true;
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAnswer = async (questionId: number, answer: string) => {
     if (!currentTest) return;
@@ -97,6 +104,7 @@ export function TestSystem({
 
   const handleRetakeTest = () => {
     if (currentTest) {
+      hasInitialized.current = false;
       handleStartTest(currentTest.lesson.id);
     }
   };
@@ -135,7 +143,6 @@ export function TestSystem({
               answers[currentTest.questions[currentQuestionIndex].id]?.isCorrect
             }
           />
-
           <div className="relative flex-1 flex items-center justify-center">
             <AnimatePresence mode="wait">
               <motion.div

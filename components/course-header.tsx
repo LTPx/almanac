@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Zap, Heart } from "lucide-react";
 import Link from "next/link";
 import {
@@ -26,20 +27,37 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
   units,
   selectedUnitId,
   onUnitChange,
-  streakDays,
-  zaps,
-  lives,
+  zaps = 0,
+  lives = 0,
   className = ""
 }) => {
   const selectedUnit = units.find((u) => u.id.toString() === selectedUnitId);
+  const prevZaps = useRef(zaps);
+  const prevLives = useRef(lives);
+
+  useEffect(() => {
+    prevZaps.current = zaps;
+    prevLives.current = lives;
+  });
+
+  const handleUnitChange = (value: string) => {
+    if ("vibrate" in navigator) {
+      navigator.vibrate(10);
+    }
+    onUnitChange(value);
+  };
 
   return (
     <div
       className={`w-full max-w-[650px] sticky top-0 z-50 bg-white border-b border-gray-200 px-4 py-4 shadow-sm ${className}`}
     >
       <div className="flex items-center justify-between mx-auto">
-        <div className="w-64">
-          <Select value={selectedUnitId} onValueChange={onUnitChange}>
+        <motion.div
+          className="w-64"
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        >
+          <Select value={selectedUnitId} onValueChange={handleUnitChange}>
             <SelectTrigger className="w-full text-black">
               <SelectValue placeholder="Selecciona una unidad...">
                 {selectedUnit ? selectedUnit.name : "Selecciona una unidad..."}
@@ -55,27 +73,95 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </motion.div>
 
         <div className="flex items-center gap-4 ml-4">
-          {/* <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-yellow-50">
-            <Star className="w-5 h-5 text-yellow-500 fill-current" />
-            <span className="text-sm font-medium text-yellow-600">
-              {streakDays} días
-            </span>
-          </div> */}
-          <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-purple-50">
-            <Link href="/store" className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-purple-500 fill-current" />
-              <span className="text-sm font-medium text-purple-600">
-                {zaps}
-              </span>
-            </Link>
-          </div>
-          <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-red-50">
-            <Heart className="w-5 h-5 text-red-500 fill-current" />
-            <span className="text-sm font-medium text-red-600">{lives}</span>
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`zaps-${zaps}`}
+              initial={{ scale: 1 }}
+              animate={{
+                scale: prevZaps.current !== zaps ? [1, 1.3, 1] : 1
+              }}
+              transition={{ duration: 0.3 }}
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-50 cursor-pointer hover:bg-purple-100 transition-colors"
+            >
+              <Link href="/store" className="flex items-center gap-2">
+                <motion.div
+                  animate={{
+                    rotate: prevZaps.current !== zaps ? [0, -10, 10, -10, 0] : 0
+                  }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Zap className="w-5 h-5 text-purple-500 fill-current" />
+                </motion.div>
+                <motion.span
+                  key={`zap-value-${zaps}`}
+                  initial={{ y: -10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 10, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="text-sm font-medium text-purple-600"
+                >
+                  {zaps}
+                </motion.span>
+              </Link>
+            </motion.div>
+          </AnimatePresence>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`lives-${lives}`}
+              initial={{ scale: 1 }}
+              animate={{
+                scale:
+                  lives <= 2
+                    ? [1, 1.1, 1, 1.1, 1]
+                    : prevLives.current !== lives
+                      ? [1, 1.3, 1]
+                      : 1
+              }}
+              transition={{ duration: lives <= 2 ? 0.6 : 0.3 }}
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                lives <= 2
+                  ? "bg-red-100 hover:bg-red-200"
+                  : "bg-red-50 hover:bg-red-100"
+              }`}
+            >
+              <motion.div
+                animate={{
+                  scale: lives <= 2 ? [1, 1.2, 1] : 1,
+                  rotate: prevLives.current !== lives ? [0, -10, 10, -10, 0] : 0
+                }}
+                transition={{
+                  scale: { duration: 0.8, repeat: lives <= 2 ? Infinity : 0 },
+                  rotate: { duration: 0.5 }
+                }}
+              >
+                <Heart
+                  className={`w-5 h-5 fill-current ${
+                    lives <= 2 ? "text-red-600" : "text-red-500"
+                  }`}
+                />
+              </motion.div>
+              <motion.span
+                key={`lives-value-${lives}`}
+                initial={{ y: -10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 10, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className={`text-sm font-medium ${
+                  lives <= 2 ? "text-red-700 font-bold" : "text-red-600"
+                }`}
+              >
+                {lives}
+              </motion.span>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </div>

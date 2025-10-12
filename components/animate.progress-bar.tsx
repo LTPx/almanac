@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import Confetti from "react-confetti";
+// import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 type SuccessProgressBarProps = {
   value: number;
@@ -10,18 +9,18 @@ type SuccessProgressBarProps = {
 };
 
 export const SuccessProgressBar = ({
-  value,
-  triggerSuccess
+  value
+  // triggerSuccess
 }: SuccessProgressBarProps) => {
-  const [showConfetti, setShowConfetti] = useState(false);
+  // const [showConfetti, setShowConfetti] = useState(false);
 
-  useEffect(() => {
-    if (triggerSuccess) {
-      setShowConfetti(true);
-      const timer = setTimeout(() => setShowConfetti(false), 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [triggerSuccess]);
+  // useEffect(() => {
+  //   if (triggerSuccess) {
+  //     setShowConfetti(true);
+  //     const timer = setTimeout(() => setShowConfetti(false), 1500);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [triggerSuccess]);
 
   return (
     <div className="relative w-full h-4 bg-gray-700 rounded-full overflow-hidden">

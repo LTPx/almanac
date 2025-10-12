@@ -3,7 +3,6 @@ import { Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "@/components/ui/sonner";
-import FooterNav from "@/components/footer-nav";
 import ClientWrapper from "@/components/client-wrapper";
 
 const notoSansKR = Noto_Sans_KR({

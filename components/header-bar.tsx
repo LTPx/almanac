@@ -54,7 +54,7 @@ export const HeaderBar = ({
         </div>
       </header>
 
-      <ExitModal />
+      <ExitModal onEndSession={onClose} />
     </>
   );
 };

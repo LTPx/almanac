@@ -1,12 +1,11 @@
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import AppSidebar from "@/components/app-sidebar";
-import AppHeader from "@/components/app-header";
+// app/admin/layout.tsx
+import { Sidebar } from "@/components/admin/sidebar";
+import { Header } from "@/components/admin/header";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { UserProvider } from "@/context/UserContext";
+import { AdminProvider } from "@/context/AdminContext";
 
-export default async function DashboardLayout({
+export default async function AdminLayout({
   children
 }: {
   children: React.ReactNode;
@@ -15,21 +14,55 @@ export default async function DashboardLayout({
     headers: await headers()
   });
 
-  if (!session) {
-    return redirect("/sign-in");
-  }
-
-  const user = session?.user;
+  const user = session?.user ?? null;
 
   return (
-    <UserProvider user={user}>
-      <SidebarProvider>
-        <AppSidebar variant="inset" />
-        <SidebarInset>
-          <AppHeader user={user} />
-          <main className="flex-1 p-6">{children}</main>
-        </SidebarInset>
-      </SidebarProvider>
-    </UserProvider>
+    <AdminProvider user={user}>
+      <div className="min-h-screen bg-background text-foreground">
+        <Sidebar />
+        <div className="pl-64">
+          <Header />
+          <main className="p-6">
+            <div className="mx-auto max-w-7xl">{children}</div>
+          </main>
+        </div>
+      </div>
+    </AdminProvider>
   );
 }
+
+// import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+// import AppSidebar from "@/components/app-sidebar";
+// import AppHeader from "@/components/app-header";
+// import { auth } from "@/lib/auth";
+// import { headers } from "next/headers";
+// import { redirect } from "next/navigation";
+// import { UserProvider } from "@/context/UserContext";
+
+// export default async function DashboardLayout({
+//   children
+// }: {
+//   children: React.ReactNode;
+// }) {
+//   const session = await auth.api.getSession({
+//     headers: await headers()
+//   });
+
+//   if (!session) {
+//     return redirect("/sign-in");
+//   }
+
+//   const user = session?.user;
+
+//   return (
+//     <UserProvider user={user}>
+//       <SidebarProvider>
+//         <AppSidebar variant="inset" />
+//         <SidebarInset>
+//           <AppHeader user={user} />
+//           <main className="flex-1 p-6">{children}</main>
+//         </SidebarInset>
+//       </SidebarProvider>
+//     </UserProvider>
+//   );
+// }
