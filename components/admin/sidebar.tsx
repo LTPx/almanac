@@ -13,7 +13,8 @@ import {
   Heart,
   Zap,
   Trophy,
-  Coins
+  Coins,
+  Settings
   // Settings,
   // Database
 } from "lucide-react";
