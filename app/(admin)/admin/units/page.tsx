@@ -17,7 +17,6 @@ import {
   Edit,
   Trash2,
   BookOpen,
-  // Users,
   MoreHorizontal,
   Eye,
   ToggleLeft,
@@ -39,12 +38,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Unit } from "@/lib/types";
 
 export default function UnitsPage() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [deleteUnitId, setDeleteUnitId] = useState<number | null>(null);
+  const [removeLessons, setRemoveLessons] = useState<boolean>(true);
 
   const fetchUnits = async () => {
     const response = await fetch("/api/units");
@@ -54,9 +55,28 @@ export default function UnitsPage() {
     return response.json();
   };
 
-  const handleDeleteUnit = (id: number) => {
-    setUnits(units.filter((unit) => unit.id !== id));
-    setDeleteUnitId(null);
+  const deleteUnit = async (unitId: number, removeLessons: boolean) => {
+    const response = await fetch(`/api/units/${unitId}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ removeLessons })
+    });
+    if (!response.ok) {
+      throw new Error("Failed to delete unit");
+    }
+    return response.json();
+  };
+
+  const handleDeleteUnit = async (id: number) => {
+    try {
+      await deleteUnit(id, removeLessons);
+      setUnits(units.filter((unit) => unit.id !== id));
+      setDeleteUnitId(null);
+      toast.success("Unidad eliminada correctamente");
+    } catch (error) {
+      console.log(error);
+      toast.error("No se pudo eliminar la unidad");
+    }
   };
 
   const toggleUnitStatus = (id: number) => {
@@ -75,8 +95,6 @@ export default function UnitsPage() {
       } catch (error) {
         console.error("Error loading units:", error);
         toast.error("No se pudieron cargar las unidades");
-      } finally {
-        // setLoading(false);
       }
     };
 
@@ -228,10 +246,25 @@ export default function UnitsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
-              Esta acción eliminará permanentemente la unidad y todas sus
-              lecciones asociadas. Esta acción no se puede deshacer.
+              Esta acción eliminará permanentemente la unidad. Puedes elegir si
+              también deseas eliminar sus lecciones asociadas.
             </AlertDialogDescription>
           </AlertDialogHeader>
+
+          <div className="flex items-center space-x-2 py-4">
+            <Checkbox
+              id="removeLessons"
+              checked={removeLessons}
+              onCheckedChange={(checked) => setRemoveLessons(checked === true)}
+            />
+            <label
+              htmlFor="removeLessons"
+              className="text-sm text-muted-foreground"
+            >
+              Eliminar también las lecciones asociadas
+            </label>
+          </div>
+
           <AlertDialogFooter>
             <AlertDialogCancel className="border-border text-foreground hover:bg-muted/10">
               Cancelar
