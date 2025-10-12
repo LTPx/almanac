@@ -27,6 +27,7 @@ const navigation = [
   { name: "NFTs", href: "/admin/nfts", icon: Coins },
   // { name: "Usuarios", href: "/admin/users", icon: Users },
   // { name: "Progreso", href: "/admin/progress", icon: BarChart3 },
+  { name: "Configuración", href: "/admin/settings", icon: Settings },
   {
     name: "Gamificación",
     href: "/admin/gamification",
@@ -38,7 +39,6 @@ const navigation = [
     ]
   }
   // { name: "Analytics", href: "/admin/analytics", icon: Database },
-  // { name: "Configuración", href: "/admin/settings", icon: Settings }
 ];
 
 export function Sidebar() {
