@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Endpoint para limpiar datos (útil para testing)
-export async function DELETE(request: NextRequest) {
+export async function DELETE() {
   try {
     // Verificar autenticación de admin aquí si es necesario
 
