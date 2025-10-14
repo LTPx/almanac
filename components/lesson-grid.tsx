@@ -8,12 +8,14 @@ import { Lesson } from "@/lib/types";
 interface LessonGridProps {
   lessons: Lesson[];
   approvedLessons: number[];
+  hearts: number;
   onStartLesson: (lesson: Lesson) => void;
 }
 
 export const LessonGrid: React.FC<LessonGridProps> = ({
   lessons,
   approvedLessons,
+  hearts,
   onStartLesson
 }) => {
   type Node = Lesson & { type: "lesson"; col: number; row: number };
@@ -207,6 +209,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                       state={getLessonState(nodeData)}
                       color={getLockedColor(nodeData.mandatory)}
                       mandatory={nodeData.mandatory}
+                      hearts={hearts}
                       shouldFloat={
                         isBottomRow && nodeData.mandatory && !isCompleted
                       }
