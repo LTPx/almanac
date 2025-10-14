@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/accordion";
 import { useUnits } from "@/hooks/use-units";
 import { Lesson, Unit } from "@/lib/types";
+import { FormattedTextDisplay } from "@/components/formatted-text-display";
 
 function Contents() {
   const { fetchUnits, isLoading } = useUnits();
@@ -32,7 +33,7 @@ function Contents() {
 
   return (
     <div className="min-h-screen bg-neutral-900 text-white p-6">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <h1 className="text-[22px] font-bold mb-6">Temas</h1>
 
         {units.map((unit) => (
@@ -50,8 +51,8 @@ function Contents() {
                     <AccordionTrigger className="text-white text-base font-semibold px-5 py-5 hover:bg-neutral-750 hover:no-underline">
                       {lesson.name}
                     </AccordionTrigger>
-                    <AccordionContent className="text-sm text-gray-300 px-5 pb-5 pt-2 border-t border-neutral-700">
-                      {lesson.description || "Sin descripción disponible."}
+                    <AccordionContent className="px-5 pb-5 pt-2 border-t border-neutral-700">
+                      <FormattedTextDisplay text={lesson.description} />
                     </AccordionContent>
                   </AccordionItem>
                 ))}
