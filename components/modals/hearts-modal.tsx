@@ -2,7 +2,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,7 +17,7 @@ import { useNoHeartsModal } from "@/store/no-hearts-modal";
 
 export const NoHeartsModal = () => {
   const [isClient, setIsClient] = useState(false);
-  const { isOpen, close, lessonName } = useNoHeartsModal();
+  const { isOpen, close } = useNoHeartsModal();
 
   useEffect(() => setIsClient(true), []);
 
