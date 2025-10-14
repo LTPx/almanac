@@ -25,7 +25,7 @@ export function TestSystem({
   userId,
   initialLessonId,
   onClose,
-  hearts
+  hearts: initialHearts
 }: TestSystemProps) {
   const [state, setState] = useState<TestState>("testing");
   const [currentTest, setCurrentTest] = useState<TestData | null>(null);
@@ -37,6 +37,7 @@ export function TestSystem({
   const [questionStartTime, setQuestionStartTime] = useState<number>(
     Date.now()
   );
+  const [currentHearts, setCurrentHearts] = useState(initialHearts);
 
   const { error, startTest, submitAnswer, completeTest } = useTest();
   const hasInitialized = useRef(false);
@@ -99,10 +100,19 @@ export function TestSystem({
     if (testResults) {
       setResults(testResults);
       setState("results");
+
+      if (testResults.heartsLost !== undefined && testResults.heartsLost > 0) {
+        setCurrentHearts((prev) => Math.max(0, prev - testResults.heartsLost));
+      }
     }
   };
 
   const handleRetakeTest = () => {
+    if (currentHearts === 0) {
+      onClose();
+      return;
+    }
+
     if (currentTest) {
       hasInitialized.current = false;
       handleStartTest(currentTest.lesson.id);
@@ -136,7 +146,7 @@ export function TestSystem({
         <>
           <HeaderBar
             onClose={onClose}
-            hearts={hearts}
+            hearts={currentHearts}
             percentage={progress}
             hasActiveSubscription={false}
             justAnsweredCorrect={
@@ -186,11 +196,15 @@ export function TestSystem({
             className="absolute inset-0 w-full h-full flex items-center justify-center"
           >
             <TestResults
-              hearts={hearts}
+              hearts={currentHearts}
               results={results}
               lessonName={currentTest.lesson.name}
               onReturnToLessons={onClose}
-              onRetakeTest={results.passed ? undefined : handleRetakeTest}
+              onRetakeTest={
+                currentHearts > 0 && !results.passed
+                  ? handleRetakeTest
+                  : undefined
+              }
             />
           </motion.div>
         </AnimatePresence>
