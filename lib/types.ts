@@ -91,6 +91,8 @@ export type Unit = {
   _count: { lessons: number };
   lessons?: Lesson[];
   createdAt: Date;
+  experiencePoints: number;
+  mandatory: boolean;
 };
 
 export type EducationalNFT = {

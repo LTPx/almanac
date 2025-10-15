@@ -1,6 +1,27 @@
 import { cache } from "react";
 import prisma from "./prisma";
 
+export const getUnitsByCurriculumId = cache(async (curriculumId: string) => {
+  const data = await prisma.curriculum.findUnique({
+    where: {
+      id: curriculumId
+    },
+    include: {
+      units: true,
+      _count: {
+        select: {
+          units: true
+        }
+      }
+    }
+  });
+  if (data) {
+    return data.units;
+  } else {
+    return [];
+  }
+});
+
 // ============== USER PROGRESS QUERIES ==============
 
 export const getUserProgress = cache(async (userId: string) => {

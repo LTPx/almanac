@@ -192,6 +192,17 @@ export default function CurriculumPage() {
 
               <CardContent>
                 <div className="space-y-3">
+                  <Link
+                    href={`/admin/curriculums/${curriculum.id}/learning-path`}
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-border text-foreground hover:bg-primary/10"
+                    >
+                      Path de aprendizaje
+                    </Button>
+                  </Link>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground mb-2">
                       Unidades incluidas:

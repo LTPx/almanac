@@ -12,11 +12,12 @@ import {
 } from "@dnd-kit/core";
 import React from "react";
 import { Lesson } from "@prisma/client";
+import { Unit } from "@/lib/types";
 
-type LessonGrid = { id: string; lessonId: number; label: string };
+type UnitGrid = { id: string; unitId: number; label: string };
 type CellId = string;
-type LessonId = string;
-type Assignments = Record<CellId, LessonId | null>;
+type UnitId = string;
+type Assignments = Record<CellId, UnitId | null>;
 
 const Draggable = React.memo(function Draggable({
   id,
@@ -111,7 +112,7 @@ const Droppable = React.memo(function Droppable({
           ${isOver ? "border-primary bg-primary/10 shadow-lg" : "border-border bg-background hover:border-primary"}`}
       >
         <div className="text-sm font-medium text-foreground mb-3">
-          Lecciones Disponibles
+          Unidades Disponibles
         </div>
         <div className="flex flex-col gap-3 overflow-y-auto max-h-[480px] pr-1">
           {children}
@@ -170,22 +171,22 @@ function HeaderStatus({
 }
 
 function useAssignments(
-  initialLessons: LessonGrid[],
-  initialPositions: { lessonId: number; position: number }[]
+  initialUnits: UnitGrid[],
+  initialPositions: { unitId: number; position: number }[]
 ) {
   const [assignments, setAssignments] = useState<Assignments>(() => {
     const grid: Assignments = Object.fromEntries(
       Array.from({ length: 12 * 5 }).map((_, i) => [`cell-${i}`, null])
     );
     initialPositions.forEach((pos) => {
-      grid[`cell-${pos.position}`] = `lesson-${pos.lessonId}`;
+      grid[`cell-${pos.position}`] = `lesson-${pos.unitId}`;
     });
     return grid;
   });
 
-  const [availableLessons, setAvailableLessons] = useState<LessonGrid[]>(() => {
-    const assignedIds = initialPositions.map((p) => `lesson-${p.lessonId}`);
-    return initialLessons.filter((l) => !assignedIds.includes(l.id));
+  const [availableLessons, setAvailableLessons] = useState<UnitGrid[]>(() => {
+    const assignedIds = initialPositions.map((p) => `lesson-${p.unitId}`);
+    return initialUnits.filter((l) => !assignedIds.includes(l.id));
   });
 
   const moveLesson = useCallback(
@@ -218,7 +219,7 @@ function useAssignments(
         let newAvailable = [...prev];
 
         if (overId === "panel") {
-          const lesson = initialLessons.find((l) => l.id === lessonKey);
+          const lesson = initialUnits.find((l) => l.id === lessonKey);
           if (lesson && !newAvailable.find((l) => l.id === lessonKey)) {
             newAvailable.push(lesson);
           }
@@ -227,7 +228,7 @@ function useAssignments(
 
           if (!sourceCell && assignments[overId]) {
             const targetLesson = assignments[overId];
-            const targetLessonObj = initialLessons.find(
+            const targetLessonObj = initialUnits.find(
               (l) => l.id === targetLesson
             );
             if (
@@ -242,14 +243,14 @@ function useAssignments(
         return newAvailable;
       });
     },
-    [assignments, initialLessons]
+    [assignments, initialUnits]
   );
 
   const clearAll = useCallback(() => {
     const allAssignedLessons = Object.values(assignments)
       .filter(Boolean)
-      .map((lessonKey) => initialLessons.find((l) => l.id === lessonKey))
-      .filter(Boolean) as LessonGrid[];
+      .map((lessonKey) => initialUnits.find((l) => l.id === lessonKey))
+      .filter(Boolean) as UnitGrid[];
 
     setAvailableLessons((prev) => [...prev, ...allAssignedLessons]);
     setAssignments((prev) => {
@@ -257,7 +258,7 @@ function useAssignments(
       Object.keys(updated).forEach((key) => (updated[key] = null));
       return updated;
     });
-  }, [assignments, initialLessons]);
+  }, [assignments, initialUnits]);
 
   return {
     assignments,
@@ -270,8 +271,8 @@ function useAssignments(
 
 function useSavePath(
   assignments: Assignments,
-  initialLessons: LessonGrid[],
-  unitId: number
+  initialUnits: UnitGrid[],
+  curriculumId: string
 ) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">(
@@ -287,11 +288,11 @@ function useSavePath(
         .filter(([, lessonKey]) => lessonKey !== null)
         .map(([cellId, lessonKey]) => {
           const position = parseInt(cellId.replace("cell-", ""), 10);
-          const lesson = initialLessons.find((l) => l.id === lessonKey);
-          return { lessonId: lesson!.lessonId, position };
+          const lesson = initialUnits.find((l) => l.id === lessonKey);
+          return { unitId: lesson!.unitId, position };
         });
 
-      const res = await fetch(`/api/units/${unitId}/lessons/sort`, {
+      const res = await fetch(`/api/curriculums/${curriculumId}/units/sort`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -308,43 +309,43 @@ function useSavePath(
     } finally {
       setIsSaving(false);
     }
-  }, [assignments, initialLessons, unitId]);
+  }, [assignments, initialUnits, curriculumId]);
 
   return { isSaving, saveStatus, handleSave };
 }
 
 export default function OrderLearningPath({
-  lessons,
-  unitId,
+  units,
+  curriculumId,
   initialPositions = []
 }: {
-  lessons: Lesson[];
-  unitId: number;
-  initialPositions?: { lessonId: number; position: number }[];
+  units: Unit[];
+  curriculumId: string;
+  initialPositions?: { unitId: number; position: number }[];
 }) {
-  const initialLessons: LessonGrid[] = useMemo(
+  const initialUnits: UnitGrid[] = useMemo(
     () =>
-      lessons.map((l) => ({
+      units.map((l) => ({
         id: `lesson-${l.id}`,
-        lessonId: l.id,
+        unitId: l.id,
         label: l.name
       })),
-    [lessons]
+    [units]
   );
 
   const { assignments, availableLessons, moveLesson, clearAll } =
-    useAssignments(initialLessons, initialPositions);
+    useAssignments(initialUnits, initialPositions);
   const { isSaving, saveStatus, handleSave } = useSavePath(
     assignments,
-    initialLessons,
-    unitId
+    initialUnits,
+    curriculumId
   );
 
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const lessonMap = useMemo(
-    () => new Map(initialLessons.map((l) => [l.id, l])),
-    [initialLessons]
+    () => new Map(initialUnits.map((l) => [l.id, l])),
+    [initialUnits]
   );
   const draggedLesson = activeId ? lessonMap.get(activeId) : null;
 
@@ -375,7 +376,7 @@ export default function OrderLearningPath({
           <HeaderStatus
             assignedCount={assignedCount}
             availableCount={availableLessons.length}
-            total={lessons.length}
+            total={units.length}
           />
           <button
             onClick={clearAll}
@@ -401,13 +402,13 @@ export default function OrderLearningPath({
                 </div>
               )}
               {availableLessons.map((u) => {
-                const lessonData = lessons.find((l) => l.id === u.lessonId);
+                const unitData = units.find((l) => l.id === u.unitId);
                 return (
                   <Draggable
                     key={u.id}
                     id={u.id}
                     label={u.label}
-                    isMandatory={lessonData?.mandatory}
+                    isMandatory={unitData?.mandatory}
                   />
                 );
               })}
@@ -434,8 +435,7 @@ export default function OrderLearningPath({
                           id={lesson.id}
                           label={lesson.label}
                           isMandatory={
-                            lessons.find((l) => l.id === lesson.lessonId)
-                              ?.mandatory
+                            units.find((l) => l.id === lesson.unitId)?.mandatory
                           }
                         />
                       )}
@@ -472,7 +472,7 @@ export default function OrderLearningPath({
             label={draggedLesson.label}
             isDragOverlay
             isMandatory={
-              lessons.find((l) => l.id === draggedLesson.lessonId)?.mandatory
+              units.find((l) => l.id === draggedLesson.unitId)?.mandatory
             }
           />
         )}
