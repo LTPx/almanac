@@ -136,15 +136,15 @@ export const getUnits = cache(async (search: string) => {
     include: {
       lessons: {
         where: { isActive: true },
-        include: {
-          _count: {
-            select: { questions: true }
-          }
-        },
+        // include: {
+        //   _count: {
+        //     select: { questions: true }
+        //   }
+        // },
         orderBy: { position: "asc" }
       },
       _count: {
-        select: { lessons: true }
+        select: { lessons: true, questions: true }
       }
     },
     orderBy: { order: "asc" }
