@@ -21,7 +21,7 @@ export function OrderWordsQuestion({
   showResult,
   isCorrect
 }: Props) {
-  const totalSlots = question.content.words.length;
+  const totalSlots = question.content.correctOrder.length;
 
   const [slots, setSlots] = useState<(string | null)[]>(
     Array(totalSlots).fill(null)
@@ -31,14 +31,12 @@ export function OrderWordsQuestion({
     ...question.content.words
   ]);
 
-  // Reset cuando cambia la pregunta
   useEffect(() => {
     setSlots(Array(totalSlots).fill(null));
     setAvailableWords([...question.content.words]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.content.words]);
 
-  // Pasamos lo que arma el usuario como "selected"
   useEffect(() => {
     setSelected(JSON.stringify(slots));
   }, [slots, setSelected]);
