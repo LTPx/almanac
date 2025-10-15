@@ -150,7 +150,7 @@ export default function LessonsPage() {
                 className="pl-10 bg-background text-foreground border-border"
               />
             </div>
-            {/* <div className="w-48">
+            <div className="w-48">
               <Select value={selectedUnit} onValueChange={setSelectedUnit}>
                 <SelectTrigger className="bg-background text-foreground border-border">
                   <Filter className="mr-2 h-4 w-4" />
@@ -165,7 +165,7 @@ export default function LessonsPage() {
                   ))}
                 </SelectContent>
               </Select>
-            </div> */}
+            </div>
           </div>
         </CardContent>
       </Card>

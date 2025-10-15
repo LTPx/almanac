@@ -21,7 +21,6 @@ import {
   MoreHorizontal,
   Eye,
   Search,
-  Filter,
   Star,
   ArrowLeft
 } from "lucide-react";
@@ -31,13 +30,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
 
 import {
   AlertDialog,
@@ -54,17 +46,10 @@ import { toast } from "sonner";
 import { LessonAdmin } from "@/lib/types";
 import { useParams } from "next/navigation";
 
-const mockUnits = [
-  { id: 1, name: "Introducción a Blockchain" },
-  { id: 2, name: "Smart Contracts" },
-  { id: 3, name: "DeFi Fundamentals" }
-];
-
 export default function UnitLessonsPage() {
   const { id } = useParams();
   const [lessons, setLessons] = useState<LessonAdmin[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedUnit, setSelectedUnit] = useState<string>("all");
   const [deleteLessonId, setDeleteLessonId] = useState<number | null>(null);
 
   const fetchLessons = async () => {
@@ -79,9 +64,8 @@ export default function UnitLessonsPage() {
     const matchesSearch =
       lesson.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lesson.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesUnit =
-      selectedUnit === "all" || lesson.unitId.toString() === selectedUnit;
-    return matchesSearch && matchesUnit;
+
+    return matchesSearch;
   });
 
   const deleteLesson = async (unitId: number) => {
@@ -120,6 +104,7 @@ export default function UnitLessonsPage() {
     };
 
     loadLessons();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -256,11 +241,11 @@ export default function UnitLessonsPage() {
                 No hay lecciones
               </h3>
               <p className="mt-2">
-                {searchTerm || selectedUnit !== "all"
+                {searchTerm
                   ? "No se encontraron lecciones con los filtros actuales."
                   : "Comienza creando tu primera lección."}
               </p>
-              {!searchTerm && selectedUnit === "all" && (
+              {!searchTerm && (
                 <Link href="/admin/lessons/new">
                   <Button className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90">
                     <Plus className="mr-2 h-4 w-4" />
