@@ -57,10 +57,14 @@ export function TestQuestion({
 
   const handleSubmitAnswer = () => {
     if (hasAnswered) return;
+
     if (question.type === "ORDER_WORDS") {
       const slots = JSON.parse(selected || "[]");
-      if (!Array.isArray(slots) || slots.some((s: string | null) => !s)) return;
+      const usedWords = slots.filter((s: string | null) => s !== null).length;
+      const requiredWords = question.content.correctOrder.length;
+      if (!Array.isArray(slots) || usedWords < requiredWords) return;
     }
+
     if (!selected) return;
 
     onAnswer(question.id, selected);
@@ -151,7 +155,15 @@ export function TestQuestion({
                 disabled={
                   !selected ||
                   (question.type === "ORDER_WORDS" &&
-                    JSON.parse(selected || "[]").some((s: string | null) => !s))
+                    (() => {
+                      const slots = JSON.parse(selected || "[]");
+                      const usedWords = slots.filter(
+                        (s: string | null) => s !== null
+                      ).length;
+                      const requiredWords =
+                        question.content.correctOrder.length;
+                      return usedWords < requiredWords;
+                    })())
                 }
                 className="
                   w-full py-8 text-xl font-semibold rounded-2xl shadow-lg

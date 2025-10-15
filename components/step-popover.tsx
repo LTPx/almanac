@@ -58,7 +58,7 @@ export function StepPopover({
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className={`${getPopoverClass()} rounded-md relative`}>
         {title && <h3 className="font-bold">{title}</h3>}
-        {message && <p className="mt-2">{message}</p>}
+        {message && <p className="mt-2 line-clamp-4">{message}</p>}
         {buttonText && onButtonClick && (
           <Button
             className={`text-[15px] font-bold ${buttonBgColor} h-[60px] w-full focus-visible:ring-0 mt-3 ${getButtonTextColor()}`}

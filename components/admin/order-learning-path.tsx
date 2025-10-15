@@ -21,7 +21,7 @@ type Assignments = Record<CellId, LessonId | null>;
 const Draggable = React.memo(function Draggable({
   id,
   label,
-  isMandatory = false, // <-- nuevo prop
+  isMandatory = false,
   isDragOverlay = false
 }: {
   id: string;
@@ -31,29 +31,62 @@ const Draggable = React.memo(function Draggable({
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({ id });
+  const [showTooltip, setShowTooltip] = useState(false);
+  const textRef = React.useRef<HTMLDivElement>(null);
+  const [isTextTruncated, setIsTextTruncated] = useState(false);
+
+  React.useEffect(() => {
+    if (textRef.current) {
+      const isTruncated =
+        textRef.current.scrollHeight > textRef.current.clientHeight;
+      setIsTextTruncated(isTruncated);
+    }
+  }, [label]);
 
   const bgColor = isMandatory
     ? "bg-green-600 text-white"
     : "bg-[#1983DD] text-white";
 
   return (
-    <div
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      style={{
-        transform: transform
-          ? `translate(${transform.x}px, ${transform.y}px)`
-          : undefined,
-        opacity: isDragging && !isDragOverlay ? 0.5 : 1
-      }}
-      className={`px-3 py-2 rounded-lg shadow-md cursor-grab active:cursor-grabbing 
-        text-sm font-medium transition-all duration-200 hover:shadow-lg select-none 
-        ${bgColor} ${isDragOverlay ? "rotate-3 scale-105" : ""} ${
-          isDragging && !isDragOverlay ? "cursor-grabbing" : ""
-        }`}
-    >
-      {label}
+    <div className="relative">
+      <div
+        ref={setNodeRef}
+        {...attributes}
+        {...listeners}
+        style={{
+          transform: transform
+            ? `translate(${transform.x}px, ${transform.y}px)`
+            : undefined,
+          opacity: isDragging && !isDragOverlay ? 0.5 : 1
+        }}
+        onMouseEnter={() => isTextTruncated && setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        className={`px-2.5 py-2 rounded-lg shadow-md cursor-grab active:cursor-grabbing 
+          font-medium transition-all duration-200 hover:shadow-lg select-none 
+          ${bgColor} ${isDragOverlay ? "rotate-3 scale-105" : ""} ${
+            isDragging && !isDragOverlay ? "cursor-grabbing" : ""
+          } w-full h-full flex items-center justify-center overflow-hidden`}
+      >
+        <div
+          ref={textRef}
+          className="text-xs leading-snug text-center line-clamp-4 w-full break-words"
+        >
+          {label}
+        </div>
+      </div>
+
+      {showTooltip && isTextTruncated && !isDragging && (
+        <div
+          className="absolute z-[100] px-4 py-3 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-xl 
+          bottom-full left-1/2 transform -translate-x-1/2 mb-3 whitespace-normal min-w-[180px] max-w-[280px]
+          animate-in fade-in slide-in-from-bottom-1 duration-200"
+        >
+          <div className="text-center leading-relaxed">{label}</div>
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2">
+            <div className="border-[6px] border-transparent border-t-gray-900"></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 });
@@ -73,7 +106,7 @@ const Droppable = React.memo(function Droppable({
     return (
       <div
         ref={setNodeRef}
-        className={`min-w-[200px] p-4 rounded-xl border-2 border-dashed
+        className={`w-[280px] p-4 rounded-xl border-2 border-dashed
           transition-all duration-200 min-h-[400px] max-h-[550px]
           ${isOver ? "border-primary bg-primary/10 shadow-lg" : "border-border bg-background hover:border-primary"}`}
       >
@@ -157,11 +190,12 @@ function useAssignments(
 
   const moveLesson = useCallback(
     (lessonKey: string, overId: string) => {
+      const sourceCell = Object.keys(assignments).find(
+        (k) => assignments[k] === lessonKey
+      );
+
       setAssignments((prev) => {
         const updated = { ...prev };
-        const sourceCell = Object.keys(updated).find(
-          (k) => updated[k] === lessonKey
-        );
 
         if (overId === "panel") {
           if (sourceCell) updated[sourceCell] = null;
@@ -169,22 +203,46 @@ function useAssignments(
         }
 
         const targetLesson = updated[overId];
-        if (sourceCell) updated[sourceCell] = targetLesson ?? null;
-        updated[overId] = lessonKey;
+
+        if (sourceCell) {
+          updated[sourceCell] = targetLesson ?? null;
+          updated[overId] = lessonKey;
+        } else {
+          updated[overId] = lessonKey;
+        }
 
         return updated;
       });
 
-      if (overId === "panel") {
-        const lesson = initialLessons.find((l) => l.id === lessonKey);
-        if (lesson && !availableLessons.find((l) => l.id === lessonKey)) {
-          setAvailableLessons((prev) => [...prev, lesson]);
+      setAvailableLessons((prev) => {
+        let newAvailable = [...prev];
+
+        if (overId === "panel") {
+          const lesson = initialLessons.find((l) => l.id === lessonKey);
+          if (lesson && !newAvailable.find((l) => l.id === lessonKey)) {
+            newAvailable.push(lesson);
+          }
+        } else {
+          newAvailable = newAvailable.filter((l) => l.id !== lessonKey);
+
+          if (!sourceCell && assignments[overId]) {
+            const targetLesson = assignments[overId];
+            const targetLessonObj = initialLessons.find(
+              (l) => l.id === targetLesson
+            );
+            if (
+              targetLessonObj &&
+              !newAvailable.find((l) => l.id === targetLesson)
+            ) {
+              newAvailable.push(targetLessonObj);
+            }
+          }
         }
-      } else {
-        setAvailableLessons((prev) => prev.filter((l) => l.id !== lessonKey));
-      }
+
+        return newAvailable;
+      });
     },
-    [availableLessons, initialLessons]
+    [assignments, initialLessons]
   );
 
   const clearAll = useCallback(() => {
@@ -313,7 +371,6 @@ export default function OrderLearningPath({
       collisionDetection={closestCenter}
     >
       <div className="flex flex-col gap-6">
-        {/* Header Status */}
         <div className="flex items-center justify-between bg-background p-4 rounded-xl border border-border">
           <HeaderStatus
             assignedCount={assignedCount}
@@ -331,7 +388,6 @@ export default function OrderLearningPath({
           </button>
         </div>
 
-        {/* Panel lateral y grid */}
         <div className="flex gap-6 h-full">
           <div className="sticky top-20 self-start">
             <Droppable id="panel" isPanel>
@@ -392,7 +448,6 @@ export default function OrderLearningPath({
         </div>
       </div>
 
-      {/* Bottom Save Button */}
       <div className="fixed bottom-0 left-0 w-full bg-black/10 backdrop-blur-sm z-10 border-t border-border shadow-md">
         <div className="max-w-7xl mx-auto flex justify-end px-6 py-4">
           <button
@@ -410,7 +465,6 @@ export default function OrderLearningPath({
         </div>
       </div>
 
-      {/* Drag overlay */}
       <DragOverlay>
         {draggedLesson && (
           <Draggable
@@ -424,7 +478,6 @@ export default function OrderLearningPath({
         )}
       </DragOverlay>
 
-      {/* Save notifications */}
       {["success", "error"].map((status) => (
         <div
           key={status}

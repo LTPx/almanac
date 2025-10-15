@@ -71,19 +71,23 @@ export async function POST(request: NextRequest) {
     });
 
     // Preparar las preguntas sin mostrar las respuestas correctas
-    const questionsForClient = lesson.questions.map((question) => ({
-      id: question.id,
-      type: question.type,
-      title: question.title,
-      order: question.order,
-      content: question.content,
-      answers: question.answers.map((answer) => ({
-        id: answer.id,
-        text: answer.text,
-        order: answer.order
-        // No incluir isCorrect
+    const questionsForClient = shuffle(
+      lesson.questions.map((question) => ({
+        id: question.id,
+        type: question.type,
+        title: question.title,
+        order: question.order,
+        content: question.content,
+        answers: shuffle(
+          question.answers.map((answer) => ({
+            id: answer.id,
+            text: answer.text,
+            order: answer.order
+            // No incluir isCorrect
+          }))
+        )
       }))
-    }));
+    );
 
     return NextResponse.json({
       testAttemptId: testAttempt.id,
@@ -102,4 +106,13 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+function shuffle<T>(array: T[]): T[] {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
 }

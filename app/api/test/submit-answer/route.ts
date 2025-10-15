@@ -43,14 +43,14 @@ export async function POST(request: NextRequest) {
 
     // Evaluar si la respuesta es correcta
     let isCorrect = false;
-    console.log(question);
+
+    const correctAnswer = question.answers.find((answer) => answer.isCorrect);
+
     switch (question.type) {
       case "MULTIPLE_CHOICE":
+
       case "TRUE_FALSE":
         // Para opción múltiple, comparar con la respuesta correcta
-        const correctAnswer = question.answers.find(
-          (answer) => answer.isCorrect
-        );
         isCorrect = correctAnswer
           ? correctAnswer.id.toString() === userAnswer
           : false;
@@ -67,22 +67,30 @@ export async function POST(request: NextRequest) {
         break;
 
       case "ORDER_WORDS":
-        console.log("correct place");
-        isCorrect = true; //pending
+        const userAnswerObj =
+          typeof userAnswer === "string" ? JSON.parse(userAnswer) : userAnswer;
+        console.log("userAnswerObj: ", userAnswerObj);
+        const joinAnswer = userAnswerObj.join(" ");
+        // @ts-expect-error no sentence interface JSON
+        const rightSentence = question.content?.sentence || correctAnswer?.text;
+        console.log("joinAnswer: ", joinAnswer);
+        console.log("rightSentence: ", rightSentence);
+        isCorrect = joinAnswer === rightSentence;
       case "MATCHING":
       case "DRAG_DROP":
         // Para estos tipos, el userAnswer debería ser un JSON con el orden/matches
         // Se necesita lógica específica según el contenido de la pregunta
-        try {
-          // const userAnswerObj =
-          //   typeof userAnswer === "string"
-          //     ? JSON.parse(userAnswer)
-          //     : userAnswer;
-          // Aquí implementar la lógica específica según question.content
-          isCorrect = false; // Placeholder
-        } catch {
-          isCorrect = false;
-        }
+        // try {
+        //   const userAnswerObj =
+        //     typeof userAnswer === "string"
+        //       ? JSON.parse(userAnswer)
+        //       : userAnswer;
+        //   // Aquí implementar la lógica específica según question.content
+        //   isCorrect = false; // Placeholder
+        // } catch {
+        //   isCorrect = false;
+        // }
+        isCorrect = true;
         break;
 
       default:

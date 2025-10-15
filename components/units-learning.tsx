@@ -30,6 +30,26 @@ const LearningPath: React.FC<LearningPathProps> = ({
     }
   };
 
+  if (activeLesson && hearts === 0) {
+    setActiveLesson(null);
+    return (
+      <div className="flex flex-col">
+        <div className="px-6 py-8">
+          {isLoading ? (
+            <div>Cargando progreso...</div>
+          ) : (
+            <LessonGrid
+              lessons={unit.lessons || []}
+              approvedLessons={progress.approvedLessons}
+              onStartLesson={setActiveLesson}
+              hearts={hearts}
+            />
+          )}
+        </div>
+      </div>
+    );
+  }
+
   if (activeLesson) {
     return (
       <div className="fixed inset-0 z-100 flex justify-center items-start bg-black/50">
@@ -55,6 +75,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
             lessons={unit.lessons || []}
             approvedLessons={progress.approvedLessons}
             onStartLesson={setActiveLesson}
+            hearts={hearts}
           />
         )}
       </div>

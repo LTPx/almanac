@@ -25,6 +25,13 @@ export interface Question {
     text: string;
     order: number;
   }[];
+  isActive: boolean;
+  lesson: {
+    name: string;
+    unit: {
+      name: string;
+    };
+  };
 }
 
 export interface TestData {
@@ -44,6 +51,7 @@ export interface TestResultsInterface {
   totalQuestions: number;
   passed: boolean;
   experienceGained: number;
+  heartsLost: number;
 }
 
 export type Lesson = {
@@ -53,6 +61,8 @@ export type Lesson = {
   position: number;
   unitId: number;
   mandatory: boolean;
+  experiencePoints: number;
+  isActive: boolean;
 };
 
 export type LessonAdmin = {

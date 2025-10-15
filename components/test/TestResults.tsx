@@ -6,6 +6,7 @@ import { useWindowSize, useAudio } from "react-use";
 import { ResultCard } from "../result-card";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { XCircle } from "lucide-react";
 
 interface TestResultsProps {
   results: TestResultsInterface;
@@ -17,12 +18,10 @@ interface TestResultsProps {
 
 export function TestResults({
   results,
-  // lessonName,
   onReturnToLessons,
   hearts,
   onRetakeTest
 }: TestResultsProps) {
-  // const percentage = Math.round(results.score);
   const isPassed = results.passed;
   const { width, height } = useWindowSize();
 
@@ -51,13 +50,17 @@ export function TestResults({
         />
       )}
       <div className="mx-auto flex h-full max-w-lg flex-col items-center justify-center gap-y-4 text-center lg:gap-y-8">
-        <Image
-          src="/finish.svg"
-          alt="Finish"
-          className="hidden lg:block"
-          height={100}
-          width={100}
-        />
+        {isPassed ? (
+          <Image
+            src="/finish.svg"
+            alt="Finish"
+            className="hidden lg:block"
+            height={100}
+            width={100}
+          />
+        ) : (
+          <XCircle className="hidden lg:block text-red-500" size={70} />
+        )}
 
         <Image
           src="/finish.svg"
@@ -68,7 +71,15 @@ export function TestResults({
         />
 
         <h1 className="text-lg font-bold text-white lg:text-3xl">
-          Great job! <br /> You&apos;ve completed the lesson.
+          {isPassed ? (
+            <>
+              Great job! <br /> You&apos;ve completed the lesson.
+            </>
+          ) : (
+            <>
+              Almost there! <br /> Try again to pass this lesson.
+            </>
+          )}
         </h1>
         <div className="flex w-full items-center gap-x-4">
           <ResultCard variant="points" value={results.experienceGained} />
@@ -83,7 +94,7 @@ export function TestResults({
             w-full py-6 text-lg font-semibold rounded-2xl shadow-lg
             bg-[#1983DD] hover:bg-[#1666B0] text-white"
         >
-          Volver a Lecciones
+          {isPassed ? "Volver a Lecciones" : "Volver"}
         </Button>
 
         {!isPassed && onRetakeTest && (
