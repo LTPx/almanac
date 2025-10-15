@@ -1,13 +1,15 @@
 "use client";
 
-import { Unit } from "@/lib/types";
+import { Curriculum } from "@/lib/types";
 import { useState, useCallback } from "react";
 
 export function useCurriculums() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchCurriculums = useCallback(async (): Promise<Unit[] | null> => {
+  const fetchCurriculums = useCallback(async (): Promise<
+    Curriculum[] | null
+  > => {
     setIsLoading(true);
     setError(null);
 
@@ -27,7 +29,7 @@ export function useCurriculums() {
   }, []);
 
   const fetchCurriculumWithUnits = useCallback(
-    async (curriculumId: number): Promise<Unit | null> => {
+    async (curriculumId: string): Promise<Curriculum | null> => {
       setIsLoading(true);
       setError(null);
 

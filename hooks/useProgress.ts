@@ -8,7 +8,7 @@ interface ProgressData {
   isCompleted: boolean;
 }
 
-export function useProgress(userId: string, unitId: number) {
+export function useProgress(userId: string, curriculumId: string) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<ProgressData>({
@@ -18,12 +18,14 @@ export function useProgress(userId: string, unitId: number) {
   });
 
   const fetchProgress = async () => {
-    if (!userId || !unitId) return;
+    if (!userId || !curriculumId) return;
     setIsLoading(true);
     setError(null);
 
     try {
-      const res = await fetch(`/api/users/${userId}/progress?unitId=${unitId}`);
+      const res = await fetch(
+        `/api/users/${userId}/progress?curriculumId=${curriculumId}`
+      );
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.error || "Error al cargar progreso");
@@ -44,7 +46,7 @@ export function useProgress(userId: string, unitId: number) {
 
   useEffect(() => {
     fetchProgress();
-  }, [userId, unitId]);
+  }, [userId, curriculumId]);
 
   return {
     progress,

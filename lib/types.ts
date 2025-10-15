@@ -93,6 +93,7 @@ export type Unit = {
   createdAt: Date;
   experiencePoints: number;
   mandatory: boolean;
+  position: number;
 };
 
 export type EducationalNFT = {

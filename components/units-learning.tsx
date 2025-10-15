@@ -3,35 +3,35 @@
 import React, { useState } from "react";
 import { LessonGrid } from "./lesson-grid";
 import { TestSystem } from "./test/TestSystem";
-import { Unit, Lesson } from "@/lib/types";
+import { Curriculum, Unit } from "@/lib/types";
 import { useProgress } from "@/hooks/useProgress";
 
 type LearningPathProps = {
-  unit: Unit;
+  curriculum: Curriculum;
   userId: string;
   hearts: number;
   onTestComplete?: () => void;
 };
 
 const LearningPath: React.FC<LearningPathProps> = ({
-  unit,
+  curriculum,
   userId,
   hearts,
   onTestComplete
 }) => {
-  const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
-  const { progress, isLoading, refetch } = useProgress(userId, unit.id);
+  const [activeUnit, setActiveUnit] = useState<Unit | null>(null);
+  const { progress, isLoading, refetch } = useProgress(userId, curriculum.id);
 
   const handleCloseTest = () => {
-    setActiveLesson(null);
+    setActiveUnit(null);
     refetch();
     if (onTestComplete) {
       onTestComplete();
     }
   };
 
-  if (activeLesson && hearts === 0) {
-    setActiveLesson(null);
+  if (activeUnit && hearts === 0) {
+    setActiveUnit(null);
     return (
       <div className="flex flex-col">
         <div className="px-6 py-8">
@@ -39,9 +39,9 @@ const LearningPath: React.FC<LearningPathProps> = ({
             <div>Cargando progreso...</div>
           ) : (
             <LessonGrid
-              lessons={unit.lessons || []}
-              approvedLessons={progress.approvedLessons}
-              onStartLesson={setActiveLesson}
+              units={curriculum.units || []}
+              approvedUnits={progress.approvedLessons}
+              onStartUnit={setActiveUnit}
               hearts={hearts}
             />
           )}
@@ -50,14 +50,14 @@ const LearningPath: React.FC<LearningPathProps> = ({
     );
   }
 
-  if (activeLesson) {
+  if (activeUnit) {
     return (
       <div className="fixed inset-0 z-100 flex justify-center items-start bg-black/50">
         <div className="w-full max-w-[650px] bg-white shadow-xl overflow-hidden">
           <TestSystem
             hearts={hearts || 0}
             userId={userId}
-            initialLessonId={activeLesson.id}
+            initialLessonId={activeUnit.id}
             onClose={handleCloseTest}
           />
         </div>
@@ -72,9 +72,9 @@ const LearningPath: React.FC<LearningPathProps> = ({
           <div>Cargando progreso...</div>
         ) : (
           <LessonGrid
-            lessons={unit.lessons || []}
-            approvedLessons={progress.approvedLessons}
-            onStartLesson={setActiveLesson}
+            units={curriculum.units || []}
+            approvedUnits={progress.approvedLessons}
+            onStartUnit={setActiveUnit}
             hearts={hearts}
           />
         )}

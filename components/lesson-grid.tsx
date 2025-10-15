@@ -2,23 +2,23 @@
 
 import React from "react";
 import { motion, Variants } from "framer-motion";
+import { Unit } from "@/lib/types";
 import LessonNode from "./lesson-node";
-import { Lesson } from "@/lib/types";
 
 interface LessonGridProps {
-  lessons: Lesson[];
-  approvedLessons: number[];
+  units: Unit[];
+  approvedUnits: number[];
   hearts: number;
-  onStartLesson: (lesson: Lesson) => void;
+  onStartUnit: (unit: Unit) => void;
 }
 
 export const LessonGrid: React.FC<LessonGridProps> = ({
-  lessons,
-  approvedLessons,
+  units,
+  approvedUnits,
   hearts,
-  onStartLesson
+  onStartUnit
 }) => {
-  type Node = Lesson & { type: "lesson"; col: number; row: number };
+  type Node = Unit & { type: "unit"; col: number; row: number };
 
   const getRowCol = (position: number) => {
     const row = Math.floor(position / 5);
@@ -27,7 +27,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
   };
 
   const generatePathLayout = (): { row: number; nodes: Node[] }[] => {
-    const maxPosition = Math.max(...lessons.map((l) => l.position));
+    const maxPosition = Math.max(...units.map((l) => l.position));
     const totalRows = Math.floor(maxPosition / 5) + 1;
 
     const grid: { row: number; nodes: Node[] }[] = Array.from(
@@ -35,10 +35,10 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
       (_, row) => ({ row, nodes: [] })
     );
 
-    lessons.forEach((lesson) => {
-      const { row, col } = getRowCol(lesson.position);
+    units.forEach((unit) => {
+      const { row, col } = getRowCol(unit.position);
       if (!grid[row]) grid[row] = { row, nodes: [] };
-      grid[row].nodes.push({ ...lesson, type: "lesson", col, row });
+      grid[row].nodes.push({ ...unit, type: "unit", col, row });
     });
 
     return grid.filter((rowData) => rowData.nodes.length > 0);
@@ -57,8 +57,8 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
       const mandatoryLessons = rowData.nodes.filter((n) => n.mandatory);
 
       if (mandatoryLessons.length > 0) {
-        const allMandatoryCompleted = mandatoryLessons.every((lesson) =>
-          approvedLessons.includes(lesson.id)
+        const allMandatoryCompleted = mandatoryLessons.every((unit) =>
+          approvedUnits.includes(unit.id)
         );
 
         if (!allMandatoryCompleted) {
@@ -70,12 +70,10 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     return true;
   };
 
-  const getLessonState = (
-    lesson: Node
-  ): "completed" | "available" | "locked" => {
-    if (approvedLessons.includes(lesson.id)) return "completed";
+  const getLessonState = (unit: Node): "completed" | "available" | "locked" => {
+    if (approvedUnits.includes(unit.id)) return "completed";
 
-    if (!isRowUnlocked(lesson.row)) return "locked";
+    if (!isRowUnlocked(unit.row)) return "locked";
 
     return "available";
   };
@@ -85,10 +83,8 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
   };
 
   const firstLesson =
-    lessons.length > 0
-      ? lessons.reduce((min, lesson) =>
-          lesson.position < min.position ? lesson : min
-        )
+    units.length > 0
+      ? units.reduce((min, unit) => (unit.position < min.position ? unit : min))
       : null;
 
   const startCol = firstLesson ? getRowCol(firstLesson.position).col : null;
@@ -192,7 +188,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
             {Array.from({ length: 5 }, (_, col) => {
               const nodeData = rowData.nodes.find((n) => n.col === col);
               const isCompleted = nodeData
-                ? approvedLessons.includes(nodeData.id)
+                ? approvedUnits.includes(nodeData.id)
                 : false;
 
               return (
@@ -213,7 +209,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                       shouldFloat={
                         isBottomRow && nodeData.mandatory && !isCompleted
                       }
-                      onStartLesson={() => onStartLesson(nodeData)}
+                      onStartLesson={() => onStartUnit(nodeData)}
                     />
                   ) : (
                     <div className="w-16 h-16"></div>

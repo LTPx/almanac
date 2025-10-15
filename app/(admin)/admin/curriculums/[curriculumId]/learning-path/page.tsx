@@ -139,12 +139,10 @@ export default function LearningPathPage({
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-2">
-            <h1 className="text-3xl font-bold text-foreground">
-              Unidad {curriculumId}
-            </h1>
+            <h1 className="text-3xl font-bold text-foreground">Curriculum</h1>
             {loadingState === "success" && (
               <span className="px-3 py-1 bg-primary/20 text-primary-foreground text-sm font-medium rounded-full">
-                {units.length} lección{units.length !== 1 ? "es" : ""}
+                {units.length} unit{units.length !== 1 ? "s" : ""}
               </span>
             )}
           </div>

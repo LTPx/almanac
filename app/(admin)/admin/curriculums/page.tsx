@@ -80,8 +80,7 @@ export default function CurriculumPage() {
   useEffect(() => {
     const loadUnits = async () => {
       try {
-        const response = await fetchCurriculums();
-        const { curriculums } = response;
+        const curriculums = await fetchCurriculums();
         setCurriculums(curriculums);
       } catch (error) {
         console.error("Error loading units:", error);

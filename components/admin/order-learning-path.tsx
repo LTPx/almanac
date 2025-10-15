@@ -11,7 +11,6 @@ import {
   DragStartEvent
 } from "@dnd-kit/core";
 import React from "react";
-import { Lesson } from "@prisma/client";
 import { Unit } from "@/lib/types";
 
 type UnitGrid = { id: string; unitId: number; label: string };
