@@ -292,7 +292,7 @@ export const getAllLessons = cache(async () => {
         }
       }
     },
-    orderBy: { createdAt: "asc" }
+    orderBy: { createdAt: "desc" }
   });
   return data;
 });
@@ -328,6 +328,11 @@ export const getLessonsByUnitId = cache(async (unitId: number) => {
       isActive: true
     },
     include: {
+      unit: {
+        select: {
+          name: true
+        }
+      },
       _count: {
         select: {
           questions: true
