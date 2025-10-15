@@ -3,20 +3,20 @@ import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, lessonId } = await request.json();
+    const { userId, unitId } = await request.json();
 
     // Validar que existan los parámetros requeridos
-    if (!userId || !lessonId) {
+    if (!userId || !unitId) {
       return NextResponse.json(
-        { error: "userId y lessonId son requeridos" },
+        { error: "userId y unitId son requeridos" },
         { status: 400 }
       );
     }
 
-    // Verificar que la lección existe y está activa
-    const lesson = await prisma.lesson.findFirst({
+    // Verificar que la unit existe y está activa
+    const unit = await prisma.unit.findFirst({
       where: {
-        id: lessonId,
+        id: unitId,
         isActive: true
       },
       include: {
@@ -32,16 +32,16 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    if (!lesson) {
+    if (!unit) {
       return NextResponse.json(
-        { error: "Lección no encontrada o inactiva" },
+        { error: "Unidad no encontrada o inactiva" },
         { status: 404 }
       );
     }
 
-    if (lesson.questions.length === 0) {
+    if (unit.questions.length === 0) {
       return NextResponse.json(
-        { error: "Esta lección no tiene preguntas disponibles" },
+        { error: "Esta unidad no tiene preguntas disponibles" },
         { status: 400 }
       );
     }
@@ -62,8 +62,8 @@ export async function POST(request: NextRequest) {
     const testAttempt = await prisma.testAttempt.create({
       data: {
         userId,
-        lessonId,
-        totalQuestions: lesson.questions.length,
+        unitId,
+        totalQuestions: unit.questions.length,
         correctAnswers: 0,
         score: 0,
         isCompleted: false
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     // Preparar las preguntas sin mostrar las respuestas correctas
     const questionsForClient = shuffle(
-      lesson.questions.map((question) => ({
+      unit.questions.map((question) => ({
         id: question.id,
         type: question.type,
         title: question.title,
@@ -92,12 +92,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       testAttemptId: testAttempt.id,
       lesson: {
-        id: lesson.id,
-        name: lesson.name,
-        description: lesson.description
+        id: unit.id,
+        name: unit.name,
+        description: unit.description
       },
       questions: questionsForClient,
-      totalQuestions: lesson.questions.length
+      totalQuestions: unit.questions.length
     });
   } catch (error) {
     console.error("Error al iniciar test:", error);

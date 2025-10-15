@@ -229,14 +229,15 @@ model UserProgress {
 }
 
 model UserUnitProgress {
-  id          Int       @id @default(autoincrement())
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String
-  unit        Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  unitId      Int
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id               Int       @id @default(autoincrement())
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  unit             Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId           Int
+  experiencePoints Int       @default(0)
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@unique([userId, unitId])
   @@map("user_unit_progress")
