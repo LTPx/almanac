@@ -25,6 +25,13 @@ export interface Question {
     text: string;
     order: number;
   }[];
+  isActive: boolean;
+  lesson: {
+    name: string;
+    unit: {
+      name: string;
+    };
+  };
 }
 
 export interface TestData {

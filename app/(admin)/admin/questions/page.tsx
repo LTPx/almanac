@@ -42,46 +42,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { toast } from "sonner";
-
-// Mock data - reemplazar con datos reales
-const mockQuestions = [
-  {
-    id: 1,
-    title: "¿Qué es un blockchain?",
-    type: "MULTIPLE_CHOICE",
-    lessonId: 1,
-    lessonName: "¿Qué es Blockchain?",
-    unitName: "Introducción a Blockchain",
-    order: 1,
-    isActive: true,
-    answersCount: 4,
-    createdAt: "2024-01-15"
-  },
-  {
-    id: 2,
-    title: "Completa la frase: Bitcoin fue creado en el año ____",
-    type: "FILL_IN_BLANK",
-    lessonId: 2,
-    lessonName: "Historia de Bitcoin",
-    unitName: "Introducción a Blockchain",
-    order: 1,
-    isActive: true,
-    answersCount: 1,
-    createdAt: "2024-01-16"
-  },
-  {
-    id: 3,
-    title: "Ordena los pasos para crear un smart contract",
-    type: "ORDER_WORDS",
-    lessonId: 3,
-    lessonName: "Smart Contracts Básicos",
-    unitName: "Smart Contracts",
-    order: 2,
-    isActive: true,
-    answersCount: 5,
-    createdAt: "2024-01-20"
-  }
-];
+import { Question } from "@/lib/types";
 
 const questionTypeLabels = {
   MULTIPLE_CHOICE: "Opción múltiple",
@@ -102,7 +63,7 @@ const questionTypeIcons = {
 };
 
 export default function QuestionsPage() {
-  const [questions, setQuestions] = useState(mockQuestions);
+  const [questions, setQuestions] = useState<Question[]>([]);
   // const questions = mockQuestions;
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
@@ -222,10 +183,10 @@ export default function QuestionsPage() {
                     <CardDescription className="mt-2">
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                         <span className="px-2 py-1 bg-card border border-border rounded text-xs">
-                          {question.unitName}
+                          {question.lesson.unit.name}
                         </span>
                         <span className="px-2 py-1 bg-card border border-border rounded text-xs">
-                          {question.lessonName}
+                          {question.lesson.name}
                         </span>
                         <span className="px-2 py-1 bg-card border border-border rounded text-xs">
                           {
@@ -234,7 +195,7 @@ export default function QuestionsPage() {
                             ]
                           }
                         </span>
-                        <span>{question.answersCount} respuestas</span>
+                        {/* <span>{question.answersCount} respuestas</span> */}
                         <span>Orden: {question.order}</span>
                       </div>
                     </CardDescription>

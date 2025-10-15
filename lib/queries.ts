@@ -397,6 +397,16 @@ export const getQuestions = cache(async (search: string) => {
     where: whereClause,
     include: {
       answers: true,
+      lesson: {
+        select: {
+          name: true,
+          unit: {
+            select: {
+              name: true
+            }
+          }
+        }
+      },
       _count: {
         select: { answers: true }
       }
