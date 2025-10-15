@@ -54,6 +54,8 @@ export type Lesson = {
   position: number;
   unitId: number;
   mandatory: boolean;
+  experiencePoints: number;
+  isActive: boolean;
 };
 
 export type LessonAdmin = {
