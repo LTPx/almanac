@@ -24,30 +24,29 @@ export async function POST(request: NextRequest) {
               name: unit.name,
               description: unit.description,
               order: unit.order,
+              experiencePoints: unit.experiencePoints,
               lessons: {
                 create: unit.lessons.map((lesson) => ({
                   name: lesson.name,
-                  description: lesson.description,
-                  position: lesson.position,
-                  experiencePoints: lesson.experiencePoints,
-                  questions: {
-                    create: lesson.questions.map((q) => ({
-                      type: q.type,
-                      title: q.title,
-                      order: q.order,
-                      content: q.content,
-                      answers:
-                        q.answers.length > 0
-                          ? {
-                              create: q.answers.map((a) => ({
-                                text: a.text,
-                                isCorrect: a.isCorrect,
-                                order: a.order
-                              }))
-                            }
-                          : undefined
-                    }))
-                  }
+                  description: lesson.description
+                }))
+              },
+              questions: {
+                create: unit.questions.map((q) => ({
+                  type: q.type,
+                  title: q.title,
+                  order: q.order,
+                  content: q.content,
+                  answers:
+                    q.answers.length > 0
+                      ? {
+                          create: q.answers.map((a) => ({
+                            text: a.text,
+                            isCorrect: a.isCorrect,
+                            order: a.order
+                          }))
+                        }
+                      : undefined
                 }))
               }
             }
@@ -55,10 +54,7 @@ export async function POST(request: NextRequest) {
 
           unitsCreated++;
           lessonsCreated += unit.lessons.length;
-          questionsCreated += unit.lessons.reduce(
-            (acc, lesson) => acc + lesson.questions.length,
-            0
-          );
+          questionsCreated += unit.questions.length;
         }
       },
       {
@@ -119,7 +115,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Endpoint para limpiar datos (útil para testing)
 export async function DELETE() {
   try {
     // Verificar autenticación de admin aquí si es necesario

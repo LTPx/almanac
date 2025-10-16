@@ -21,11 +21,10 @@ model User {
   encryptedKey  String?
 
   // Educational relationships
-  userProgress       UserProgress[]
-  testAttempts       TestAttempt[]
-  streaks            UserStreak[]
-  userLessonProgress UserLessonProgress[]
-  userUnitProgress   UserUnitProgress[]
+  userProgress     UserProgress[]
+  testAttempts     TestAttempt[]
+  streaks          UserStreak[]
+  userUnitProgress UserUnitProgress[]
 
   //Blockchain
   nfts EducationalNFT[]
@@ -132,47 +131,49 @@ model Citation {
 }
 
 model Unit {
-  id           Int            @id @default(autoincrement())
-  name         String
-  description  String?
-  lessons      Lesson[]
-  order        Int
-  isActive     Boolean        @default(true)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  userProgress UserProgress[]
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  lessons     Lesson[]
+  order       Int
+  position    Int?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  mandatory        Boolean @default(true)
+  experiencePoints Int     @default(25)
+
+  // test
+  questions Question[]
+
+  // Progress
+  userProgress     UserProgress[]
+  userUnitProgress UserUnitProgress[]
 
   // GAMIFICATION - relationships
-  userUnitTokens   UserUnitToken[]
-  zapTransactions  ZapTransaction[]
-  userUnitProgress UserUnitProgress[]
+  userUnitTokens  UserUnitToken[]
+  zapTransactions ZapTransaction[]
 
   //Education - relationships
   curriculum         Curriculum?         @relation(fields: [curriculumId], references: [id])
   curriculumId       String?
   learningObjectives LearningObjective[]
+  testAttempt        TestAttempt[]
 
   @@map("unit")
 }
 
 model Lesson {
-  id               Int      @id @default(autoincrement())
-  name             String
-  description      String?
-  unit             Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  unitId           Int
-  mandatory        Boolean  @default(true)
-  experiencePoints Int      @default(25)
-  position         Int?
-  isActive         Boolean  @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  // relationships
-  questions          Question[]
-  userProgress       UserProgress[]
-  testAttempts       TestAttempt[]
-  userLessonProgress UserLessonProgress[]
+  id                 Int                 @id @default(autoincrement())
+  name               String
+  description        String?
+  unit               Unit                @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId             Int
+  position           Int?
+  isActive           Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
   learningObjectives LearningObjective[]
   facts              Fact[]
 
@@ -181,19 +182,16 @@ model Lesson {
 
 model Question {
   id        Int          @id @default(autoincrement())
-  lesson    Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  lessonId  Int
+  unit      Unit         @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId    Int
   type      QuestionType
-  title     String // Texto de la pregunta
-  order     Int // Orden dentro de la lección
+  title     String
+  order     Int
   isActive  Boolean      @default(true)
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
+  content   Json
 
-  // Datos específicos por tipo de pregunta (JSON)
-  content Json // Contenido flexible según el tipo
-
-  // relationships
   answers     Answer[]
   testAnswers TestAnswer[]
   citations   Citation[]
@@ -218,44 +216,28 @@ model UserProgress {
   id               Int       @id @default(autoincrement())
   user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId           String
-  unit             Unit?     @relation(fields: [unitId], references: [id])
-  unitId           Int?
-  lesson           Lesson?   @relation(fields: [lessonId], references: [id])
-  lessonId         Int?
+  unit             Unit      @relation(fields: [unitId], references: [id])
+  unitId           Int
   isCompleted      Boolean   @default(false)
   experiencePoints Int       @default(0)
   completedAt      DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  @@unique([userId, lessonId])
+  @@unique([userId, unitId])
   @@map("user_progress")
 }
 
-model UserLessonProgress {
+model UserUnitProgress {
   id               Int       @id @default(autoincrement())
   user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId           String
-  lesson           Lesson?   @relation(fields: [lessonId], references: [id])
-  lessonId         Int?
+  unit             Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId           Int
   experiencePoints Int       @default(0)
   completedAt      DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
-
-  @@unique([userId, lessonId])
-  @@map("user_lesson_progress")
-}
-
-model UserUnitProgress {
-  id          Int       @id @default(autoincrement())
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String
-  unit        Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  unitId      Int
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
 
   @@unique([userId, unitId])
   @@map("user_unit_progress")
@@ -265,17 +247,16 @@ model TestAttempt {
   id             Int          @id @default(autoincrement())
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
-  lesson         Lesson       @relation(fields: [lessonId], references: [id])
-  lessonId       Int
-  score          Float // Puntuación obtenida (0-100)
-  totalQuestions Int // Total de preguntas en el test
-  correctAnswers Int // Respuestas correctas
+  unit           Unit         @relation(fields: [unitId], references: [id])
+  unitId         Int
+  score          Float
+  totalQuestions Int
+  correctAnswers Int
   isCompleted    Boolean      @default(false)
   startedAt      DateTime     @default(now())
   completedAt    DateTime?
   answers        TestAnswer[]
 
-  // GAMIFICATION -  relationships
   heartTransactions HeartTransaction[]
 
   @@map("test_attempt")

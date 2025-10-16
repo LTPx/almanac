@@ -35,21 +35,7 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    const stats = await prisma.curriculum.groupBy({
-      by: ["difficulty"],
-      _count: true
-    });
-
-    return NextResponse.json({
-      curriculums,
-      stats: stats.reduce(
-        (acc, item) => {
-          acc[item.difficulty] = item._count;
-          return acc;
-        },
-        {} as Record<string, number>
-      )
-    });
+    return NextResponse.json(curriculums);
   } catch (error) {
     console.error("Error al obtener curriculums:", error);
     return NextResponse.json(

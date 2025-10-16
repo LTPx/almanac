@@ -32,6 +32,24 @@ export const orderWordsContentSchema = z.object({
   explanation: z.string().optional()
 });
 
+export const matchingContentSchema = z.object({
+  pairs: z
+    .array(
+      z.object({
+        left: z.string().min(1, "Left item is required"),
+        right: z.string().min(1, "Right item is required")
+      })
+    )
+    .min(2, "Must have at least 2 pairs"),
+  explanation: z.string().optional()
+});
+
+export const dragDropContentSchema = z.object({
+  items: z.array(z.string()).min(2, "Must have at least 2 items"),
+  correctOrder: z.array(z.string()).min(2, "Correct order is required"),
+  explanation: z.string().optional()
+});
+
 // Schema para Question
 export const questionSchema = z
   .object({
@@ -39,7 +57,9 @@ export const questionSchema = z
       "MULTIPLE_CHOICE",
       "FILL_IN_BLANK",
       "TRUE_FALSE",
-      "ORDER_WORDS"
+      "ORDER_WORDS",
+      "MATCHING",
+      "DRAG_DROP"
     ]),
     title: z.string().min(1, "Question title is required"),
     order: z.number().int().positive("Order must be a positive integer"),
@@ -47,7 +67,9 @@ export const questionSchema = z
       multipleChoiceContentSchema,
       fillInBlankContentSchema,
       trueFalseContentSchema,
-      orderWordsContentSchema
+      orderWordsContentSchema,
+      matchingContentSchema,
+      dragDropContentSchema
     ]),
     answers: z.array(answerSchema)
   })
@@ -76,26 +98,27 @@ export const questionSchema = z
     }
   );
 
-// Schema para Lesson
+// Schema para Lesson (ahora solo descriptivo, sin preguntas ni experiencePoints)
 export const lessonSchema = z.object({
   name: z.string().min(1, "Lesson name is required"),
   description: z.string().min(1, "Lesson description is required"),
-  position: z.number().int().positive("Position must be a positive integer"),
-  experiencePoints: z
-    .number()
-    .int()
-    .min(0, "Experience points must be non-negative"),
-  questions: z
-    .array(questionSchema)
-    .min(1, "Lesson must have at least one question")
+  position: z.number().int().positive("Position must be a positive integer")
 });
 
-// Schema para Unit
+// Schema para Unit (ahora con preguntas y experiencePoints)
 export const unitSchema = z.object({
   name: z.string().min(1, "Unit name is required"),
   description: z.string().min(1, "Unit description is required"),
   order: z.number().int().positive("Order must be a positive integer"),
-  lessons: z.array(lessonSchema).min(1, "Unit must have at least one lesson")
+  experiencePoints: z
+    .number()
+    .int()
+    .min(0, "Experience points must be non-negative")
+    .default(25),
+  lessons: z.array(lessonSchema).min(1, "Unit must have at least one lesson"),
+  questions: z
+    .array(questionSchema)
+    .min(1, "Unit must have at least one question")
 });
 
 // Schema completo para el array de unidades
@@ -109,3 +132,9 @@ export type Unit = z.infer<typeof unitSchema>;
 export type Lesson = z.infer<typeof lessonSchema>;
 export type Question = z.infer<typeof questionSchema>;
 export type Answer = z.infer<typeof answerSchema>;
+export type MultipleChoiceContent = z.infer<typeof multipleChoiceContentSchema>;
+export type FillInBlankContent = z.infer<typeof fillInBlankContentSchema>;
+export type TrueFalseContent = z.infer<typeof trueFalseContentSchema>;
+export type OrderWordsContent = z.infer<typeof orderWordsContentSchema>;
+export type MatchingContent = z.infer<typeof matchingContentSchema>;
+export type DragDropContent = z.infer<typeof dragDropContentSchema>;

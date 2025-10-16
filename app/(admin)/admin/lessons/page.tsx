@@ -201,12 +201,6 @@ export default function LessonsPage() {
                     <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
                       {lesson.unit.name}
                     </span>
-                    <div className="flex items-center space-x-1">
-                      <HelpCircle className="h-4 w-4" />
-                      <span>{lesson._count.questions} preguntas</span>
-                    </div>
-                    <span>{lesson.experiencePoints} XP</span>
-                    <span>Posición: {lesson.position}</span>
                   </div>
                 </div>
 

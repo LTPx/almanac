@@ -9,7 +9,7 @@ export function useTest() {
 
   const startTest = async (
     userId: string,
-    lessonId: number
+    unitId: number
   ): Promise<TestData | null> => {
     setIsLoading(true);
     setError(null);
@@ -20,7 +20,7 @@ export function useTest() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ userId, lessonId })
+        body: JSON.stringify({ userId, unitId })
       });
 
       if (!response.ok) {

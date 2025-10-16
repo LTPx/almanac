@@ -26,11 +26,8 @@ export interface Question {
     order: number;
   }[];
   isActive: boolean;
-  lesson: {
+  unit: {
     name: string;
-    unit: {
-      name: string;
-    };
   };
 }
 
@@ -88,9 +85,12 @@ export type Unit = {
   description: string | null;
   order: number;
   isActive: boolean;
-  _count: { lessons: number };
+  _count: { lessons: number; questions: number };
   lessons?: Lesson[];
   createdAt: Date;
+  experiencePoints: number;
+  mandatory: boolean;
+  position: number;
 };
 
 export type EducationalNFT = {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { completeUnit, reduceHeartsForFailedTest } from "@/lib/gamification";
+import { reduceHeartsForFailedTest } from "@/lib/gamification";
 import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
@@ -18,11 +18,15 @@ export async function POST(request: NextRequest) {
       where: { id: testAttemptId },
       include: {
         answers: true,
-        lesson: {
-          include: { unit: true }
+        unit: {
+          include: {
+            curriculum: true
+          }
         }
       }
     });
+
+    const curriculumId = testAttempt?.unit.curriculum?.id;
 
     if (!testAttempt) {
       return NextResponse.json(
@@ -59,85 +63,53 @@ export async function POST(request: NextRequest) {
 
     let experienceGained = 0;
     let unitCompleted = false;
-    let unitRewards = null;
+    // let unitRewards = null;
     let heartsLost = 0;
 
     if (passed) {
       // ✅ Test pasado → otorgar experiencia
-      experienceGained = testAttempt.lesson.experiencePoints;
+      experienceGained = testAttempt.unit.experiencePoints;
 
       // Verificar si ya existe progreso para esta lección
-      const existingLessonProgress = await prisma.userLessonProgress.findUnique(
-        {
-          where: {
-            userId_lessonId: {
-              userId: testAttempt.userId,
-              lessonId: testAttempt.lessonId
-            }
+      const existingUnitProgress = await prisma.userUnitProgress.findUnique({
+        where: {
+          userId_unitId: {
+            userId: testAttempt.userId,
+            unitId: testAttempt.unitId
           }
         }
-      );
+      });
 
-      if (!existingLessonProgress) {
-        // Crear progreso de lección aprobada
-        await prisma.userLessonProgress.create({
+      if (!existingUnitProgress) {
+        // Crear progreso de la unidad aprobada
+        await prisma.userUnitProgress.create({
           data: {
             userId: testAttempt.userId,
-            lessonId: testAttempt.lessonId,
-            experiencePoints: testAttempt.lesson.experiencePoints,
+            unitId: testAttempt.unitId,
+            experiencePoints: testAttempt.unit.experiencePoints,
             completedAt: new Date()
           }
         });
 
-        // ✅ Revisar si completó todas las obligatorias de la unidad
-        const unitLessons = await prisma.lesson.findMany({
-          where: {
-            unitId: testAttempt.lesson.unit.id,
-            isActive: true,
-            mandatory: true
-          },
-          select: { id: true }
-        });
+        if (curriculumId) {
+          // ✅ Revisar si completó todas las unidades obligatorias
+          const unitsCurriculum = await prisma.unit.findMany({
+            where: {
+              curriculumId,
+              isActive: true,
+              mandatory: true
+            },
+            select: { id: true }
+          });
 
-        const completedLessons = await prisma.userLessonProgress.findMany({
-          where: {
-            userId: testAttempt.userId,
-            lessonId: { in: unitLessons.map((l) => l.id) }
-          }
-        });
-
-        if (completedLessons.length >= unitLessons.length) {
-          // Unidad completada → verificar si ya tiene progreso
-          const existingUnitProgress = await prisma.userUnitProgress.findUnique(
-            {
-              where: {
-                userId_unitId: {
-                  userId: testAttempt.userId,
-                  unitId: testAttempt.lesson.unit.id
-                }
-              }
+          const completedUnits = await prisma.userUnitProgress.findMany({
+            where: {
+              userId: testAttempt.userId,
+              unitId: { in: unitsCurriculum.map((l) => l.id) }
             }
-          );
+          });
 
-          if (!existingUnitProgress) {
-            await prisma.userUnitProgress.create({
-              data: {
-                userId: testAttempt.userId,
-                unitId: testAttempt.lesson.unit.id,
-                completedAt: new Date()
-              }
-            });
-
-            try {
-              unitRewards = await completeUnit(
-                testAttempt.userId,
-                testAttempt.lesson.unit.id
-              );
-              unitCompleted = true;
-            } catch (error: any) {
-              console.log("Unit reward error:", error.message);
-            }
-          }
+          unitCompleted = completedUnits.length === unitsCurriculum.length;
         }
 
         // ✅ Actualizar racha
@@ -186,7 +158,7 @@ export async function POST(request: NextRequest) {
         passed,
         experienceGained,
         unitCompleted,
-        unitRewards, // { zapTokens, unitTokens, totalUnitsCompleted }
+        // unitRewards, // { zapTokens, unitTokens, totalUnitsCompleted }
         heartsLost
       }
     });

@@ -182,11 +182,8 @@ export default function QuestionsPage() {
                     </div>
                     <CardDescription className="mt-2">
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                        <span className="px-2 py-1 bg-card border border-border rounded text-xs">
-                          {question.lesson.unit.name}
-                        </span>
-                        <span className="px-2 py-1 bg-card border border-border rounded text-xs">
-                          {question.lesson.name}
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                          {question.unit.name}
                         </span>
                         <span className="px-2 py-1 bg-card border border-border rounded text-xs">
                           {

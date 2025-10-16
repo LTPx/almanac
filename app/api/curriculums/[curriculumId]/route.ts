@@ -7,27 +7,24 @@ export async function GET(
 ) {
   try {
     const { curriculumId } = await context.params;
-
     const curriculum = await prisma.curriculum.findUnique({
       where: { id: curriculumId },
       include: {
         units: {
-          orderBy: { order: "asc" },
-          include: {
-            lessons: {
-              where: { isActive: true },
-              orderBy: { position: "asc" },
-              select: {
-                id: true,
-                name: true,
-                experiencePoints: true,
-                mandatory: true
-              }
-            },
-            _count: {
-              select: { lessons: true }
-            }
-          }
+          orderBy: { order: "asc" }
+          // include: {
+          //   lessons: {
+          //     where: { isActive: true },
+          //     orderBy: { position: "asc" },
+          //     select: {
+          //       id: true,
+          //       name: true
+          //     }
+          //   },
+          //   _count: {
+          //     select: { lessons: true }
+          //   }
+          // }
         },
         _count: {
           select: { units: true }
@@ -42,7 +39,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ curriculum });
+    return NextResponse.json(curriculum);
   } catch (error) {
     console.error("Error al obtener curriculum:", error);
     return NextResponse.json(

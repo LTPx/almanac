@@ -1,5 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getUnitsByCurriculumId } from "@/lib/queries";
 import prisma from "@/lib/prisma";
+
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ curriculumId: string }> }
+) {
+  const { curriculumId } = await context.params;
+
+  try {
+    const lessons = await getUnitsByCurriculumId(curriculumId);
+    return NextResponse.json(lessons);
+  } catch (error) {
+    console.error("Error fetching lessons:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch lessons" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function PUT(
   request: NextRequest,

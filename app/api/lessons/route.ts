@@ -19,15 +19,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const {
-      name,
-      description,
-      mandatory,
-      experiencePoints,
-      position,
-      isActive,
-      unitId
-    } = body;
+    const { name, description, position, isActive, unitId } = body;
 
     if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -37,8 +29,6 @@ export async function POST(request: Request) {
       data: {
         name,
         description,
-        mandatory,
-        experiencePoints,
         position,
         isActive,
         unitId: parseInt(unitId)
