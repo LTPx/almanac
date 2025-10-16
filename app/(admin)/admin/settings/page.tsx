@@ -30,11 +30,16 @@ export default function AdminSettingsPage() {
     }
 
     data.forEach((unit: any, unitIndex: number) => {
+      // Validar campos de la unidad
       if (!unit.name) errors.push(`Unidad ${unitIndex + 1}: Falta el nombre`);
       if (!unit.description)
         errors.push(`Unidad ${unitIndex + 1}: Falta la descripción`);
       if (typeof unit.order !== "number")
         errors.push(`Unidad ${unitIndex + 1}: El orden debe ser un número`);
+      if (typeof unit.experiencePoints !== "number")
+        errors.push(
+          `Unidad ${unitIndex + 1}: experiencePoints debe ser un número`
+        );
 
       if (!Array.isArray(unit.lessons)) {
         errors.push(
@@ -54,49 +59,63 @@ export default function AdminSettingsPage() {
             errors.push(
               `Unidad ${unitIndex + 1}, Lección ${lessonIndex + 1}: position debe ser un número`
             );
-          if (typeof lesson.experiencePoints !== "number")
+        });
+      }
+
+      if (!Array.isArray(unit.questions)) {
+        errors.push(
+          `Unidad ${unitIndex + 1}: Debe tener un array de preguntas`
+        );
+      } else {
+        unit.questions.forEach((q: any, qIndex: number) => {
+          const validTypes = [
+            "MULTIPLE_CHOICE",
+            "FILL_IN_BLANK",
+            "TRUE_FALSE",
+            "ORDER_WORDS",
+            "MATCHING",
+            "DRAG_DROP"
+          ];
+          if (!validTypes.includes(q.type)) {
             errors.push(
-              `Unidad ${unitIndex + 1}, Lección ${lessonIndex + 1}: experiencePoints debe ser un número`
+              `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}: Tipo inválido (debe ser ${validTypes.join(", ")})`
+            );
+          }
+          if (!q.title)
+            errors.push(
+              `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}: Falta el título`
+            );
+          if (!q.content)
+            errors.push(
+              `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}: Falta el contenido`
+            );
+          if (typeof q.order !== "number")
+            errors.push(
+              `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}: order debe ser un número`
             );
 
-          if (!Array.isArray(lesson.questions)) {
-            errors.push(
-              `Unidad ${unitIndex + 1}, Lección ${lessonIndex + 1}: Debe tener un array de preguntas`
-            );
-          } else {
-            lesson.questions.forEach((q: any, qIndex: number) => {
-              const validTypes = [
-                "MULTIPLE_CHOICE",
-                "FILL_IN_BLANK",
-                "TRUE_FALSE",
-                "ORDER_WORDS"
-              ];
-              if (!validTypes.includes(q.type)) {
-                errors.push(
-                  `Unidad ${unitIndex + 1}, Lección ${lessonIndex + 1}, Pregunta ${qIndex + 1}: Tipo inválido (debe ser ${validTypes.join(", ")})`
-                );
-              }
-              if (!q.title)
-                errors.push(
-                  `Unidad ${unitIndex + 1}, Lección ${lessonIndex + 1}, Pregunta ${qIndex + 1}: Falta el título`
-                );
-              if (!q.content)
-                errors.push(
-                  `Unidad ${unitIndex + 1}, Lección ${lessonIndex + 1}, Pregunta ${qIndex + 1}: Falta el contenido`
-                );
-              if (typeof q.order !== "number")
-                errors.push(
-                  `Unidad ${unitIndex + 1}, Lección ${lessonIndex + 1}, Pregunta ${qIndex + 1}: order debe ser un número`
-                );
-
-              if (q.type === "MULTIPLE_CHOICE" || q.type === "TRUE_FALSE") {
-                if (!Array.isArray(q.answers) || q.answers.length === 0) {
+          // Validar respuestas según el tipo de pregunta
+          if (q.type === "MULTIPLE_CHOICE" || q.type === "TRUE_FALSE") {
+            if (!Array.isArray(q.answers) || q.answers.length === 0) {
+              errors.push(
+                `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}: Debe tener respuestas`
+              );
+            } else {
+              q.answers.forEach((answer: any, aIndex: number) => {
+                if (!answer.text)
                   errors.push(
-                    `Unidad ${unitIndex + 1}, Lección ${lessonIndex + 1}, Pregunta ${qIndex + 1}: Debe tener respuestas`
+                    `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}, Respuesta ${aIndex + 1}: Falta el texto`
                   );
-                }
-              }
-            });
+                if (typeof answer.isCorrect !== "boolean")
+                  errors.push(
+                    `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}, Respuesta ${aIndex + 1}: isCorrect debe ser booleano`
+                  );
+                if (typeof answer.order !== "number")
+                  errors.push(
+                    `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}, Respuesta ${aIndex + 1}: order debe ser un número`
+                  );
+              });
+            }
           }
         });
       }
@@ -225,30 +244,54 @@ export default function AdminSettingsPage() {
         name: "Unidad de Ejemplo",
         description: "Esta es una unidad de ejemplo",
         order: 1,
+        experiencePoints: 25,
         lessons: [
           {
             name: "Lección de Ejemplo",
             description: "Esta es una lección de ejemplo",
-            position: 1,
-            experiencePoints: 25,
-            questions: [
-              {
-                type: "MULTIPLE_CHOICE",
-                title: "¿Cuál es la respuesta correcta?",
-                order: 1,
-                content: {
-                  options: ["Opción 1", "Opción 2", "Opción 3", "Opción 4"],
-                  correctAnswer: "Opción 1",
-                  explanation: "Explicación de por qué es correcta"
-                },
-                answers: [
-                  { text: "Opción 1", isCorrect: true, order: 1 },
-                  { text: "Opción 2", isCorrect: false, order: 2 },
-                  { text: "Opción 3", isCorrect: false, order: 3 },
-                  { text: "Opción 4", isCorrect: false, order: 4 }
-                ]
-              }
+            position: 1
+          }
+        ],
+        questions: [
+          {
+            type: "MULTIPLE_CHOICE",
+            title: "¿Cuál es el resultado de 5 + 4?",
+            order: 1,
+            content: {
+              options: ["7", "8", "9", "10"],
+              correctAnswer: "9",
+              explanation: "La suma de 5 + 4 = 9"
+            },
+            answers: [
+              { text: "7", isCorrect: false, order: 1 },
+              { text: "8", isCorrect: false, order: 2 },
+              { text: "9", isCorrect: true, order: 3 },
+              { text: "10", isCorrect: false, order: 4 }
             ]
+          },
+          {
+            type: "TRUE_FALSE",
+            title: "¿5 + 5 es igual a 10?",
+            order: 2,
+            content: {
+              correctAnswer: true,
+              explanation: "Efectivamente, 5 + 5 = 10"
+            },
+            answers: [
+              { text: "Verdadero", isCorrect: true, order: 1 },
+              { text: "Falso", isCorrect: false, order: 2 }
+            ]
+          },
+          {
+            type: "FILL_IN_BLANK",
+            title: "Completa: 12 + ___ = 20",
+            order: 3,
+            content: {
+              sentence: "12 + ___ = 20",
+              correctAnswer: "8",
+              explanation: "Para que 12 + algo = 20, necesitamos 8"
+            },
+            answers: [{ text: "8", isCorrect: true, order: 1 }]
           }
         ]
       }
@@ -276,12 +319,7 @@ export default function AdminSettingsPage() {
       0
     );
     const questions = jsonData.reduce(
-      (acc: number, u: any) =>
-        acc +
-        (u.lessons?.reduce(
-          (l: number, lesson: any) => l + (lesson.questions?.length || 0),
-          0
-        ) || 0),
+      (acc: number, u: any) => acc + (u.questions?.length || 0),
       0
     );
 
