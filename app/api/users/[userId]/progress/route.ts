@@ -9,21 +9,16 @@ export async function GET(
 
   try {
     const { searchParams } = new URL(request.url);
-    const unitId = searchParams.get("unitId");
+    const curriculumId = searchParams.get("curriculumId");
 
-    if (!unitId) {
+    if (!curriculumId) {
       return NextResponse.json(
         { error: "Unit ID is required" },
         { status: 400 }
       );
     }
 
-    const unitIdInt = parseInt(unitId);
-    if (isNaN(unitIdInt)) {
-      return NextResponse.json({ error: "Invalid unit ID" }, { status: 400 });
-    }
-
-    const progress = await getUserProgressByUnit(userId, unitIdInt);
+    const progress = await getUserProgressByUnit(userId, curriculumId);
     return NextResponse.json(progress);
   } catch (error) {
     console.error("Error fetching user progress:", error);

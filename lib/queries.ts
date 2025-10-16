@@ -40,68 +40,65 @@ export const getUserProgress = cache(async (userId: string) => {
 });
 
 export const getUserProgressByUnit = cache(
-  async (userId: string, unitId: number) => {
+  async (userId: string, curriculumId: string) => {
     if (!userId) return null;
 
-    // Traemos unidad con todas sus lecciones activas
-    const unit = await prisma.unit.findUnique({
-      where: { id: unitId },
-      select: {
-        id: true,
-        name: true,
-        lessons: {
-          where: { isActive: true },
-          select: { id: true, name: true, mandatory: true }
-        }
+    const curriculum = await prisma.curriculum.findUnique({
+      where: {
+        id: curriculumId
+      },
+      include: {
+        units: true
       }
     });
 
-    if (!unit) return null;
+    if (!curriculum) return null;
 
-    const allLessons = unit.lessons;
-    const mandatoryLessons = allLessons.filter((l) => l.mandatory);
+    const allUnits = curriculum.units;
+    const mandatoryLessons = allUnits.filter((l) => l.mandatory);
 
-    // Traemos progreso del usuario en TODAS las lessons de la unidad
-    const approvedLessonsInUnit = await prisma.userLessonProgress.findMany({
+    // Traemos progreso del usuario en TODAS las unidades del curriculum
+    const approvedUnitsInCurriculum = await prisma.userUnitProgress.findMany({
       where: {
         userId,
-        lessonId: { in: allLessons.map((l) => l.id) }
+        unitId: { in: allUnits.map((l) => l.id) }
       },
       include: {
-        lesson: {
+        unit: {
           select: { id: true, name: true }
         }
       }
     });
 
-    if (approvedLessonsInUnit.length === 0) return null;
+    if (approvedUnitsInCurriculum.length === 0) return null;
 
     // ✅ Unidad completada si TODAS las obligatorias están aprobadas
-    const approvedLessonIds = new Set(
-      approvedLessonsInUnit.map((p) => p.lessonId)
+    const approvedUnitsIds = new Set(
+      approvedUnitsInCurriculum.map((p) => p.unitId)
     );
+
     const isUnitCompleted = mandatoryLessons.every((l) =>
-      approvedLessonIds.has(l.id)
+      approvedUnitsIds.has(l.id)
     );
 
     // ✅ Aprobadas = todas las lessons activas completadas (obligatorias y opcionales)
-    const approvedLessons = approvedLessonsInUnit
-      .filter((p) => p.lesson)
-      .map((p) => p.lesson);
+    const approvedUnits = approvedUnitsInCurriculum
+      .filter((p) => p.unit)
+      .map((p) => p.unit);
 
     // ✅ XP acumulada = suma de todas las lessons aprobadas
-    const currentXpInUnit = approvedLessonsInUnit.reduce(
+    const currentXpInUnit = approvedUnitsInCurriculum.reduce(
       (total, p) => total + p.experiencePoints,
       0
     );
 
     return {
-      unit: {
-        id: unit.id,
-        name: unit.name
+      curriculum: {
+        id: curriculum.id,
+        name: curriculum.title
       },
       experiencePoints: currentXpInUnit,
-      approvedLessons,
+      approvedUnits,
       isCompleted: isUnitCompleted
     };
   }

@@ -7,7 +7,6 @@ export async function GET(
 ) {
   try {
     const { curriculumId } = await context.params;
-    console.log("curriculumId: ", curriculumId);
     const curriculum = await prisma.curriculum.findUnique({
       where: { id: curriculumId },
       include: {
@@ -40,7 +39,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ curriculum });
+    return NextResponse.json(curriculum);
   } catch (error) {
     console.error("Error al obtener curriculum:", error);
     return NextResponse.json(
