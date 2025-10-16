@@ -61,7 +61,17 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { name, description, order, isActive } = body;
+    const {
+      name,
+      description,
+      order,
+      isActive,
+      position,
+      experiencePoints,
+      mandatory
+    } = body;
+
+    console.log("experiencePoints: ", experiencePoints);
 
     const unit = await prisma.unit.update({
       where: { id },
@@ -70,6 +80,9 @@ export async function PUT(
         ...(description !== undefined && { description }),
         ...(order !== undefined && { order }),
         ...(isActive !== undefined && { isActive }),
+        ...(position !== undefined && { position }),
+        ...(experiencePoints !== undefined && { experiencePoints }),
+        ...(mandatory !== undefined && { mandatory }),
         updatedAt: new Date()
       },
       include: {

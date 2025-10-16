@@ -21,7 +21,8 @@ import {
   Eye,
   ToggleLeft,
   ToggleRight,
-  HelpCircle
+  HelpCircle,
+  Star
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -137,10 +138,23 @@ export default function UnitsPage() {
                         className={
                           unit.isActive
                             ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-muted-foreground"
+                            : "bg-gray-200 text-gray-900"
                         }
                       >
                         {unit.isActive ? "Activo" : "Inactivo"}
+                      </Badge>
+                      <Badge
+                        variant={unit.mandatory ? "default" : "secondary"}
+                        className={
+                          unit.isActive
+                            ? "bg-gray-700 text-primary-foreground"
+                            : "border-gray-50 text-gray-200"
+                        }
+                      >
+                        {unit.mandatory && (
+                          <Star className="h-4 w-4 text-yellow-500" />
+                        )}
+                        {unit.mandatory ? "Obligatoria" : "No obligatoria"}
                       </Badge>
                     </CardTitle>
                     <CardDescription className="mt-1 text-muted-foreground">

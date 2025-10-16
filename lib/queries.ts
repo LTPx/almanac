@@ -94,7 +94,7 @@ export const getUserProgressByUnit = cache(
 export const getUnits = cache(async (search: string) => {
   console.log("search: ", search);
   const whereClause = {
-    isActive: true,
+    // isActive: true,
     ...(search
       ? {
           name: {
