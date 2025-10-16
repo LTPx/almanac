@@ -66,8 +66,8 @@ export async function POST(request: NextRequest) {
 
     let experienceGained = 0;
     let curriculumCompleted = false;
-    // let unitRewards = null;
     let heartsLost = 0;
+    let curriculumRewards = null;
 
     if (passed) {
       // ✅ Test pasado → otorgar experiencia
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       // Verificar si ya existe progreso para esta lección
       const existingUnitProgress = await prisma.userUnitProgress.findUnique({
         where: {
-          userId_curriculumId: {
+          userId_unitId: {
             userId: testAttempt.userId,
             unitId: testAttempt.unitId
           }
@@ -116,7 +116,11 @@ export async function POST(request: NextRequest) {
             completedUnits.length === unitsCurriculum.length;
 
           if (curriculumCompleted) {
-            await completeCurriculum(testAttempt.userId, testAttempt.unit.id);
+            curriculumRewards = await completeCurriculum(
+              testAttempt.userId,
+              curriculumId
+            );
+            console.log("user tokens gain: ", curriculumRewards);
           }
         }
 
@@ -166,7 +170,7 @@ export async function POST(request: NextRequest) {
         passed,
         experienceGained,
         curriculumCompleted,
-        // unitRewards, // { zapTokens, unitTokens, totalCurriculumsCompleted }
+        curriculumRewards, // { zapTokens, unitTokens, totalCurriculumsCompleted }
         heartsLost
       }
     });
