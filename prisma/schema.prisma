@@ -30,10 +30,10 @@ model User {
   nfts EducationalNFT[]
 
   // GAMIFICATION 
-  hearts              Int      @default(5)
-  zapTokens           Int      @default(0)
-  lastHeartReset      DateTime @default(now())
-  totalUnitsCompleted Int      @default(0)
+  hearts                    Int      @default(5)
+  zapTokens                 Int      @default(0)
+  lastHeartReset            DateTime @default(now())
+  totalCurriculumsCompleted Int      @default(0)
 
   // GAMIFICATION - relationships
   userCurriculumTokens UserCurriculumToken[]
