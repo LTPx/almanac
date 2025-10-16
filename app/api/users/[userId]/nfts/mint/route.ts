@@ -10,7 +10,7 @@ import {
 const CONTRACT_ADDRESS = process.env.THIRDWEB_CONTRACT_ADDRESS!;
 
 interface MintRequestBody {
-  unitId?: string | number;
+  curriculumId?: string;
   tokenUnit?: string | number;
   description?: string;
 }
@@ -22,21 +22,18 @@ export async function POST(
   try {
     const { userId } = await context.params;
     const body: MintRequestBody = await request.json();
-    const unitId = body.unitId ?? body.tokenUnit;
+    const curriculumId = body.curriculumId;
     const description = body.description;
 
-    if (!unitId) {
+    if (!curriculumId) {
       return NextResponse.json(
-        { error: "unitId es requerido" },
+        { error: "curriculumId es requerido" },
         { status: 400 }
       );
     }
 
     // 1) Validar usuario y tokens disponibles
-    const validationResult = await validateUserAndTokens(
-      userId,
-      Number(unitId)
-    );
+    const validationResult = await validateUserAndTokens(userId, curriculumId);
 
     if (validationResult.error) {
       return NextResponse.json(
@@ -45,11 +42,11 @@ export async function POST(
       );
     }
 
-    const { user, userUnitToken } = validationResult.data!;
+    const { user, userCurriculumToken } = validationResult.data!;
 
     // 2) Crear metadatos del NFT con descripción personalizada
     const courseName = "Almanac";
-    const unitName = userUnitToken.unit.name;
+    const unitName = userCurriculumToken.curriculum.title;
     // const rarity = "NORMAL";
     const rarity = getRandomRarity();
     const { nftImage, nftImageId, rarityUsed } =
@@ -69,7 +66,7 @@ export async function POST(
     // 4) Guardar en base de datos
     const savedNFT = await saveNFTToDatabase({
       userId,
-      unitId: String(unitId),
+      unitId: curriculumId,
       userUnitToken,
       mintResult,
       metadata,
@@ -94,10 +91,10 @@ export async function POST(
   }
 }
 
-async function validateUserAndTokens(userId: string, unitId: number) {
+async function validateUserAndTokens(userId: string, curriculumId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: { userUnitTokens: { include: { unit: true } } }
+    include: { userCurriculumTokens: { include: { curriculum: true } } }
   });
 
   if (!user) {
@@ -116,9 +113,11 @@ async function validateUserAndTokens(userId: string, unitId: number) {
     };
   }
 
-  const userUnitToken = user.userUnitTokens.find((t) => t.unitId === unitId);
+  const userCurriculumToken = user.userCurriculumTokens.find(
+    (t) => t.curriculumId === curriculumId
+  );
 
-  if (!userUnitToken || userUnitToken.quantity <= 0) {
+  if (!userCurriculumToken || userCurriculumToken.quantity <= 0) {
     return {
       error: "No hay tokens disponibles para esta unidad",
       status: 400,
@@ -129,7 +128,7 @@ async function validateUserAndTokens(userId: string, unitId: number) {
   return {
     error: null,
     status: 200,
-    data: { user, userUnitToken }
+    data: { user, userCurriculumToken }
   };
 }
 

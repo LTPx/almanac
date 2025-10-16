@@ -37,9 +37,11 @@ function AchievementsContent({ userId }: { userId: string }) {
   const fetchCompletedUnits = useCallback(async () => {
     try {
       setLoadingUnits(true);
-      const response = await fetch(`/api/users/${userId}/completed-units`);
+      const response = await fetch(
+        `/api/users/${userId}/completed-curriculums`
+      );
       const data = await response.json();
-      setCompletedUnits(data.units || []);
+      setCompletedUnits(data.curriculums || []);
     } catch (error) {
       console.error("Error fetching completed units:", error);
     } finally {
