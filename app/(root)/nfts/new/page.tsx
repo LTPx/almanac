@@ -71,7 +71,7 @@ export default function CreateCertificatePage() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          unitId: selectedUnitId,
+          curriculumTokenId: selectedUnitId,
           description: description.trim()
         })
       });

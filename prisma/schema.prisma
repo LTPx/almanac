@@ -341,13 +341,13 @@ model EducationalNFT {
   id              String     @id @default(cuid())
   tokenId         String
   userId          String
-  curriculumId    String
   contractAddress String
   transactionHash String?
   metadataUri     String
   mintedAt        DateTime   @default(now())
   user            User       @relation(fields: [userId], references: [id])
   curriculum      Curriculum @relation(fields: [curriculumId], references: [id])
+  curriculumId    String
   nftAsset        NFTAsset?  @relation(fields: [nftAssetId], references: [id])
   nftAssetId      Int?       @unique
 

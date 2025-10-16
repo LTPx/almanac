@@ -10,7 +10,7 @@ import {
 const CONTRACT_ADDRESS = process.env.THIRDWEB_CONTRACT_ADDRESS!;
 
 interface MintRequestBody {
-  curriculumId?: string;
+  curriculumTokenId?: string;
   tokenUnit?: string | number;
   description?: string;
 }
@@ -22,18 +22,21 @@ export async function POST(
   try {
     const { userId } = await context.params;
     const body: MintRequestBody = await request.json();
-    const curriculumId = body.curriculumId;
+    const curriculumTokenId = body.curriculumTokenId;
     const description = body.description;
 
-    if (!curriculumId) {
+    if (!curriculumTokenId) {
       return NextResponse.json(
-        { error: "curriculumId es requerido" },
+        { error: "curriculumTokenId es requerido" },
         { status: 400 }
       );
     }
 
     // 1) Validar usuario y tokens disponibles
-    const validationResult = await validateUserAndTokens(userId, curriculumId);
+    const validationResult = await validateUserAndTokens(
+      userId,
+      curriculumTokenId
+    );
 
     if (validationResult.error) {
       return NextResponse.json(
@@ -47,7 +50,6 @@ export async function POST(
     // 2) Crear metadatos del NFT con descripción personalizada
     const courseName = "Almanac";
     const unitName = userCurriculumToken.curriculum.title;
-    // const rarity = "NORMAL";
     const rarity = getRandomRarity();
     const { nftImage, nftImageId, rarityUsed } =
       await getAvailableNFTImage(rarity);
@@ -66,8 +68,8 @@ export async function POST(
     // 4) Guardar en base de datos
     const savedNFT = await saveNFTToDatabase({
       userId,
-      unitId: curriculumId,
-      userUnitToken,
+      curriculumId: curriculumTokenId,
+      userCurriculumToken,
       mintResult,
       metadata,
       nftImageId
@@ -91,7 +93,10 @@ export async function POST(
   }
 }
 
-async function validateUserAndTokens(userId: string, curriculumId: string) {
+async function validateUserAndTokens(
+  userId: string,
+  curriculumTokenId: string
+) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: { userCurriculumTokens: { include: { curriculum: true } } }
@@ -114,7 +119,7 @@ async function validateUserAndTokens(userId: string, curriculumId: string) {
   }
 
   const userCurriculumToken = user.userCurriculumTokens.find(
-    (t) => t.curriculumId === curriculumId
+    (t) => t.curriculumId === curriculumTokenId
   );
 
   if (!userCurriculumToken || userCurriculumToken.quantity <= 0) {
@@ -134,15 +139,15 @@ async function validateUserAndTokens(userId: string, curriculumId: string) {
 
 async function saveNFTToDatabase({
   userId,
-  unitId,
-  userUnitToken,
+  curriculumId,
+  userCurriculumToken,
   mintResult,
   metadata,
   nftImageId
 }: {
   userId: string;
-  unitId: string;
-  userUnitToken: any;
+  curriculumId: string;
+  userCurriculumToken: any;
   mintResult: any;
   metadata: any;
   nftImageId: number;
@@ -150,13 +155,15 @@ async function saveNFTToDatabase({
   const now = new Date();
 
   return prisma.$transaction(async (tx) => {
-    const newQuantity = userUnitToken.quantity - 1;
+    const newQuantity = userCurriculumToken.quantity - 1;
 
     if (newQuantity <= 0) {
-      await tx.userCurriculumToken.delete({ where: { id: userUnitToken.id } });
+      await tx.userCurriculumToken.delete({
+        where: { id: userCurriculumToken.id }
+      });
     } else {
       await tx.userCurriculumToken.update({
-        where: { id: userUnitToken.id },
+        where: { id: userCurriculumToken.id },
         data: { quantity: newQuantity, updatedAt: now }
       });
     }
@@ -165,7 +172,7 @@ async function saveNFTToDatabase({
       data: {
         tokenId: mintResult.tokenId ?? "",
         userId,
-        unitId,
+        curriculumId,
         contractAddress: CONTRACT_ADDRESS,
         transactionHash: mintResult.transactionHash,
         metadataUri: mintResult.metadataUri ?? JSON.stringify(metadata),
