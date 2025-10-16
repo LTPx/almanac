@@ -88,7 +88,7 @@ export type Unit = {
   description: string | null;
   order: number;
   isActive: boolean;
-  _count: { lessons: number };
+  _count: { lessons: number; questions: number };
   lessons?: Lesson[];
   createdAt: Date;
   experiencePoints: number;
