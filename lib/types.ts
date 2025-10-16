@@ -26,11 +26,8 @@ export interface Question {
     order: number;
   }[];
   isActive: boolean;
-  lesson: {
+  unit: {
     name: string;
-    unit: {
-      name: string;
-    };
   };
 }
 
