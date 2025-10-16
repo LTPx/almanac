@@ -8,7 +8,7 @@ export async function GET(
   const { userId } = await context.params;
 
   try {
-    const unitTokens = await prisma.userUnitToken.findMany({
+    const unitTokens = await prisma.userCurriculumToken.findMany({
       where: {
         userId
       },

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { reduceHeartsForFailedTest } from "@/lib/gamification";
+import {
+  completeCurriculum,
+  reduceHeartsForFailedTest
+} from "@/lib/gamification";
 import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
@@ -62,7 +65,7 @@ export async function POST(request: NextRequest) {
     });
 
     let experienceGained = 0;
-    let unitCompleted = false;
+    let curriculumCompleted = false;
     // let unitRewards = null;
     let heartsLost = 0;
 
@@ -73,7 +76,7 @@ export async function POST(request: NextRequest) {
       // Verificar si ya existe progreso para esta lección
       const existingUnitProgress = await prisma.userUnitProgress.findUnique({
         where: {
-          userId_unitId: {
+          userId_curriculumId: {
             userId: testAttempt.userId,
             unitId: testAttempt.unitId
           }
@@ -109,7 +112,12 @@ export async function POST(request: NextRequest) {
             }
           });
 
-          unitCompleted = completedUnits.length === unitsCurriculum.length;
+          curriculumCompleted =
+            completedUnits.length === unitsCurriculum.length;
+
+          if (curriculumCompleted) {
+            await completeCurriculum(testAttempt.userId, testAttempt.unit.id);
+          }
         }
 
         // ✅ Actualizar racha
@@ -157,8 +165,8 @@ export async function POST(request: NextRequest) {
         totalQuestions: testAttempt.totalQuestions,
         passed,
         experienceGained,
-        unitCompleted,
-        // unitRewards, // { zapTokens, unitTokens, totalUnitsCompleted }
+        curriculumCompleted,
+        // unitRewards, // { zapTokens, unitTokens, totalCurriculumsCompleted }
         heartsLost
       }
     });

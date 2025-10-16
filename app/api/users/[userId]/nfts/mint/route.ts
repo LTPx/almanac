@@ -154,9 +154,9 @@ async function saveNFTToDatabase({
     const newQuantity = userUnitToken.quantity - 1;
 
     if (newQuantity <= 0) {
-      await tx.userUnitToken.delete({ where: { id: userUnitToken.id } });
+      await tx.userCurriculumToken.delete({ where: { id: userUnitToken.id } });
     } else {
-      await tx.userUnitToken.update({
+      await tx.userCurriculumToken.update({
         where: { id: userUnitToken.id },
         data: { quantity: newQuantity, updatedAt: now }
       });

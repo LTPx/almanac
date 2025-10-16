@@ -6,7 +6,7 @@ interface GamificationData {
   hearts: number;
   maxHearts: number;
   zapTokens: number;
-  totalUnitsCompleted: number;
+  totalCurriculumsCompleted: number;
   unitTokens: any[];
   needsHeartReset: boolean;
   canPurchaseHeart: boolean;
@@ -19,7 +19,7 @@ export function useGamification(userId: string) {
     hearts: 0,
     maxHearts: 0,
     zapTokens: 0,
-    totalUnitsCompleted: 0,
+    totalCurriculumsCompleted: 0,
     unitTokens: [],
     needsHeartReset: false,
     canPurchaseHeart: false
@@ -42,7 +42,7 @@ export function useGamification(userId: string) {
         hearts: data.hearts ?? 0,
         maxHearts: data.maxHearts ?? 0,
         zapTokens: data.zapTokens ?? 0,
-        totalUnitsCompleted: data.totalUnitsCompleted ?? 0,
+        totalCurriculumsCompleted: data.totalCurriculumsCompleted ?? 0,
         unitTokens: data.unitTokens ?? [],
         needsHeartReset: data.needsHeartReset ?? false,
         canPurchaseHeart: data.canPurchaseHeart ?? false
