@@ -339,12 +339,25 @@ export default function NFTsPage() {
 
               <CardContent className="p-4">
                 <div className="space-y-2">
+                  <div>
+                    <h3 className="font-semibold text-md">
+                      {nft.name || "No name"}
+                    </h3>
+                  </div>
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-lg">
+                    <Badge
+                      variant={nft.educationalNFT ? "default" : "secondary"}
+                      className={
+                        nft.educationalNFT
+                          ? "bg-gray-700 text-primary-foreground"
+                          : "border-gray-50 text-gray-200"
+                      }
+                    >
                       {nft.educationalNFT
                         ? `NFT #${nft.educationalNFT.tokenId}`
                         : "NO MINTED"}
-                    </h3>
+                    </Badge>
+
                     {nft.isUsed ? (
                       <CheckCircle className="h-5 w-5 text-green-500" />
                     ) : (

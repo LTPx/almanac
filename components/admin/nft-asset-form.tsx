@@ -56,6 +56,7 @@ const rarityOptions = [
 interface NFTFormProps {
   initialData?: NFTAsset | null;
   onSubmit: (formData: {
+    name: string;
     imageFile: File | null;
     imageUrl: string;
     rarity: string;
@@ -76,6 +77,7 @@ export function NFTAssetForm({
     initialData?.imageUrl || ""
   );
   const [formData, setFormData] = useState({
+    name: initialData?.name || "",
     imageUrl: initialData?.imageUrl || "",
     imageFile: null as File | null,
     rarity: initialData?.rarity || "NORMAL",
@@ -88,13 +90,12 @@ export function NFTAssetForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalLoading(true);
-
     try {
       if (!formData.imageFile && !formData.imageUrl) {
         alert("Debes subir un archivo o proporcionar una URL");
         return;
       }
-
+      console.log(formData);
       await onSubmit(formData);
     } catch (error) {
       console.error("Error en el formulario:", error);
@@ -161,6 +162,15 @@ export function NFTAssetForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="name">Nombre del NFT</Label>
+        <Input
+          id="name"
+          value={formData.name}
+          onChange={(e) => handleInputChange("name", e.target.value)}
+          required
+        />
+      </div>
       {/* Imagen del NFT */}
       <Card>
         <CardHeader>

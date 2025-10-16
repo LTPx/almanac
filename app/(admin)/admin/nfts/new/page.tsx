@@ -11,12 +11,14 @@ export default function CreateNFTPage() {
   const router = useRouter();
 
   const handleSubmit = async (formData: {
+    name: string;
     imageFile: File | null;
     imageUrl: string;
     rarity: string;
     metadataUri: string;
   }) => {
     const data = new FormData();
+    if (formData.name) data.append("name", formData.name);
     if (formData.imageFile) data.append("file", formData.imageFile);
     if (formData.imageUrl) data.append("imageUrl", formData.imageUrl);
     data.append("rarity", formData.rarity);

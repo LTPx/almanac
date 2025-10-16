@@ -351,6 +351,7 @@ model EducationalNFT {
 
 model NFTAsset {
   id             Int             @id @default(autoincrement())
+  name           String          @default("")
   imageUrl       String
   rarity         NFTRarity
   isUsed         Boolean         @default(false)

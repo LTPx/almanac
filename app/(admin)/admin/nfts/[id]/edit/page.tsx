@@ -29,6 +29,7 @@ export default function EditNFTPage() {
 
   const handleSubmit = async (formData: any) => {
     const data = new FormData();
+    if (formData.name) data.append("name", formData.name);
     if (formData.imageFile) data.append("file", formData.imageFile);
     if (formData.imageUrl) data.append("imageUrl", formData.imageUrl);
     data.append("rarity", formData.rarity);
