@@ -3,27 +3,29 @@
 import { useState, useEffect } from "react";
 
 interface ProgressData {
-  approvedLessons: number[];
+  approvedUnits: number[];
   experiencePoints: number;
   isCompleted: boolean;
 }
 
-export function useProgress(userId: string, unitId: number) {
+export function useProgress(userId: string, curriculumId: string) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<ProgressData>({
-    approvedLessons: [],
+    approvedUnits: [],
     experiencePoints: 0,
     isCompleted: false
   });
 
   const fetchProgress = async () => {
-    if (!userId || !unitId) return;
+    if (!userId || !curriculumId) return;
     setIsLoading(true);
     setError(null);
 
     try {
-      const res = await fetch(`/api/users/${userId}/progress?unitId=${unitId}`);
+      const res = await fetch(
+        `/api/users/${userId}/progress?curriculumId=${curriculumId}`
+      );
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.error || "Error al cargar progreso");
@@ -31,7 +33,7 @@ export function useProgress(userId: string, unitId: number) {
 
       const data = await res.json();
       setProgress({
-        approvedLessons: data.approvedLessons.map((l: any) => l.id),
+        approvedUnits: data.approvedUnits.map((l: any) => l.id),
         experiencePoints: data.experiencePoints || 0,
         isCompleted: data.isCompleted || false
       });
@@ -44,7 +46,7 @@ export function useProgress(userId: string, unitId: number) {
 
   useEffect(() => {
     fetchProgress();
-  }, [userId, unitId]);
+  }, [userId, curriculumId]);
 
   return {
     progress,

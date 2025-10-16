@@ -40,15 +40,7 @@ export async function PUT(
     }
     const body = await request.json();
 
-    const {
-      name,
-      description,
-      mandatory,
-      experiencePoints,
-      position,
-      isActive,
-      unitId
-    } = body;
+    const { name, description, position, isActive, unitId } = body;
 
     const existingLesson = await prisma.lesson.findUnique({
       where: { id }
@@ -63,8 +55,6 @@ export async function PUT(
       data: {
         ...(name && { name }),
         ...(description !== undefined && { description }),
-        ...(mandatory !== undefined && { mandatory }),
-        ...(experiencePoints !== undefined && { experiencePoints }),
         ...(position !== undefined && { position }),
         ...(unitId !== undefined && { unitId: parseInt(unitId) }),
         ...(isActive !== undefined && { isActive }),

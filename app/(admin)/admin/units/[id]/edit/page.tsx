@@ -50,10 +50,10 @@ export default function EditUnitPage() {
         body: JSON.stringify(data)
       });
       if (!res.ok) throw new Error("Error al guardar cambios");
-      toast.success("Curriculum actualizado correctamente");
-      router.push("/admin/curriculums");
+      toast.success("Unidad actualizado correctamente");
+      router.push("/admin/units");
     } catch {
-      toast.error("No se pudo actualizar el curriculum");
+      toast.error("No se pudo actualizar el unidad");
     } finally {
       setSubmitting(false);
     }
@@ -88,6 +88,7 @@ export default function EditUnitPage() {
             initialData={unit}
             onSubmit={handleSubmit}
             submitting={submitting}
+            buttonText={"Guardar Cambios"}
           />
         </CardContent>
       </Card>

@@ -32,7 +32,7 @@ export default function CurriculumUnitsPage() {
         if (!curriculumRes.ok || !unitsRes.ok)
           throw new Error("Error al cargar datos");
 
-        const { curriculum } = await curriculumRes.json();
+        const curriculum = await curriculumRes.json();
         const units = await unitsRes.json();
         setCurriculum(curriculum);
         setAllUnits(units);

@@ -20,7 +20,8 @@ import {
   MoreHorizontal,
   Eye,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  HelpCircle
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -202,9 +203,12 @@ export default function UnitsPage() {
                   <BookOpen className="h-4 w-4" />
                   <span>{unit._count.lessons} lecciones</span>
                 </div>
-                <div>
-                  <span>Orden: {unit.order}</span>
+                <div className="flex items-center space-x-1">
+                  <HelpCircle className="h-4 w-4" />
+                  <span>{unit._count.questions} preguntas</span>
                 </div>
+                <span>{unit.experiencePoints} XP</span>
+                <span>Posición: {unit.position}</span>
                 <div>
                   <span>
                     Creado: {new Date(unit.createdAt).toLocaleDateString()}
@@ -220,15 +224,6 @@ export default function UnitsPage() {
                     className="border-border text-foreground hover:bg-primary/10"
                   >
                     Ver lecciones
-                  </Button>
-                </Link>
-                <Link href={`/admin/units/${unit.id}`}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-border text-foreground hover:bg-primary/10"
-                  >
-                    Path de aprendizaje
                   </Button>
                 </Link>
               </div>

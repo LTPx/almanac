@@ -80,8 +80,7 @@ export default function CurriculumPage() {
   useEffect(() => {
     const loadUnits = async () => {
       try {
-        const response = await fetchCurriculums();
-        const { curriculums } = response;
+        const curriculums = await fetchCurriculums();
         setCurriculums(curriculums);
       } catch (error) {
         console.error("Error loading units:", error);
@@ -154,6 +153,17 @@ export default function CurriculumPage() {
                         Actualizado:{" "}
                         {new Date(curriculum.updatedAt).toLocaleDateString()}
                       </div>
+                      <Link
+                        href={`/admin/curriculums/${curriculum.id}/learning-path`}
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-border text-foreground hover:bg-primary/10"
+                        >
+                          Path de aprendizaje
+                        </Button>
+                      </Link>
                     </CardDescription>
                   </div>
 

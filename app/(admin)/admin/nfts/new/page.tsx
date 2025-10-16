@@ -19,8 +19,7 @@ import {
   Upload,
   X,
   Image as ImageIcon,
-  Sparkles,
-  ExternalLink
+  Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -170,32 +169,6 @@ export default function CreateNFTPage() {
 
   const selectedRarity = rarityOptions.find((r) => r.value === formData.rarity);
 
-  const generateMetadataExample = () => {
-    return JSON.stringify(
-      {
-        name: `Educational NFT #${Date.now()}`,
-        description: `${selectedRarity?.label} NFT otorgado por completar una unidad educativa`,
-        image: formData.imageUrl || "ipfs://...",
-        attributes: [
-          {
-            trait_type: "Rarity",
-            value: selectedRarity?.label
-          },
-          {
-            trait_type: "Category",
-            value: "Educational Achievement"
-          },
-          {
-            trait_type: "Issued",
-            value: new Date().toISOString()
-          }
-        ]
-      },
-      null,
-      2
-    );
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
@@ -332,60 +305,9 @@ export default function CreateNFTPage() {
                 </SelectContent>
               </Select>
               {selectedRarity && (
-                <p className="text-sm text-gray-600">
-                  {selectedRarity.description}
-                </p>
+                <p className="text-sm">{selectedRarity.description}</p>
               )}
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="metadataUri">Metadata URI (Opcional)</Label>
-              <div className="flex space-x-2">
-                <Input
-                  id="metadataUri"
-                  value={formData.metadataUri}
-                  onChange={(e) =>
-                    handleInputChange("metadataUri", e.target.value)
-                  }
-                  placeholder="ipfs://QmXxxx... o https://..."
-                />
-                {formData.metadataUri && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={() => window.open(formData.metadataUri, "_blank")}
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-              <p className="text-xs text-gray-500">
-                Si ya tienes el metadata en IPFS, proporciona el URI. De lo
-                contrario, se generará automáticamente.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Vista previa del metadata */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Vista Previa del Metadata</CardTitle>
-            <CardDescription>
-              Estructura JSON que se guardará en la blockchain
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-lg bg-gray-900 p-4 overflow-x-auto">
-              <pre className="text-sm text-green-400 font-mono">
-                {generateMetadataExample()}
-              </pre>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-              Este metadata se generará y subirá a IPFS automáticamente al crear
-              el NFT
-            </p>
           </CardContent>
         </Card>
 
@@ -513,76 +435,6 @@ export default function CreateNFTPage() {
               para garantizar permanencia y descentralización.
             </li>
           </ul>
-        </CardContent>
-      </Card>
-
-      {/* Recursos útiles */}
-      <Card>
-        <CardHeader>
-          <CardTitle>🔗 Recursos Útiles</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm space-y-2">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <a
-              href="https://www.pinata.cloud/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <div>
-                <p className="font-medium">Pinata (IPFS)</p>
-                <p className="text-xs text-gray-600">
-                  Servicio para subir a IPFS
-                </p>
-              </div>
-              <ExternalLink className="h-4 w-4 text-gray-400" />
-            </a>
-
-            <a
-              href="https://docs.openzeppelin.com/contracts/4.x/erc721"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <div>
-                <p className="font-medium">ERC-721 Standard</p>
-                <p className="text-xs text-gray-600">
-                  Documentación de OpenZeppelin
-                </p>
-              </div>
-              <ExternalLink className="h-4 w-4 text-gray-400" />
-            </a>
-
-            <a
-              href="https://www.canva.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <div>
-                <p className="font-medium">Canva</p>
-                <p className="text-xs text-gray-600">
-                  Diseña tus NFTs fácilmente
-                </p>
-              </div>
-              <ExternalLink className="h-4 w-4 text-gray-400" />
-            </a>
-
-            <a
-              href="https://www.remove.bg/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <div>
-                <p className="font-medium">Remove.bg</p>
-                <p className="text-xs text-gray-600">
-                  Elimina fondos de imágenes
-                </p>
-              </div>
-              <ExternalLink className="h-4 w-4 text-gray-400" />
-            </a>
-          </div>
         </CardContent>
       </Card>
     </div>

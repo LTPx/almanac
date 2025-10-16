@@ -1,45 +1,47 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import LearningPath from "@/components/units-learning";
 import { useUser } from "@/context/UserContext";
-import { useUnits } from "@/hooks/use-units";
-import { Unit } from "@/lib/types";
+import { Curriculum } from "@/lib/types";
 import CourseHeader from "@/components/course-header";
 import { useGamification } from "@/hooks/useGamification";
+import { useCurriculums } from "@/hooks/use-curriculums";
+import LearningPath from "@/components/units-learning";
 
 export default function HomePage() {
-  const [units, setUnits] = useState<Unit[]>([]);
-  const [selectedUnitId, setSelectedUnitId] = useState<string>("");
-  const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
+  const [curriculums, setCurriculums] = useState<Curriculum[]>([]);
+  const [selectedCurriculumId, setSelectedCurriculumId] = useState<string>("");
+  const [selectedCurriculum, setSelectedCurriculum] =
+    useState<Curriculum | null>(null);
   const user = useUser();
   const userId = user?.id || "";
-  const { isLoading, error, fetchUnits, fetchUnitWithLessons } = useUnits();
+  const { isLoading, error, fetchCurriculums, fetchCurriculumWithUnits } =
+    useCurriculums();
   const { gamification, refetch: refetchGamification } =
     useGamification(userId);
 
   useEffect(() => {
     const loadUnits = async () => {
-      const data = await fetchUnits();
+      const data = await fetchCurriculums();
       if (data) {
-        setUnits(data);
+        setCurriculums(data);
         if (data.length > 0) {
-          setSelectedUnitId(data[0].id.toString());
+          setSelectedCurriculumId(data[0].id.toString());
         }
       }
     };
     loadUnits();
-  }, [fetchUnits]);
+  }, [fetchCurriculums]);
 
   useEffect(() => {
-    if (!selectedUnitId) return;
+    if (!selectedCurriculumId) return;
 
     const loadUnit = async () => {
-      const unit = await fetchUnitWithLessons(Number(selectedUnitId));
-      if (unit) setSelectedUnit(unit);
+      const unit = await fetchCurriculumWithUnits(selectedCurriculumId);
+      if (unit) setSelectedCurriculum(unit);
     };
     loadUnit();
-  }, [selectedUnitId, fetchUnitWithLessons]);
+  }, [selectedCurriculumId, fetchCurriculumWithUnits]);
 
   const handleTestComplete = useCallback(async () => {
     await refetchGamification();
@@ -48,25 +50,25 @@ export default function HomePage() {
   return (
     <div className="HomePage">
       <CourseHeader
-        units={units}
-        selectedUnitId={selectedUnitId}
-        onUnitChange={setSelectedUnitId}
+        curriculums={curriculums}
+        selectedCurriculumId={selectedCurriculumId}
+        onUnitChange={setSelectedCurriculumId}
         lives={gamification?.hearts ?? 0}
         zaps={gamification?.zapTokens ?? 0}
       />
       {isLoading && <div>Cargando...</div>}
       {error && <div className="text-red-500">{error}</div>}
-      {!isLoading && selectedUnit && (
+      {!isLoading && selectedCurriculum && (
         <div className="h-full">
           <LearningPath
             hearts={gamification?.hearts ?? 0}
-            unit={selectedUnit}
+            curriculum={selectedCurriculum}
             userId={userId}
             onTestComplete={handleTestComplete}
           />
         </div>
       )}
-      {!isLoading && !selectedUnit && <div>No se encontraron datos</div>}
+      {!isLoading && !selectedCurriculum && <div>No se encontraron datos</div>}
     </div>
   );
 }

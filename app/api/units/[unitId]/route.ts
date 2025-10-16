@@ -6,7 +6,6 @@ export async function GET(
   context: { params: Promise<{ unitId: string }> }
 ) {
   const { unitId } = await context.params;
-  console.log("unitId:", unitId);
 
   try {
     const id = parseInt(unitId);
@@ -24,13 +23,6 @@ export async function GET(
         lessons: {
           where: {
             isActive: true
-          },
-          include: {
-            _count: {
-              select: {
-                questions: true
-              }
-            }
           },
           orderBy: { position: "asc" }
         },
@@ -81,17 +73,9 @@ export async function PUT(
         updatedAt: new Date()
       },
       include: {
-        lessons: {
-          include: {
-            _count: {
-              select: {
-                questions: true
-              }
-            }
-          }
-        },
         _count: {
           select: {
+            questions: true,
             lessons: true
           }
         }

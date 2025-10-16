@@ -23,8 +23,8 @@ export default function EditCurriculumPage() {
       try {
         const res = await fetch(`/api/curriculums/${curriculumId}`);
         if (!res.ok) throw new Error("Error al cargar curriculum");
-        const data = await res.json();
-        setCurriculum(data.curriculum);
+        const curriculum = await res.json();
+        setCurriculum(curriculum);
       } catch {
         toast.error("No se pudo cargar el curriculum");
       } finally {
@@ -74,6 +74,7 @@ export default function EditCurriculumPage() {
         initialData={curriculum}
         onSubmit={handleSubmit}
         submitting={submitting}
+        buttonText="Guardar Cambios"
       />
     </div>
   );

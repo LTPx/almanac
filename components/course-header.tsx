@@ -11,11 +11,11 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Unit } from "@/lib/types";
+import { Curriculum } from "@/lib/types";
 
 interface CourseHeaderProps {
-  units: Unit[];
-  selectedUnitId: string;
+  curriculums: Curriculum[];
+  selectedCurriculumId: string;
   onUnitChange: (unitId: string) => void;
   streakDays?: number;
   zaps?: number;
@@ -24,14 +24,16 @@ interface CourseHeaderProps {
 }
 
 const CourseHeader: React.FC<CourseHeaderProps> = ({
-  units,
-  selectedUnitId,
+  curriculums,
+  selectedCurriculumId,
   onUnitChange,
   zaps = 0,
   lives = 0,
   className = ""
 }) => {
-  const selectedUnit = units.find((u) => u.id.toString() === selectedUnitId);
+  const selectedCurriculum = curriculums.find(
+    (u) => u.id.toString() === selectedCurriculumId
+  );
   const prevZaps = useRef(zaps);
   const prevLives = useRef(lives);
 
@@ -57,17 +59,22 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
           whileHover={{ scale: 1.02 }}
           transition={{ type: "spring", stiffness: 400, damping: 17 }}
         >
-          <Select value={selectedUnitId} onValueChange={handleUnitChange}>
+          <Select value={selectedCurriculumId} onValueChange={handleUnitChange}>
             <SelectTrigger className="w-full text-black">
               <SelectValue placeholder="Selecciona una unidad...">
-                {selectedUnit ? selectedUnit.name : "Selecciona una unidad..."}
+                {selectedCurriculum
+                  ? selectedCurriculum.title
+                  : "Selecciona una unidad..."}
               </SelectValue>
             </SelectTrigger>
             <SelectContent className="bg-white text-black">
-              {units.map((unit) => (
-                <SelectItem key={unit.id} value={unit.id.toString()}>
+              {curriculums.map((curriculum) => (
+                <SelectItem
+                  key={curriculum.id}
+                  value={curriculum.id.toString()}
+                >
                   <div className="flex items-center justify-between w-full">
-                    <span>{unit.name}</span>
+                    <span>{curriculum.title}</span>
                   </div>
                 </SelectItem>
               ))}
