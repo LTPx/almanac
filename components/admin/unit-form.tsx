@@ -14,6 +14,7 @@ interface UnitFormProps {
   initialData?: Unit | null;
   onSubmit: (data: UnitInput) => Promise<void>;
   submitting?: boolean;
+  buttonText?: string;
 }
 
 export type UnitInput = {
@@ -26,7 +27,8 @@ export type UnitInput = {
 export default function UnitForm({
   initialData,
   onSubmit,
-  submitting
+  submitting,
+  buttonText
 }: UnitFormProps) {
   const [formData, setFormData] = useState<UnitInput>({
     name: initialData?.name || "",
@@ -104,7 +106,7 @@ export default function UnitForm({
         </Link>
         <Button type="submit" disabled={isLoading}>
           <Save className="mr-2 h-4 w-4" />
-          {isLoading ? "Guardando..." : "Crear Unidad"}
+          {isLoading ? "Guardando..." : buttonText || "Crear Unidad"}
         </Button>
       </div>
     </form>

@@ -34,15 +34,6 @@ export async function POST(request: Request) {
         isActive: true
       },
       include: {
-        lessons: {
-          include: {
-            _count: {
-              select: {
-                questions: true
-              }
-            }
-          }
-        },
         _count: {
           select: {
             lessons: true
