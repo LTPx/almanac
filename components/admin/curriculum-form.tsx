@@ -20,6 +20,7 @@ interface CurriculumFormProps {
   initialData?: Curriculum | null;
   onSubmit: (data: CurriculumInput) => Promise<void>;
   submitting?: boolean;
+  buttonText?: string;
 }
 
 export type CurriculumInput = {
@@ -31,7 +32,8 @@ export type CurriculumInput = {
 export default function CurriculumForm({
   initialData,
   onSubmit,
-  submitting
+  submitting,
+  buttonText
 }: CurriculumFormProps) {
   const [formData, setFormData] = useState<CurriculumInput>({
     title: initialData?.title || "",
@@ -108,7 +110,7 @@ export default function CurriculumForm({
         </Link>
         <Button type="submit" disabled={submitting || !formData.title}>
           <Save className="mr-2 h-4 w-4" />
-          {submitting ? "Creando..." : "Crear Curriculum"}
+          {submitting ? "Saving..." : buttonText || "Crear Curriculum"}
         </Button>
       </div>
     </form>
