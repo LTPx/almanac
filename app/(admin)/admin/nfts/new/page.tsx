@@ -19,8 +19,7 @@ import {
   Upload,
   X,
   Image as ImageIcon,
-  Sparkles,
-  ExternalLink
+  Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import {

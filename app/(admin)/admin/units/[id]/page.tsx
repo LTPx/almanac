@@ -1,8 +1,4 @@
-export default function UnitPage({
-  params
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function UnitPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <h1>Pending here</h1>

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { completeUnit, reduceHeartsForFailedTest } from "@/lib/gamification";
+import { reduceHeartsForFailedTest } from "@/lib/gamification";
 import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     let experienceGained = 0;
     let unitCompleted = false;
-    let unitRewards = null;
+    // let unitRewards = null;
     let heartsLost = 0;
 
     if (passed) {
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
         passed,
         experienceGained,
         unitCompleted,
-        unitRewards, // { zapTokens, unitTokens, totalUnitsCompleted }
+        // unitRewards, // { zapTokens, unitTokens, totalUnitsCompleted }
         heartsLost
       }
     });
