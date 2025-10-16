@@ -203,7 +203,6 @@ export default function LessonForm({
                 Recomendado: 25-50 XP para lecciones estándar
               </p>
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="position">Posición en la Unidad</Label>
               <Input
