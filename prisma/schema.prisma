@@ -21,10 +21,10 @@ model User {
   encryptedKey  String?
 
   // Educational relationships
-  userProgress     UserProgress[]
-  testAttempts     TestAttempt[]
-  streaks          UserStreak[]
-  userUnitProgress UserUnitProgress[]
+  userCurriculumProgress UserCurriculumProgress[]
+  testAttempts           TestAttempt[]
+  streaks                UserStreak[]
+  userUnitProgress       UserUnitProgress[]
 
   //Blockchain
   nfts EducationalNFT[]
@@ -102,6 +102,9 @@ model Curriculum {
   userCurriculumTokens UserCurriculumToken[]
   zapTransactions      ZapTransaction[]
 
+  // Progress
+  userCurriculumProgress UserCurriculumProgress[]
+
   educationalNFTs EducationalNFT[]
 }
 
@@ -154,7 +157,6 @@ model Unit {
   questions Question[]
 
   // Progress
-  userProgress     UserProgress[]
   userUnitProgress UserUnitProgress[]
 
   //Education - relationships
@@ -214,20 +216,20 @@ model Answer {
   @@map("answer")
 }
 
-model UserProgress {
-  id               Int       @id @default(autoincrement())
-  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+model UserCurriculumProgress {
+  id               Int        @id @default(autoincrement())
+  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId           String
-  unit             Unit      @relation(fields: [unitId], references: [id])
-  unitId           Int
-  isCompleted      Boolean   @default(false)
-  experiencePoints Int       @default(0)
+  curriculum       Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  curriculumId     String
+  isCompleted      Boolean    @default(false)
+  experiencePoints Int        @default(0)
   completedAt      DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
 
-  @@unique([userId, unitId])
-  @@map("user_progress")
+  @@unique([userId, curriculumId])
+  @@map("user_curriculum_progress")
 }
 
 model UserUnitProgress {
