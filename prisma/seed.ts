@@ -7,7 +7,8 @@ async function main() {
   await prisma.testAttempt.deleteMany();
   await prisma.answer.deleteMany();
   await prisma.question.deleteMany();
-  await prisma.userProgress.deleteMany();
+  await prisma.userCurriculumProgress.deleteMany();
+  await prisma.userCurriculumToken.deleteMany();
   await prisma.userUnitProgress.deleteMany();
   await prisma.learningObjective.deleteMany();
   await prisma.fact.deleteMany();

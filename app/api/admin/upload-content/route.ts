@@ -124,7 +124,8 @@ export async function DELETE() {
       await tx.testAttempt.deleteMany();
       await tx.answer.deleteMany();
       await tx.question.deleteMany();
-      await tx.userProgress.deleteMany();
+      await tx.userCurriculumProgress.deleteMany();
+      await tx.userCurriculumToken.deleteMany();
       await tx.lesson.deleteMany();
       await tx.unit.deleteMany();
     });
