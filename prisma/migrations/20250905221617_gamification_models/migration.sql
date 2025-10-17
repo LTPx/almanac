@@ -7,7 +7,7 @@ CREATE TYPE "public"."heart_transaction_type" AS ENUM ('DAILY_RESET', 'TEST_FAIL
 -- AlterTable
 ALTER TABLE "public"."user" ADD COLUMN     "hearts" INTEGER NOT NULL DEFAULT 5,
 ADD COLUMN     "lastHeartReset" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN     "totalUnitsCompleted" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "totalCurriculumsCompleted" INTEGER NOT NULL DEFAULT 0,
 ADD COLUMN     "zapTokens" INTEGER NOT NULL DEFAULT 0;
 
 -- CreateTable

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { reduceHeartsForFailedTest } from "@/lib/gamification";
+import {
+  completeCurriculum,
+  reduceHeartsForFailedTest
+} from "@/lib/gamification";
 import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
@@ -62,9 +65,9 @@ export async function POST(request: NextRequest) {
     });
 
     let experienceGained = 0;
-    let unitCompleted = false;
-    // let unitRewards = null;
+    let curriculumCompleted = false;
     let heartsLost = 0;
+    let curriculumRewards = null;
 
     if (passed) {
       // ✅ Test pasado → otorgar experiencia
@@ -109,7 +112,16 @@ export async function POST(request: NextRequest) {
             }
           });
 
-          unitCompleted = completedUnits.length === unitsCurriculum.length;
+          curriculumCompleted =
+            completedUnits.length === unitsCurriculum.length;
+
+          if (curriculumCompleted) {
+            curriculumRewards = await completeCurriculum(
+              testAttempt.userId,
+              curriculumId
+            );
+            console.log("user tokens gain: ", curriculumRewards);
+          }
         }
 
         // ✅ Actualizar racha
@@ -157,8 +169,8 @@ export async function POST(request: NextRequest) {
         totalQuestions: testAttempt.totalQuestions,
         passed,
         experienceGained,
-        unitCompleted,
-        // unitRewards, // { zapTokens, unitTokens, totalUnitsCompleted }
+        curriculumCompleted,
+        curriculumRewards, // { zapTokens, unitTokens, totalCurriculumsCompleted }
         heartsLost
       }
     });

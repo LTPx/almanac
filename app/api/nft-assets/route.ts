@@ -86,6 +86,7 @@ export async function POST(request: NextRequest) {
     const file = formData.get("file") as File;
     const rarity = formData.get("rarity") as string;
     const metadataUri = formData.get("metadataUri") as string | null;
+    const name = formData.get("name") as string | null;
 
     if (!file || !rarity) {
       return NextResponse.json(
@@ -116,6 +117,7 @@ export async function POST(request: NextRequest) {
     const imageUrl = `https://${PINATA_GATEWAY}/ipfs/${upload.cid}`;
     const nftAsset = await prisma.nFTAsset.create({
       data: {
+        name: name || "",
         imageUrl,
         rarity: rarity as any,
         metadataUri,

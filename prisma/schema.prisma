@@ -21,24 +21,24 @@ model User {
   encryptedKey  String?
 
   // Educational relationships
-  userProgress     UserProgress[]
-  testAttempts     TestAttempt[]
-  streaks          UserStreak[]
-  userUnitProgress UserUnitProgress[]
+  userCurriculumProgress UserCurriculumProgress[]
+  testAttempts           TestAttempt[]
+  streaks                UserStreak[]
+  userUnitProgress       UserUnitProgress[]
 
   //Blockchain
   nfts EducationalNFT[]
 
   // GAMIFICATION 
-  hearts              Int      @default(5)
-  zapTokens           Int      @default(0)
-  lastHeartReset      DateTime @default(now())
-  totalUnitsCompleted Int      @default(0)
+  hearts                    Int      @default(5)
+  zapTokens                 Int      @default(0)
+  lastHeartReset            DateTime @default(now())
+  totalCurriculumsCompleted Int      @default(0)
 
   // GAMIFICATION - relationships
-  userUnitTokens    UserUnitToken[]
-  heartTransactions HeartTransaction[]
-  zapTransactions   ZapTransaction[]
+  userCurriculumTokens UserCurriculumToken[]
+  heartTransactions    HeartTransaction[]
+  zapTransactions      ZapTransaction[]
 
   @@map("user")
 }
@@ -97,6 +97,15 @@ model Curriculum {
   metadata         Json?
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
+
+  // GAMIFICATION 
+  userCurriculumTokens UserCurriculumToken[]
+  zapTransactions      ZapTransaction[]
+
+  // Progress
+  userCurriculumProgress UserCurriculumProgress[]
+
+  educationalNFTs EducationalNFT[]
 }
 
 model LearningObjective {
@@ -148,12 +157,7 @@ model Unit {
   questions Question[]
 
   // Progress
-  userProgress     UserProgress[]
   userUnitProgress UserUnitProgress[]
-
-  // GAMIFICATION - relationships
-  userUnitTokens  UserUnitToken[]
-  zapTransactions ZapTransaction[]
 
   //Education - relationships
   curriculum         Curriculum?         @relation(fields: [curriculumId], references: [id])
@@ -212,20 +216,20 @@ model Answer {
   @@map("answer")
 }
 
-model UserProgress {
-  id               Int       @id @default(autoincrement())
-  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+model UserCurriculumProgress {
+  id               Int        @id @default(autoincrement())
+  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId           String
-  unit             Unit      @relation(fields: [unitId], references: [id])
-  unitId           Int
-  isCompleted      Boolean   @default(false)
-  experiencePoints Int       @default(0)
+  curriculum       Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  curriculumId     String
+  isCompleted      Boolean    @default(false)
+  experiencePoints Int        @default(0)
   completedAt      DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
 
-  @@unique([userId, unitId])
-  @@map("user_progress")
+  @@unique([userId, curriculumId])
+  @@map("user_curriculum_progress")
 }
 
 model UserUnitProgress {
@@ -290,18 +294,18 @@ model UserStreak {
 }
 
 // GAMIFICATION
-model UserUnitToken {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  unit      Unit     @relation(fields: [unitId], references: [id])
-  unitId    Int
-  quantity  Int      @default(1)
-  earnedAt  DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model UserCurriculumToken {
+  id           Int        @id @default(autoincrement())
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  curriculum   Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  curriculumId String
+  quantity     Int        @default(1)
+  earnedAt     DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
-  @@unique([userId, unitId])
-  @@map("user_unit_token")
+  @@unique([userId, curriculumId])
+  @@map("user_curriculum_token")
 }
 
 model HeartTransaction {
@@ -319,38 +323,40 @@ model HeartTransaction {
 }
 
 model ZapTransaction {
-  id            Int                @id @default(autoincrement())
-  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        String
-  type          ZapTransactionType
-  amount        Int // Cantidad (positivo = ganado, negativo = gastado)
-  reason        String? // Razón de la transacción
-  relatedUnitId Int? // Si está relacionado con completar una unidad
-  relatedUnit   Unit?              @relation(fields: [relatedUnitId], references: [id])
-  createdAt     DateTime           @default(now())
+  id                  Int                @id @default(autoincrement())
+  user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId              String
+  type                ZapTransactionType
+  amount              Int
+  reason              String?
+  relatedCurriculumId String?
+  relatedCurriculum   Curriculum?        @relation(fields: [relatedCurriculumId], references: [id])
+  createdAt           DateTime           @default(now())
 
   @@map("zap_transaction")
 }
 
 //BLOCKCHAIN
 model EducationalNFT {
-  id              String    @id @default(cuid())
+  id              String     @id @default(cuid())
   tokenId         String
   userId          String
-  unitId          String
   contractAddress String
   transactionHash String?
   metadataUri     String
-  mintedAt        DateTime  @default(now())
-  user            User      @relation(fields: [userId], references: [id])
-  nftAsset        NFTAsset? @relation(fields: [nftAssetId], references: [id])
-  nftAssetId      Int?      @unique
+  mintedAt        DateTime   @default(now())
+  user            User       @relation(fields: [userId], references: [id])
+  curriculum      Curriculum @relation(fields: [curriculumId], references: [id])
+  curriculumId    String
+  nftAsset        NFTAsset?  @relation(fields: [nftAssetId], references: [id])
+  nftAssetId      Int?       @unique
 
   @@map("educational_nft")
 }
 
 model NFTAsset {
   id             Int             @id @default(autoincrement())
+  name           String          @default("")
   imageUrl       String
   rarity         NFTRarity
   isUsed         Boolean         @default(false)

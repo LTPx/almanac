@@ -42,9 +42,11 @@ export default function CreateCertificatePage() {
   const fetchCompletedUnits = async (userId: string) => {
     try {
       setLoadingData(true);
-      const response = await fetch(`/api/users/${userId}/completed-units`);
+      const response = await fetch(
+        `/api/users/${userId}/completed-curriculums`
+      );
       const data = await response.json();
-      setCompletedUnits(data.units || []);
+      setCompletedUnits(data.curriculums || []);
     } catch (error) {
       console.error("Error fetching completed units:", error);
     } finally {
@@ -69,7 +71,7 @@ export default function CreateCertificatePage() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          unitId: selectedUnitId,
+          curriculumTokenId: selectedUnitId,
           description: description.trim()
         })
       });

@@ -124,81 +124,83 @@ export async function purchaseHeartWithZaps(userId: string) {
   };
 }
 
-export async function completeUnit(userId: string, unitId: number) {
-  const existingProgress = await prisma.userProgress.findFirst({
+export async function completeCurriculum(userId: string, curriculumId: string) {
+  const existingProgress = await prisma.userCurriculumProgress.findFirst({
     where: {
       userId,
-      unitId,
+      curriculumId,
       isCompleted: true
     }
   });
 
   if (existingProgress) {
-    throw new Error("Esta unidad ya fue completada anteriormente");
+    throw new Error("Este curriculum ya fue completada anteriormente");
   }
 
   // Marcar unidad como completada y otorgar recompensas
-  const [updatedUser, unitToken] = await prisma.$transaction(async (tx) => {
-    // Actualizar usuario con ZAPs y contador de unidades
-    const user = await tx.user.update({
-      where: { id: userId },
-      data: {
-        zapTokens: { increment: GAME_CONFIG.ZAPS_PER_UNIT_COMPLETE },
-        totalUnitsCompleted: { increment: 1 }
-      }
-    });
+  const [updatedUser, curriculumToken] = await prisma.$transaction(
+    async (tx) => {
+      // Actualizar usuario con ZAPs y contador de unidades
+      const user = await tx.user.update({
+        where: { id: userId },
+        data: {
+          zapTokens: { increment: GAME_CONFIG.ZAPS_PER_UNIT_COMPLETE },
+          totalCurriculumsCompleted: { increment: 1 }
+        }
+      });
 
-    // Crear o actualizar token de unidad
-    const unitToken = await tx.userUnitToken.upsert({
-      where: {
-        userId_unitId: { userId, unitId }
-      },
-      update: {
-        quantity: { increment: GAME_CONFIG.TOKENS_PER_UNIT_COMPLETE },
-        updatedAt: new Date()
-      },
-      create: {
-        userId,
-        unitId,
-        quantity: GAME_CONFIG.TOKENS_PER_UNIT_COMPLETE
-      }
-    });
+      // Crear o actualizar token de unidad
+      const curriculumToken = await tx.userCurriculumToken.upsert({
+        where: {
+          userId_curriculumId: { userId, curriculumId }
+        },
+        update: {
+          quantity: { increment: GAME_CONFIG.TOKENS_PER_UNIT_COMPLETE },
+          updatedAt: new Date()
+        },
+        create: {
+          userId,
+          curriculumId,
+          quantity: GAME_CONFIG.TOKENS_PER_UNIT_COMPLETE
+        }
+      });
 
-    // Marcar progreso como completado
-    // await tx.userProgress.upsert({
-    //   where: {
-    //     userId_unitId: { userId, unitId }
-    //   },
-    //   update: {
-    //     isCompleted: true,
-    //     completedAt: new Date()
-    //   },
-    //   create: {
-    //     userId,
-    //     unitId,
-    //     isCompleted: true,
-    //     completedAt: new Date()
-    //   }
-    // });
+      // Marcar progreso como completado
+      // await tx.userProgress.upsert({
+      //   where: {
+      //     userId_curriculumId: { userId, unitId }
+      //   },
+      //   update: {
+      //     isCompleted: true,
+      //     completedAt: new Date()
+      //   },
+      //   create: {
+      //     userId,
+      //     unitId,
+      //     isCompleted: true,
+      //     completedAt: new Date()
+      //   }
+      // });
 
-    // Registrar transacción de ZAPs
-    await tx.zapTransaction.create({
-      data: {
-        userId,
-        type: "UNIT_COMPLETED",
-        amount: GAME_CONFIG.ZAPS_PER_UNIT_COMPLETE,
-        reason: "ZAPs ganados por completar unidad",
-        relatedUnitId: unitId
-      }
-    });
+      // Registrar transacción de ZAPs
+      await tx.zapTransaction.create({
+        data: {
+          userId,
+          type: "UNIT_COMPLETED",
+          amount: GAME_CONFIG.ZAPS_PER_UNIT_COMPLETE,
+          reason: "ZAPs ganados por completar curriculum",
+          relatedCurriculumId: curriculumId
+        }
+      });
 
-    return [user, unitToken];
-  });
+      return [user, curriculumToken];
+    }
+  );
 
   return {
     zapTokens: updatedUser.zapTokens,
-    unitTokens: unitToken.quantity,
-    totalUnitsCompleted: updatedUser.totalUnitsCompleted
+    curriculumTokens: curriculumToken.quantity,
+    totalCurriculumsCompleted: updatedUser.totalCurriculumsCompleted
   };
 }
 
@@ -208,14 +210,14 @@ export async function getUserGamificationStats(userId: string) {
     select: {
       hearts: true,
       zapTokens: true,
-      totalUnitsCompleted: true,
+      totalCurriculumsCompleted: true,
       lastHeartReset: true,
-      userUnitTokens: {
+      userCurriculumTokens: {
         include: {
-          unit: {
+          curriculum: {
             select: {
               id: true,
-              name: true
+              title: true
             }
           }
         }
@@ -237,8 +239,8 @@ export async function getUserGamificationStats(userId: string) {
     hearts: user.hearts,
     maxHearts: GAME_CONFIG.MAX_HEARTS,
     zapTokens: user.zapTokens,
-    totalUnitsCompleted: user.totalUnitsCompleted,
-    unitTokens: user.userUnitTokens,
+    totalCurriculumsCompleted: user.totalCurriculumsCompleted,
+    userCurriculumTokens: user.userCurriculumTokens,
     needsHeartReset,
     canPurchaseHeart:
       user.zapTokens >= GAME_CONFIG.ZAPS_PER_HEART_PURCHASE &&

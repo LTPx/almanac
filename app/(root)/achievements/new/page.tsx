@@ -81,9 +81,11 @@ export default function CreateCertificatePage() {
   const fetchCompletedUnits = async (userId: string) => {
     try {
       setLoadingData(true);
-      const response = await fetch(`/api/users/${userId}/completed-units`);
+      const response = await fetch(
+        `/api/users/${userId}/completed-curriculums`
+      );
       const data = await response.json();
-      setCompletedUnits(data.units || []);
+      setCompletedUnits(data.curriculums || []);
     } catch (error) {
       console.error("Error fetching completed units:", error);
     } finally {
@@ -119,7 +121,7 @@ export default function CreateCertificatePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          unitId: selectedUnitId,
+          curriculumTokenId: selectedUnitId,
           description: description.trim()
         })
       });
@@ -290,7 +292,7 @@ export default function CreateCertificatePage() {
                   className="w-full p-4 border border-gray-600 rounded-lg text-white"
                   required
                 >
-                  <option value="">Selecciona una unidad...</option>
+                  <option value="">Selecciona un token...</option>
                   {availableUnits.map((unit) => (
                     <option key={unit.unitId} value={unit.unitId}>
                       {unit.unitName}

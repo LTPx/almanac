@@ -10,7 +10,7 @@ import {
 const CONTRACT_ADDRESS = process.env.THIRDWEB_CONTRACT_ADDRESS!;
 
 interface MintRequestBody {
-  unitId?: string | number;
+  curriculumTokenId?: string;
   tokenUnit?: string | number;
   description?: string;
 }
@@ -22,12 +22,12 @@ export async function POST(
   try {
     const { userId } = await context.params;
     const body: MintRequestBody = await request.json();
-    const unitId = body.unitId ?? body.tokenUnit;
+    const curriculumTokenId = body.curriculumTokenId;
     const description = body.description;
 
-    if (!unitId) {
+    if (!curriculumTokenId) {
       return NextResponse.json(
-        { error: "unitId es requerido" },
+        { error: "curriculumTokenId es requerido" },
         { status: 400 }
       );
     }
@@ -35,7 +35,7 @@ export async function POST(
     // 1) Validar usuario y tokens disponibles
     const validationResult = await validateUserAndTokens(
       userId,
-      Number(unitId)
+      curriculumTokenId
     );
 
     if (validationResult.error) {
@@ -45,12 +45,11 @@ export async function POST(
       );
     }
 
-    const { user, userUnitToken } = validationResult.data!;
+    const { user, userCurriculumToken } = validationResult.data!;
 
     // 2) Crear metadatos del NFT con descripción personalizada
     const courseName = "Almanac";
-    const unitName = userUnitToken.unit.name;
-    // const rarity = "NORMAL";
+    const unitName = userCurriculumToken.curriculum.title;
     const rarity = getRandomRarity();
     const { nftImage, nftImageId, rarityUsed } =
       await getAvailableNFTImage(rarity);
@@ -69,8 +68,8 @@ export async function POST(
     // 4) Guardar en base de datos
     const savedNFT = await saveNFTToDatabase({
       userId,
-      unitId: String(unitId),
-      userUnitToken,
+      curriculumId: curriculumTokenId,
+      userCurriculumToken,
       mintResult,
       metadata,
       nftImageId
@@ -94,10 +93,13 @@ export async function POST(
   }
 }
 
-async function validateUserAndTokens(userId: string, unitId: number) {
+async function validateUserAndTokens(
+  userId: string,
+  curriculumTokenId: string
+) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: { userUnitTokens: { include: { unit: true } } }
+    include: { userCurriculumTokens: { include: { curriculum: true } } }
   });
 
   if (!user) {
@@ -116,9 +118,11 @@ async function validateUserAndTokens(userId: string, unitId: number) {
     };
   }
 
-  const userUnitToken = user.userUnitTokens.find((t) => t.unitId === unitId);
+  const userCurriculumToken = user.userCurriculumTokens.find(
+    (t) => t.curriculumId === curriculumTokenId
+  );
 
-  if (!userUnitToken || userUnitToken.quantity <= 0) {
+  if (!userCurriculumToken || userCurriculumToken.quantity <= 0) {
     return {
       error: "No hay tokens disponibles para esta unidad",
       status: 400,
@@ -129,21 +133,21 @@ async function validateUserAndTokens(userId: string, unitId: number) {
   return {
     error: null,
     status: 200,
-    data: { user, userUnitToken }
+    data: { user, userCurriculumToken }
   };
 }
 
 async function saveNFTToDatabase({
   userId,
-  unitId,
-  userUnitToken,
+  curriculumId,
+  userCurriculumToken,
   mintResult,
   metadata,
   nftImageId
 }: {
   userId: string;
-  unitId: string;
-  userUnitToken: any;
+  curriculumId: string;
+  userCurriculumToken: any;
   mintResult: any;
   metadata: any;
   nftImageId: number;
@@ -151,13 +155,15 @@ async function saveNFTToDatabase({
   const now = new Date();
 
   return prisma.$transaction(async (tx) => {
-    const newQuantity = userUnitToken.quantity - 1;
+    const newQuantity = userCurriculumToken.quantity - 1;
 
     if (newQuantity <= 0) {
-      await tx.userUnitToken.delete({ where: { id: userUnitToken.id } });
+      await tx.userCurriculumToken.delete({
+        where: { id: userCurriculumToken.id }
+      });
     } else {
-      await tx.userUnitToken.update({
-        where: { id: userUnitToken.id },
+      await tx.userCurriculumToken.update({
+        where: { id: userCurriculumToken.id },
         data: { quantity: newQuantity, updatedAt: now }
       });
     }
@@ -166,7 +172,7 @@ async function saveNFTToDatabase({
       data: {
         tokenId: mintResult.tokenId ?? "",
         userId,
-        unitId,
+        curriculumId,
         contractAddress: CONTRACT_ADDRESS,
         transactionHash: mintResult.transactionHash,
         metadataUri: mintResult.metadataUri ?? JSON.stringify(metadata),

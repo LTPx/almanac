@@ -107,6 +107,7 @@ export type EducationalNFT = {
 
 export type NFTAsset = {
   id: number;
+  name: string;
   imageUrl: string;
   rarity: "NORMAL" | "RARE" | "EPIC" | "UNIQUE";
   isUsed: boolean;
