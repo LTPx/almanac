@@ -38,6 +38,7 @@ export function TestSystem({
     Date.now()
   );
   const [currentHearts, setCurrentHearts] = useState(initialHearts);
+  const [justAnsweredCorrect, setJustAnsweredCorrect] = useState(false);
 
   const { error, startTest, submitAnswer, completeTest } = useTest();
   const hasInitialized = useRef(false);
@@ -80,6 +81,14 @@ export function TestSystem({
         ...prev,
         [questionId]: { answer, isCorrect: result.isCorrect }
       }));
+
+      setJustAnsweredCorrect(result.isCorrect);
+
+      if (!result.isCorrect) {
+        setCurrentHearts((prev) => Math.max(0, prev - 1));
+      }
+
+      setTimeout(() => setJustAnsweredCorrect(false), 1000);
     }
   };
 
@@ -100,10 +109,6 @@ export function TestSystem({
     if (testResults) {
       setResults(testResults);
       setState("results");
-
-      if (testResults.heartsLost !== undefined && testResults.heartsLost > 0) {
-        setCurrentHearts((prev) => Math.max(0, prev - testResults.heartsLost));
-      }
     }
   };
 
@@ -149,9 +154,7 @@ export function TestSystem({
             hearts={currentHearts}
             percentage={progress}
             hasActiveSubscription={false}
-            justAnsweredCorrect={
-              answers[currentTest.questions[currentQuestionIndex].id]?.isCorrect
-            }
+            justAnsweredCorrect={justAnsweredCorrect}
           />
           <div className="relative flex-1 flex items-center justify-center">
             <AnimatePresence mode="wait">
