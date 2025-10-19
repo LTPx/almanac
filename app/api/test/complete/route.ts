@@ -42,6 +42,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Calcular tiempo transcurrido en segundos
+    const startTime = new Date(testAttempt.startedAt);
+    const endTime = new Date();
+    const timeElapsedMs = endTime.getTime() - startTime.getTime();
+    const timeElapsedSeconds = Math.floor(timeElapsedMs / 1000);
+
     // Calcular resultados
     const correctAnswers = testAttempt.answers.filter(
       (a) => a.isCorrect
@@ -57,13 +63,12 @@ export async function POST(request: NextRequest) {
         correctAnswers,
         score,
         isCompleted: true,
-        completedAt: new Date()
+        completedAt: endTime
       }
     });
 
     let experienceGained = 0;
     let curriculumCompleted = false;
-    // let heartsLost = 0;
     let curriculumRewards = null;
 
     if (passed) {
@@ -158,8 +163,8 @@ export async function POST(request: NextRequest) {
         passed,
         experienceGained,
         curriculumCompleted,
-        curriculumRewards // { zapTokens, unitTokens, totalCurriculumsCompleted }
-        // heartsLost
+        curriculumRewards,
+        timeElapsed: timeElapsedSeconds
       }
     });
   } catch (error) {
