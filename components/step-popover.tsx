@@ -19,6 +19,7 @@ interface StepPopoverProps {
   children: React.ReactNode;
   isLocked?: boolean;
   isOptional?: boolean;
+  isFirstMandatory?: boolean;
 }
 
 export function StepPopover({
@@ -29,25 +30,34 @@ export function StepPopover({
   className,
   children,
   isLocked = false,
-  isOptional = false
+  isOptional = false,
+  isFirstMandatory = false
 }: StepPopoverProps) {
   const getPopoverClass = () => {
     if (className) return className;
     if (isLocked) return "bg-gray-700 text-white p-4";
+    if (isFirstMandatory) return "bg-[#F9F0B6] text-gray-900 p-4";
     if (isOptional) return "bg-[#1983DD] text-white p-4";
     return "bg-[#1F941C] text-white p-4";
   };
 
   const getArrowClass = () => {
     if (isLocked) return "fill-gray-700";
+    if (isFirstMandatory) return "fill-[#F9F0B6]";
     if (isOptional) return "fill-[#1983DD]";
     return "fill-[#1F941C]";
   };
 
   const getButtonTextColor = () => {
     if (isLocked) return "text-gray-400";
+    if (isFirstMandatory) return "text-gray-900";
     if (isOptional) return "text-[#1983DD]";
     return "text-[#1F941C]";
+  };
+
+  const getIconColor = () => {
+    if (isFirstMandatory) return "text-gray-900 opacity-90";
+    return "text-white opacity-90";
   };
 
   const buttonBgColor = isLocked
@@ -59,7 +69,7 @@ export function StepPopover({
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className={`${getPopoverClass()} rounded-xl relative`}>
         <div className="absolute top-4 right-4">
-          <BookOpen className="w-6 h-6 text-white opacity-90" />
+          <BookOpen className={`w-6 h-6 ${getIconColor()}`} />
         </div>
 
         <div className="pr-10">

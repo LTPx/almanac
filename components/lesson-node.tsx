@@ -16,6 +16,7 @@ type LessonNodeProps = {
   mandatory?: boolean;
   shouldFloat?: boolean;
   hearts: number;
+  isFirstMandatory?: boolean;
   onStartLesson: () => void;
 };
 
@@ -27,6 +28,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
   mandatory = false,
   shouldFloat = false,
   hearts,
+  isFirstMandatory = false,
   onStartLesson
 }) => {
   const { open: openNoHeartsModal } = useNoHeartsModal();
@@ -35,16 +37,22 @@ const LessonNode: React.FC<LessonNodeProps> = ({
 
   const getBackgroundColor = () => {
     if (state === "completed") {
-      return mandatory
-        ? "bg-[#5EC16A] border-[#5EC16A]"
-        : "bg-[#E6E7EB] border-[#E6E7EB]";
-    }
-    if (state === "available") {
-      return isLockedByHearts
-        ? "bg-gray-400 border-gray-400"
+      return mandatory && isFirstMandatory
+        ? "bg-[#F9F0B6] border-[#F9F0B6]"
         : mandatory
           ? "bg-[#5EC16A] border-[#5EC16A]"
-          : "bg-[#1983DD] border-[#1983DD]";
+          : "bg-[#E6E7EB] border-[#E6E7EB]";
+    }
+    if (state === "available") {
+      if (isLockedByHearts) {
+        return "bg-gray-400 border-gray-400";
+      }
+      if (isFirstMandatory && mandatory) {
+        return "bg-transparent";
+      }
+      return mandatory
+        ? "bg-[#5EC16A] border-[#5EC16A]"
+        : "bg-[#1983DD] border-[#1983DD]";
     }
     return "";
   };
@@ -64,6 +72,16 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       openNoHeartsModal(name);
     } else {
       onStartLesson();
+    }
+  };
+
+  const getFirstMandatoryStyle = () => {
+    if (!isFirstMandatory) return "";
+
+    if (state === "completed") {
+      return "border-[#F9F0B6] border-solid";
+    } else {
+      return "border-[#F9F0B6] border-dashed";
     }
   };
 
@@ -100,8 +118,15 @@ const LessonNode: React.FC<LessonNodeProps> = ({
         w-full h-full lg:h-16 flex items-center justify-center
         relative
         ${getBackgroundColor()}
-        ${state === "locked" || isLockedByHearts ? `${color} border-dashed` : "shadow-lg"}
-        rounded-2xl border-2 ${!isLockedByHearts && state !== "locked" ? "cursor-pointer" : "cursor-not-allowed opacity-75"}
+        ${
+          isFirstMandatory
+            ? getFirstMandatoryStyle()
+            : state === "locked" || isLockedByHearts
+              ? `${color} border-dashed`
+              : "shadow-lg"
+        }
+        ${isFirstMandatory ? "rounded-t-[2rem] rounded-b-lg" : "rounded-2xl"}
+        border-2 ${!isLockedByHearts && state !== "locked" ? "cursor-pointer" : "cursor-not-allowed opacity-75"}
       `}
     >
       <motion.div
@@ -154,6 +179,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
         onButtonClick={handleStartLesson}
         isLocked={false}
         isOptional={!mandatory}
+        isFirstMandatory={isFirstMandatory}
       >
         {nodeContent}
       </StepPopover>
