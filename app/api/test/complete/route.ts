@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     let experienceGained = 0;
     let curriculumCompleted = false;
-    let heartsLost = 0;
+    // let heartsLost = 0;
     let curriculumRewards = null;
 
     if (passed) {
@@ -158,8 +158,8 @@ export async function POST(request: NextRequest) {
         passed,
         experienceGained,
         curriculumCompleted,
-        curriculumRewards, // { zapTokens, unitTokens, totalCurriculumsCompleted }
-        heartsLost
+        curriculumRewards // { zapTokens, unitTokens, totalCurriculumsCompleted }
+        // heartsLost
       }
     });
   } catch (error) {
