@@ -8,6 +8,7 @@ import {
   PopoverArrow
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { BookOpen } from "lucide-react";
 
 interface StepPopoverProps {
   title?: string;
@@ -56,12 +57,19 @@ export function StepPopover({
   return (
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className={`${getPopoverClass()} rounded-md relative`}>
-        {title && <h3 className="font-bold">{title}</h3>}
-        {message && <p className="mt-2 line-clamp-4">{message}</p>}
+      <PopoverContent className={`${getPopoverClass()} rounded-xl relative`}>
+        <div className="absolute top-4 right-4">
+          <BookOpen className="w-6 h-6 text-white opacity-90" />
+        </div>
+
+        <div className="pr-10">
+          {title && <h3 className="font-bold text-lg">{title}</h3>}
+          {message && <p className="mt-2 line-clamp-4 text-sm">{message}</p>}
+        </div>
+
         {buttonText && onButtonClick && (
           <Button
-            className={`text-[15px] font-bold ${buttonBgColor} h-[60px] w-full focus-visible:ring-0 mt-3 ${getButtonTextColor()}`}
+            className={`text-[15px] font-bold ${buttonBgColor} h-[60px] w-full focus-visible:ring-0 mt-3 ${getButtonTextColor()} rounded-xl`}
             onClick={onButtonClick}
             disabled={isLocked}
           >
