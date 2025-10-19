@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { reduceHeartsForFailedTest } from "@/lib/gamification";
 
 export async function POST(request: NextRequest) {
   try {
@@ -133,6 +134,10 @@ export async function POST(request: NextRequest) {
           timeSpent
         }
       });
+    }
+
+    if (!isCorrect) {
+      await reduceHeartsForFailedTest(testAttempt.userId, testAttemptId);
     }
 
     return NextResponse.json({

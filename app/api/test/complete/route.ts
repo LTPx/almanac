@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  completeCurriculum,
-  reduceHeartsForFailedTest
-} from "@/lib/gamification";
+import { completeCurriculum } from "@/lib/gamification";
 import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
@@ -149,15 +146,6 @@ export async function POST(request: NextRequest) {
             data: { longestStreak: userStreak.currentStreak }
           });
         }
-      }
-    } else {
-      // ❌ Test fallado → reducir corazones
-      try {
-        heartsLost = 1;
-        await reduceHeartsForFailedTest(testAttempt.userId, testAttemptId);
-      } catch (error: any) {
-        console.log("Error reducing hearts:", error.message);
-        heartsLost = 0;
       }
     }
 
