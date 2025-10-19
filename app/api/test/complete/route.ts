@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
         experienceGained,
         curriculumCompleted,
         curriculumRewards,
-        timeElapsed: timeElapsedSeconds
+        timeQuizInSeconds: timeElapsedSeconds
       }
     });
   } catch (error) {
