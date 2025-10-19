@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserGamificationStats, resetDailyHearts } from "@/lib/gamification";
+import {
+  getUserGamificationStats,
+  resetHeartsByHours
+} from "@/lib/gamification";
 
 export async function GET(
   request: NextRequest,
@@ -8,7 +11,7 @@ export async function GET(
   const { userId } = await context.params;
   try {
     // Intentar reseteo automático de corazones
-    await resetDailyHearts(userId);
+    await resetHeartsByHours(userId);
 
     // Obtener estadísticas
     const stats = await getUserGamificationStats(userId);

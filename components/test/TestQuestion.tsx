@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
 import { MultipleChoiceQuestion } from "./multiple-choice-question";
 import { TrueFalseQuestion } from "./true-false-question";
 import { FillInBlankQuestion } from "./fill-in-blank-question";
@@ -71,6 +71,20 @@ export function TestQuestion({
     setHasAnswered(true);
   };
 
+  const getCorrectAnswer = () => {
+    switch (question.type) {
+      case "MULTIPLE_CHOICE":
+      case "TRUE_FALSE":
+        return question.content.correctAnswer;
+      case "FILL_IN_BLANK":
+        return question.content.correctAnswer;
+      case "ORDER_WORDS":
+        return question.content.correctOrder.join(" ");
+      default:
+        return "";
+    }
+  };
+
   const renderQuestionType = () => {
     switch (question.type) {
       case "MULTIPLE_CHOICE":
@@ -133,22 +147,53 @@ export function TestQuestion({
           </div>
           <div>
             {showResult && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                className="mb-6 flex items-center gap-2"
-              >
-                <CheckCircle
-                  className={`w-6 h-6 ${isCorrect ? "text-[#32C781]" : "text-red-500"}`}
-                />
-                <span
-                  className={`font-medium ${isCorrect ? "text-[#32C781]" : "text-red-500"}`}
+              <div className="space-y-4">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                  className="flex items-center gap-2"
                 >
-                  {isCorrect ? "¡Correcto!" : "Incorrecto"}
-                </span>
-              </motion.div>
+                  {isCorrect ? (
+                    <CheckCircle className="w-6 h-6 text-[#32C781]" />
+                  ) : (
+                    <XCircle className="w-6 h-6 text-red-500" />
+                  )}
+                  <span
+                    className={`font-medium ${isCorrect ? "text-[#32C781]" : "text-red-500"}`}
+                  >
+                    {isCorrect ? "¡Correcto!" : "Incorrecto"}
+                  </span>
+                </motion.div>
+
+                {!isCorrect && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.3 }}
+                    className="bg-red-500/10 border border-red-500/50 rounded-lg p-4"
+                  >
+                    <div className="flex items-start gap-2">
+                      <XCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-semibold text-red-400 mb-1">
+                          Respuesta correcta:
+                        </p>
+                        <p className="text-white font-medium">
+                          {getCorrectAnswer()}
+                        </p>
+                        {question.content.explanation && (
+                          <p className="text-gray-300 text-sm mt-2">
+                            {question.content.explanation}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
             )}
+
             {!hasAnswered && (
               <Button
                 onClick={handleSubmitAnswer}

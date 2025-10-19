@@ -49,6 +49,7 @@ export interface TestResultsInterface {
   passed: boolean;
   experienceGained: number;
   heartsLost: number;
+  timeQuizInSeconds: number;
 }
 
 export type Lesson = {

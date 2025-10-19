@@ -6,6 +6,8 @@ import { TestQuestion } from "./TestQuestion";
 import { TestResults } from "./TestResults";
 import { useTest } from "@/hooks/useTest";
 import { HeaderBar } from "../header-bar";
+import { NoHeartsTestModal } from "../modals/no-hearts-test-modal";
+import { useNoHeartsTestModal } from "@/store/use-no-hearts-test-modal";
 
 import type {
   TestData,
@@ -38,9 +40,11 @@ export function TestSystem({
     Date.now()
   );
   const [currentHearts, setCurrentHearts] = useState(initialHearts);
+  const [justAnsweredCorrect, setJustAnsweredCorrect] = useState(false);
 
   const { error, startTest, submitAnswer, completeTest } = useTest();
   const hasInitialized = useRef(false);
+  const { open: openNoHeartsModal } = useNoHeartsTestModal();
 
   const handleStartTest = useCallback(
     async (lessonId: number) => {
@@ -80,7 +84,30 @@ export function TestSystem({
         ...prev,
         [questionId]: { answer, isCorrect: result.isCorrect }
       }));
+
+      setJustAnsweredCorrect(result.isCorrect);
+
+      if (!result.isCorrect) {
+        const newHearts = Math.max(0, currentHearts - 1);
+        setCurrentHearts(newHearts);
+
+        if (newHearts === 0) {
+          setTimeout(() => {
+            openNoHeartsModal(handleRefillHearts, handleExitTest);
+          }, 1500);
+        }
+      }
+
+      setTimeout(() => setJustAnsweredCorrect(false), 1000);
     }
+  };
+
+  const handleRefillHearts = () => {
+    setCurrentHearts(5);
+  };
+
+  const handleExitTest = () => {
+    onClose();
   };
 
   const handleNext = () => {
@@ -100,10 +127,6 @@ export function TestSystem({
     if (testResults) {
       setResults(testResults);
       setState("results");
-
-      if (testResults.heartsLost !== undefined && testResults.heartsLost > 0) {
-        setCurrentHearts((prev) => Math.max(0, prev - testResults.heartsLost));
-      }
     }
   };
 
@@ -149,9 +172,7 @@ export function TestSystem({
             hearts={currentHearts}
             percentage={progress}
             hasActiveSubscription={false}
-            justAnsweredCorrect={
-              answers[currentTest.questions[currentQuestionIndex].id]?.isCorrect
-            }
+            justAnsweredCorrect={justAnsweredCorrect}
           />
           <div className="relative flex-1 flex items-center justify-center">
             <AnimatePresence mode="wait">
@@ -209,6 +230,8 @@ export function TestSystem({
           </motion.div>
         </AnimatePresence>
       )}
+
+      <NoHeartsTestModal />
     </div>
   );
 }

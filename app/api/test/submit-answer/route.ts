@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { reduceHeartsForFailedTest } from "@/lib/gamification";
 
 export async function POST(request: NextRequest) {
   try {
@@ -69,13 +70,14 @@ export async function POST(request: NextRequest) {
       case "ORDER_WORDS":
         const userAnswerObj =
           typeof userAnswer === "string" ? JSON.parse(userAnswer) : userAnswer;
-        console.log("userAnswerObj: ", userAnswerObj);
         const joinAnswer = userAnswerObj.join(" ");
         // @ts-expect-error no sentence interface JSON
         const rightSentence = question.content?.sentence || correctAnswer?.text;
         console.log("joinAnswer: ", joinAnswer);
         console.log("rightSentence: ", rightSentence);
         isCorrect = joinAnswer === rightSentence;
+        console.log("isCorrect: ", isCorrect);
+        break;
       case "MATCHING":
       case "DRAG_DROP":
         // Para estos tipos, el userAnswer debería ser un JSON con el orden/matches
@@ -133,6 +135,10 @@ export async function POST(request: NextRequest) {
           timeSpent
         }
       });
+    }
+
+    if (!isCorrect) {
+      await reduceHeartsForFailedTest(testAttempt.userId, testAttemptId);
     }
 
     return NextResponse.json({

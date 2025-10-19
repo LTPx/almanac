@@ -2,11 +2,68 @@ import prisma from "./prisma";
 
 const GAME_CONFIG = {
   MAX_HEARTS: 5,
-  HEARTS_RESET_HOUR: 0, // Midnight
+  HOURS_PER_HEART: 5,
   ZAPS_PER_UNIT_COMPLETE: 100,
   ZAPS_PER_HEART_PURCHASE: 10,
   TOKENS_PER_UNIT_COMPLETE: 1
 };
+
+export async function resetHeartsByHours(userId: string) {
+  const now = new Date();
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { lastHeartReset: true, hearts: true }
+  });
+
+  if (!user) throw new Error("User not found");
+
+  // Si ya tiene el máximo de corazones, no hacer nada
+  if (user.hearts >= GAME_CONFIG.MAX_HEARTS) {
+    return false;
+  }
+
+  // Calcular cuántas horas han pasado desde el último reset
+  const lastReset = new Date(user.lastHeartReset);
+  const hoursSinceLastReset =
+    (now.getTime() - lastReset.getTime()) / (60 * 60 * 1000);
+
+  // Calcular cuántos corazones se deben regenerar
+  const heartsToRegenerate = Math.floor(
+    hoursSinceLastReset / GAME_CONFIG.HOURS_PER_HEART
+  );
+
+  if (heartsToRegenerate > 0) {
+    // Calcular los nuevos corazones sin exceder el máximo
+    const newHearts = Math.min(
+      user.hearts + heartsToRegenerate,
+      GAME_CONFIG.MAX_HEARTS
+    );
+
+    const actualHeartsAdded = newHearts - user.hearts;
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        hearts: newHearts,
+        lastHeartReset: now
+      }
+    });
+
+    // Registrar transacción
+    await prisma.heartTransaction.create({
+      data: {
+        userId,
+        type: "DAILY_RESET",
+        amount: actualHeartsAdded,
+        reason: `Regeneración de ${actualHeartsAdded} corazón(es)`
+      }
+    });
+
+    return true;
+  }
+
+  return false;
+}
 
 export async function resetDailyHearts(userId: string) {
   const now = new Date();

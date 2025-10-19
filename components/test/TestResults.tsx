@@ -19,7 +19,7 @@ interface TestResultsProps {
 export function TestResults({
   results,
   onReturnToLessons,
-  hearts,
+  // hearts,
   onRetakeTest
 }: TestResultsProps) {
   const isPassed = results.passed;
@@ -37,6 +37,28 @@ export function TestResults({
       setHasPlayed(true);
     }
   }, [isPassed, hasPlayed, finishControls]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const calculateSpeed = () => {
+    const timeElapsed = results.timeQuizInSeconds || 0;
+    const totalQuestions = results.totalQuestions;
+    const averageTimePerQuestion = timeElapsed / totalQuestions;
+
+    if (averageTimePerQuestion <= 20) {
+      return "rapid";
+    } else if (averageTimePerQuestion <= 40) {
+      return "normal";
+    } else {
+      return "slow";
+    }
+  };
+
+  const speed = calculateSpeed();
 
   return (
     <div className="bg-background min-h-screen lg:p-6 flex flex-col items-center justify-center">
@@ -81,9 +103,15 @@ export function TestResults({
             </>
           )}
         </h1>
-        <div className="flex w-full items-center gap-x-4">
+
+        <div className="grid grid-cols-3 gap-3 w-full px-4">
+          <ResultCard
+            variant="speed"
+            value={formatTime(results.timeQuizInSeconds || 0)}
+            speed={speed}
+          />
           <ResultCard variant="points" value={results.experienceGained} />
-          <ResultCard variant="hearts" value={hearts || 0} />
+          <ResultCard variant="accuracy" value={Math.round(results.score)} />
         </div>
       </div>
 

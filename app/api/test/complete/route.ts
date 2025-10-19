@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  completeCurriculum,
-  reduceHeartsForFailedTest
-} from "@/lib/gamification";
+import { completeCurriculum } from "@/lib/gamification";
 import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
@@ -45,6 +42,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Calcular tiempo transcurrido en segundos
+    const startTime = new Date(testAttempt.startedAt);
+    const endTime = new Date();
+    const timeElapsedMs = endTime.getTime() - startTime.getTime();
+    const timeElapsedSeconds = Math.floor(timeElapsedMs / 1000);
+
     // Calcular resultados
     const correctAnswers = testAttempt.answers.filter(
       (a) => a.isCorrect
@@ -60,13 +63,12 @@ export async function POST(request: NextRequest) {
         correctAnswers,
         score,
         isCompleted: true,
-        completedAt: new Date()
+        completedAt: endTime
       }
     });
 
     let experienceGained = 0;
     let curriculumCompleted = false;
-    let heartsLost = 0;
     let curriculumRewards = null;
 
     if (passed) {
@@ -150,15 +152,6 @@ export async function POST(request: NextRequest) {
           });
         }
       }
-    } else {
-      // ❌ Test fallado → reducir corazones
-      try {
-        heartsLost = 1;
-        await reduceHeartsForFailedTest(testAttempt.userId, testAttemptId);
-      } catch (error: any) {
-        console.log("Error reducing hearts:", error.message);
-        heartsLost = 0;
-      }
     }
 
     return NextResponse.json({
@@ -170,8 +163,8 @@ export async function POST(request: NextRequest) {
         passed,
         experienceGained,
         curriculumCompleted,
-        curriculumRewards, // { zapTokens, unitTokens, totalCurriculumsCompleted }
-        heartsLost
+        curriculumRewards,
+        timeQuizInSeconds: timeElapsedSeconds
       }
     });
   } catch (error) {

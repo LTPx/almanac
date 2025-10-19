@@ -87,8 +87,6 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
       ? units.reduce((min, unit) => (unit.position < min.position ? unit : min))
       : null;
 
-  const startCol = firstLesson ? getRowCol(firstLesson.position).col : null;
-
   const pathLayout = generatePathLayout();
   const maxRow =
     pathLayout.length > 0 ? Math.max(...pathLayout.map((r) => r.row)) : 0;
@@ -125,55 +123,8 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     }
   };
 
-  const startIndicatorVariants: Variants = {
-    hidden: {
-      opacity: 0,
-      scale: 0,
-      y: -20
-    },
-    show: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: {
-        type: "spring",
-        stiffness: 150,
-        damping: 18,
-        duration: 0.8
-      }
-    }
-  };
-
   return (
     <div className="max-w-sm mx-auto">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-5 gap-3 lg:gap-6 mb-6 lg:mb-6"
-      >
-        {Array.from({ length: 5 }, (_, col) => (
-          <motion.div
-            key={col}
-            variants={itemVariants}
-            className="flex justify-center"
-          >
-            {startCol === col ? (
-              <motion.div
-                initial="hidden"
-                animate="show"
-                variants={startIndicatorVariants}
-                className="w-full h-full lg:h-16 flex flex-col items-center"
-              >
-                <div className="bg-[#F9F0B6] rounded-t-full w-full h-full lg:h-16 flex items-center justify-center shadow-lg"></div>
-              </motion.div>
-            ) : (
-              <div className="w-full h-16 lg:h-16"></div>
-            )}
-          </motion.div>
-        ))}
-      </motion.div>
-
       {pathLayout.map((rowData, rowIndex) => {
         const isBottomRow = rowData.row === maxRow;
 
@@ -208,6 +159,9 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                       hearts={hearts}
                       shouldFloat={
                         isBottomRow && nodeData.mandatory && !isCompleted
+                      }
+                      isFirstMandatory={
+                        nodeData.id === firstLesson?.id && nodeData.mandatory
                       }
                       onStartLesson={() => onStartUnit(nodeData)}
                     />
