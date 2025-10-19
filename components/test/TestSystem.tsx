@@ -6,6 +6,8 @@ import { TestQuestion } from "./TestQuestion";
 import { TestResults } from "./TestResults";
 import { useTest } from "@/hooks/useTest";
 import { HeaderBar } from "../header-bar";
+import { NoHeartsTestModal } from "../modals/no-hearts-test-modal";
+import { useNoHeartsTestModal } from "@/store/use-no-hearts-test-modal";
 
 import type {
   TestData,
@@ -42,6 +44,7 @@ export function TestSystem({
 
   const { error, startTest, submitAnswer, completeTest } = useTest();
   const hasInitialized = useRef(false);
+  const { open: openNoHeartsModal } = useNoHeartsTestModal();
 
   const handleStartTest = useCallback(
     async (lessonId: number) => {
@@ -85,11 +88,26 @@ export function TestSystem({
       setJustAnsweredCorrect(result.isCorrect);
 
       if (!result.isCorrect) {
-        setCurrentHearts((prev) => Math.max(0, prev - 1));
+        const newHearts = Math.max(0, currentHearts - 1);
+        setCurrentHearts(newHearts);
+
+        if (newHearts === 0) {
+          setTimeout(() => {
+            openNoHeartsModal(handleRefillHearts, handleExitTest);
+          }, 1500);
+        }
       }
 
       setTimeout(() => setJustAnsweredCorrect(false), 1000);
     }
+  };
+
+  const handleRefillHearts = () => {
+    setCurrentHearts(5);
+  };
+
+  const handleExitTest = () => {
+    onClose();
   };
 
   const handleNext = () => {
@@ -212,6 +230,8 @@ export function TestSystem({
           </motion.div>
         </AnimatePresence>
       )}
+
+      <NoHeartsTestModal />
     </div>
   );
 }

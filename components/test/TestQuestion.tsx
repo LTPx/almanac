@@ -171,12 +171,12 @@ export function TestQuestion({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2, duration: 0.3 }}
-                    className="bg-[#32C781]/10 border border-[#32C781]/30 rounded-lg p-4"
+                    className="bg-red-500/10 border border-red-500/50 rounded-lg p-4"
                   >
                     <div className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-[#32C781] mt-0.5 flex-shrink-0" />
+                      <XCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="text-sm font-semibold text-[#32C781] mb-1">
+                        <p className="text-sm font-semibold text-red-400 mb-1">
                           Respuesta correcta:
                         </p>
                         <p className="text-white font-medium">
