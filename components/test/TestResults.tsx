@@ -45,7 +45,7 @@ export function TestResults({
   };
 
   const calculateSpeed = () => {
-    const timeElapsed = results.timeElapsed || 0;
+    const timeElapsed = results.timeQuizInSeconds || 0;
     const totalQuestions = results.totalQuestions;
     const averageTimePerQuestion = timeElapsed / totalQuestions;
 
@@ -104,11 +104,10 @@ export function TestResults({
           )}
         </h1>
 
-        {/* Tarjetas de resultados */}
         <div className="grid grid-cols-3 gap-3 w-full px-4">
           <ResultCard
             variant="speed"
-            value={formatTime(results.timeElapsed || 0)}
+            value={formatTime(results.timeQuizInSeconds || 0)}
             speed={speed}
           />
           <ResultCard variant="points" value={results.experienceGained} />
