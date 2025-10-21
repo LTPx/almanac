@@ -75,7 +75,25 @@ export async function POST(
       nftImageId
     });
 
-    // 5) IMPORTANTE: Devolver el NFT con los metadatos incluidos
+    // 5) Spend zaps
+    await prisma.zapTransaction.create({
+      data: {
+        userId,
+        type: "ADMIN_ADJUSTMENT",
+        amount: -100,
+        reason: "ZAPs gastados en mintear NFT"
+      }
+    });
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        hearts: { increment: 1 },
+        zapTokens: { decrement: 100 }
+      }
+    });
+
+    // 6) IMPORTANTE: Devolver el NFT con los metadatos incluidos
     return NextResponse.json({
       success: true,
       nft: {
@@ -113,6 +131,14 @@ async function validateUserAndTokens(
   if (!user.walletAddress) {
     return {
       error: "Usuario sin walletAddress",
+      status: 400,
+      data: null
+    };
+  }
+
+  if (user.zapTokens < 100) {
+    return {
+      error: "Zaps insuficientes",
       status: 400,
       data: null
     };
