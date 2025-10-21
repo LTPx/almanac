@@ -91,6 +91,25 @@ export function TestSystem({
         const newHearts = Math.max(0, currentHearts - 1);
         setCurrentHearts(newHearts);
 
+        // 🔁 Reinsertar pregunta fallada al final
+        setCurrentTest((prevTest) => {
+          if (!prevTest) return prevTest;
+          const failedQuestion = prevTest.questions.find(
+            (q) => q.id === questionId
+          );
+          if (!failedQuestion) return prevTest;
+
+          const alreadyQueued = prevTest.questions
+            .slice(currentQuestionIndex + 1)
+            .some((q) => q.id === questionId);
+          if (alreadyQueued) return prevTest;
+
+          return {
+            ...prevTest,
+            questions: [...prevTest.questions, failedQuestion]
+          };
+        });
+
         if (newHearts === 0) {
           setTimeout(() => {
             openNoHeartsModal(handleRefillHearts, handleExitTest);
@@ -112,6 +131,15 @@ export function TestSystem({
 
   const handleNext = () => {
     if (!currentTest) return;
+
+    const currentQuestionId = currentTest.questions[currentQuestionIndex].id;
+
+    // 🧹 Limpiar respuesta si la pregunta fue reinsertada
+    setAnswers((prev) => {
+      const updated = { ...prev };
+      delete updated[currentQuestionId];
+      return updated;
+    });
 
     if (currentQuestionIndex < currentTest.questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
