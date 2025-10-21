@@ -7,7 +7,34 @@ export const getUnitsByCurriculumId = cache(async (curriculumId: string) => {
       id: curriculumId
     },
     include: {
-      units: true,
+      units: {
+        where: {
+          isActive: true
+        },
+        include: {
+          lessons: {
+            where: {
+              isActive: true
+            },
+            orderBy: {
+              position: "asc"
+            },
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              position: true,
+              isActive: true,
+              createdAt: true,
+              updatedAt: true,
+              unitId: true
+            }
+          }
+        },
+        orderBy: {
+          order: "asc"
+        }
+      },
       _count: {
         select: {
           units: true
@@ -15,6 +42,7 @@ export const getUnitsByCurriculumId = cache(async (curriculumId: string) => {
       }
     }
   });
+
   if (data) {
     return data.units;
   } else {

@@ -7,21 +7,28 @@ import {
   AccordionItem,
   AccordionTrigger
 } from "@/components/ui/accordion";
-import { useUnits } from "@/hooks/use-units";
-import { Lesson, Unit } from "@/lib/types";
+import { useCurriculums } from "@/hooks/use-curriculums";
+import { Lesson, Unit, Curriculum } from "@/lib/types";
 import { FormattedTextDisplay } from "@/components/formatted-text-display";
+import { useCurriculumStore } from "@/store/useCurriculumStore";
 
 function Contents() {
-  const { fetchUnits, isLoading } = useUnits();
-  const [units, setUnits] = useState<Unit[]>([]);
+  const { selectedCurriculumId } = useCurriculumStore();
+  const { fetchCurriculumWithUnits, isLoading } = useCurriculums();
+  const [curriculum, setCurriculum] = useState<Curriculum | null>(null);
 
   useEffect(() => {
-    const loadUnits = async () => {
-      const data = await fetchUnits();
-      if (data) setUnits(data);
+    const loadCurriculumUnits = async () => {
+      if (!selectedCurriculumId) return;
+
+      const data = await fetchCurriculumWithUnits(selectedCurriculumId);
+      if (data) {
+        setCurriculum(data);
+      }
     };
-    loadUnits();
-  }, [fetchUnits]);
+
+    loadCurriculumUnits();
+  }, [selectedCurriculumId, fetchCurriculumWithUnits]);
 
   if (isLoading) {
     return (
@@ -31,12 +38,22 @@ function Contents() {
     );
   }
 
+  if (!selectedCurriculumId || !curriculum) {
+    return (
+      <div className="min-h-screen bg-neutral-900 text-white flex items-center justify-center">
+        <div className="text-gray-400 text-lg">
+          No se ha seleccionado un curriculum
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-neutral-900 text-white p-6">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-[22px] font-bold mb-6">Temas</h1>
 
-        {units.map((unit) => (
+        {curriculum.units?.map((unit: Unit) => (
           <div key={unit.id} className="mb-6">
             <h2 className="text-xl font-bold mb-3">{unit.name}</h2>
 

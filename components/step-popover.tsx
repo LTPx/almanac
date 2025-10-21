@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface StepPopoverProps {
   title?: string;
@@ -33,6 +34,8 @@ export function StepPopover({
   isOptional = false,
   isFirstMandatory = false
 }: StepPopoverProps) {
+  const router = useRouter();
+
   const getPopoverClass = () => {
     if (className) return className;
     if (isLocked) return "bg-gray-700 text-white p-4";
@@ -64,13 +67,23 @@ export function StepPopover({
     ? "bg-gray-600 hover:bg-gray-600"
     : "bg-white hover:bg-white/90";
 
+  const handleBookClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push("/contents");
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className={`${getPopoverClass()} rounded-xl relative`}>
-        <div className="absolute top-4 right-4">
-          <BookOpen className={`w-6 h-6 ${getIconColor()}`} />
-        </div>
+        <button
+          onClick={handleBookClick}
+          className="absolute top-4 right-4 hover:scale-110 transition-transform cursor-pointer focus:outline-none"
+          aria-label="Ver contenidos"
+        >
+          <BookOpen className={`w-6 h-6 ${getIconColor()} hover:opacity-100`} />
+        </button>
 
         <div className="pr-10">
           {title && <h3 className="font-bold text-lg">{title}</h3>}

@@ -7,12 +7,15 @@ import CourseHeader from "@/components/course-header";
 import { useGamification } from "@/hooks/useGamification";
 import { useCurriculums } from "@/hooks/use-curriculums";
 import LearningPath from "@/components/units-learning";
+import { useCurriculumStore } from "@/store/useCurriculumStore";
 
 export default function HomePage() {
   const [curriculums, setCurriculums] = useState<Curriculum[]>([]);
-  const [selectedCurriculumId, setSelectedCurriculumId] = useState<string>("");
   const [selectedCurriculum, setSelectedCurriculum] =
     useState<Curriculum | null>(null);
+  const { selectedCurriculumId, setSelectedCurriculumId } =
+    useCurriculumStore();
+
   const user = useUser();
   const userId = user?.id || "";
   const { isLoading, error, fetchCurriculums, fetchCurriculumWithUnits } =
@@ -25,13 +28,14 @@ export default function HomePage() {
       const data = await fetchCurriculums();
       if (data) {
         setCurriculums(data);
-        if (data.length > 0) {
+        // Si no hay curriculum seleccionado, seleccionar el primero
+        if (data.length > 0 && !selectedCurriculumId) {
           setSelectedCurriculumId(data[0].id.toString());
         }
       }
     };
     loadUnits();
-  }, [fetchCurriculums]);
+  }, [fetchCurriculums, selectedCurriculumId, setSelectedCurriculumId]);
 
   useEffect(() => {
     if (!selectedCurriculumId) return;
@@ -47,12 +51,16 @@ export default function HomePage() {
     await refetchGamification();
   }, [refetchGamification]);
 
+  const handleCurriculumChange = (curriculumId: string) => {
+    setSelectedCurriculumId(curriculumId);
+  };
+
   return (
     <div className="HomePage">
       <CourseHeader
         curriculums={curriculums}
         selectedCurriculumId={selectedCurriculumId}
-        onUnitChange={setSelectedCurriculumId}
+        onUnitChange={handleCurriculumChange}
         lives={gamification?.hearts ?? 0}
         zaps={gamification?.zapTokens ?? 0}
       />
