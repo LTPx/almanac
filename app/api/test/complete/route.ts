@@ -93,6 +93,36 @@ export async function POST(request: NextRequest) {
             completedAt: new Date()
           }
         });
+
+        if (curriculumId) {
+          // ✅ Revisar si completó todas las unidades obligatorias
+          const unitsCurriculum = await prisma.unit.findMany({
+            where: {
+              curriculumId,
+              isActive: true,
+              mandatory: true
+            },
+            select: { id: true }
+          });
+
+          const completedUnits = await prisma.userUnitProgress.findMany({
+            where: {
+              userId: testAttempt.userId,
+              unitId: { in: unitsCurriculum.map((l) => l.id) }
+            }
+          });
+
+          curriculumCompleted =
+            completedUnits.length === unitsCurriculum.length;
+
+          if (curriculumCompleted) {
+            curriculumRewards = await completeCurriculum(
+              testAttempt.userId,
+              curriculumId
+            );
+            console.log("user tokens gain: ", curriculumRewards);
+          }
+        }
       } else {
         // Usuario repite el test y aprueba: dar **mitad de XP** y sumarla
         experienceGained = Math.floor(testAttempt.unit.experiencePoints / 2);
