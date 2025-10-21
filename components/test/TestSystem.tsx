@@ -171,7 +171,7 @@ export function TestSystem({
   };
 
   const progress = currentTest
-    ? ((currentQuestionIndex + 1) / currentTest.totalQuestions) * 100
+    ? ((currentQuestionIndex + 1) / currentTest.questions.length) * 100
     : 0;
 
   if (error) {
