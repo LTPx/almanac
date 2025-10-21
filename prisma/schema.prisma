@@ -31,6 +31,7 @@ model User {
 
   // GAMIFICATION 
   hearts                    Int      @default(5)
+  totalExperiencePoints     Int      @default(0)
   zapTokens                 Int      @default(0)
   lastHeartReset            DateTime @default(now())
   totalCurriculumsCompleted Int      @default(0)

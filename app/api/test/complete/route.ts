@@ -72,10 +72,6 @@ export async function POST(request: NextRequest) {
     let curriculumRewards = null;
 
     if (passed) {
-      // ✅ Test pasado → otorgar experiencia
-      experienceGained = testAttempt.unit.experiencePoints;
-
-      // Verificar si ya existe progreso para esta lección
       const existingUnitProgress = await prisma.userUnitProgress.findUnique({
         where: {
           userId_unitId: {
@@ -86,72 +82,45 @@ export async function POST(request: NextRequest) {
       });
 
       if (!existingUnitProgress) {
-        // Crear progreso de la unidad aprobada
+        // Primer intento aprobado: XP completa
+        experienceGained = testAttempt.unit.experiencePoints;
+
         await prisma.userUnitProgress.create({
           data: {
             userId: testAttempt.userId,
             unitId: testAttempt.unitId,
-            experiencePoints: testAttempt.unit.experiencePoints,
+            experiencePoints: experienceGained,
             completedAt: new Date()
           }
         });
+      } else {
+        // Usuario repite el test y aprueba: dar **mitad de XP** y sumarla
+        experienceGained = Math.floor(testAttempt.unit.experiencePoints / 2);
 
-        if (curriculumId) {
-          // ✅ Revisar si completó todas las unidades obligatorias
-          const unitsCurriculum = await prisma.unit.findMany({
-            where: {
-              curriculumId,
-              isActive: true,
-              mandatory: true
-            },
-            select: { id: true }
-          });
-
-          const completedUnits = await prisma.userUnitProgress.findMany({
-            where: {
+        await prisma.userUnitProgress.update({
+          where: {
+            userId_unitId: {
               userId: testAttempt.userId,
-              unitId: { in: unitsCurriculum.map((l) => l.id) }
+              unitId: testAttempt.unitId
             }
-          });
-
-          curriculumCompleted =
-            completedUnits.length === unitsCurriculum.length;
-
-          if (curriculumCompleted) {
-            curriculumRewards = await completeCurriculum(
-              testAttempt.userId,
-              curriculumId
-            );
-            console.log("user tokens gain: ", curriculumRewards);
-          }
-        }
-
-        // ✅ Actualizar racha
-        await prisma.userStreak.upsert({
-          where: { userId: testAttempt.userId },
-          update: {
-            currentStreak: { increment: 1 },
-            lastActivity: new Date()
           },
-          create: {
-            userId: testAttempt.userId,
-            currentStreak: 1,
-            longestStreak: 1,
-            lastActivity: new Date()
+          data: {
+            experiencePoints: {
+              increment: experienceGained
+            },
+            completedAt: new Date()
           }
         });
-
-        const userStreak = await prisma.userStreak.findUnique({
-          where: { userId: testAttempt.userId }
-        });
-
-        if (userStreak && userStreak.currentStreak > userStreak.longestStreak) {
-          await prisma.userStreak.update({
-            where: { userId: testAttempt.userId },
-            data: { longestStreak: userStreak.currentStreak }
-          });
-        }
       }
+
+      await prisma.user.update({
+        where: { id: testAttempt.userId },
+        data: {
+          totalExperiencePoints: {
+            increment: experienceGained
+          }
+        }
+      });
     }
 
     return NextResponse.json({
