@@ -5,7 +5,7 @@ import { Zap, Play } from "lucide-react";
 
 export default function SpecialOfferCard() {
   return (
-    <Card className="bg-gray-800 border-gray-700">
+    <Card className="bg-background border-gray-700">
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
