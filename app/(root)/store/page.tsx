@@ -36,6 +36,7 @@ export default function Store() {
   // Cargar información del usuario al montar el componente
   useEffect(() => {
     loadUserStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadUserStats = async () => {
@@ -134,9 +135,15 @@ export default function Store() {
           />
           <h1 className="text-xl font-semibold">Tienda</h1>
         </div>
-        <div className="flex items-center gap-2">
-          <Zap className="w-5 h-5 text-purple-500" />
-          <span className="text-purple-500 font-semibold">{zapTokens}</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Heart className="w-5 h-5 text-red-500 fill-red-500" />
+            <span className="text-red-500 font-semibold">{hearts}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Zap className="w-5 h-5 text-purple-500" />
+            <span className="text-purple-500 font-semibold">{zapTokens}</span>
+          </div>
         </div>
       </div>
 
