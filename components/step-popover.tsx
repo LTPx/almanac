@@ -21,6 +21,8 @@ interface StepPopoverProps {
   isLocked?: boolean;
   isOptional?: boolean;
   isFirstMandatory?: boolean;
+  isCompleted?: boolean;
+  mandatory?: boolean;
 }
 
 export function StepPopover({
@@ -32,13 +34,21 @@ export function StepPopover({
   children,
   isLocked = false,
   isOptional = false,
-  isFirstMandatory = false
+  isFirstMandatory = false,
+  isCompleted = false,
+  mandatory = false
 }: StepPopoverProps) {
   const router = useRouter();
 
   const getPopoverClass = () => {
     if (className) return className;
     if (isLocked) return "bg-gray-700 text-white p-4";
+    if (isCompleted) {
+      if (isFirstMandatory && mandatory)
+        return "bg-[#F9F0B6] text-gray-900 p-4";
+      if (mandatory) return "bg-[#5EC16A] text-white p-4";
+      return "bg-[#E6E7EB] text-gray-900 p-4";
+    }
     if (isFirstMandatory) return "bg-[#F9F0B6] text-gray-900 p-4";
     if (isOptional) return "bg-[#1983DD] text-white p-4";
     return "bg-[#1F941C] text-white p-4";
@@ -46,6 +56,11 @@ export function StepPopover({
 
   const getArrowClass = () => {
     if (isLocked) return "fill-gray-700";
+    if (isCompleted) {
+      if (isFirstMandatory && mandatory) return "fill-[#F9F0B6]";
+      if (mandatory) return "fill-[#5EC16A]";
+      return "fill-[#E6E7EB]";
+    }
     if (isFirstMandatory) return "fill-[#F9F0B6]";
     if (isOptional) return "fill-[#1983DD]";
     return "fill-[#1F941C]";
@@ -53,12 +68,18 @@ export function StepPopover({
 
   const getButtonTextColor = () => {
     if (isLocked) return "text-gray-400";
+    if (isCompleted) {
+      if (isFirstMandatory && mandatory) return "text-gray-900";
+      if (mandatory) return "text-[#5EC16A]";
+      return "text-gray-700";
+    }
     if (isFirstMandatory) return "text-gray-900";
     if (isOptional) return "text-[#1983DD]";
     return "text-[#1F941C]";
   };
 
   const getIconColor = () => {
+    if (isCompleted && !mandatory) return "text-gray-900 opacity-90";
     if (isFirstMandatory) return "text-gray-900 opacity-90";
     return "text-white opacity-90";
   };

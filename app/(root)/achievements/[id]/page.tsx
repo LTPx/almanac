@@ -132,11 +132,12 @@ export default function NFTDetailPage() {
         <div className="sticky top-0 z-10 bg-black/80 backdrop-blur-sm border-b border-gray-800">
           <div className="flex items-center justify-between p-4">
             <Skeleton className="h-8 w-8 rounded-full" />
-            <Skeleton className="h-8 w-20" />
           </div>
         </div>
         <div className="p-4 space-y-4">
-          <Skeleton className="w-full aspect-square rounded-2xl" />
+          <div className="flex justify-center">
+            <Skeleton className="w-[280px] h-[280px] aspect-square rounded-2xl" />
+          </div>
           <Skeleton className="h-8 w-3/4" />
           <Skeleton className="h-20 w-full" />
         </div>
