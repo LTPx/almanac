@@ -222,7 +222,7 @@ export default function Store() {
                     <span>
                       {totalZapCost} Zaps × {heartQuantity}
                     </span>
-                    <Zap className="w-5 h-5 fill-purple-500" />
+                    <Heart className="w-5 h-5 text-red-500 fill-red-500" />
                   </div>
 
                   <button
