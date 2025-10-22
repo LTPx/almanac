@@ -6,6 +6,26 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "**.googleusercontent.com"
+      },
+      {
+        protocol: "https",
+        hostname: "gateway.pinata.cloud",
+        pathname: "/ipfs/**"
+      },
+      {
+        protocol: "https",
+        hostname: "ipfs.io",
+        pathname: "/ipfs/**"
+      },
+      {
+        protocol: "https",
+        hostname: "cloudflare-ipfs.com",
+        pathname: "/ipfs/**"
+      },
+      {
+        protocol: "https",
+        hostname: "dweb.link",
+        pathname: "/ipfs/**"
       }
     ]
   }

@@ -1,0 +1,377 @@
+"use client";
+
+import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ChevronLeft, ChevronDown, AlertCircle } from "lucide-react";
+import Image from "next/image";
+
+interface NFTMetadata {
+  name: string;
+  description: string;
+  image: string;
+  attributes?: Array<{
+    trait_type: string;
+    value: string | number;
+  }>;
+}
+
+interface NFTDetail {
+  id: string;
+  tokenId: string;
+  contractAddress: string;
+  transactionHash?: string;
+  chain: string;
+  tokenStandard: string;
+  collectionName: string;
+  owner: string;
+  ownerName?: string;
+  mintedAt: string;
+  curriculum?: {
+    id: string;
+    title: string;
+    difficulty: string;
+  };
+  metadata: NFTMetadata;
+}
+
+export default function NFTDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const nftId = params?.id as string;
+
+  const [nft, setNft] = useState<NFTDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [aboutExpanded, setAboutExpanded] = useState(true);
+  const [collectionExpanded, setCollectionExpanded] = useState(false);
+  const [blockchainExpanded, setBlockchainExpanded] = useState(false);
+  const [moreFromCollection, setMoreFromCollection] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchNFTDetail();
+  }, [nftId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchNFTDetail = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/users/[userId]/nfts/${nftId}`);
+
+      if (!response.ok) {
+        throw new Error("Error al cargar el NFT");
+      }
+
+      const data = await response.json();
+      setNft(data);
+
+      if (data.collectionName) {
+        fetchMoreFromCollection(data.collectionName, nftId);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error desconocido");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMoreFromCollection = async (
+    collectionName: string,
+    currentNftId: string
+  ) => {
+    try {
+      const response = await fetch(
+        `/api/collections/${collectionName}/nfts?limit=3&exclude=${currentNftId}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setMoreFromCollection(data.nfts || []);
+      }
+    } catch (err) {
+      console.error("Error fetching collection NFTs:", err);
+    }
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: nft?.metadata.name || "Mi NFT",
+      text: nft?.metadata.description || "Mira mi certificado NFT",
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert("Enlace copiado al portapapeles");
+      }
+    } catch (err) {
+      console.error("Error sharing:", err);
+    }
+  };
+
+  const formatAddress = (address: string) => {
+    if (!address) return "";
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("es-ES", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <div className="sticky top-0 z-10 bg-black/80 backdrop-blur-sm border-b border-gray-800">
+          <div className="flex items-center justify-between p-4">
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <Skeleton className="h-8 w-20" />
+          </div>
+        </div>
+        <div className="p-4 space-y-4">
+          <Skeleton className="w-full aspect-square rounded-2xl" />
+          <Skeleton className="h-8 w-3/4" />
+          <Skeleton className="h-20 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !nft) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {error || "NFT no encontrado"}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => router.back()}
+              className="ml-3"
+            >
+              Volver
+            </Button>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  const achievements =
+    nft.metadata.attributes?.filter(
+      (attr) =>
+        attr.trait_type.includes("Algebra") ||
+        attr.trait_type.includes("Imaginary") ||
+        attr.trait_type.includes("Binomials")
+    ) || [];
+
+  return (
+    <div className="min-h-screen bg-black text-white pb-20">
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-black/80 backdrop-blur-sm border-b border-gray-800">
+        <div className="flex items-center justify-between p-4">
+          <button
+            onClick={() => router.back()}
+            className="p-2 hover:bg-gray-800 rounded-full transition-colors"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+        </div>
+      </div>
+
+      {/* NFT Image */}
+      <div className="p-4 flex justify-center">
+        <div className="relative w-[280px] h-[280px] rounded-2xl overflow-hidden bg-gradient-to-br from-green-400 to-green-600 shadow-xl">
+          <Image
+            src={nft.metadata.image}
+            alt={nft.metadata.name}
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+      </div>
+
+      {/* NFT Info */}
+      <div className="px-4 space-y-6">
+        {/* Title */}
+        <div>
+          <h1 className="text-2xl font-bold mb-1">{nft.metadata.name}</h1>
+          <p className="text-gray-400 text-sm">
+            Collection name · Owned by{" "}
+            {nft.owner ? formatAddress(nft.owner) : ""}
+          </p>
+        </div>
+
+        {/* About Section */}
+        <div className="border-t border-gray-800 pt-4">
+          <button
+            onClick={() => setAboutExpanded(!aboutExpanded)}
+            className="flex items-center justify-between w-full mb-3"
+          >
+            <h2 className="text-lg font-semibold">About</h2>
+            <ChevronDown
+              className={`w-5 h-5 transition-transform ${
+                aboutExpanded ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {aboutExpanded && (
+            <div className="space-y-3">
+              <div>
+                <p className="text-xl font-bold mb-2">
+                  About {nft.metadata.name}
+                </p>
+                <p className="text-gray-400 text-sm leading-relaxed">
+                  {nft.metadata.description}
+                </p>
+              </div>
+
+              {/* Achievements */}
+              {achievements.length > 0 && (
+                <div>
+                  <p className="font-semibold mb-2">Achievements</p>
+                  <div className="space-y-1">
+                    {achievements.map((achievement, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between text-sm"
+                      >
+                        <span className="text-gray-400">
+                          {achievement.trait_type}
+                        </span>
+                        <span className="font-medium">
+                          {achievement.value}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Minted Date */}
+              <div>
+                <p className="font-semibold mb-1">Minted:</p>
+                <p className="text-gray-400 text-sm">
+                  {formatDate(nft.mintedAt)}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Collection Section */}
+        <div className="border-t border-gray-800 pt-4">
+          <button
+            onClick={() => setCollectionExpanded(!collectionExpanded)}
+            className="flex items-center justify-between w-full"
+          >
+            <h2 className="text-lg font-semibold">
+              About {nft.collectionName}
+            </h2>
+            <ChevronDown
+              className={`w-5 h-5 transition-transform ${
+                collectionExpanded ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {collectionExpanded && (
+            <div className="mt-3">
+              <p className="text-gray-400 text-sm leading-relaxed">
+                {nft.collectionName} - Certificados educacionales únicos que
+                validan tu progreso y logros en{" "}
+                {nft.curriculum?.title || "Almanac"}.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Blockchain Details */}
+        <div className="border-t border-gray-800 pt-4">
+          <button
+            onClick={() => setBlockchainExpanded(!blockchainExpanded)}
+            className="flex items-center justify-between w-full"
+          >
+            <h2 className="text-lg font-semibold">Blockchain details</h2>
+            <ChevronDown
+              className={`w-5 h-5 transition-transform ${
+                blockchainExpanded ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {blockchainExpanded && (
+            <div className="mt-3 space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-400">Contract address</span>
+                <span className="text-blue-400">
+                  {formatAddress(nft.contractAddress)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Token ID</span>
+                <span>{nft.tokenId}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Token Standard</span>
+                <span>{nft.tokenStandard}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Chain</span>
+                <span>{nft.chain}</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Share Button */}
+        <Button
+          onClick={handleShare}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-base font-semibold rounded-xl"
+        >
+          Share
+        </Button>
+
+        {/* More from Collection */}
+        {moreFromCollection.length > 0 && (
+          <div className="border-t border-gray-800 pt-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">
+                More from this collection
+              </h2>
+              <ChevronDown className="w-5 h-5" />
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {moreFromCollection.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => router.push(`/achievements/${item.id}`)}
+                  className="relative aspect-square rounded-xl overflow-hidden bg-gray-800 hover:opacity-80 transition-opacity"
+                >
+                  <Image
+                    src={item.metadata?.image || "/placeholder.png"}
+                    alt={item.metadata?.name || "NFT"}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                    <p className="text-xs font-medium truncate">
+                      {item.metadata?.name || `#${item.tokenId}`}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

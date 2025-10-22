@@ -125,6 +125,7 @@ function AchievementsContent({ userId }: { userId: string }) {
                 nfts.map((nft) => (
                   <CardNFT
                     key={nft.id}
+                    id={nft.id}
                     image={nft.metadata?.image || ""}
                     title={nft.metadata?.name || `Certificado #${nft.tokenId}`}
                     description={nft.metadata?.description}
