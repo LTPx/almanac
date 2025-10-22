@@ -153,7 +153,23 @@ const LessonNode: React.FC<LessonNodeProps> = ({
   );
 
   if (state === "completed") {
-    return nodeContent;
+    return (
+      <StepPopover
+        title={name}
+        message={
+          description ||
+          "¡Nivel completado! Puedes volver a intentarlo para mejorar tu puntuación."
+        }
+        buttonText="Volver a Intentar"
+        onButtonClick={handleStartLesson}
+        isLocked={false}
+        isCompleted={true}
+        mandatory={mandatory}
+        isFirstMandatory={isFirstMandatory}
+      >
+        {nodeContent}
+      </StepPopover>
+    );
   }
 
   if (state === "locked") {

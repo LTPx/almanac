@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ArrowLeft, Zap } from "lucide-react";
+import { ArrowLeft, Zap, Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import PremiumCard from "@/components/premium-card";
 import SpecialOfferCard from "@/components/offert-card";
@@ -17,20 +17,23 @@ export default function Store() {
           <ArrowLeft
             onClick={() => router.back()}
             className="w-6 h-6 text-gray-400 cursor-pointer hover:text-gray-200"
-          />{" "}
+          />
           <h1 className="text-xl font-semibold">Tienda</h1>
         </div>
         <div className="flex items-center gap-2">
           <Zap className="w-5 h-5 text-purple-500" />
           <span className="text-purple-500 font-semibold">120</span>
         </div>
-      </div>{" "}
+      </div>
+
       <div className="p-4 space-y-6">
         <PremiumCard />
+
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Ofertas especiales</h3>
           <SpecialOfferCard />
         </div>
+
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Zaps</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -61,6 +64,28 @@ export default function Store() {
                 </div>
               }
             />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Vidas</h3>
+          <div className="bg-background rounded-2xl p-6 border border-gray-700">
+            <div className="flex items-start gap-4">
+              <div className="bg-red-500/20 p-3 rounded-xl">
+                <Heart className="w-8 h-8 text-red-500 fill-red-500" />
+              </div>
+              <div className="flex-1">
+                <h4 className="text-lg font-semibold mb-2">Set de vidas</h4>
+                <p className="text-gray-400 text-sm mb-4">
+                  Recarga tus vidas para tener más oportunidades de continuar en
+                  tus pruebas.
+                </p>
+                <div className="flex items-center gap-2 text-purple-500 font-semibold">
+                  <span>20 Zaps</span>
+                  <Zap className="w-5 h-5 fill-purple-500" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

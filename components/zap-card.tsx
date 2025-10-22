@@ -9,7 +9,7 @@ interface ZapCardProps {
 
 export default function ZapCard({ amount, price, icon }: ZapCardProps) {
   return (
-    <Card className="bg-gray-800 border-gray-700 hover:border-purple-500 transition-colors">
+    <Card className="bg-background border-gray-700 hover:border-purple-500 transition-colors">
       <CardContent className="p-6 text-center space-y-4">
         <div className="flex justify-center">{icon}</div>
         <div>
