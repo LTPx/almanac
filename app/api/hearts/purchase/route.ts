@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 const ZAP_TO_HEART_RATE = 10; // 10 ZAPs = 1 corazón
-const MAX_HEARTS = 5; // Máximo de corazones permitidos
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,6 +27,7 @@ export async function POST(request: NextRequest) {
 
     const zapCost = heartsToPurchase * ZAP_TO_HEART_RATE;
 
+    // Usar transacción para garantizar atomicidad
     const result = await prisma.$transaction(async (tx) => {
       // 1. Obtener el usuario con bloqueo para evitar condiciones de carrera
       const user = await tx.user.findUnique({
@@ -50,16 +50,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // 3. Validar que no exceda el máximo de corazones
-      const newHeartTotal = user.hearts + heartsToPurchase;
-
-      if (newHeartTotal > MAX_HEARTS) {
-        throw new Error(
-          `No puedes tener más de ${MAX_HEARTS} corazones. Actualmente tienes ${user.hearts}`
-        );
-      }
-
-      // 4. Actualizar el usuario (restar ZAPs y sumar corazones)
+      // 3. Actualizar el usuario (restar ZAPs y sumar corazones)
       const updatedUser = await tx.user.update({
         where: { id: userId },
         data: {
@@ -73,7 +64,7 @@ export async function POST(request: NextRequest) {
         }
       });
 
-      // 5. Registrar la transacción de ZAPs
+      // 4. Registrar la transacción de ZAPs
       await tx.zapTransaction.create({
         data: {
           userId: userId,
@@ -83,7 +74,7 @@ export async function POST(request: NextRequest) {
         }
       });
 
-      // 6. Registrar la transacción de corazones
+      // 5. Registrar la transacción de corazones
       await tx.heartTransaction.create({
         data: {
           userId: userId,
@@ -148,15 +139,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const maxHeartsPurchasable = Math.min(
-      Math.floor(user.zapTokens / ZAP_TO_HEART_RATE),
-      MAX_HEARTS - user.hearts
-    );
+    const maxHeartsPurchasable = Math.floor(user.zapTokens / ZAP_TO_HEART_RATE);
 
     return NextResponse.json({
       currentZaps: user.zapTokens,
       currentHearts: user.hearts,
-      maxHearts: MAX_HEARTS,
       exchangeRate: `${ZAP_TO_HEART_RATE} ZAPs = 1 Corazón`,
       canPurchase: maxHeartsPurchasable,
       zapCostForOne: ZAP_TO_HEART_RATE
