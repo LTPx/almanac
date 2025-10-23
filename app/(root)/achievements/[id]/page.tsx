@@ -67,7 +67,8 @@ export default function NFTDetailPage() {
       setNft(data);
 
       if (data.collectionName) {
-        fetchMoreFromCollection(data.collectionName, nftId);
+        // debugger;
+        // fetchMoreFromCollection(data.collectionName, nftId);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
@@ -76,22 +77,22 @@ export default function NFTDetailPage() {
     }
   };
 
-  const fetchMoreFromCollection = async (
-    collectionName: string,
-    currentNftId: string
-  ) => {
-    try {
-      const response = await fetch(
-        `/api/collections/${collectionName}/nfts?limit=3&exclude=${currentNftId}`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setMoreFromCollection(data.nfts || []);
-      }
-    } catch (err) {
-      console.error("Error fetching collection NFTs:", err);
-    }
-  };
+  // const fetchMoreFromCollection = async (
+  //   collectionName: string,
+  //   currentNftId: string
+  // ) => {
+  //   try {
+  //     const response = await fetch(
+  //       `/api/collections/${collectionName}/nfts?limit=3&exclude=${currentNftId}`
+  //     );
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       setMoreFromCollection(data.nfts || []);
+  //     }
+  //   } catch (err) {
+  //     console.error("Error fetching collection NFTs:", err);
+  //   }
+  // };
 
   const handleShare = async () => {
     const shareData = {

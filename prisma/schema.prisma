@@ -376,6 +376,7 @@ enum ZapTransactionType {
   LESSON_COMPLETED // Ganó ZAPs por completar lección
   DAILY_BONUS // Bonificación diaria
   ADMIN_ADJUSTMENT // Ajuste manual por admin
+  TOKEN_MINTED // Mintear un token
 
   @@map("zap_transaction_type")
 }
