@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
         zapTokens: true,
         zapTransactions: {
           where: {
-            type: "DAILY_BONUS", // Usamos DAILY_BONUS para ads por ahora
+            type: "AD_REWARD",
             reason: {
               contains: "anuncio"
             }
