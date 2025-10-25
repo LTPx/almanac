@@ -15,6 +15,7 @@ interface UserStats {
   exchangeRate: string;
   canPurchase: number;
   zapCostForOne: number;
+  maxHearts: number;
 }
 
 export default function Store() {
@@ -265,6 +266,16 @@ export default function Store() {
                     )}
                   </button>
                 </div>
+
+                {/* Información de intercambio */}
+                {userStats && (
+                  <div className="mb-4 text-sm text-gray-400">
+                    <p>
+                      Tienes: {hearts}/{userStats.maxHearts} vidas
+                    </p>
+                    <p>Puedes comprar: {userStats.canPurchase} vida(s)</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
