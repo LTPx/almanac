@@ -28,7 +28,6 @@ export default function HomePage() {
       const data = await fetchCurriculums();
       if (data) {
         setCurriculums(data);
-        // Si no hay curriculum seleccionado, seleccionar el primero
         if (data.length > 0 && !selectedCurriculumId) {
           setSelectedCurriculumId(data[0].id.toString());
         }
@@ -69,6 +68,7 @@ export default function HomePage() {
       {!isLoading && selectedCurriculum && (
         <div className="h-full">
           <LearningPath
+            key={selectedCurriculum.id}
             hearts={gamification?.hearts ?? 0}
             curriculum={selectedCurriculum}
             userId={userId}
