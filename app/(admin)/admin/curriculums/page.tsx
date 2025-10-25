@@ -64,9 +64,27 @@ export default function CurriculumPage() {
     null
   );
 
-  const handleDeleteCurriculum = (id: string) => {
-    setCurriculums(curriculums.filter((c) => c.id !== id));
-    setDeleteCurriculumId(null);
+  const deleteCurriculum = async (curriculumId: string) => {
+    const response = await fetch(`/api/curriculums/${curriculumId}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" }
+    });
+    if (!response.ok) {
+      throw new Error("Failed to delete curriculum");
+    }
+    return response.json();
+  };
+
+  const handleDeleteCurriculum = async (id: string) => {
+    try {
+      await deleteCurriculum(id);
+      setCurriculums(curriculums.filter((c) => c.id !== id));
+      setDeleteCurriculumId(null);
+      toast.success("Curriculum eliminado correctamente");
+    } catch (error) {
+      console.log(error);
+      toast.error("No se pudo eliminar el curriculum");
+    }
   };
 
   const fetchCurriculums = async () => {
