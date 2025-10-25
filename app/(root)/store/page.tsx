@@ -166,7 +166,12 @@ export default function Store() {
 
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Ofertas especiales</h3>
-          <SpecialOfferCard />
+          <SpecialOfferCard
+            userId={userId}
+            onZapsUpdate={(newZaps) => {
+              setZapTokens(newZaps);
+            }}
+          />
         </div>
 
         <div className="space-y-4">
