@@ -15,11 +15,14 @@ import { signInFormSchema } from "@/lib/auth-schema";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { redirect } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 export default function SignInForm() {
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<z.infer<typeof signInFormSchema>>({
     resolver: zodResolver(signInFormSchema),
     defaultValues: {
@@ -37,18 +40,20 @@ export default function SignInForm() {
       },
       {
         onRequest: () => {
-          toast.loading("Signing in...");
+          setIsLoading(true);
         },
         onSuccess: (response: any) => {
           const {
             data: { user }
           } = response;
           console.log(user);
+          setIsLoading(false);
           toast.dismiss();
           toast.success("Signed in successfully");
           redirect("/home");
         },
         onError: (ctx) => {
+          setIsLoading(false);
           toast.dismiss();
           toast.error(ctx.error.message);
         }
@@ -85,8 +90,8 @@ export default function SignInForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
-          Sign In
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? "Signing in..." : "Sign In"}
         </Button>
       </form>
     </Form>
