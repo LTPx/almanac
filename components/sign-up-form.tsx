@@ -15,11 +15,14 @@ import { formSchema } from "@/lib/auth-schema";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { redirect } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 export default function SignUpForm() {
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -31,6 +34,7 @@ export default function SignUpForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const { name, email, password } = values;
+
     await authClient.signUp.email(
       {
         email,
@@ -39,13 +43,15 @@ export default function SignUpForm() {
       },
       {
         onRequest: () => {
-          toast("Signing up...");
+          setIsLoading(true);
         },
         onSuccess: () => {
+          setIsLoading(false);
           form.reset();
           redirect("/sign-in");
         },
         onError: (ctx) => {
+          setIsLoading(false);
           toast.error(ctx.error.message);
         }
       }
@@ -75,7 +81,7 @@ export default function SignUpForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="m@example.com" {...field} />
+                <Input placeholder="your@email.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -94,8 +100,8 @@ export default function SignUpForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
-          Register
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? "Signing up..." : "Register"}
         </Button>
       </form>
     </Form>
