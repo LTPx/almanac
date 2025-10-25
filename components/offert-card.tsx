@@ -119,10 +119,12 @@ export default function SpecialOfferCard({
 
   const simulateAd = (duration: number, adSessionId?: string) => {
     setAdProgress(0);
+    let hasCompleted = false;
     const interval = setInterval(() => {
       setAdProgress((prev) => {
         const newProgress = prev + 100 / duration;
-        if (newProgress >= 100) {
+        if (newProgress >= 100 && !hasCompleted) {
+          hasCompleted = true;
           clearInterval(interval);
           completeAd(adSessionId);
           return 100;
