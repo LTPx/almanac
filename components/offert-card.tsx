@@ -28,7 +28,6 @@ export default function SpecialOfferCard({
   const [isLoading, setIsLoading] = useState(false);
   const [showAdModal, setShowAdModal] = useState(false);
   const [adProgress, setAdProgress] = useState(0);
-  const [adSessionId, setAdSessionId] = useState<string | null>(null);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -97,9 +96,8 @@ export default function SpecialOfferCard({
       const data = await response.json();
 
       if (response.ok) {
-        setAdSessionId(data.adSessionId);
         setShowAdModal(true);
-        simulateAd(data.duration);
+        simulateAd(data.duration, data.adSessionId);
       } else {
         setMessage({
           type: "error",
@@ -119,14 +117,14 @@ export default function SpecialOfferCard({
     }
   };
 
-  const simulateAd = (duration: number) => {
+  const simulateAd = (duration: number, adSessionId?: string) => {
     setAdProgress(0);
     const interval = setInterval(() => {
       setAdProgress((prev) => {
         const newProgress = prev + 100 / duration;
         if (newProgress >= 100) {
           clearInterval(interval);
-          completeAd();
+          completeAd(adSessionId);
           return 100;
         }
         return newProgress;
@@ -134,7 +132,7 @@ export default function SpecialOfferCard({
     }, 1000);
   };
 
-  const completeAd = async () => {
+  const completeAd = async (adSessionId?: string) => {
     if (!userId || !adSessionId) return;
 
     try {
@@ -191,7 +189,6 @@ export default function SpecialOfferCard({
     if (adProgress >= 100) {
       setShowAdModal(false);
       setAdProgress(0);
-      setAdSessionId(null);
     }
   };
 
