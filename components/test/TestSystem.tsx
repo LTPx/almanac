@@ -158,17 +158,17 @@ export function TestSystem({
     }
   };
 
-  const handleRetakeTest = () => {
-    if (currentHearts === 0) {
-      onClose();
-      return;
-    }
+  // const handleRetakeTest = () => {
+  //   if (currentHearts === 0) {
+  //     onClose();
+  //     return;
+  //   }
 
-    if (currentTest) {
-      hasInitialized.current = false;
-      handleStartTest(currentTest.lesson.id);
-    }
-  };
+  //   if (currentTest) {
+  //     hasInitialized.current = false;
+  //     handleStartTest(currentTest.lesson.id);
+  //   }
+  // };
 
   const progress = currentTest
     ? ((currentQuestionIndex + 1) / currentTest.questions.length) * 100
@@ -249,11 +249,11 @@ export function TestSystem({
               results={results}
               lessonName={currentTest.lesson.name}
               onReturnToLessons={onClose}
-              onRetakeTest={
-                currentHearts > 0 && !results.passed
-                  ? handleRetakeTest
-                  : undefined
-              }
+              // onRetakeTest={
+              //   currentHearts > 0 && !results.passed
+              //     ? handleRetakeTest
+              //     : undefined
+              // }
             />
           </motion.div>
         </AnimatePresence>
