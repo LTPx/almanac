@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Zap, Play, Loader2, X } from "lucide-react";
@@ -34,12 +34,27 @@ export default function SpecialOfferCard({
   } | null>(null);
   const [countdown, setCountdown] = useState<number>(0);
 
+  // useCallback para loadAdInfo
+  const loadAdInfo = useCallback(async () => {
+    if (!userId) return;
+
+    try {
+      const response = await fetch(`/api/ads/watch?userId=${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setAdInfo(data);
+      }
+    } catch (error) {
+      console.error("Error cargando información del anuncio:", error);
+    }
+  }, [userId]);
+
   // Cargar información del anuncio
   useEffect(() => {
     if (userId) {
       loadAdInfo();
     }
-  }, [userId]);
+  }, [userId, loadAdInfo]);
 
   // Countdown para próximo anuncio disponible
   useEffect(() => {
@@ -59,21 +74,7 @@ export default function SpecialOfferCard({
 
       return () => clearInterval(interval);
     }
-  }, [adInfo]);
-
-  const loadAdInfo = async () => {
-    if (!userId) return;
-
-    try {
-      const response = await fetch(`/api/ads/watch?userId=${userId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setAdInfo(data);
-      }
-    } catch (error) {
-      console.error("Error cargando información del anuncio:", error);
-    }
-  };
+  }, [adInfo, loadAdInfo]);
 
   const startAd = async () => {
     if (!userId || !adInfo?.canWatchAd) return;
