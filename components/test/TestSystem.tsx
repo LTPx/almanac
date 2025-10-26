@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 import { TestQuestion } from "./TestQuestion";
 import { TestResults } from "./TestResults";
 import { useTest } from "@/hooks/useTest";
@@ -13,6 +14,7 @@ import type {
   TestData,
   TestResultsInterface as TestResultsType
 } from "@/lib/types";
+import Store from "@/app/(root)/store/page";
 
 interface TestSystemProps {
   userId: string;
@@ -21,7 +23,7 @@ interface TestSystemProps {
   hearts: number;
 }
 
-type TestState = "testing" | "review-intro" | "reviewing" | "results";
+type TestState = "testing" | "review-intro" | "reviewing" | "results" | "store";
 
 export function TestSystem({
   userId,
@@ -123,7 +125,7 @@ export function TestSystem({
 
         if (newHearts === 0) {
           setTimeout(() => {
-            openNoHeartsModal(handleRefillHearts, handleExitTest);
+            openNoHeartsModal(handleOpenStore, handleExitTest);
           }, 1500);
         }
       }
@@ -132,8 +134,21 @@ export function TestSystem({
     }
   };
 
-  const handleRefillHearts = () => {
-    setCurrentHearts(5);
+  const handleOpenStore = () => {
+    setState("store");
+  };
+
+  const handleCloseStore = async () => {
+    try {
+      const response = await fetch(`/api/hearts/purchase?userId=${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentHearts(data.currentHearts);
+      }
+    } catch (error) {
+      console.error("Error recargando corazones:", error);
+    }
+    setState("testing");
   };
 
   const handleExitTest = () => {
@@ -266,10 +281,36 @@ export function TestSystem({
               </p>
               <button
                 onClick={handleStartReview}
-                className="w-full py-3 bg-[#1983DD] hover:bg-[#1666B0] text-white text-white font-semibold rounded-lg transition-colors"
+                className="w-full py-3 bg-[#1983DD] hover:bg-[#1666B0] text-white font-semibold rounded-lg transition-colors"
               >
                 Comenzar repaso
               </button>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      )}
+
+      {state === "store" && (
+        <AnimatePresence>
+          <motion.div
+            key="store"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="absolute inset-0 w-full h-full flex justify-center overflow-y-auto bg-background"
+          >
+            <div className="relative max-w-[650px] h-full">
+              <div className="absolute top-4 left-4 z-50">
+                <button
+                  onClick={handleCloseStore}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-white shadow-lg"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  <span>Volver al examen</span>
+                </button>
+              </div>
+              <Store />
             </div>
           </motion.div>
         </AnimatePresence>

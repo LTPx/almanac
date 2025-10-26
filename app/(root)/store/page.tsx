@@ -31,10 +31,8 @@ export default function Store() {
     text: string;
   } | null>(null);
 
-  // Aquí deberías obtener el userId de tu sistema de autenticación
   const userId = user?.id || "";
 
-  // Cargar información del usuario al montar el componente
   useEffect(() => {
     loadUserStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -220,8 +218,6 @@ export default function Store() {
                   Recarga tus vidas para tener más oportunidades de continuar en
                   tus pruebas.
                 </p>
-
-                {/* Selector de cantidad */}
                 <div className="flex items-center gap-3 mb-4">
                   <button
                     onClick={handleDecrement}
@@ -271,8 +267,6 @@ export default function Store() {
                     )}
                   </button>
                 </div>
-
-                {/* Información de intercambio */}
                 {userStats && (
                   <div className="mb-4 text-sm text-gray-400">
                     <p>
