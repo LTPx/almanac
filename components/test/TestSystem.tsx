@@ -21,7 +21,7 @@ interface TestSystemProps {
   hearts: number;
 }
 
-type TestState = "testing" | "results";
+type TestState = "testing" | "review-intro" | "reviewing" | "results";
 
 export function TestSystem({
   userId,
@@ -41,6 +41,8 @@ export function TestSystem({
   );
   const [currentHearts, setCurrentHearts] = useState(initialHearts);
   const [justAnsweredCorrect, setJustAnsweredCorrect] = useState(false);
+  const [firstPassQuestionCount, setFirstPassQuestionCount] = useState(0);
+  const [failedQuestions, setFailedQuestions] = useState<number[]>([]);
 
   const { error, startTest, submitAnswer, completeTest } = useTest();
   const hasInitialized = useRef(false);
@@ -55,6 +57,8 @@ export function TestSystem({
         setAnswers({});
         setQuestionStartTime(Date.now());
         setState("testing");
+        setFirstPassQuestionCount(testData.questions.length);
+        setFailedQuestions([]);
       }
     },
     [startTest, userId]
@@ -90,8 +94,15 @@ export function TestSystem({
       if (!result.isCorrect) {
         const newHearts = Math.max(0, currentHearts - 1);
         setCurrentHearts(newHearts);
+        if (state === "testing") {
+          setFailedQuestions((prev) => {
+            if (!prev.includes(questionId)) {
+              return [...prev, questionId];
+            }
+            return prev;
+          });
+        }
 
-        // 🔁 Reinsertar pregunta fallada al final
         setCurrentTest((prevTest) => {
           if (!prevTest) return prevTest;
           const failedQuestion = prevTest.questions.find(
@@ -134,19 +145,33 @@ export function TestSystem({
 
     const currentQuestionId = currentTest.questions[currentQuestionIndex].id;
 
-    // 🧹 Limpiar respuesta si la pregunta fue reinsertada
     setAnswers((prev) => {
       const updated = { ...prev };
       delete updated[currentQuestionId];
       return updated;
     });
 
-    if (currentQuestionIndex < currentTest.questions.length - 1) {
+    if (
+      state === "testing" &&
+      currentQuestionIndex === firstPassQuestionCount - 1
+    ) {
+      if (failedQuestions.length > 0) {
+        setState("review-intro");
+        setCurrentQuestionIndex((prev) => prev + 1);
+        setQuestionStartTime(Date.now());
+      } else {
+        handleCompleteTest();
+      }
+    } else if (currentQuestionIndex < currentTest.questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
       setQuestionStartTime(Date.now());
     } else {
       handleCompleteTest();
     }
+  };
+
+  const handleStartReview = () => {
+    setState("reviewing");
   };
 
   const handleCompleteTest = async () => {
@@ -157,18 +182,6 @@ export function TestSystem({
       setState("results");
     }
   };
-
-  // const handleRetakeTest = () => {
-  //   if (currentHearts === 0) {
-  //     onClose();
-  //     return;
-  //   }
-
-  //   if (currentTest) {
-  //     hasInitialized.current = false;
-  //     handleStartTest(currentTest.lesson.id);
-  //   }
-  // };
 
   const progress = currentTest
     ? ((currentQuestionIndex + 1) / currentTest.questions.length) * 100
@@ -193,7 +206,7 @@ export function TestSystem({
 
   return (
     <div className="bg-background h-[100dvh] flex flex-col overflow-hidden">
-      {state === "testing" && currentTest && (
+      {(state === "testing" || state === "reviewing") && currentTest && (
         <>
           <HeaderBar
             onClose={onClose}
@@ -234,6 +247,34 @@ export function TestSystem({
         </>
       )}
 
+      {state === "review-intro" && (
+        <AnimatePresence>
+          <motion.div
+            key="review-intro"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="flex-1 flex items-center justify-center px-6"
+          >
+            <div className="text-center max-w-md w-full">
+              <h1 className="text-3xl font-bold text-[#EFFF0A] mb-3">
+                ¡Bien hecho!
+              </h1>
+              <p className="text-lg white mb-6">
+                Ahora vamos a repasar los errores
+              </p>
+              <button
+                onClick={handleStartReview}
+                className="w-full py-3 bg-[#1983DD] hover:bg-[#1666B0] text-white text-white font-semibold rounded-lg transition-colors"
+              >
+                Comenzar repaso
+              </button>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      )}
+
       {state === "results" && results && currentTest && (
         <AnimatePresence>
           <motion.div
@@ -249,11 +290,6 @@ export function TestSystem({
               results={results}
               lessonName={currentTest.lesson.name}
               onReturnToLessons={onClose}
-              // onRetakeTest={
-              //   currentHearts > 0 && !results.passed
-              //     ? handleRetakeTest
-              //     : undefined
-              // }
             />
           </motion.div>
         </AnimatePresence>
