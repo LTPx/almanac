@@ -14,7 +14,7 @@ import type {
   TestData,
   TestResultsInterface as TestResultsType
 } from "@/lib/types";
-import Store from "@/app/(root)/store/page";
+import StoreContent from "../store-content";
 
 interface TestSystemProps {
   userId: string;
@@ -409,7 +409,16 @@ export function TestSystem({
                   <span>Volver al examen</span>
                 </button>
               </div>
-              <Store />
+              <StoreContent
+                onBack={handleCloseStore}
+                showBackButton={true}
+                onHeartsUpdate={(newHearts: any) => {
+                  setCurrentHearts(newHearts);
+                  if (onHeartsChange) {
+                    onHeartsChange(newHearts);
+                  }
+                }}
+              />
             </div>
           </motion.div>
         </AnimatePresence>
