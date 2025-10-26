@@ -21,19 +21,23 @@ interface TestSystemProps {
   initialLessonId: number;
   onClose: () => void;
   hearts: number;
+  onHeartsChange?: (hearts: number) => void;
 }
 
-type TestState = "testing" | "review-intro" | "reviewing" | "results" | "store";
+type TestState = "testing" | "review-intro" | "reviewing" | "results";
 
 export function TestSystem({
   userId,
   initialLessonId,
   onClose,
-  hearts: initialHearts
+  hearts: initialHearts,
+  onHeartsChange
 }: TestSystemProps) {
   const [state, setState] = useState<TestState>("testing");
+  const [showStore, setShowStore] = useState(false);
   const [currentTest, setCurrentTest] = useState<TestData | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [animationKey, setAnimationKey] = useState(0);
   const [answers, setAnswers] = useState<{
     [questionId: number]: { answer: string; isCorrect: boolean };
   }>({});
@@ -48,7 +52,45 @@ export function TestSystem({
 
   const { error, startTest, submitAnswer, completeTest } = useTest();
   const hasInitialized = useRef(false);
+  const modalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { open: openNoHeartsModal } = useNoHeartsTestModal();
+
+  const handleOpenStore = useCallback(() => {
+    setShowStore(true);
+  }, []);
+
+  const handleExitTest = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  useEffect(() => {
+    if (
+      currentHearts === 0 &&
+      (state === "testing" || state === "reviewing") &&
+      !showStore
+    ) {
+      if (modalTimeoutRef.current) {
+        clearTimeout(modalTimeoutRef.current);
+      }
+
+      modalTimeoutRef.current = setTimeout(() => {
+        openNoHeartsModal(handleOpenStore, handleExitTest);
+      }, 100);
+    }
+
+    return () => {
+      if (modalTimeoutRef.current) {
+        clearTimeout(modalTimeoutRef.current);
+      }
+    };
+  }, [
+    currentHearts,
+    state,
+    showStore,
+    openNoHeartsModal,
+    handleOpenStore,
+    handleExitTest
+  ]);
 
   const handleStartTest = useCallback(
     async (lessonId: number) => {
@@ -71,42 +113,43 @@ export function TestSystem({
       handleStartTest(initialLessonId);
       hasInitialized.current = true;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [handleStartTest, initialLessonId]);
 
-  const handleAnswer = async (questionId: number, answer: string) => {
-    if (!currentTest) return;
+  const handleAnswer = useCallback(
+    async (questionId: number, answer: string) => {
+      if (!currentTest) return;
 
-    const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
-    const result = await submitAnswer(
-      currentTest.testAttemptId,
-      questionId,
-      answer,
-      timeSpent
-    );
+      const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
+      const result = await submitAnswer(
+        currentTest.testAttemptId,
+        questionId,
+        answer,
+        timeSpent
+      );
 
-    if (result) {
+      if (!result) return;
+
       setAnswers((prev) => ({
         ...prev,
         [questionId]: { answer, isCorrect: result.isCorrect }
       }));
 
       setJustAnsweredCorrect(result.isCorrect);
+      setTimeout(() => setJustAnsweredCorrect(false), 1000);
 
       if (!result.isCorrect) {
         const newHearts = Math.max(0, currentHearts - 1);
         setCurrentHearts(newHearts);
+
         if (state === "testing") {
-          setFailedQuestions((prev) => {
-            if (!prev.includes(questionId)) {
-              return [...prev, questionId];
-            }
-            return prev;
-          });
+          setFailedQuestions((prev) =>
+            prev.includes(questionId) ? prev : [...prev, questionId]
+          );
         }
 
         setCurrentTest((prevTest) => {
           if (!prevTest) return prevTest;
+
           const failedQuestion = prevTest.questions.find(
             (q) => q.id === questionId
           );
@@ -115,6 +158,7 @@ export function TestSystem({
           const alreadyQueued = prevTest.questions
             .slice(currentQuestionIndex + 1)
             .some((q) => q.id === questionId);
+
           if (alreadyQueued) return prevTest;
 
           return {
@@ -122,49 +166,84 @@ export function TestSystem({
             questions: [...prevTest.questions, failedQuestion]
           };
         });
-
-        if (newHearts === 0) {
-          setTimeout(() => {
-            openNoHeartsModal(handleOpenStore, handleExitTest);
-          }, 1500);
-        }
       }
+    },
+    [
+      currentTest,
+      questionStartTime,
+      submitAnswer,
+      currentHearts,
+      state,
+      currentQuestionIndex
+    ]
+  );
 
-      setTimeout(() => setJustAnsweredCorrect(false), 1000);
-    }
-  };
+  const handleCloseStore = useCallback(async () => {
+    let updatedHearts = currentHearts;
 
-  const handleOpenStore = () => {
-    setState("store");
-  };
-
-  const handleCloseStore = async () => {
     try {
       const response = await fetch(`/api/hearts/purchase?userId=${userId}`);
       if (response.ok) {
         const data = await response.json();
-        setCurrentHearts(data.currentHearts);
+        updatedHearts = data.currentHearts;
+
+        if (updatedHearts !== currentHearts) {
+          setCurrentHearts(updatedHearts);
+          onHeartsChange?.(updatedHearts);
+        }
       }
     } catch (error) {
       console.error("Error recargando corazones:", error);
     }
-    setState("testing");
-  };
 
-  const handleExitTest = () => {
-    onClose();
-  };
+    setShowStore(false);
 
-  const handleNext = () => {
+    if (updatedHearts > 0 && currentTest) {
+      const currentQuestionId = currentTest.questions[currentQuestionIndex]?.id;
+
+      if (currentQuestionId) {
+        setAnswers((prev) => {
+          const updated = { ...prev };
+          delete updated[currentQuestionId];
+          return updated;
+        });
+      }
+
+      if (currentQuestionIndex < currentTest.questions.length - 1) {
+        setCurrentQuestionIndex((prev) => prev + 1);
+        setQuestionStartTime(Date.now());
+        setAnimationKey((prev) => prev + 1);
+      }
+    }
+  }, [
+    currentHearts,
+    userId,
+    onHeartsChange,
+    currentTest,
+    currentQuestionIndex
+  ]);
+
+  const handleCompleteTest = useCallback(async () => {
+    if (!currentTest) return;
+    const testResults = await completeTest(currentTest.testAttemptId);
+    if (testResults) {
+      setResults(testResults);
+      setState("results");
+    }
+  }, [currentTest, completeTest]);
+
+  const handleNext = useCallback(() => {
     if (!currentTest) return;
 
-    const currentQuestionId = currentTest.questions[currentQuestionIndex].id;
+    const currentQuestionId = currentTest.questions[currentQuestionIndex]?.id;
 
-    setAnswers((prev) => {
-      const updated = { ...prev };
-      delete updated[currentQuestionId];
-      return updated;
-    });
+    if (currentQuestionId) {
+      setAnswers((prev) => {
+        const updated = { ...prev };
+        delete updated[currentQuestionId];
+        return updated;
+      });
+    }
 
     if (
       state === "testing" &&
@@ -172,31 +251,31 @@ export function TestSystem({
     ) {
       if (failedQuestions.length > 0) {
         setState("review-intro");
-        setCurrentQuestionIndex((prev) => prev + 1);
-        setQuestionStartTime(Date.now());
       } else {
         handleCompleteTest();
+        return;
       }
-    } else if (currentQuestionIndex < currentTest.questions.length - 1) {
+    }
+
+    if (currentQuestionIndex < currentTest.questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
       setQuestionStartTime(Date.now());
+      setAnimationKey((prev) => prev + 1);
     } else {
       handleCompleteTest();
     }
-  };
+  }, [
+    currentTest,
+    currentQuestionIndex,
+    state,
+    firstPassQuestionCount,
+    failedQuestions.length,
+    handleCompleteTest
+  ]);
 
-  const handleStartReview = () => {
+  const handleStartReview = useCallback(() => {
     setState("reviewing");
-  };
-
-  const handleCompleteTest = async () => {
-    if (!currentTest) return;
-    const testResults = await completeTest(currentTest.testAttemptId);
-    if (testResults) {
-      setResults(testResults);
-      setState("results");
-    }
-  };
+  }, []);
 
   const progress = currentTest
     ? ((currentQuestionIndex + 1) / currentTest.questions.length) * 100
@@ -233,7 +312,7 @@ export function TestSystem({
           <div className="relative flex-1 flex items-center justify-center">
             <AnimatePresence mode="wait">
               <motion.div
-                key={currentQuestionIndex}
+                key={animationKey}
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -50 }}
@@ -245,14 +324,14 @@ export function TestSystem({
                   onAnswer={handleAnswer}
                   onNext={handleNext}
                   showResult={
-                    !!answers[currentTest.questions[currentQuestionIndex].id]
+                    !!answers[currentTest.questions[currentQuestionIndex]?.id]
                   }
                   isCorrect={
-                    answers[currentTest.questions[currentQuestionIndex].id]
+                    answers[currentTest.questions[currentQuestionIndex]?.id]
                       ?.isCorrect
                   }
                   selectedAnswer={
-                    answers[currentTest.questions[currentQuestionIndex].id]
+                    answers[currentTest.questions[currentQuestionIndex]?.id]
                       ?.answer
                   }
                 />
@@ -290,32 +369,6 @@ export function TestSystem({
         </AnimatePresence>
       )}
 
-      {state === "store" && (
-        <AnimatePresence>
-          <motion.div
-            key="store"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="absolute inset-0 w-full h-full flex justify-center overflow-y-auto bg-background"
-          >
-            <div className="relative max-w-[650px] h-full">
-              <div className="absolute top-4 left-4 z-50">
-                <button
-                  onClick={handleCloseStore}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-white shadow-lg"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                  <span>Volver al examen</span>
-                </button>
-              </div>
-              <Store />
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      )}
-
       {state === "results" && results && currentTest && (
         <AnimatePresence>
           <motion.div
@@ -332,6 +385,32 @@ export function TestSystem({
               lessonName={currentTest.lesson.name}
               onReturnToLessons={onClose}
             />
+          </motion.div>
+        </AnimatePresence>
+      )}
+
+      {showStore && (
+        <AnimatePresence>
+          <motion.div
+            key="store"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="fixed inset-0 w-full h-full flex justify-center overflow-y-auto bg-background z-[250]"
+          >
+            <div className="relative max-w-[650px] h-full">
+              <div className="absolute top-4 left-4 z-50">
+                <button
+                  onClick={handleCloseStore}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-white shadow-lg"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  <span>Volver al examen</span>
+                </button>
+              </div>
+              <Store />
+            </div>
           </motion.div>
         </AnimatePresence>
       )}
