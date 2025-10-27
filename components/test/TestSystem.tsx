@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
 import { TestQuestion } from "./TestQuestion";
 import { TestResults } from "./TestResults";
 import { useTest } from "@/hooks/useTest";
@@ -400,19 +399,12 @@ export function TestSystem({
             className="fixed inset-0 w-full h-full flex justify-center overflow-y-auto bg-background z-[250]"
           >
             <div className="relative max-w-[650px] h-full">
-              <div className="absolute top-4 left-4 z-50">
-                <button
-                  onClick={handleCloseStore}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-white shadow-lg"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                  <span>Volver al examen</span>
-                </button>
-              </div>
               <StoreContent
                 onBack={handleCloseStore}
                 showBackButton={true}
-                onHeartsUpdate={(newHearts: any) => {
+                title="Tienda"
+                backButtonVariant="button"
+                onHeartsUpdate={(newHearts: number) => {
                   setCurrentHearts(newHearts);
                   if (onHeartsChange) {
                     onHeartsChange(newHearts);

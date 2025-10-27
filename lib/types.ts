@@ -156,9 +156,11 @@ export interface UserStats {
 }
 
 export interface StoreContentProps {
-  onBack?: () => void;
+  onBack: () => void;
   showBackButton?: boolean;
   onHeartsUpdate?: (hearts: number) => void;
+  title?: string;
+  backButtonVariant?: "icon" | "button";
 }
 
 export interface ZapPackage {

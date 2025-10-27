@@ -11,7 +11,9 @@ import type { UserStats, StoreContentProps } from "@/lib/types";
 export default function StoreContent({
   onBack,
   showBackButton = true,
-  onHeartsUpdate
+  onHeartsUpdate,
+  title = "Tienda",
+  backButtonVariant = "icon"
 }: StoreContentProps) {
   const user = useUser();
   const [zapTokens, setZapTokens] = useState(120);
@@ -124,15 +126,33 @@ export default function StoreContent({
 
   return (
     <div className="min-h-screen text-white">
-      <div className="flex items-center justify-between p-4 border-b border-gray-800">
+      <div
+        className={`sticky z-10 bg-background flex items-center justify-between p-4 border-b border-gray-800 ${
+          backButtonVariant === "button" ? "top-0" : "top-[60px]"
+        }`}
+      >
         <div className="flex items-center gap-3">
-          {showBackButton && (
+          {showBackButton && backButtonVariant === "icon" && (
             <ArrowLeft
               onClick={onBack}
               className="w-6 h-6 text-gray-400 cursor-pointer hover:text-gray-200"
             />
           )}
-          <h1 className="text-xl font-semibold">Tienda</h1>
+          {showBackButton && backButtonVariant === "button" && (
+            <button
+              onClick={onBack}
+              className="flex items-center gap-2 px-4 py-2 text-white"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>Volver al examen</span>
+            </button>
+          )}
+          {!showBackButton && (
+            <h1 className="text-xl font-semibold">{title}</h1>
+          )}
+          {showBackButton && backButtonVariant === "icon" && (
+            <h1 className="text-xl font-semibold">{title}</h1>
+          )}
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -148,13 +168,24 @@ export default function StoreContent({
 
       {message && (
         <div
-          className={`mx-4 mt-4 p-4 rounded-lg ${
+          className={`fixed bottom-4 left-1/2 -translate-x-1/2 z-50 min-w-[300px] max-w-md p-4 rounded-lg shadow-lg animate-in slide-in-from-top ${
             message.type === "success"
-              ? "bg-green-500/20 border border-green-500 text-green-400"
-              : "bg-red-500/20 border border-red-500 text-red-400"
+              ? "bg-green-500/90 border border-green-400 text-white backdrop-blur-sm"
+              : "bg-red-500/90 border border-red-400 text-white backdrop-blur-sm"
           }`}
         >
-          {message.text}
+          <div className="flex items-center gap-2">
+            {message.type === "success" ? (
+              <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                ✓
+              </div>
+            ) : (
+              <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                !
+              </div>
+            )}
+            <span className="font-medium">{message.text}</span>
+          </div>
         </div>
       )}
 
