@@ -4,6 +4,7 @@ import React from "react";
 import { motion, Variants } from "framer-motion";
 import { Unit } from "@/lib/types";
 import LessonNode from "./lesson-node";
+import { NoHeartsModal } from "./modals/hearts-modal";
 
 interface LessonGridProps {
   units: Unit[];
@@ -124,56 +125,60 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
   };
 
   return (
-    <div className="max-w-sm mx-auto">
-      {pathLayout.map((rowData, rowIndex) => {
-        const isBottomRow = rowData.row === maxRow;
+    <>
+      <div className="max-w-sm mx-auto">
+        {pathLayout.map((rowData, rowIndex) => {
+          const isBottomRow = rowData.row === maxRow;
 
-        return (
-          <motion.div
-            key={rowIndex}
-            variants={containerVariants}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-5 gap-3 lg:gap-6 mb-6 lg:mb-6"
-          >
-            {Array.from({ length: 5 }, (_, col) => {
-              const nodeData = rowData.nodes.find((n) => n.col === col);
-              const isCompleted = nodeData
-                ? approvedUnits.includes(nodeData.id)
-                : false;
+          return (
+            <motion.div
+              key={rowIndex}
+              variants={containerVariants}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-5 gap-3 lg:gap-6 mb-6 lg:mb-6"
+            >
+              {Array.from({ length: 5 }, (_, col) => {
+                const nodeData = rowData.nodes.find((n) => n.col === col);
+                const isCompleted = nodeData
+                  ? approvedUnits.includes(nodeData.id)
+                  : false;
 
-              return (
-                <motion.div
-                  key={col}
-                  variants={itemVariants}
-                  className="flex justify-center"
-                >
-                  {nodeData ? (
-                    <LessonNode
-                      id={nodeData.id}
-                      name={nodeData.name}
-                      description={nodeData.description}
-                      state={getLessonState(nodeData)}
-                      color={getLockedColor(nodeData.mandatory)}
-                      mandatory={nodeData.mandatory}
-                      hearts={hearts}
-                      shouldFloat={
-                        isBottomRow && nodeData.mandatory && !isCompleted
-                      }
-                      isFirstMandatory={
-                        nodeData.id === firstLesson?.id && nodeData.mandatory
-                      }
-                      onStartLesson={() => onStartUnit(nodeData)}
-                    />
-                  ) : (
-                    <div className="w-16 h-16"></div>
-                  )}
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        );
-      })}
-    </div>
+                return (
+                  <motion.div
+                    key={col}
+                    variants={itemVariants}
+                    className="flex justify-center"
+                  >
+                    {nodeData ? (
+                      <LessonNode
+                        id={nodeData.id}
+                        name={nodeData.name}
+                        description={nodeData.description}
+                        state={getLessonState(nodeData)}
+                        color={getLockedColor(nodeData.mandatory)}
+                        mandatory={nodeData.mandatory}
+                        hearts={hearts}
+                        shouldFloat={
+                          isBottomRow && nodeData.mandatory && !isCompleted
+                        }
+                        isFirstMandatory={
+                          nodeData.id === firstLesson?.id && nodeData.mandatory
+                        }
+                        onStartLesson={() => onStartUnit(nodeData)}
+                      />
+                    ) : (
+                      <div className="w-16 h-16"></div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          );
+        })}
+      </div>
+
+      <NoHeartsModal />
+    </>
   );
 };

@@ -33,9 +33,22 @@ export const NoHeartsTestModal = () => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={close}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) return;
+      }}
+    >
       <DialogOverlay className="fixed inset-0 z-[199]" />
-      <DialogContent className="max-w-md z-[200]">
+      <DialogContent
+        className="max-w-md z-[200]"
+        onPointerDownOutside={(e) => {
+          e.preventDefault();
+        }}
+        onEscapeKeyDown={(e) => {
+          e.preventDefault();
+        }}
+      >
         <DialogHeader>
           <div className="mb-5 flex w-full items-center justify-center">
             <div className="relative">
@@ -44,7 +57,6 @@ export const NoHeartsTestModal = () => {
                 alt="Mascota triste"
                 width={120}
                 height={120}
-                // className="animate-bounce"
               />
               <div className="absolute -right-2 -top-2">
                 <Heart className="h-12 w-12 text-red-500 fill-red-500 opacity-100" />

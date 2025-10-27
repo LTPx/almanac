@@ -133,3 +133,26 @@ export async function PUT(
     );
   }
 }
+
+export async function DELETE(
+  request: Request,
+  context: { params: Promise<{ curriculumId: string }> }
+) {
+  const { curriculumId } = await context.params;
+
+  try {
+    await prisma.curriculum.delete({
+      where: { id: curriculumId }
+    });
+
+    return NextResponse.json({
+      message: `Curriculum removed successfully`
+    });
+  } catch (error) {
+    console.error("Error deleting curriculum:", error);
+    return NextResponse.json(
+      { error: "Failed to delete curriculum" },
+      { status: 500 }
+    );
+  }
+}

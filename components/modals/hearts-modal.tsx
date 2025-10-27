@@ -1,7 +1,7 @@
-// components/modals/no-hearts-modal.tsx
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,10 +18,16 @@ import { useNoHeartsModal } from "@/store/no-hearts-modal";
 export const NoHeartsModal = () => {
   const [isClient, setIsClient] = useState(false);
   const { isOpen, close } = useNoHeartsModal();
+  const router = useRouter();
 
   useEffect(() => setIsClient(true), []);
 
   if (!isClient) return null;
+
+  const handleGetHearts = () => {
+    close();
+    router.push("/store");
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={close}>
@@ -52,9 +58,7 @@ export const NoHeartsModal = () => {
             <Button
               className="w-full rounded-[10px] py-[25px] text-[15px] bg-blue-500 hover:bg-blue-600"
               size="lg"
-              onClick={() => {
-                close();
-              }}
+              onClick={handleGetHearts}
             >
               Obtener Vidas
             </Button>

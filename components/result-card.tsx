@@ -1,4 +1,4 @@
-import { InfinityIcon, Clock, Target } from "lucide-react";
+import { InfinityIcon, Clock, Target, Star } from "lucide-react";
 import Image from "next/image";
 
 import { cn } from "@/lib/utils";
@@ -11,14 +11,13 @@ type ResultCardProps = {
 
 export const ResultCard = ({ value, variant, speed }: ResultCardProps) => {
   const getImageSrc = () => {
-    if (variant === "points") return "/points.svg";
     if (variant === "hearts") return "/heart.svg";
     return null;
   };
 
   const getTitle = () => {
     if (variant === "hearts") return "Hearts Left";
-    if (variant === "points") return "Total XP";
+    if (variant === "points") return "Experiencia";
     if (variant === "speed") {
       if (speed === "rapid") return "Rápido";
       if (speed === "slow") return "Lento";
@@ -29,7 +28,7 @@ export const ResultCard = ({ value, variant, speed }: ResultCardProps) => {
   };
 
   const getBorderColor = () => {
-    if (variant === "points") return "border-orange-400";
+    if (variant === "points") return "border-[#EFFF0A]";
     if (variant === "hearts") return "border-rose-500";
     if (variant === "speed") {
       if (speed === "rapid") return "border-[#4A5FCC]";
@@ -41,7 +40,7 @@ export const ResultCard = ({ value, variant, speed }: ResultCardProps) => {
   };
 
   const getBgColor = () => {
-    if (variant === "points") return "bg-orange-400";
+    if (variant === "points") return "bg-[#EFFF0A]";
     if (variant === "hearts") return "bg-rose-500";
     if (variant === "speed") {
       if (speed === "rapid") return "bg-[#4A5FCC]";
@@ -53,7 +52,7 @@ export const ResultCard = ({ value, variant, speed }: ResultCardProps) => {
   };
 
   const getTextColor = () => {
-    if (variant === "points") return "text-orange-400";
+    if (variant === "points") return "text-[#EFFF0A]";
     if (variant === "hearts") return "text-rose-500";
     if (variant === "speed") {
       if (speed === "rapid") return "text-[#4A5FCC]";
@@ -77,6 +76,9 @@ export const ResultCard = ({ value, variant, speed }: ResultCardProps) => {
         />
       );
     }
+    if (variant === "points") {
+      return <Star className="h-7 w-7 mr-1.5 stroke-[2.5] fill-[#EFFF0A]" />;
+    }
     if (variant === "speed") {
       return <Clock className="h-7 w-7 mr-1.5 stroke-[2.5]" />;
     }
@@ -85,8 +87,6 @@ export const ResultCard = ({ value, variant, speed }: ResultCardProps) => {
     }
     return null;
   };
-
-  // const imageSrc = getImageSrc();
 
   return (
     <div
@@ -98,7 +98,7 @@ export const ResultCard = ({ value, variant, speed }: ResultCardProps) => {
     >
       <div
         className={cn(
-          "rounded-t-xl p-1.5 text-center text-xs font-bold uppercase text-white",
+          "rounded-t-xl p-1.5 text-center text-xs font-bold uppercase text-[#272A33]",
           getBgColor()
         )}
       >

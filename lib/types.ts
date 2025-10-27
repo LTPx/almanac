@@ -145,3 +145,34 @@ export type Curriculum = {
   updatedAt: Date;
   units: Unit[];
 };
+
+export interface UserStats {
+  currentZaps: number;
+  currentHearts: number;
+  exchangeRate: string;
+  canPurchase: number;
+  zapCostForOne: number;
+  maxHearts: number;
+}
+
+export interface StoreContentProps {
+  onBack: () => void;
+  showBackButton?: boolean;
+  onHeartsUpdate?: (hearts: number) => void;
+  title?: string;
+  backButtonVariant?: "icon" | "button";
+}
+
+export interface ZapPackage {
+  amount: number;
+  price: string;
+  icon: React.ReactNode;
+}
+
+export interface PurchaseResponse {
+  data: {
+    hearts: number;
+    zapTokens: number;
+  };
+  error?: string;
+}

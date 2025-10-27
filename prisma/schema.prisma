@@ -377,6 +377,7 @@ enum ZapTransactionType {
   DAILY_BONUS // Bonificación diaria
   ADMIN_ADJUSTMENT // Ajuste manual por admin
   TOKEN_MINTED // Mintear un token
+  AD_REWARD // Recompensa por ver anuncio
 
   @@map("zap_transaction_type")
 }
