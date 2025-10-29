@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ChevronLeft, ChevronDown, AlertCircle } from "lucide-react";
 import Image from "next/image";
+import { useUser } from "@/context/UserContext";
 
 interface NFTMetadata {
   name: string;
@@ -33,6 +34,7 @@ interface NFTDetail {
     id: string;
     title: string;
     difficulty: string;
+    units: string[];
   };
   metadata: NFTMetadata;
 }
@@ -40,8 +42,9 @@ interface NFTDetail {
 export default function NFTDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const user = useUser();
   const nftId = params?.id as string;
-
+  const userId = user?.id || "";
   const [nft, setNft] = useState<NFTDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +60,7 @@ export default function NFTDetailPage() {
   const fetchNFTDetail = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/users/[userId]/nfts/${nftId}`);
+      const response = await fetch(`/api/users/${userId}/nfts/${nftId}`);
 
       if (!response.ok) {
         throw new Error("Error al cargar el NFT");
@@ -66,9 +69,8 @@ export default function NFTDetailPage() {
       const data = await response.json();
       setNft(data);
 
-      if (data.collectionName) {
-        // debugger;
-        fetchMoreFromCollection(data.collectionName, nftId);
+      if (data.collectionId) {
+        fetchMoreFromCollection(data.collectionId);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
@@ -77,13 +79,10 @@ export default function NFTDetailPage() {
     }
   };
 
-  const fetchMoreFromCollection = async (
-    collectionName: string,
-    currentNftId: string
-  ) => {
+  const fetchMoreFromCollection = async (collectionId: string) => {
     try {
       const response = await fetch(
-        `/api/collections/${collectionName}/nfts?limit=3&exclude=${currentNftId}`
+        `/api/nft-collections/${collectionId}/nfts?limit=3`
       );
       if (response.ok) {
         const data = await response.json();
@@ -167,13 +166,7 @@ export default function NFTDetailPage() {
     );
   }
 
-  const achievements =
-    nft.metadata.attributes?.filter(
-      (attr) =>
-        attr.trait_type.includes("Algebra") ||
-        attr.trait_type.includes("Imaginary") ||
-        attr.trait_type.includes("Binomials")
-    ) || [];
+  const achievements = nft.curriculum?.units || [];
 
   return (
     <div className="min-h-screen bg-black text-white pb-20">
@@ -247,12 +240,10 @@ export default function NFTDetailPage() {
                         key={index}
                         className="flex items-center justify-between text-sm"
                       >
-                        <span className="text-gray-400">
-                          {achievement.trait_type}
-                        </span>
-                        <span className="font-medium">
+                        <span className="text-gray-400">{achievement}</span>
+                        {/* <span className="font-medium">
                           {achievement.value}%
-                        </span>
+                        </span> */}
                       </div>
                     ))}
                   </div>
@@ -351,21 +342,20 @@ export default function NFTDetailPage() {
               <ChevronDown className="w-5 h-5" />
             </div>
             <div className="grid grid-cols-3 gap-3">
-              {moreFromCollection.map((item) => (
+              {moreFromCollection.map((item, index) => (
                 <button
-                  key={item.id}
+                  key={index}
                   onClick={() => router.push(`/achievements/${item.id}`)}
                   className="relative aspect-square rounded-xl overflow-hidden bg-gray-800 hover:opacity-80 transition-opacity"
                 >
-                  <Image
-                    src={item.metadata?.image || "/placeholder.png"}
-                    alt={item.metadata?.name || "NFT"}
-                    fill
+                  <img
+                    src={item.imageUrl || "/placeholder.png"}
+                    alt={item.name || "NFT"}
                     className="object-cover"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
                     <p className="text-xs font-medium truncate">
-                      {item.metadata?.name || `#${item.tokenId}`}
+                      {item.name || "NFT"}
                     </p>
                   </div>
                 </button>

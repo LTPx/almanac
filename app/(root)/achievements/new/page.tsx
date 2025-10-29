@@ -32,6 +32,11 @@ interface CompletedUnit {
   }>;
 }
 
+interface NFTCollection {
+  id: string;
+  name: string;
+}
+
 interface NFT {
   id: string;
   tokenId: string;
@@ -55,7 +60,8 @@ export default function CreateCertificatePage() {
   const { data: session } = useSession();
   const router = useRouter();
 
-  const [completedUnits, setCompletedUnits] = useState<CompletedUnit[]>([]);
+  const [curriculumTokens, setCurriculumTokens] = useState<CompletedUnit[]>([]);
+  const [collectionNfts, setCollectionNfts] = useState<NFTCollection[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -66,10 +72,15 @@ export default function CreateCertificatePage() {
   const [mintedNFT, setMintedNFT] = useState<NFT | null>(null);
 
   const [selectedUnitId, setSelectedUnitId] = useState("");
+  const [selectedCollectionId, setSelectedCollectionId] = useState<
+    string | null
+  >();
   const [description, setDescription] = useState("");
 
-  const selectedUnit = completedUnits.find((u) => u.unitId === selectedUnitId);
-  const availableUnits = completedUnits.filter((unit) => !unit.hasNFT);
+  const selectedUnit = curriculumTokens.find(
+    (u) => u.unitId === selectedUnitId
+  );
+  const availableUnits = curriculumTokens.filter((unit) => !unit.hasNFT);
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -81,11 +92,10 @@ export default function CreateCertificatePage() {
   const fetchCompletedUnits = async (userId: string) => {
     try {
       setLoadingData(true);
-      const response = await fetch(
-        `/api/users/${userId}/completed-curriculums`
-      );
+      const response = await fetch(`/api/users/${userId}/nfts/reward`);
       const data = await response.json();
-      setCompletedUnits(data.curriculums || []);
+      setCurriculumTokens(data.curriculums || []);
+      setCollectionNfts(data.collections || []);
     } catch (error) {
       console.error("Error fetching completed units:", error);
     } finally {
@@ -110,7 +120,7 @@ export default function CreateCertificatePage() {
   };
 
   const handleMintNFT = async () => {
-    if (!session?.user?.id || !selectedUnitId) return;
+    if (!session?.user?.id || !selectedUnitId || !selectedCollectionId) return;
 
     setLoading(true);
     setError(null);
@@ -122,7 +132,8 @@ export default function CreateCertificatePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           curriculumTokenId: selectedUnitId,
-          description: description.trim()
+          description: description.trim(),
+          collectionId: selectedCollectionId
         })
       });
 
@@ -296,6 +307,25 @@ export default function CreateCertificatePage() {
                   {availableUnits.map((unit) => (
                     <option key={unit.unitId} value={unit.unitId}>
                       {unit.unitName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-3">
+                  Colección
+                </label>
+                <select
+                  value={selectedCollectionId || ""}
+                  onChange={(e) => setSelectedCollectionId(e.target.value)}
+                  className="w-full p-4 border border-gray-600 rounded-lg text-white"
+                  required
+                >
+                  <option value="">Selecciona una colección...</option>
+                  {collectionNfts.map((collection) => (
+                    <option key={collection.id} value={collection.id}>
+                      {collection.name}
                     </option>
                   ))}
                 </select>

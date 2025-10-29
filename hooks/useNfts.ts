@@ -2,27 +2,33 @@
 
 import { useState, useEffect, useCallback } from "react";
 
-interface NFT {
+// interface NFT {
+//   id: string;
+//   tokenId: string;
+//   unitId: string;
+//   contractAddress: string;
+//   transactionHash: string | null;
+//   metadataUri: string;
+//   mintedAt: string;
+//   metadata?: {
+//     name?: string;
+//     description?: string;
+//     image?: string;
+//     attributes?: Array<{
+//       trait_type: string;
+//       value: string;
+//     }>;
+//   };
+// }
+
+interface EducationalNFTAsset {
   id: string;
-  tokenId: string;
-  unitId: string;
-  contractAddress: string;
-  transactionHash: string | null;
-  metadataUri: string;
-  mintedAt: string;
-  metadata?: {
-    name?: string;
-    description?: string;
-    image?: string;
-    attributes?: Array<{
-      trait_type: string;
-      value: string;
-    }>;
-  };
+  name: string;
+  imageUrl: string;
 }
 
 export function useNFTs(userId: string, useThirdweb: boolean = false) {
-  const [nfts, setNfts] = useState<NFT[]>([]);
+  const [nfts, setNfts] = useState<EducationalNFTAsset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isThirdwebEnabled, setIsThirdwebEnabled] = useState(useThirdweb);

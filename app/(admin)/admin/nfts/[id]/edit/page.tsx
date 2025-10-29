@@ -32,6 +32,8 @@ export default function EditNFTPage() {
     if (formData.name) data.append("name", formData.name);
     if (formData.imageFile) data.append("file", formData.imageFile);
     if (formData.imageUrl) data.append("imageUrl", formData.imageUrl);
+    if (formData.collectionId)
+      data.append("collectionId", formData.collectionId);
     data.append("rarity", formData.rarity);
     if (formData.metadataUri) data.append("metadataUri", formData.metadataUri);
 

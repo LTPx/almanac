@@ -184,12 +184,9 @@ function AchievementsContent({ userId }: { userId: string }) {
                           <CardNFT
                             key={nft.id}
                             id={nft.id}
-                            image={nft.metadata?.image || ""}
-                            title={
-                              nft.metadata?.name ||
-                              `Certificado #${nft.tokenId}`
-                            }
-                            description={nft.metadata?.description}
+                            image={nft.imageUrl || ""}
+                            title={nft.name || "Medalla NFT"}
+                            description={""}
                           />
                         ))}
                     </div>
