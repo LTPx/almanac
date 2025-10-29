@@ -10,6 +10,9 @@ import {
   Link as LinkIcon,
   Globe
 } from "lucide-react";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
 
 interface NFTCollectionFormProps {
   mode: "create" | "edit";
@@ -129,65 +132,62 @@ export function NFTCollectionForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Name */}
       <div>
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+        <label className="flex items-center gap-2 text-sm font-medium mb-2">
           <Palette size={16} />
           Nombre de la Colección
         </label>
-        <input
+        <Input
           type="text"
           name="name"
           value={formData.name}
           onChange={handleChange}
           placeholder="Ej: Certificados Matemáticas"
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           required
         />
       </div>
 
       {/* Symbol */}
       <div>
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+        <label className="flex items-center gap-2 text-sm font-medium mb-2">
           <Hash size={16} />
           Símbolo (Ticker)
         </label>
-        <input
+        <Input
           type="text"
           name="symbol"
           value={formData.symbol}
           onChange={handleChange}
           placeholder="Ej: MATH"
           maxLength={10}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase"
           required
         />
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs mt-2">
           Máximo 10 caracteres (se mostrará en mayúsculas)
         </p>
       </div>
 
       {/* Description */}
       <div>
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+        <label className="flex items-center gap-2 text-sm font-medium mb-2">
           <FileText size={16} />
           Descripción (opcional)
         </label>
-        <textarea
+        <Textarea
           name="description"
           value={formData.description}
           onChange={handleChange}
           placeholder="Describe esta colección de NFTs..."
           rows={3}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
         />
       </div>
 
       {/* Contract Address */}
       <div>
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+        <label className="flex items-center gap-2 text-sm font-medium mb-2">
           <LinkIcon size={16} />
           Dirección del Contrato
         </label>
-        <input
+        <Input
           type="text"
           name="contractAddress"
           value={formData.contractAddress}
@@ -196,14 +196,14 @@ export function NFTCollectionForm({
           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
           required
         />
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs mt-2">
           Dirección del contrato NFT desplegado en la blockchain
         </p>
       </div>
 
       {/* Chain ID */}
       <div>
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+        <label className="flex items-center gap-2 text-sm font-medium mb-2">
           <Globe size={16} />
           Red Blockchain
         </label>
@@ -221,8 +221,8 @@ export function NFTCollectionForm({
       </div>
 
       {/* Is Active */}
-      <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-        <input
+      <div className="flex items-center gap-3 p-4 bg-card rounded-lg">
+        <Input
           type="checkbox"
           id="isActive"
           name="isActive"
@@ -230,7 +230,7 @@ export function NFTCollectionForm({
           onChange={handleCheckbox}
           className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
         />
-        <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
+        <label htmlFor="isActive" className="text-sm font-medium">
           Colección activa (permitir minteo de NFTs)
         </label>
       </div>
@@ -244,11 +244,7 @@ export function NFTCollectionForm({
 
       {/* Buttons */}
       <div className="flex gap-3">
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
+        <Button type="submit" disabled={loading}>
           {loading ? (
             <>
               <Loader2 className="animate-spin" size={20} />
@@ -260,17 +256,17 @@ export function NFTCollectionForm({
               {mode === "create" ? "Crear Colección" : "Guardar Cambios"}
             </>
           )}
-        </button>
+        </Button>
 
         {onCancel && (
-          <button
+          <Button
             type="button"
             onClick={onCancel}
             disabled={loading}
-            className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            variant="outline"
           >
             Cancelar
-          </button>
+          </Button>
         )}
       </div>
     </form>

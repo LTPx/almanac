@@ -2,8 +2,10 @@
 
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Package, Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { NFTCollectionForm } from "@/components/admin/nft-collection-form";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function EditCollectionPage() {
   const router = useRouter();
@@ -19,7 +21,9 @@ export default function EditCollectionPage() {
 
   const fetchCollection = async () => {
     try {
-      const response = await fetch(`/api/admin/collections/${params.id}`);
+      const response = await fetch(
+        `/api/nft-collections/${params.collectionId}`
+      );
       const data = await response.json();
 
       if (response.ok) {
@@ -37,11 +41,11 @@ export default function EditCollectionPage() {
 
   const handleSuccess = (data: any) => {
     alert(`✅ Colección "${data.collection.name}" actualizada exitosamente!`);
-    router.push("/admin/collections");
+    router.push("/admin/nfts");
   };
 
   const handleCancel = () => {
-    router.push("/admin/collections");
+    router.push("/admin/nfts");
   };
 
   if (loading) {
@@ -71,31 +75,29 @@ export default function EditCollectionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Package className="text-purple-600" size={32} />
-            <h1 className="text-3xl font-bold text-gray-900">
-              Editar Colección
-            </h1>
+    <div className="max-w-2xl mx-auto">
+      <div className="space-y-6">
+        <div className="flex items-center space-x-4">
+          <Link href="/admin/nfts">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Volver
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold">Editar Colección</h1>
+            <p>
+              Actualiza la información de la colección{" "}
+              <strong>{collection?.name}</strong>
+            </p>
           </div>
-          <p className="text-gray-600">
-            Actualiza la información de la colección{" "}
-            <strong>{collection?.name}</strong>
-          </p>
         </div>
-
-        {/* Form */}
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <NFTCollectionForm
-            mode="edit"
-            initialData={collection}
-            onSuccess={handleSuccess}
-            onCancel={handleCancel}
-          />
-        </div>
+        <NFTCollectionForm
+          mode="edit"
+          initialData={collection}
+          onSuccess={handleSuccess}
+          onCancel={handleCancel}
+        />
       </div>
     </div>
   );

@@ -45,6 +45,12 @@ export async function GET(request: NextRequest) {
                 }
               }
             }
+          },
+          collection: {
+            select: {
+              id: true,
+              name: true
+            }
           }
         },
         orderBy: {

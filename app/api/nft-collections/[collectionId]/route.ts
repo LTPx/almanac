@@ -14,8 +14,7 @@ export async function GET(
         _count: {
           select: {
             educationalNFTs: true,
-            nftAssets: true,
-            curriculums: true
+            nftAssets: true
           }
         }
       }

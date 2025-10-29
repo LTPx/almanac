@@ -125,23 +125,25 @@ export default function NFTsPage() {
     <div className="space-y-6 bg-background text-foreground min-h-screen p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">NFT Assets</h1>
+          <h1 className="text-3xl font-bold">NFT</h1>
           <p className="text-muted-foreground">
             Gestiona los NFTs disponibles para recompensas
           </p>
         </div>
-        <Link href="/admin/collections/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            New NFT Collection
-          </Button>
-        </Link>
-        <Link href="/admin/nfts/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            New NFT Asset
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/admin/collections/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              New NFT Collection
+            </Button>
+          </Link>
+          <Link href="/admin/nfts/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              New NFT Asset
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Estadísticas */}
@@ -349,6 +351,13 @@ export default function NFTsPage() {
                     <h3 className="font-semibold text-md">
                       {nft.name || "No name"}
                     </h3>
+                    <Link
+                      href={`/admin/collections/${nft.collectionId || ""}/edit`}
+                    >
+                      <h3 className="text-sm mt-1 text-muted-foreground">
+                        {nft.collection?.name || "No collection"}
+                      </h3>
+                    </Link>
                   </div>
                   <div className="flex items-center justify-between">
                     <Badge
