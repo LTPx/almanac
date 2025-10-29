@@ -8,6 +8,22 @@ import { useGamification } from "@/hooks/useGamification";
 import { useCurriculums } from "@/hooks/use-curriculums";
 import LearningPath from "@/components/units-learning";
 import { useCurriculumStore } from "@/store/useCurriculumStore";
+import { Loader2, BookOpen } from "lucide-react";
+
+const ContentLoadingScreen = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="flex flex-col items-center gap-4">
+      <div className="relative">
+        <Loader2 className="w-12 h-12 animate-spin text-purple-500" />
+      </div>
+      <div className="text-center">
+        <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+          Cargando
+        </p>
+      </div>
+    </div>
+  </div>
+);
 
 export default function HomePage() {
   const [curriculums, setCurriculums] = useState<Curriculum[]>([]);
@@ -20,8 +36,11 @@ export default function HomePage() {
   const userId = user?.id || "";
   const { isLoading, error, fetchCurriculums, fetchCurriculumWithUnits } =
     useCurriculums();
-  const { gamification, refetch: refetchGamification } =
-    useGamification(userId);
+  const {
+    gamification,
+    isLoading: isLoadingGamification,
+    refetch: refetchGamification
+  } = useGamification(userId);
 
   useEffect(() => {
     const loadUnits = async () => {
@@ -54,6 +73,32 @@ export default function HomePage() {
     setSelectedCurriculumId(curriculumId);
   };
 
+  const isInitialLoading = isLoading && curriculums.length === 0;
+  const isGamificationLoading = isLoadingGamification && !gamification;
+
+  if (isInitialLoading || isGamificationLoading) {
+    return (
+      <div className="HomePage">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative">
+              <Loader2 className="w-12 h-12 animate-spin text-purple-500" />
+              <BookOpen className="w-6 h-6 text-purple-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                Cargando tu progreso
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Preparando todo para ti...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="HomePage">
       <CourseHeader
@@ -63,9 +108,16 @@ export default function HomePage() {
         lives={gamification?.hearts ?? 0}
         zaps={gamification?.zapTokens ?? 0}
       />
-      {isLoading && <div>Cargando...</div>}
-      {error && <div className="text-red-500">{error}</div>}
-      {!isLoading && selectedCurriculum && (
+      {error && (
+        <div className="px-6 py-4">
+          <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 text-red-700 dark:text-red-400 px-4 py-3 rounded">
+            {error}
+          </div>
+        </div>
+      )}
+      {isLoading ? (
+        <ContentLoadingScreen />
+      ) : selectedCurriculum ? (
         <div className="h-full">
           <LearningPath
             key={selectedCurriculum.id}
@@ -75,8 +127,13 @@ export default function HomePage() {
             onTestComplete={handleTestComplete}
           />
         </div>
+      ) : (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <p className="text-gray-500 dark:text-gray-400">
+            No se encontraron datos
+          </p>
+        </div>
       )}
-      {!isLoading && !selectedCurriculum && <div>No se encontraron datos</div>}
     </div>
   );
 }
