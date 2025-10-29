@@ -50,7 +50,7 @@ export default function SignInForm() {
           setIsLoading(false);
           toast.dismiss();
           toast.success("Signed in successfully");
-          redirect("/home");
+          redirect("/");
         },
         onError: (ctx) => {
           setIsLoading(false);

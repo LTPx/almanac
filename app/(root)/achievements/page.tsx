@@ -169,7 +169,7 @@ function AchievementsContent({ userId }: { userId: string }) {
                       </div>
 
                       <Link
-                        href={"/home"}
+                        href={"/"}
                         className="mt-4 px-6 py-3 bg-[#1983DD] hover:bg-[#1A73E8] text-white text-sm font-medium rounded-lg transition-colors"
                       >
                         Completar mi primera unidad

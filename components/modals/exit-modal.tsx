@@ -68,7 +68,7 @@ export const ExitModal = ({ onEndSession }: ExitModalProps) => {
                 if (onEndSession) {
                   onEndSession();
                 }
-                // router.push("/home");
+                // router.push("/");
               }}
             >
               End session
