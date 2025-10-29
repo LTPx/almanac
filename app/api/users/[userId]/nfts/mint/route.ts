@@ -51,8 +51,10 @@ export async function POST(
     const courseName = "Almanac";
     const unitName = userCurriculumToken.curriculum.title;
     const rarity = getRandomRarity();
-    const { nftImage, nftImageId, rarityUsed } =
-      await getAvailableNFTImage(rarity);
+    const { nftImage, nftImageId, rarityUsed } = await getAvailableNFTImage(
+      rarity,
+      ""
+    );
 
     const metadata = createNFTMetadata({
       courseName,
@@ -63,7 +65,11 @@ export async function POST(
     });
 
     // 3) Mintear el NFT
-    const mintResult = await mintEducationalNFT(user.walletAddress!, metadata);
+    const mintResult = await mintEducationalNFT(
+      user.walletAddress!,
+      metadata,
+      ""
+    );
 
     // 4) Guardar en base de datos
     const savedNFT = await saveNFTToDatabase({

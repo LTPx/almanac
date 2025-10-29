@@ -130,6 +130,12 @@ export default function NFTsPage() {
             Gestiona los NFTs disponibles para recompensas
           </p>
         </div>
+        <Link href="/admin/collections/new">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            New NFT Collection
+          </Button>
+        </Link>
         <Link href="/admin/nfts/new">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
