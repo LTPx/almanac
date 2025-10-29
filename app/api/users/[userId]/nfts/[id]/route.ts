@@ -32,7 +32,8 @@ export async function GET(
             id: true,
             name: true,
             imageUrl: true,
-            rarity: true
+            rarity: true,
+            collectionId: true
           }
         }
       }
@@ -102,7 +103,8 @@ export async function GET(
             value: "Educational Certificate"
           }
         ]
-      }
+      },
+      collectionId: nft.nftAsset?.collectionId || null
     };
 
     return NextResponse.json(nftDetail);
