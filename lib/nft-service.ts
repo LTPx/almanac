@@ -7,7 +7,6 @@ import prisma from "./prisma";
 
 const ADMIN_PRIVATE_KEY = process.env.ADMIN_WALLET_PRIVATE_KEY;
 const THIRDWEB_SECRET_KEY = process.env.THIRDWEB_SECRET_KEY;
-const CONTRACT_ADDRESS = process.env.THIRDWEB_CONTRACT_ADDRESS!;
 
 if (!ADMIN_PRIVATE_KEY)
   throw new Error("Falta ADMIN_WALLET_PRIVATE_KEY en env");
@@ -20,11 +19,6 @@ const TRANSFER_TOPIC =
 /** Inicializar thirdweb client + account admin */
 const client = createThirdwebClient({ secretKey: THIRDWEB_SECRET_KEY });
 const account = privateKeyToAccount({ client, privateKey: ADMIN_PRIVATE_KEY });
-const contract = getContract({
-  client,
-  chain: polygonAmoy,
-  address: CONTRACT_ADDRESS
-});
 
 export interface NFTMetadata {
   name: string;
@@ -41,6 +35,41 @@ export interface MintResult {
   transactionHash: string;
   metadataUri: string | null;
   explorerUrl: string | null;
+  collectionId: string;
+  collectionName: string;
+}
+
+export const RARITIES = ["NORMAL", "RARE", "EPIC", "UNIQUE"] as const;
+export type Rarity = (typeof RARITIES)[number];
+
+/**
+ * 🆕 Obtiene una colección por ID
+ */
+export async function getCollectionById(collectionId: string) {
+  const collection = await prisma.nFTCollection.findUnique({
+    where: { id: collectionId }
+  });
+
+  if (!collection) {
+    throw new Error(`Colección ${collectionId} no encontrada`);
+  }
+
+  if (!collection.isActive) {
+    throw new Error(`La colección ${collection.name} está desactivada`);
+  }
+
+  return collection;
+}
+
+/**
+ * 🆕 Crea una instancia de contrato para una colección específica
+ */
+function getContractForCollection(contractAddress: string) {
+  return getContract({
+    client,
+    chain: polygonAmoy,
+    address: contractAddress
+  });
 }
 
 /**
@@ -51,15 +80,18 @@ export function createNFTMetadata({
   unitName,
   rarity,
   imageUrl,
-  customDescription
+  customDescription,
+  collectionName
 }: {
   courseName: string;
   unitName: string;
-  rarity: "NORMAL" | "RARE" | "EPIC" | "UNIQUE";
+  rarity: Rarity;
   imageUrl: string;
   customDescription?: string;
+  collectionName?: string;
 }): NFTMetadata {
   const defaultDescription = `Certificado de completitud para la unidad "${unitName}" del curso "${courseName}"`;
+
   return {
     name: `${courseName} - ${unitName}`,
     description: customDescription || defaultDescription,
@@ -72,20 +104,21 @@ export function createNFTMetadata({
         trait_type: "Completed Date",
         value: new Date().toISOString().split("T")[0]
       },
-      { trait_type: "Type", value: "Educational Certificate" }
+      { trait_type: "Type", value: "Educational Certificate" },
+      ...(collectionName
+        ? [{ trait_type: "Collection", value: collectionName }]
+        : [])
     ]
   };
 }
 
 /**
- * Obtiene una imagen/nft disponible basado en rareza
+ * Obtiene una imagen/nft disponible basado en rareza y colección
  */
-
-export const RARITIES = ["NORMAL", "RARE", "EPIC", "UNIQUE"] as const;
-export type Rarity = (typeof RARITIES)[number];
-
-export async function getAvailableNFTImage(preferredRarity: Rarity) {
-  // fallback ordenado: primero la preferida, luego el resto en orden definido
+export async function getAvailableNFTImage(
+  preferredRarity: Rarity,
+  collectionId: string
+) {
   const rarityPriority: Rarity[] = [
     preferredRarity,
     ...RARITIES.filter((r) => r !== preferredRarity)
@@ -93,7 +126,11 @@ export async function getAvailableNFTImage(preferredRarity: Rarity) {
 
   for (const rarity of rarityPriority) {
     const image = await prisma.nFTAsset.findFirst({
-      where: { rarity, isUsed: false },
+      where: {
+        rarity,
+        isUsed: false,
+        collectionId
+      },
       orderBy: { id: "asc" }
     });
 
@@ -111,7 +148,9 @@ export async function getAvailableNFTImage(preferredRarity: Rarity) {
     }
   }
 
-  throw new Error("No hay imágenes disponibles en ninguna rareza");
+  throw new Error(
+    `No hay imágenes disponibles para la colección ${collectionId}`
+  );
 }
 
 /**
@@ -146,13 +185,14 @@ async function waitForReceipt(
  */
 function extractTokenIdFromLogs(
   logs: any[],
-  walletAddress: string
+  walletAddress: string,
+  contractAddress: string
 ): string | null {
   const paddedTo =
     "0x" + walletAddress.toLowerCase().replace(/^0x/, "").padStart(64, "0");
 
   for (const log of logs) {
-    if (log.address.toLowerCase() !== CONTRACT_ADDRESS.toLowerCase()) continue;
+    if (log.address.toLowerCase() !== contractAddress.toLowerCase()) continue;
     if ((log.topics?.[0] ?? "").toLowerCase() !== TRANSFER_TOPIC) continue;
 
     const topicTo = (log.topics?.[2] ?? "").toLowerCase();
@@ -169,16 +209,22 @@ function extractTokenIdFromLogs(
 /**
  * Genera la URL del explorador para el NFT
  */
-function generateExplorerUrl(tokenId: string | null): string | null {
+function generateExplorerUrl(
+  tokenId: string | null,
+  contractAddress: string
+): string | null {
   return tokenId
-    ? `https://amoy.polygonscan.com/token/${CONTRACT_ADDRESS}?a=${tokenId}`
+    ? `https://amoy.polygonscan.com/token/${contractAddress}?a=${tokenId}`
     : null;
 }
 
 /**
  * Obtiene el URI de metadatos del token
  */
-async function getTokenMetadataUri(tokenId: string): Promise<string | null> {
+async function getTokenMetadataUri(
+  tokenId: string,
+  contract: any
+): Promise<string | null> {
   try {
     return await tokenURI({ contract, tokenId: BigInt(tokenId) });
   } catch (err) {
@@ -188,17 +234,28 @@ async function getTokenMetadataUri(tokenId: string): Promise<string | null> {
 }
 
 /**
- * Mintea un NFT educativo para el usuario especificado
+ * 🔄 Mintea un NFT educativo para el usuario especificado en una colección específica
  */
 export async function mintEducationalNFT(
   walletAddress: string,
-  metadata: NFTMetadata
+  metadata: NFTMetadata,
+  collectionId: string
 ): Promise<MintResult> {
-  // 1) Crear y enviar transacción
+  // 1) Obtener la colección
+  const collection = await getCollectionById(collectionId);
+
+  // 2) Crear instancia del contrato para esta colección
+  const contract = getContractForCollection(collection.contractAddress);
+
+  console.log(
+    `🎨 Minteando en colección: ${collection.name} (${collection.contractAddress})`
+  );
+
+  // 3) Crear y enviar transacción
   const transaction = mintTo({
     contract,
     to: walletAddress,
-    //@ts-expect-error - thirdweb typing issue - see
+    //@ts-expect-error - thirdweb typing issue
     nft: metadata
   });
 
@@ -207,24 +264,32 @@ export async function mintEducationalNFT(
     throw new Error("No se obtuvo transactionHash");
   }
 
-  // 2) Esperar por el receipt
+  // 4) Esperar por el receipt
   const rpcRequest = getRpcClient({ client, chain: polygonAmoy });
   const receipt = await waitForReceipt(rpcRequest, transactionHash);
 
-  // 3) Extraer tokenId de los logs
-  const tokenId = extractTokenIdFromLogs(receipt.logs, walletAddress);
+  // 5) Extraer tokenId de los logs
+  const tokenId = extractTokenIdFromLogs(
+    receipt.logs,
+    walletAddress,
+    collection.contractAddress
+  );
 
-  // 4) Obtener metadataUri si tenemos tokenId
-  const metadataUri = tokenId ? await getTokenMetadataUri(tokenId) : null;
+  // 6) Obtener metadataUri si tenemos tokenId
+  const metadataUri = tokenId
+    ? await getTokenMetadataUri(tokenId, contract)
+    : null;
 
-  // 5) Generar URL del explorador
-  const explorerUrl = generateExplorerUrl(tokenId);
+  // 7) Generar URL del explorador
+  const explorerUrl = generateExplorerUrl(tokenId, collection.contractAddress);
 
   return {
     tokenId,
     transactionHash,
     metadataUri,
-    explorerUrl
+    explorerUrl,
+    collectionId: collection.id,
+    collectionName: collection.name
   };
 }
 

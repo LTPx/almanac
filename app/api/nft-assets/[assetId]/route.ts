@@ -74,6 +74,7 @@ export async function PUT(
     const rarity = formData.get("rarity") as string | null;
     const metadataUri = formData.get("metadataUri") as string | null;
     const name = formData.get("name") as string | null;
+    const collectionId = formData.get("collectionId") as string | null;
 
     const existingNFT = await prisma.nFTAsset.findUnique({
       where: { id }
@@ -171,6 +172,7 @@ export async function PUT(
     if (name !== undefined) updateData.name = name || "";
     if (rarity) updateData.rarity = rarity;
     if (metadataUri) updateData.metadataUri = metadataUri;
+    if (collectionId) updateData.collectionId = collectionId;
 
     const updatedNFT = await prisma.nFTAsset.update({
       where: { id },

@@ -24,7 +24,12 @@ export async function GET(
             id: true,
             title: true,
             audienceAgeRange: true,
-            difficulty: true
+            difficulty: true,
+            units: {
+              select: {
+                name: true
+              }
+            }
           }
         },
         nftAsset: {
@@ -32,7 +37,13 @@ export async function GET(
             id: true,
             name: true,
             imageUrl: true,
-            rarity: true
+            rarity: true,
+            collection: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
           }
         }
       }
@@ -64,7 +75,7 @@ export async function GET(
       transactionHash: nft.transactionHash,
       chain: chain,
       tokenStandard: "ERC721",
-      collectionName: "Almanac Educational Certificates",
+      collectionName: nft.nftAsset?.collection?.name || null,
       owner: nft.user.walletAddress || nft.userId,
       ownerName: nft.user.name || "Unknown",
       ownerEmail: nft.user.email,
@@ -73,7 +84,8 @@ export async function GET(
         id: nft.curriculum.id,
         title: nft.curriculum.title,
         difficulty: nft.curriculum.difficulty,
-        audienceAgeRange: nft.curriculum.audienceAgeRange
+        audienceAgeRange: nft.curriculum.audienceAgeRange,
+        units: nft.curriculum.units.map((unit) => unit.name)
       },
       nftAsset: nft.nftAsset,
       metadata: metadata || {
@@ -102,7 +114,8 @@ export async function GET(
             value: "Educational Certificate"
           }
         ]
-      }
+      },
+      collectionId: nft.nftAsset?.collection?.id || null
     };
 
     return NextResponse.json(nftDetail);
