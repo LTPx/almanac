@@ -349,24 +349,52 @@ model EducationalNFT {
   user            User       @relation(fields: [userId], references: [id])
   curriculum      Curriculum @relation(fields: [curriculumId], references: [id])
   curriculumId    String
-  nftAsset        NFTAsset?  @relation(fields: [nftAssetId], references: [id])
-  nftAssetId      Int?       @unique
+
+  // relationships
+  nftAsset     NFTAsset?      @relation(fields: [nftAssetId], references: [id])
+  nftAssetId   Int?           @unique
+  collection   NFTCollection? @relation(fields: [collectionId], references: [id])
+  collectionId String?
 
   @@map("educational_nft")
 }
 
 model NFTAsset {
-  id             Int             @id @default(autoincrement())
-  name           String          @default("")
-  imageUrl       String
-  rarity         NFTRarity
-  isUsed         Boolean         @default(false)
-  metadataUri    String?
-  createdAt      DateTime        @default(now())
-  usedAt         DateTime?
+  id          Int       @id @default(autoincrement())
+  name        String    @default("")
+  imageUrl    String
+  rarity      NFTRarity
+  isUsed      Boolean   @default(false)
+  metadataUri String?
+  createdAt   DateTime  @default(now())
+  usedAt      DateTime?
+
+  // relationship
   educationalNFT EducationalNFT?
 
+  // relationship to collection
+  collection   NFTCollection? @relation(fields: [collectionId], references: [id])
+  collectionId String?
+
   @@map("nft_asset")
+}
+
+model NFTCollection {
+  id              String   @id @default(cuid())
+  name            String
+  symbol          String
+  description     String?
+  contractAddress String   @unique
+  chainId         Int      @default(80002) // Polygon testnet Amoy
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // relationships
+  educationalNFTs EducationalNFT[]
+  nftAssets       NFTAsset[]
+
+  @@map("nft_collection")
 }
 
 //ENUMS
