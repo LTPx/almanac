@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
     const rarity = formData.get("rarity") as string;
     const metadataUri = formData.get("metadataUri") as string | null;
     const name = formData.get("name") as string | null;
+    const collectionId = formData.get("collectionId") as string | null;
 
     if (!file || !rarity) {
       return NextResponse.json(
@@ -121,7 +122,8 @@ export async function POST(request: NextRequest) {
         imageUrl,
         rarity: rarity as any,
         metadataUri,
-        isUsed: false
+        isUsed: false,
+        collectionId
       }
     });
 
