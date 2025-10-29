@@ -30,6 +30,25 @@ export default function StoreContent({
 
   useEffect(() => {
     loadUserStats();
+
+    // Agregar listener para cuando la ventana vuelva a estar visible
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        loadUserStats();
+      }
+    };
+
+    const handleFocus = () => {
+      loadUserStats();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -198,6 +217,8 @@ export default function StoreContent({
             userId={userId}
             onZapsUpdate={(newZaps) => {
               setZapTokens(newZaps);
+              // Recargar stats completos después de actualizar zaps
+              loadUserStats();
             }}
           />
         </div>
