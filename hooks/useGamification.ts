@@ -13,7 +13,7 @@ interface GamificationData {
 }
 
 export function useGamification(userId: string) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [gamification, setGamification] = useState<GamificationData>({
     hearts: 0,
@@ -26,7 +26,10 @@ export function useGamification(userId: string) {
   });
 
   const fetchGamification = async () => {
-    if (!userId) return;
+    if (!userId) {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     setError(null);
 
@@ -56,6 +59,7 @@ export function useGamification(userId: string) {
 
   useEffect(() => {
     fetchGamification();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   return {

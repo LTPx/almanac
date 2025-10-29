@@ -3,12 +3,29 @@
 import Link from "next/link";
 import React from "react";
 import { Button } from "./ui/button";
-import SignOutForm from "./sign-out-form";
 import Logo from "./logo";
 import { useUser } from "@/context/UserContext";
+import { authClient } from "@/lib/auth-client";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function Navbar() {
   const user = useUser();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSignOut = async () => {
+    setIsLoading(true);
+    try {
+      await authClient.signOut();
+      toast.success("Signed out successfully");
+      window.location.href = "/sign-in";
+    } catch (error) {
+      setIsLoading(false);
+      toast.error("Failed to sign out");
+      console.error("Sign out error:", error);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-100 flex justify-center py-2">
       <div className="container border rounded-md w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-2 px-4">
@@ -25,7 +42,13 @@ export default function Navbar() {
                 >
                   <Button variant="outline">Dashboard</Button>
                 </Link>
-                <SignOutForm />
+                <Button
+                  variant="default"
+                  onClick={handleSignOut}
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Signing out..." : "Logout"}
+                </Button>
               </>
             ) : (
               <>

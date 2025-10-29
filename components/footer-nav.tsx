@@ -19,7 +19,7 @@ const NAV: {
   iconOpen?: React.ComponentType<any>;
   iconClosed?: React.ComponentType<any>;
 }[] = [
-  { name: "Home", link: "/home", icon: Home },
+  { name: "Home", link: "/", icon: Home },
   {
     name: "Contents",
     link: "/contents",
