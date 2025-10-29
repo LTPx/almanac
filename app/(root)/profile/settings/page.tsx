@@ -1,34 +1,27 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { useSetUser } from "@/context/UserContext";
+import { useState } from "react";
 import MenuItem from "@/components/menu-item";
 
 export default function SettingsProfile() {
-  const router = useRouter();
-  const setUser = useSetUser();
+  // const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onRequest: () => {
-          toast.loading("Logging out...");
-        },
-        onSuccess: () => {
-          toast.dismiss();
-          setUser(null); //
-          router.push("/");
-          toast.success("Logged out successfully");
-        },
-        onError: (ctx) => {
-          toast.dismiss();
-          toast.error(ctx.error.message);
-        }
-      }
-    });
+    setIsLoggingOut(true);
+    try {
+      await authClient.signOut();
+      toast.success("Logged out successfully");
+      window.location.href = "/sign-in";
+    } catch (error) {
+      setIsLoggingOut(false);
+      toast.error("Failed to log out");
+      console.error("Logout error:", error);
+    }
   };
 
   const handlePreferences = () => console.log("Preferencias clicked");
@@ -63,8 +56,9 @@ export default function SettingsProfile() {
             variant="outline"
             className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white px-8 py-2 rounded-lg"
             onClick={handleLogout}
+            disabled={isLoggingOut}
           >
-            Log out
+            {isLoggingOut ? "Logging out..." : "Log out"}
           </Button>
         </div>
       </div>
