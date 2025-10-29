@@ -16,11 +16,12 @@ export default function StoreContent({
   backButtonVariant = "icon"
 }: StoreContentProps) {
   const user = useUser();
-  const [zapTokens, setZapTokens] = useState(120);
-  const [hearts, setHearts] = useState(3);
+  const [zapTokens, setZapTokens] = useState<number | null>(null);
+  const [hearts, setHearts] = useState<number | null>(null);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [heartQuantity, setHeartQuantity] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -31,7 +32,6 @@ export default function StoreContent({
   useEffect(() => {
     loadUserStats();
 
-    // Agregar listener para cuando la ventana vuelva a estar visible
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         loadUserStats();
@@ -63,6 +63,8 @@ export default function StoreContent({
       }
     } catch (error) {
       console.error("Error cargando estadísticas:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -143,6 +145,17 @@ export default function StoreContent({
 
   const totalZapCost = heartQuantity * 10;
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen text-white flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+          <p className="text-gray-400">Cargando tienda...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen text-white">
       <div
@@ -176,11 +189,13 @@ export default function StoreContent({
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Heart className="w-5 h-5 text-red-500 fill-red-500" />
-            <span className="text-red-500 font-semibold">{hearts}</span>
+            <span className="text-red-500 font-semibold">{hearts ?? "-"}</span>
           </div>
           <div className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-purple-500" />
-            <span className="text-purple-500 font-semibold">{zapTokens}</span>
+            <span className="text-purple-500 font-semibold">
+              {zapTokens ?? "-"}
+            </span>
           </div>
         </div>
       </div>
@@ -217,7 +232,6 @@ export default function StoreContent({
             userId={userId}
             onZapsUpdate={(newZaps) => {
               setZapTokens(newZaps);
-              // Recargar stats completos después de actualizar zaps
               loadUserStats();
             }}
           />
@@ -321,7 +335,7 @@ export default function StoreContent({
                 {userStats && (
                   <div className="mb-4 text-sm text-gray-400">
                     <p>
-                      Tienes: {hearts}/{userStats.maxHearts} vidas
+                      Tienes: {hearts ?? 0}/{userStats.maxHearts} vidas
                     </p>
                     <p>Puedes comprar: {userStats.canPurchase} vida(s)</p>
                   </div>
