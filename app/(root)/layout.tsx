@@ -1,6 +1,8 @@
+// app/(root)/layout.tsx
 import Navbar from "@/components/navbar";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { UserProvider } from "@/context/UserContext";
 import FooterNav from "@/components/footer-nav";
 
@@ -12,7 +14,12 @@ export default async function HomeLayout({
   const session = await auth.api.getSession({
     headers: await headers()
   });
-  const user = session?.user ?? null;
+
+  if (!session) {
+    redirect("/sign-in");
+  }
+
+  const user = session.user;
 
   return (
     <UserProvider user={user}>
@@ -20,7 +27,6 @@ export default async function HomeLayout({
         <Navbar />
         <main>{children}</main>
         <FooterNav />
-        {/* <Footer /> */}
       </div>
     </UserProvider>
   );
