@@ -34,6 +34,7 @@ interface NFTDetail {
     id: string;
     title: string;
     difficulty: string;
+    units: string[];
   };
   metadata: NFTMetadata;
 }
@@ -165,13 +166,7 @@ export default function NFTDetailPage() {
     );
   }
 
-  const achievements =
-    nft.metadata.attributes?.filter(
-      (attr) =>
-        attr.trait_type.includes("Algebra") ||
-        attr.trait_type.includes("Imaginary") ||
-        attr.trait_type.includes("Binomials")
-    ) || [];
+  const achievements = nft.curriculum?.units || [];
 
   return (
     <div className="min-h-screen bg-black text-white pb-20">
@@ -245,12 +240,10 @@ export default function NFTDetailPage() {
                         key={index}
                         className="flex items-center justify-between text-sm"
                       >
-                        <span className="text-gray-400">
-                          {achievement.trait_type}
-                        </span>
-                        <span className="font-medium">
+                        <span className="text-gray-400">{achievement}</span>
+                        {/* <span className="font-medium">
                           {achievement.value}%
-                        </span>
+                        </span> */}
                       </div>
                     ))}
                   </div>
