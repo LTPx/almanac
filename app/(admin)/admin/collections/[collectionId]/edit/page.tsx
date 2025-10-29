@@ -50,7 +50,7 @@ export default function EditCollectionPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
+      <div className="min-h-screen flex items-center justify-center bg-card from-purple-50 to-blue-50">
         <div className="text-center">
           <Loader2
             className="animate-spin mx-auto mb-4 text-purple-600"
@@ -75,30 +75,28 @@ export default function EditCollectionPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Link href="/admin/nfts">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold">Editar Colección</h1>
-            <p>
-              Actualiza la información de la colección{" "}
-              <strong>{collection?.name}</strong>
-            </p>
-          </div>
+    <div className="space-y-6">
+      <div className="flex items-center space-x-4">
+        <Link href="/admin/nfts">
+          <Button variant="ghost" size="sm">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Volver
+          </Button>
+        </Link>
+        <div>
+          <h1 className="text-3xl font-bold">Editar Colección</h1>
+          <p>
+            Actualiza la información de la colección{" "}
+            <strong>{collection?.name}</strong>
+          </p>
         </div>
-        <NFTCollectionForm
-          mode="edit"
-          initialData={collection}
-          onSuccess={handleSuccess}
-          onCancel={handleCancel}
-        />
       </div>
+      <NFTCollectionForm
+        mode="edit"
+        initialData={collection}
+        onSuccess={handleSuccess}
+        onCancel={handleCancel}
+      />
     </div>
   );
 }
