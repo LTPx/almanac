@@ -116,6 +116,7 @@ export type NFTAsset = {
   createdAt: Date;
   usedAt?: Date;
   educationalNFT?: EducationalNFT;
+  collectionId?: string;
 };
 
 export type Pagination = {

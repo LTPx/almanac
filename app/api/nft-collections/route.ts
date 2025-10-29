@@ -2,22 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 // GET - Listar todas las colecciones
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const collections = await prisma.nFTCollection.findMany({
       include: {
         _count: {
           select: {
             educationalNFTs: true,
-            nftAssets: true,
-            curriculums: true
+            nftAssets: true
           }
         }
       },
       orderBy: { createdAt: "desc" }
     });
 
-    return NextResponse.json({ collections });
+    return NextResponse.json(collections);
   } catch (error) {
     console.error("Error fetching collections:", error);
     return NextResponse.json(

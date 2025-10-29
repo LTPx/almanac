@@ -2,8 +2,8 @@
 
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import NFTCollectionForm from "../../../../../components/NFTCollectionForm";
 import { Package, Loader2 } from "lucide-react";
+import { NFTCollectionForm } from "@/components/admin/nft-collection-form";
 
 export default function EditCollectionPage() {
   const router = useRouter();
@@ -14,6 +14,7 @@ export default function EditCollectionPage() {
 
   useEffect(() => {
     fetchCollection();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchCollection = async () => {
