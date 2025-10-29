@@ -12,6 +12,7 @@ const CONTRACT_ADDRESS = process.env.THIRDWEB_CONTRACT_ADDRESS!;
 interface MintRequestBody {
   curriculumTokenId?: string;
   tokenUnit?: string | number;
+  collectionId: string;
   description?: string;
 }
 
@@ -21,13 +22,19 @@ export async function POST(
 ) {
   try {
     const { userId } = await context.params;
-    const body: MintRequestBody = await request.json();
-    const curriculumTokenId = body.curriculumTokenId;
-    const description = body.description;
+    const { curriculumTokenId, description, collectionId }: MintRequestBody =
+      await request.json();
 
     if (!curriculumTokenId) {
       return NextResponse.json(
         { error: "curriculumTokenId es requerido" },
+        { status: 400 }
+      );
+    }
+
+    if (!collectionId) {
+      return NextResponse.json(
+        { error: "collectionId es requerido" },
         { status: 400 }
       );
     }
@@ -53,7 +60,7 @@ export async function POST(
     const rarity = getRandomRarity();
     const { nftImage, nftImageId, rarityUsed } = await getAvailableNFTImage(
       rarity,
-      ""
+      collectionId
     );
 
     const metadata = createNFTMetadata({
@@ -68,7 +75,7 @@ export async function POST(
     const mintResult = await mintEducationalNFT(
       user.walletAddress!,
       metadata,
-      ""
+      collectionId
     );
 
     // 4) Guardar en base de datos

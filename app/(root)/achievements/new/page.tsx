@@ -72,6 +72,9 @@ export default function CreateCertificatePage() {
   const [mintedNFT, setMintedNFT] = useState<NFT | null>(null);
 
   const [selectedUnitId, setSelectedUnitId] = useState("");
+  const [selectedCollectionId, setSelectedCollectionId] = useState<
+    string | null
+  >();
   const [description, setDescription] = useState("");
 
   const selectedUnit = curriculumTokens.find(
@@ -117,7 +120,7 @@ export default function CreateCertificatePage() {
   };
 
   const handleMintNFT = async () => {
-    if (!session?.user?.id || !selectedUnitId) return;
+    if (!session?.user?.id || !selectedUnitId || !selectedCollectionId) return;
 
     setLoading(true);
     setError(null);
@@ -129,7 +132,8 @@ export default function CreateCertificatePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           curriculumTokenId: selectedUnitId,
-          description: description.trim()
+          description: description.trim(),
+          collectionId: selectedCollectionId
         })
       });
 
@@ -313,8 +317,8 @@ export default function CreateCertificatePage() {
                   Colección
                 </label>
                 <select
-                  value={selectedUnitId}
-                  onChange={(e) => setSelectedUnitId(e.target.value)}
+                  value={selectedCollectionId || ""}
+                  onChange={(e) => setSelectedCollectionId(e.target.value)}
                   className="w-full p-4 border border-gray-600 rounded-lg text-white"
                   required
                 >
