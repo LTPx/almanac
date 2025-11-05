@@ -153,6 +153,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                     {nodeData ? (
                       <LessonNode
                         id={nodeData.id}
+                        unitId={nodeData.id}
                         name={nodeData.name}
                         description={nodeData.description}
                         state={getLessonState(nodeData)}

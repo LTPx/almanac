@@ -8,6 +8,7 @@ import { useNoHeartsModal } from "@/store/no-hearts-modal";
 
 type LessonNodeProps = {
   id: number;
+  unitId: number;
   name: string;
   description?: string | null;
   state: "completed" | "available" | "locked";
@@ -20,6 +21,7 @@ type LessonNodeProps = {
 };
 
 const LessonNode: React.FC<LessonNodeProps> = ({
+  unitId,
   name,
   description,
   state,
@@ -140,6 +142,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
   if (state === "completed") {
     return (
       <StepPopover
+        unitId={unitId}
         title={name}
         message={
           description ||
@@ -160,6 +163,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
   if (state === "locked") {
     return (
       <StepPopover
+        unitId={unitId}
         title={name}
         message="¡Completa todos los niveles anteriores para habilitar este nivel!"
         buttonText="CERRADA"
@@ -173,6 +177,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
 
   return (
     <StepPopover
+      unitId={unitId}
       title={name}
       message={description || ""}
       buttonText="Empezar mi Prueba"

@@ -23,6 +23,7 @@ interface StepPopoverProps {
   isFirstMandatory?: boolean;
   isCompleted?: boolean;
   mandatory?: boolean;
+  unitId?: number;
 }
 
 export function StepPopover({
@@ -36,7 +37,8 @@ export function StepPopover({
   isOptional = false,
   isFirstMandatory = false,
   isCompleted = false,
-  mandatory = false
+  mandatory = false,
+  unitId
 }: StepPopoverProps) {
   const router = useRouter();
 
@@ -91,7 +93,7 @@ export function StepPopover({
   const handleBookClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    router.push("/contents");
+    router.push(`/contents?unit=${unitId}`);
   };
 
   return (
