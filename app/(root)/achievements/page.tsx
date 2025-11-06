@@ -10,6 +10,7 @@ import { useNFTs } from "@/hooks/useNfts";
 import { useUser } from "@/context/UserContext";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
+import { ExploreTab } from "@/components/explore-tab";
 
 function Achievements() {
   const user = useUser();
@@ -34,6 +35,7 @@ function AchievementsContent({ userId }: { userId: string }) {
   const { nfts, loading, error, refetch } = useNFTs(userId);
   const [completedUnits, setCompletedUnits] = useState<CompletedUnit[]>([]);
   const [loadingUnits, setLoadingUnits] = useState(true);
+  const [exploreTab, setExploreTab] = useState("explore");
 
   const fetchCompletedUnits = useCallback(async () => {
     try {
@@ -85,14 +87,14 @@ function AchievementsContent({ userId }: { userId: string }) {
           className="flex-1 flex flex-col overflow-hidden m-0"
         >
           <Tabs
-            value="mis-medallas"
+            value={exploreTab}
+            onValueChange={setExploreTab}
             className="w-full flex-1 flex flex-col overflow-hidden"
           >
             <TabsList className="w-full h-14 bg-[#32C781] rounded-none shrink-0">
               <TabsTrigger
                 value="explore"
-                disabled
-                className="flex-1 font-bold text-[#1A6E47] cursor-not-allowed rounded-none text-sm"
+                className="flex-1 text-white data-[state=active]:bg-transparent shadow-none border-0 border-b-2 border-b-transparent data-[state=active]:border-b-white rounded-none font-medium text-sm"
               >
                 Explore
               </TabsTrigger>
@@ -111,6 +113,12 @@ function AchievementsContent({ userId }: { userId: string }) {
               </TabsTrigger>
             </TabsList>
 
+            {/* Explore Tab */}
+            <TabsContent value="explore" className="flex-1 overflow-y-auto m-0">
+              <ExploreTab nfts={nfts} isActive={exploreTab === "explore"} />
+            </TabsContent>
+
+            {/* Mis Medallas Tab */}
             <TabsContent
               value="mis-medallas"
               className="flex-1 overflow-y-auto m-0"
