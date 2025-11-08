@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
                           create: q.answers.map((a) => ({
                             text: a.text,
                             isCorrect: a.isCorrect,
-                            order: a.order
+                            order: a.order || 0
                           }))
                         }
                       : undefined
