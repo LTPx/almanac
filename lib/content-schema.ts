@@ -3,8 +3,8 @@ import { z } from "zod";
 // Schema para Answer
 export const answerSchema = z.object({
   text: z.string().min(1, "Answer text is required"),
-  isCorrect: z.boolean(),
-  order: z.number().int().positive("Order must be a positive integer")
+  isCorrect: z.boolean()
+  // order: z.number().int().positive("Order must be a positive integer")
 });
 
 // Schema para Question Content basado en el tipo

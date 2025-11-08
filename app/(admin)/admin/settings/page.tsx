@@ -110,10 +110,6 @@ export default function AdminSettingsPage() {
                   errors.push(
                     `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}, Respuesta ${aIndex + 1}: isCorrect debe ser booleano`
                   );
-                if (typeof answer.order !== "number")
-                  errors.push(
-                    `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}, Respuesta ${aIndex + 1}: order debe ser un número`
-                  );
               });
             }
           }

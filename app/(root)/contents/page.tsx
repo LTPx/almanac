@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Accordion,
   AccordionContent,
@@ -13,9 +14,12 @@ import { FormattedTextDisplay } from "@/components/formatted-text-display";
 import { useCurriculumStore } from "@/store/useCurriculumStore";
 
 function Contents() {
+  const searchParams = useSearchParams();
+  const unitIdParam = searchParams?.get("unit");
   const { selectedCurriculumId } = useCurriculumStore();
   const { fetchCurriculumWithUnits, isLoading } = useCurriculums();
   const [curriculum, setCurriculum] = useState<Curriculum | null>(null);
+  const [openAccordion, setOpenAccordion] = useState<string>("");
 
   useEffect(() => {
     const loadCurriculumUnits = async () => {
@@ -24,11 +28,30 @@ function Contents() {
       const data = await fetchCurriculumWithUnits(selectedCurriculumId);
       if (data) {
         setCurriculum(data);
+        if (unitIdParam) {
+          const unitId = parseInt(unitIdParam);
+          const targetUnit = data.units?.find((u: Unit) => u.id === unitId);
+
+          if (
+            targetUnit &&
+            targetUnit.lessons &&
+            targetUnit.lessons.length > 0
+          ) {
+            const firstLesson = targetUnit.lessons[0];
+            setOpenAccordion(`lesson-${firstLesson.id}`);
+            setTimeout(() => {
+              const element = document.getElementById(`unit-${unitId}`);
+              if (element) {
+                element.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+            }, 100);
+          }
+        }
       }
     };
 
     loadCurriculumUnits();
-  }, [selectedCurriculumId, fetchCurriculumWithUnits]);
+  }, [selectedCurriculumId, fetchCurriculumWithUnits, unitIdParam]);
 
   if (isLoading) {
     return (
@@ -52,13 +75,21 @@ function Contents() {
     <div className="min-h-screen bg-neutral-900 text-white p-6 pb-20">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-[22px] font-bold mb-6">Temas</h1>
-
         {curriculum.units?.map((unit: Unit) => (
-          <div key={unit.id} className="mb-6">
+          <div
+            key={unit.id}
+            id={`unit-${unit.id}`}
+            className="mb-6 scroll-mt-20"
+          >
             <h2 className="text-xl font-bold mb-3">{unit.name}</h2>
-
             <div className="border-2 border-neutral-600 rounded-2xl overflow-hidden">
-              <Accordion type="single" collapsible className="w-full">
+              <Accordion
+                type="single"
+                collapsible
+                className="w-full"
+                value={openAccordion}
+                onValueChange={setOpenAccordion}
+              >
                 {unit.lessons?.map((lesson: Lesson) => (
                   <AccordionItem
                     key={lesson.id}
