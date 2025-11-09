@@ -56,9 +56,6 @@ const LessonNode: React.FC<LessonNodeProps> = ({
   };
 
   const getIconColor = () => {
-    if (state === "completed" && !mandatory) {
-      return "text-gray-700";
-    }
     return "text-white";
   };
 
