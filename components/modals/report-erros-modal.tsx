@@ -73,7 +73,7 @@ export function ReportErrorModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[300] flex items-center justify-center bg-black/70 p-4"
-        onClick={handleClose}
+        // onClick={handleClose}
       >
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
