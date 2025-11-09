@@ -14,6 +14,7 @@ import type {
   TestResultsInterface as TestResultsType
 } from "@/lib/types";
 import StoreContent from "../store-content";
+import { ReportErrorModal } from "../modals/report-erros-modal";
 
 interface TestSystemProps {
   userId: string;
@@ -34,6 +35,7 @@ export function TestSystem({
 }: TestSystemProps) {
   const [state, setState] = useState<TestState>("testing");
   const [showStore, setShowStore] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const [currentTest, setCurrentTest] = useState<TestData | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [animationKey, setAnimationKey] = useState(0);
@@ -61,6 +63,20 @@ export function TestSystem({
   const handleExitTest = useCallback(() => {
     onClose();
   }, [onClose]);
+
+  const handleReportError = async (report: {
+    questionId: number;
+    reason: string;
+    description: string;
+  }) => {
+    console.log("📝 Reporte simulado:", {
+      ...report,
+      userId,
+      testAttemptId: currentTest?.testAttemptId,
+      timestamp: new Date().toISOString()
+    });
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  };
 
   useEffect(() => {
     if (
@@ -322,6 +338,7 @@ export function TestSystem({
                   question={currentTest.questions[currentQuestionIndex]}
                   onAnswer={handleAnswer}
                   onNext={handleNext}
+                  onReportError={() => setShowReportModal(true)} // 👈 Nueva prop
                   showResult={
                     !!answers[currentTest.questions[currentQuestionIndex]?.id]
                   }
@@ -414,6 +431,19 @@ export function TestSystem({
             </div>
           </motion.div>
         </AnimatePresence>
+      )}
+
+      {currentTest && (
+        <ReportErrorModal
+          isOpen={showReportModal}
+          onClose={() => setShowReportModal(false)}
+          questionId={currentTest.questions[currentQuestionIndex]?.id}
+          questionText={
+            currentTest.questions[currentQuestionIndex]?.title ||
+            currentTest.questions[currentQuestionIndex]?.title
+          }
+          onSubmit={handleReportError}
+        />
       )}
 
       <NoHeartsTestModal />

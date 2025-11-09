@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, Flag } from "lucide-react";
 import { MultipleChoiceQuestion } from "./multiple-choice-question";
 import { TrueFalseQuestion } from "./true-false-question";
 import { FillInBlankQuestion } from "./fill-in-blank-question";
@@ -10,14 +10,25 @@ import { OrderWordsQuestion } from "./order-words-question";
 import { motion } from "framer-motion";
 import { useAudio } from "react-use";
 
+interface TestQuestionProps {
+  question: any;
+  onAnswer: (questionId: number, answer: string) => void;
+  onNext: () => void;
+  showResult?: boolean;
+  isCorrect?: boolean;
+  selectedAnswer?: string;
+  onReportError?: () => void;
+}
+
 export function TestQuestion({
   question,
   onAnswer,
   onNext,
   showResult = false,
   isCorrect = false,
-  selectedAnswer
-}: any) {
+  selectedAnswer,
+  onReportError
+}: TestQuestionProps) {
   const [selected, setSelected] = useState<string>(selectedAnswer || "");
   const [hasAnswered, setHasAnswered] = useState(showResult);
 
@@ -144,6 +155,18 @@ export function TestQuestion({
               {question.title}
             </h1>
             <div className="mb-6">{renderQuestionType()}</div>
+
+            {onReportError && (
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={onReportError}
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-400 hover:text-orange-500 hover:bg-orange-500/10 rounded-lg transition-all duration-200"
+                >
+                  <Flag className="w-4 h-4" />
+                  <span>Reportar un problema</span>
+                </button>
+              </div>
+            )}
           </div>
           <div>
             {showResult && (
