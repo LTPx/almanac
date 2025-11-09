@@ -42,7 +42,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
         ? "bg-[#F9F0B6] border-[#F9F0B6]"
         : mandatory
           ? "bg-[#5EC16A] border-[#5EC16A]"
-          : "bg-[#E6E7EB] border-[#E6E7EB]";
+          : "bg-[#1983DD] border-[#1983DD]";
     }
     if (state === "available") {
       if (isFirstMandatory && mandatory) {
