@@ -50,7 +50,7 @@ export function StepPopover({
       if (isFirstMandatory && mandatory)
         return "bg-[#F9F0B6] text-gray-900 p-4";
       if (mandatory) return "bg-[#5EC16A] text-white p-4";
-      return "bg-[#E6E7EB] text-gray-900 p-4";
+      return "bg-[#1983DD] text-white p-4";
     }
     if (isFirstMandatory) return "bg-[#F9F0B6] text-gray-900 p-4";
     if (isOptional) return "bg-[#1983DD] text-white p-4";
@@ -62,7 +62,7 @@ export function StepPopover({
     if (isCompleted) {
       if (isFirstMandatory && mandatory) return "fill-[#F9F0B6]";
       if (mandatory) return "fill-[#5EC16A]";
-      return "fill-[#E6E7EB]";
+      return "fill-[#1983DD]";
     }
     if (isFirstMandatory) return "fill-[#F9F0B6]";
     if (isOptional) return "fill-[#1983DD]";
@@ -74,7 +74,7 @@ export function StepPopover({
     if (isCompleted) {
       if (isFirstMandatory && mandatory) return "text-gray-900";
       if (mandatory) return "text-[#5EC16A]";
-      return "text-gray-700";
+      return "text-[#1983DD]";
     }
     if (isFirstMandatory) return "text-gray-900";
     if (isOptional) return "text-[#1983DD]";
@@ -82,7 +82,7 @@ export function StepPopover({
   };
 
   const getIconColor = () => {
-    if (isCompleted && !mandatory) return "text-gray-900 opacity-90";
+    if (isCompleted && !mandatory) return "text-white opacity-90";
     if (isFirstMandatory) return "text-gray-900 opacity-90";
     return "text-white opacity-90";
   };
@@ -121,6 +121,7 @@ export function StepPopover({
             className={`w-6 h-6 ${getIconColor()} group-hover:opacity-100 transition-opacity drop-shadow-sm`}
           />
         </motion.button>
+
         <div className="pr-10">
           {title && <h3 className="font-bold text-lg">{title}</h3>}
           {message && <p className="mt-2 line-clamp-4 text-sm">{message}</p>}
