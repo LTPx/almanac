@@ -92,6 +92,11 @@ export type Unit = {
   experiencePoints: number;
   mandatory: boolean;
   position: number;
+  curriculumId?: string;
+  curriculum?: {
+    title: string;
+    id: string;
+  };
 };
 
 export type EducationalNFT = {

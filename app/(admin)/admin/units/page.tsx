@@ -22,7 +22,9 @@ import {
   ToggleLeft,
   ToggleRight,
   HelpCircle,
-  Star
+  Star,
+  Layout,
+  List
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -44,10 +46,19 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Unit } from "@/lib/types";
 
+type GroupedUnits = {
+  [key: string]: {
+    curriculumTitle: string;
+    curriculumId: string;
+    units: Unit[];
+  };
+};
+
 export default function UnitsPage() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [deleteUnitId, setDeleteUnitId] = useState<number | null>(null);
   const [removeLessons, setRemoveLessons] = useState<boolean>(true);
+  const [viewMode, setViewMode] = useState<"list" | "grouped">("grouped");
 
   const fetchUnits = async () => {
     const response = await fetch("/api/units");
@@ -89,6 +100,20 @@ export default function UnitsPage() {
     );
   };
 
+  // Agrupar unidades por currículum
+  const groupedUnits: GroupedUnits = units.reduce((acc, unit) => {
+    const key = unit.curriculumId || "sin-curriculum";
+    if (!acc[key]) {
+      acc[key] = {
+        curriculumTitle: unit.curriculum?.title || "Sin Currículum",
+        curriculumId: unit.curriculumId || "",
+        units: []
+      };
+    }
+    acc[key].units.push(unit);
+    return acc;
+  }, {} as GroupedUnits);
+
   useEffect(() => {
     const loadUnits = async () => {
       try {
@@ -103,6 +128,127 @@ export default function UnitsPage() {
     loadUnits();
   }, []);
 
+  const renderUnitCard = (unit: Unit) => (
+    <Card
+      key={unit.id}
+      className="bg-card text-card-foreground border border-border"
+    >
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div>
+              <CardTitle className="flex items-center space-x-2">
+                <span>{unit.name}</span>
+                <Badge
+                  variant={unit.isActive ? "default" : "secondary"}
+                  className={
+                    unit.isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-gray-200 text-gray-900"
+                  }
+                >
+                  {unit.isActive ? "Activo" : "Inactivo"}
+                </Badge>
+                <Badge
+                  variant={unit.mandatory ? "default" : "secondary"}
+                  className={
+                    unit.isActive
+                      ? "bg-gray-700 text-primary-foreground"
+                      : "border-gray-50 text-gray-200"
+                  }
+                >
+                  {unit.mandatory && (
+                    <Star className="h-4 w-4 text-yellow-500" />
+                  )}
+                  {unit.mandatory ? "Obligatoria" : "No obligatoria"}
+                </Badge>
+              </CardTitle>
+              <CardDescription className="mt-1 text-muted-foreground">
+                {unit.description}
+              </CardDescription>
+            </div>
+          </div>
+
+          {/* Dropdown acciones */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="bg-card text-card-foreground border border-border"
+            >
+              <DropdownMenuItem asChild>
+                <Link href={`/admin/units/${unit.id}`}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  Ver detalles
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/admin/units/${unit.id}/edit`}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Editar
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toggleUnitStatus(unit.id)}>
+                {unit.isActive ? (
+                  <>
+                    <ToggleLeft className="mr-2 h-4 w-4" />
+                    Desactivar
+                  </>
+                ) : (
+                  <>
+                    <ToggleRight className="mr-2 h-4 w-4" />
+                    Activar
+                  </>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => setDeleteUnitId(unit.id)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Eliminar
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </CardHeader>
+
+      <CardContent>
+        <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
+          <div className="flex items-center space-x-2">
+            <BookOpen className="h-4 w-4" />
+            <span>{unit._count.lessons} lecciones</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <HelpCircle className="h-4 w-4" />
+            <span>{unit._count.questions} preguntas</span>
+          </div>
+          <span>{unit.experiencePoints} XP</span>
+          <span>Posición: {unit.position}</span>
+          <div>
+            <span>Creado: {new Date(unit.createdAt).toLocaleDateString()}</span>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link href={`/admin/units/${unit.id}/lessons`}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-border text-foreground hover:bg-primary/10"
+            >
+              Ver lecciones
+            </Button>
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="space-y-6 bg-background text-foreground min-h-screen p-6">
       <div className="flex items-center justify-between">
@@ -112,139 +258,68 @@ export default function UnitsPage() {
             Gestiona las unidades del curso
           </p>
         </div>
-        <Link href="/admin/units/new">
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-            <Plus className="mr-2 h-4 w-4" />
-            Nueva Unidad
-          </Button>
-        </Link>
-      </div>
-
-      {/* Lista de unidades */}
-      <div className="grid gap-6">
-        {units.map((unit) => (
-          <Card
-            key={unit.id}
-            className="bg-card text-card-foreground border border-border"
+        <div className="flex gap-2">
+          <Button
+            variant={viewMode === "list" ? "default" : "outline"}
+            onClick={() => setViewMode("list")}
+            className={
+              viewMode === "list"
+                ? "bg-slate-700 hover:bg-slate:800 text-primary-foreground"
+                : "border-border"
+            }
           >
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div>
-                    <CardTitle className="flex items-center space-x-2">
-                      <span>{unit.name}</span>
-                      <Badge
-                        variant={unit.isActive ? "default" : "secondary"}
-                        className={
-                          unit.isActive
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-gray-200 text-gray-900"
-                        }
-                      >
-                        {unit.isActive ? "Activo" : "Inactivo"}
-                      </Badge>
-                      <Badge
-                        variant={unit.mandatory ? "default" : "secondary"}
-                        className={
-                          unit.isActive
-                            ? "bg-gray-700 text-primary-foreground"
-                            : "border-gray-50 text-gray-200"
-                        }
-                      >
-                        {unit.mandatory && (
-                          <Star className="h-4 w-4 text-yellow-500" />
-                        )}
-                        {unit.mandatory ? "Obligatoria" : "No obligatoria"}
-                      </Badge>
-                    </CardTitle>
-                    <CardDescription className="mt-1 text-muted-foreground">
-                      {unit.description}
-                    </CardDescription>
-                  </div>
-                </div>
-
-                {/* Dropdown acciones */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="bg-card text-card-foreground border border-border"
-                  >
-                    <DropdownMenuItem asChild>
-                      <Link href={`/admin/units/${unit.id}`}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        Ver detalles
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/admin/units/${unit.id}/edit`}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Editar
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => toggleUnitStatus(unit.id)}>
-                      {unit.isActive ? (
-                        <>
-                          <ToggleLeft className="mr-2 h-4 w-4" />
-                          Desactivar
-                        </>
-                      ) : (
-                        <>
-                          <ToggleRight className="mr-2 h-4 w-4" />
-                          Activar
-                        </>
-                      )}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="text-destructive"
-                      onClick={() => setDeleteUnitId(unit.id)}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Eliminar
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </CardHeader>
-
-            <CardContent>
-              <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-                <div className="flex items-center space-x-2">
-                  <BookOpen className="h-4 w-4" />
-                  <span>{unit._count.lessons} lecciones</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <HelpCircle className="h-4 w-4" />
-                  <span>{unit._count.questions} preguntas</span>
-                </div>
-                <span>{unit.experiencePoints} XP</span>
-                <span>Posición: {unit.position}</span>
-                <div>
-                  <span>
-                    Creado: {new Date(unit.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Link href={`/admin/units/${unit.id}/lessons`}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-border text-foreground hover:bg-primary/10"
-                  >
-                    Ver lecciones
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+            <List className="mr-2 h-4 w-4" />
+            Lista
+          </Button>
+          <Button
+            variant={viewMode === "grouped" ? "default" : "outline"}
+            onClick={() => setViewMode("grouped")}
+            className={
+              viewMode === "grouped"
+                ? "bg-slate-700 hover:bg-slate:800 text-primary-foreground"
+                : "border-border"
+            }
+          >
+            <Layout className="mr-2 h-4 w-4" />
+            Por Currículum
+          </Button>
+          <Link href="/admin/units/new">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+              <Plus className="mr-2 h-4 w-4" />
+              Nueva Unidad
+            </Button>
+          </Link>
+        </div>
       </div>
+
+      {/* Vista de lista */}
+      {viewMode === "list" && (
+        <div className="grid gap-6">
+          {units.map((unit) => renderUnitCard(unit))}
+        </div>
+      )}
+
+      {/* Vista agrupada por currículum */}
+      {viewMode === "grouped" && (
+        <div className="space-y-8">
+          {Object.entries(groupedUnits).map(([key, group]) => (
+            <div key={key} className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <h2 className="text-2xl font-semibold">
+                  {group.curriculumTitle}
+                </h2>
+                <Badge variant="outline" className="text-sm">
+                  {group.units.length}{" "}
+                  {group.units.length === 1 ? "unidad" : "unidades"}
+                </Badge>
+              </div>
+              <div className="grid gap-6">
+                {group.units.map((unit) => renderUnitCard(unit))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Confirmar eliminación */}
       <AlertDialog
