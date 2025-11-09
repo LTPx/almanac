@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "ivory-many-cheetah-189.mypinata.cloud"
+      },
+
+      {
+        protocol: "https",
         hostname: "gateway.pinata.cloud",
         pathname: "/ipfs/**"
       },
