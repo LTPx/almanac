@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 interface StepPopoverProps {
   title?: string;
@@ -100,14 +101,26 @@ export function StepPopover({
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className={`${getPopoverClass()} rounded-xl relative`}>
-        <button
+        <motion.button
           onClick={handleBookClick}
-          className="absolute top-4 right-4 hover:scale-110 transition-transform cursor-pointer focus:outline-none"
+          className="absolute top-4 right-4 cursor-pointer focus:outline-none group"
           aria-label="Ver contenidos"
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [1, 0.9, 1]
+          }}
+          transition={{
+            duration: 1.6,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          whileHover={{ scale: 1.2 }}
+          whileTap={{ scale: 0.9 }}
         >
-          <BookOpen className={`w-6 h-6 ${getIconColor()} hover:opacity-100`} />
-        </button>
-
+          <BookOpen
+            className={`w-6 h-6 ${getIconColor()} group-hover:opacity-100 transition-opacity drop-shadow-sm`}
+          />
+        </motion.button>
         <div className="pr-10">
           {title && <h3 className="font-bold text-lg">{title}</h3>}
           {message && <p className="mt-2 line-clamp-4 text-sm">{message}</p>}
