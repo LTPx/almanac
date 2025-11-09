@@ -22,7 +22,9 @@ import {
   Eye,
   Search,
   Filter,
-  Star
+  Star,
+  Layout,
+  List
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -52,22 +54,34 @@ import {
 import { toast } from "sonner";
 import { LessonAdmin } from "@/lib/types";
 
-const mockUnits = [
-  { id: 1, name: "Introducción a Blockchain" },
-  { id: 2, name: "Smart Contracts" },
-  { id: 3, name: "DeFi Fundamentals" }
-];
+type GroupedLessons = {
+  [key: string]: {
+    unitName: string;
+    unitId: number;
+    lessons: LessonAdmin[];
+  };
+};
 
 export default function LessonsPage() {
   const [lessons, setLessons] = useState<LessonAdmin[]>([]);
+  const [units, setUnits] = useState<{ id: number; name: string }[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUnit, setSelectedUnit] = useState<string>("all");
   const [deleteLessonId, setDeleteLessonId] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "grouped">("grouped");
 
   const fetchLessons = async () => {
     const response = await fetch("/api/lessons");
     if (!response.ok) {
       throw new Error("Failed to fetch lessons");
+    }
+    return response.json();
+  };
+
+  const fetchUnits = async () => {
+    const response = await fetch("/api/units");
+    if (!response.ok) {
+      throw new Error("Failed to fetch units");
     }
     return response.json();
   };
@@ -80,6 +94,23 @@ export default function LessonsPage() {
       selectedUnit === "all" || lesson.unitId.toString() === selectedUnit;
     return matchesSearch && matchesUnit;
   });
+
+  // Agrupar lecciones por unidad
+  const groupedLessons: GroupedLessons = filteredLessons.reduce(
+    (acc, lesson) => {
+      const key = lesson.unitId.toString();
+      if (!acc[key]) {
+        acc[key] = {
+          unitName: lesson.unit.name,
+          unitId: lesson.unitId,
+          lessons: []
+        };
+      }
+      acc[key].lessons.push(lesson);
+      return acc;
+    },
+    {} as GroupedLessons
+  );
 
   const deleteLesson = async (unitId: number) => {
     const response = await fetch(`/api/lessons/${unitId}`, {
@@ -104,20 +135,98 @@ export default function LessonsPage() {
   };
 
   useEffect(() => {
-    const loadLessons = async () => {
+    const loadData = async () => {
       try {
-        const unitsData = await fetchLessons();
-        setLessons(unitsData);
+        const [lessonsData, unitsData] = await Promise.all([
+          fetchLessons(),
+          fetchUnits()
+        ]);
+        setLessons(lessonsData);
+        setUnits(unitsData);
       } catch (error) {
-        console.error("Error loading lessons:", error);
-        toast.error("Error loading lessons");
-      } finally {
-        // setLoading(false);
+        console.error("Error loading data:", error);
+        toast.error("Error al cargar los datos");
       }
     };
 
-    loadLessons();
+    loadData();
   }, []);
+
+  const renderLessonCard = (lesson: LessonAdmin) => (
+    <Card key={lesson.id} className="bg-card border-border">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <div className="flex items-center space-x-2">
+              <CardTitle className="text-lg text-foreground">
+                {lesson.name}
+              </CardTitle>
+              {lesson.mandatory && (
+                <Badge
+                  variant="destructive"
+                  className="text-xs flex items-center"
+                >
+                  <Star className="mr-1 h-3 w-3" />
+                  Obligatoria
+                </Badge>
+              )}
+              <Badge variant={lesson.isActive ? "default" : "secondary"}>
+                {lesson.isActive ? "Activa" : "Inactiva"}
+              </Badge>
+            </div>
+            <CardDescription className="mt-1 text-muted-foreground">
+              {lesson.description}
+            </CardDescription>
+            {viewMode === "list" && (
+              <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                  {lesson.unit.name}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="bg-card border-border text-foreground"
+            >
+              <DropdownMenuItem asChild>
+                <Link href={`/admin/lessons/${lesson.id}`}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  Ver detalles
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/admin/lessons/${lesson.id}/edit`}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Editar
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/admin/lessons/${lesson.id}/questions`}>
+                  <HelpCircle className="mr-2 h-4 w-4" />
+                  Gestionar preguntas
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-red-600"
+                onClick={() => setDeleteLessonId(lesson.id)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Eliminar
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </CardHeader>
+    </Card>
+  );
 
   return (
     <div className="space-y-6">
@@ -129,12 +238,38 @@ export default function LessonsPage() {
             Gestiona las lecciones del curso
           </p>
         </div>
-        <Link href="/admin/lessons/new">
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-            <Plus className="mr-2 h-4 w-4" />
-            Nueva Lección
+        <div className="flex gap-2">
+          <Button
+            variant={viewMode === "list" ? "default" : "outline"}
+            onClick={() => setViewMode("list")}
+            className={
+              viewMode === "list"
+                ? "bg-slate-700 text-primary-foreground"
+                : "border-border"
+            }
+          >
+            <List className="mr-2 h-4 w-4" />
+            Lista
           </Button>
-        </Link>
+          <Button
+            variant={viewMode === "grouped" ? "default" : "outline"}
+            onClick={() => setViewMode("grouped")}
+            className={
+              viewMode === "grouped"
+                ? "bg-slate-700 text-primary-foreground"
+                : "border-border"
+            }
+          >
+            <Layout className="mr-2 h-4 w-4" />
+            Por Unidad
+          </Button>
+          <Link href="/admin/lessons/new">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+              <Plus className="mr-2 h-4 w-4" />
+              Nueva Lección
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Filtros */}
@@ -158,7 +293,7 @@ export default function LessonsPage() {
                 </SelectTrigger>
                 <SelectContent className="bg-card text-foreground border-border">
                   <SelectItem value="all">Todas las unidades</SelectItem>
-                  {mockUnits.map((unit) => (
+                  {units.map((unit) => (
                     <SelectItem key={unit.id} value={unit.id.toString()}>
                       {unit.name}
                     </SelectItem>
@@ -170,106 +305,57 @@ export default function LessonsPage() {
         </CardContent>
       </Card>
 
-      {/* Lista de lecciones */}
-      <div className="grid gap-4">
-        {filteredLessons.map((lesson) => (
-          <Card key={lesson.id} className="bg-card border-border">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <CardTitle className="text-lg text-foreground">
-                      {lesson.name}
-                    </CardTitle>
-                    {lesson.mandatory && (
-                      <Badge
-                        variant="destructive"
-                        className="text-xs flex items-center"
-                      >
-                        <Star className="mr-1 h-3 w-3" />
-                        Obligatoria
-                      </Badge>
-                    )}
-                    <Badge variant={lesson.isActive ? "default" : "secondary"}>
-                      {lesson.isActive ? "Activa" : "Inactiva"}
-                    </Badge>
-                  </div>
-                  <CardDescription className="mt-1 text-muted-foreground">
-                    {lesson.description}
-                  </CardDescription>
-                  <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                      {lesson.unit.name}
-                    </span>
-                  </div>
-                </div>
+      {/* Vista de lista */}
+      {viewMode === "list" && (
+        <div className="grid gap-4">
+          {filteredLessons.map((lesson) => renderLessonCard(lesson))}
+        </div>
+      )}
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="bg-card border-border text-foreground"
-                  >
-                    <DropdownMenuItem asChild>
-                      <Link href={`/admin/lessons/${lesson.id}`}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        Ver detalles
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/admin/lessons/${lesson.id}/edit`}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Editar
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/admin/lessons/${lesson.id}/questions`}>
-                        <HelpCircle className="mr-2 h-4 w-4" />
-                        Gestionar preguntas
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="text-red-600"
-                      onClick={() => setDeleteLessonId(lesson.id)}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Eliminar
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+      {/* Vista agrupada por unidad */}
+      {viewMode === "grouped" && (
+        <div className="space-y-8">
+          {Object.entries(groupedLessons).map(([key, group]) => (
+            <div key={key} className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <h2 className="text-2xl font-semibold">{group.unitName}</h2>
+                <Badge variant="outline" className="text-sm">
+                  {group.lessons.length}{" "}
+                  {group.lessons.length === 1 ? "lección" : "lecciones"}
+                </Badge>
               </div>
-            </CardHeader>
-          </Card>
-        ))}
+              <div className="grid gap-4">
+                {group.lessons.map((lesson) => renderLessonCard(lesson))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-        {filteredLessons.length === 0 && (
-          <Card className="bg-card border-border">
-            <CardContent className="text-center py-8 text-muted-foreground">
-              <BookOpen className="mx-auto h-12 w-12" />
-              <h3 className="mt-4 text-lg font-semibold text-foreground">
-                No hay lecciones
-              </h3>
-              <p className="mt-2">
-                {searchTerm || selectedUnit !== "all"
-                  ? "No se encontraron lecciones con los filtros actuales."
-                  : "Comienza creando tu primera lección."}
-              </p>
-              {!searchTerm && selectedUnit === "all" && (
-                <Link href="/admin/lessons/new">
-                  <Button className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Crear primera lección
-                  </Button>
-                </Link>
-              )}
-            </CardContent>
-          </Card>
-        )}
-      </div>
+      {/* Sin resultados */}
+      {filteredLessons.length === 0 && (
+        <Card className="bg-card border-border">
+          <CardContent className="text-center py-8 text-muted-foreground">
+            <BookOpen className="mx-auto h-12 w-12" />
+            <h3 className="mt-4 text-lg font-semibold text-foreground">
+              No hay lecciones
+            </h3>
+            <p className="mt-2">
+              {searchTerm || selectedUnit !== "all"
+                ? "No se encontraron lecciones con los filtros actuales."
+                : "Comienza creando tu primera lección."}
+            </p>
+            {!searchTerm && selectedUnit === "all" && (
+              <Link href="/admin/lessons/new">
+                <Button className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Crear primera lección
+                </Button>
+              </Link>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Confirmar eliminación */}
       <AlertDialog
