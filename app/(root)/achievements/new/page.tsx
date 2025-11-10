@@ -370,7 +370,7 @@ export default function CreateCertificatePage() {
                 >
                   <ArrowLeft size={20} /> Atrás
                 </button>
-                <button
+                <Button
                   onClick={handleContinue}
                   disabled={loading}
                   className="cursor-pointer flex-1 bg-[#1983DD] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2"
@@ -384,7 +384,7 @@ export default function CreateCertificatePage() {
                       Crear NFT <Zap size={20} />
                     </>
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           )}

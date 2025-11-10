@@ -9,15 +9,15 @@ import { ChevronLeft, ChevronDown, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { useUser } from "@/context/UserContext";
 
-interface NFTMetadata {
-  name: string;
-  description: string;
-  image: string;
-  attributes?: Array<{
-    trait_type: string;
-    value: string | number;
-  }>;
-}
+// interface NFTMetadata {
+//   name: string;
+//   description: string;
+//   image: string;
+//   attributes?: Array<{
+//     trait_type: string;
+//     value: string | number;
+//   }>;
+// }
 
 interface NFTDetail {
   id: string;
@@ -36,7 +36,18 @@ interface NFTDetail {
     difficulty: string;
     units: string[];
   };
-  metadata: NFTMetadata;
+  // metadata: NFTMetadata;
+  nftAsset?: {
+    id: number;
+    name: string;
+    imageUrl: string;
+    rarity: number;
+    collection?: {
+      id: string;
+      name: string;
+      description?: string;
+    };
+  };
 }
 
 export default function NFTDetailPage() {
@@ -95,8 +106,8 @@ export default function NFTDetailPage() {
 
   const handleShare = async () => {
     const shareData = {
-      title: nft?.metadata.name || "Mi NFT",
-      text: nft?.metadata.description || "Mira mi certificado NFT",
+      title: nft?.nftAsset?.name || "Mi NFT",
+      // text: nft?.nftAsset?.description || "Mira mi certificado NFT",
       url: window.location.href
     };
 
@@ -186,8 +197,8 @@ export default function NFTDetailPage() {
       <div className="p-4 flex justify-center">
         <div className="relative w-[280px] h-[280px] rounded-2xl overflow-hidden bg-gradient-to-br from-green-400 to-green-600 shadow-xl">
           <Image
-            src={nft.metadata.image}
-            alt={nft.metadata.name}
+            src={nft.nftAsset?.imageUrl || ""}
+            alt={nft.nftAsset?.name || ""}
             fill
             className="object-cover"
             priority
@@ -199,9 +210,9 @@ export default function NFTDetailPage() {
       <div className="px-4 space-y-6">
         {/* Title */}
         <div>
-          <h1 className="text-2xl font-bold mb-1">{nft.metadata.name}</h1>
+          <h1 className="text-2xl font-bold mb-1">{nft.nftAsset?.name}</h1>
           <p className="text-gray-400 text-sm">
-            Collection name · Owned by{" "}
+            {nft.nftAsset?.collection?.name} · Owned by{" "}
             {nft.owner ? formatAddress(nft.owner) : ""}
           </p>
         </div>
@@ -223,10 +234,10 @@ export default function NFTDetailPage() {
             <div className="space-y-3">
               <div>
                 <p className="text-xl font-bold mb-2">
-                  About {nft.metadata.name}
+                  About {nft.nftAsset?.name} #{nft.tokenId}
                 </p>
                 <p className="text-gray-400 text-sm leading-relaxed">
-                  {nft.metadata.description}
+                  {nft.nftAsset?.collection?.description}
                 </p>
               </div>
 
@@ -279,9 +290,7 @@ export default function NFTDetailPage() {
           {collectionExpanded && (
             <div className="mt-3">
               <p className="text-gray-400 text-sm leading-relaxed">
-                {nft.collectionName} - Certificados educacionales únicos que
-                validan tu progreso y logros en{" "}
-                {nft.curriculum?.title || "Almanac"}.
+                {nft.nftAsset?.collection?.description}
               </p>
             </div>
           )}
