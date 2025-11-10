@@ -226,7 +226,7 @@ export default function CreateCertificatePage() {
 
   return (
     <div className="min-h-screen py-8 px-4">
-      <div className="max-w-lg mx-auto">
+      <div className="max-w-lg mx-auto pb-[30px]">
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={handleBack}
