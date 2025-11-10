@@ -51,6 +51,10 @@ export function TestSystem({
   const [firstPassQuestionCount, setFirstPassQuestionCount] = useState(0);
   const [failedQuestions, setFailedQuestions] = useState<number[]>([]);
 
+  const [uniqueFailedQuestions, setUniqueFailedQuestions] = useState<
+    Set<number>
+  >(new Set());
+
   const { error, startTest, submitAnswer, completeTest } = useTest();
   const hasInitialized = useRef(false);
   const modalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -118,6 +122,7 @@ export function TestSystem({
         setState("testing");
         setFirstPassQuestionCount(testData.questions.length);
         setFailedQuestions([]);
+        setUniqueFailedQuestions(new Set());
       }
     },
     [startTest, userId]
@@ -160,6 +165,12 @@ export function TestSystem({
           setFailedQuestions((prev) =>
             prev.includes(questionId) ? prev : [...prev, questionId]
           );
+
+          setUniqueFailedQuestions((prev) => {
+            const newSet = new Set(prev);
+            newSet.add(questionId);
+            return newSet;
+          });
         }
 
         setCurrentTest((prevTest) => {
@@ -241,11 +252,27 @@ export function TestSystem({
   const handleCompleteTest = useCallback(async () => {
     if (!currentTest) return;
     const testResults = await completeTest(currentTest.testAttemptId);
+
     if (testResults) {
-      setResults(testResults);
+      const totalQuestions = firstPassQuestionCount;
+      const failedCount = uniqueFailedQuestions.size;
+      const correctCount = totalQuestions - failedCount;
+      const accurateScore = (correctCount / totalQuestions) * 100;
+
+      const correctedResults = {
+        ...testResults,
+        score: accurateScore
+      };
+
+      setResults(correctedResults);
       setState("results");
     }
-  }, [currentTest, completeTest]);
+  }, [
+    currentTest,
+    completeTest,
+    firstPassQuestionCount,
+    uniqueFailedQuestions
+  ]);
 
   const handleNext = useCallback(() => {
     if (!currentTest) return;
@@ -338,7 +365,7 @@ export function TestSystem({
                   question={currentTest.questions[currentQuestionIndex]}
                   onAnswer={handleAnswer}
                   onNext={handleNext}
-                  onReportError={() => setShowReportModal(true)} // 👈 Nueva prop
+                  onReportError={() => setShowReportModal(true)}
                   showResult={
                     !!answers[currentTest.questions[currentQuestionIndex]?.id]
                   }

@@ -1,30 +1,19 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { TestResultsInterface } from "@/lib/types";
-// import Confetti from "react-confetti";
-// import { useWindowSize, useAudio } from "react-use";
 import { useAudio } from "react-use";
 import { ResultCard } from "../result-card";
 import { useEffect, useState } from "react";
-// import Image from "next/image";
-// import { XCircle } from "lucide-react";
 
 interface TestResultsProps {
   results: TestResultsInterface;
   lessonName: string;
   onReturnToLessons: () => void;
-  // onRetakeTest?: () => void;
   hearts?: number;
 }
 
-export function TestResults({
-  results,
-  onReturnToLessons
-  // hearts,
-  // onRetakeTest
-}: TestResultsProps) {
+export function TestResults({ results, onReturnToLessons }: TestResultsProps) {
   const isPassed = results.passed;
-  // const { width, height } = useWindowSize();
 
   const [finishAudio, , finishControls] = useAudio({
     src: "/finish.mp3",
@@ -59,38 +48,22 @@ export function TestResults({
     }
   };
 
+  const getAccuracyLabel = (score: number): string => {
+    if (score === 100) return "Exacto";
+    if (score >= 90) return "Excelente";
+    if (score >= 80) return "Muy Bien";
+    if (score >= 70) return "Bien";
+    if (score >= 60) return "Aceptable";
+    return "Mejorable";
+  };
+
   const speed = calculateSpeed();
+  const accuracyScore = Math.round(results.score);
+  const accuracyLabel = getAccuracyLabel(accuracyScore);
 
   return (
     <div className="bg-background min-h-screen lg:p-6 flex flex-col items-center justify-center">
-      {/* {isPassed && (
-        <Confetti
-          recycle={false}
-          numberOfPieces={500}
-          tweenDuration={10_000}
-          width={width}
-          height={height}
-        />
-      )} */}
       <div className="mx-auto flex h-full max-w-lg flex-col items-center justify-center gap-y-4 text-center lg:gap-y-8">
-        {/* {isPassed && (
-          <Image
-            src="/finish.svg"
-            alt="Finish"
-            className="hidden lg:block"
-            height={100}
-            width={100}
-          />
-        )} */}
-
-        {/* <Image
-          src="/finish.svg"
-          alt="Finish"
-          className="block lg:hidden"
-          height={100}
-          width={100}
-        /> */}
-
         <h1 className="text-lg font-bold text-[#EFFF0A] lg:text-3xl">
           {isPassed ? <>Completaste la prueba!</> : <>Completaste la prueba!</>}
         </h1>
@@ -102,7 +75,11 @@ export function TestResults({
             speed={speed}
           />
           <ResultCard variant="points" value={results.experienceGained} />
-          <ResultCard variant="accuracy" value={Math.round(results.score)} />
+          <ResultCard
+            variant="accuracy"
+            value={accuracyScore}
+            accuracyLabel={accuracyLabel}
+          />
         </div>
       </div>
 
