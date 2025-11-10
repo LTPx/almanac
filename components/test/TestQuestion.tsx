@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Flag } from "lucide-react";
+import { CheckCircle, XCircle, Flag, Volume2 } from "lucide-react";
 import { MultipleChoiceQuestion } from "./multiple-choice-question";
 import { TrueFalseQuestion } from "./true-false-question";
 import { FillInBlankQuestion } from "./fill-in-blank-question";
 import { OrderWordsQuestion } from "./order-words-question";
 import { motion } from "framer-motion";
 import { useAudio } from "react-use";
+import { useTextToSpeech } from "@/hooks/useSpeech";
 
 interface TestQuestionProps {
   question: any;
@@ -35,6 +36,12 @@ export function TestQuestion({
   const [correctAudio, , correctControls] = useAudio({ src: "/correct.wav" });
   const [incorrectAudio, , incorrectControls] = useAudio({
     src: "/incorrect.wav"
+  });
+
+  const { speak, isSpeaking } = useTextToSpeech({
+    rate: 0.9,
+    pitch: 1,
+    volume: 1
   });
 
   useEffect(() => {
@@ -151,9 +158,31 @@ export function TestQuestion({
       <div className="flex h-full items-center justify-center">
         <div className="flex h-full flex-col justify-between w-full max-w-[650px] gap-y-2 px-6">
           <div>
-            <h1 className="mb-5 text-center text-lg font-bold text-white lg:text-start lg:text-3xl">
-              {question.title}
-            </h1>
+            <div className="mb-5 flex flex-col items-center gap-4">
+              <h1 className="text-center text-lg font-bold text-white lg:text-start lg:text-3xl flex-1">
+                {question.title}
+              </h1>
+              <div className="flex justify-end w-full">
+                <button
+                  onClick={() => speak(question.title)}
+                  disabled={isSpeaking}
+                  className={`
+                    flex items-center justify-center w-8 h-8 rounded-full
+                    transition-all duration-200 flex-shrink-0
+                    ${
+                      isSpeaking
+                        ? "bg-[#1983DD] text-white"
+                        : "bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white"
+                    }
+                  `}
+                  aria-label="Escuchar pregunta"
+                >
+                  <Volume2
+                    className={`w-4 h-4 ${isSpeaking ? "animate-pulse" : ""}`}
+                  />
+                </button>
+              </div>
+            </div>
             <div className="mb-6">{renderQuestionType()}</div>
 
             {onReportError && (
