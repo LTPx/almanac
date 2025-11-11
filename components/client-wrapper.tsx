@@ -9,11 +9,12 @@ export default function ClientWrapper({
 }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
+  const isNft = pathname.startsWith("/nft");
 
   return (
     <div
       className={
-        isAdmin
+        isAdmin || isNft
           ? "w-full min-h-screen"
           : "relative w-full max-w-[650px] min-h-screen"
       }
