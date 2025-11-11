@@ -38,10 +38,28 @@ export async function GET(
     }));
 
     const collections = await prisma.nFTCollection.findMany({
-      where: { isActive: true }
+      where: { isActive: true },
+      include: {
+        nftAssets: {
+          where: {
+            isUsed: false
+          },
+          take: 5,
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            imageUrl: true,
+            name: true
+          }
+        }
+      }
     });
 
-    return NextResponse.json({ curriculums, collections });
+    const nftsAvailable = collections.flatMap(
+      (collection) => collection.nftAssets
+    );
+
+    return NextResponse.json({ curriculums, collections, nftsAvailable });
   } catch (error) {
     console.error("Error fetching completed curriculums:", error);
     return NextResponse.json(

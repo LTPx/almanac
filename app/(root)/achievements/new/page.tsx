@@ -19,6 +19,7 @@ import {
 import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { NFTAsset } from "@/lib/types";
 
 interface CompletedUnit {
   unitId: string;
@@ -62,6 +63,7 @@ export default function CreateCertificatePage() {
 
   const [curriculumTokens, setCurriculumTokens] = useState<CompletedUnit[]>([]);
   const [collectionNfts, setCollectionNfts] = useState<NFTCollection[]>([]);
+  const [nftsAvailable, setNftsAvailable] = useState<NFTAsset[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -96,6 +98,7 @@ export default function CreateCertificatePage() {
       const data = await response.json();
       setCurriculumTokens(data.curriculums || []);
       setCollectionNfts(data.collections || []);
+      setNftsAvailable(data.nftsAvailable || []);
     } catch (error) {
       console.error("Error fetching completed units:", error);
     } finally {
@@ -251,28 +254,19 @@ export default function CreateCertificatePage() {
           {currentStep === 0 && (
             <div className="space-y-6">
               <div className="flex gap-4 overflow-x-auto pb-4">
-                <div className="flex-shrink-0 w-40">
-                  <div className="rounded-xl overflow-hidden border-2 border-gray-600">
-                    <div className="aspect-square bg-gradient-to-br from-pink-300 via-blue-200 to-green-200 flex items-center justify-center"></div>
+                {nftsAvailable.map((nft, index) => (
+                  <div className="flex-shrink-0 w-40" key={index}>
+                    <div className="rounded-xl overflow-hidden border-2 border-gray-600">
+                      <div className="aspect-square bg-gradient-to-br from-pink-300 via-blue-200 to-green-200 flex items-center justify-center">
+                        <img src={nft.imageUrl} alt="nft" />
+                      </div>
+                    </div>
+                    <p className="text-blue-400 font-semibold mt-2">
+                      {nft.name}
+                    </p>
+                    <p className="text-white text-sm">Social S...4 '24</p>
                   </div>
-                  <p className="text-blue-400 font-semibold mt-2">Marvlyn</p>
-                  <p className="text-white text-sm">Social S...4 '24</p>
-                </div>
-                <div className="flex-shrink-0 w-40">
-                  <div className="rounded-xl overflow-hidden border-2 border-gray-600">
-                    <div className="aspect-square bg-gradient-to-br from-blue-900 via-blue-700 to-blue-900 flex items-center justify-center"></div>
-                  </div>
-                  <p className="text-white font-semibold mt-2">Charlie</p>
-                  <p className="text-white text-sm">Astronomy '25</p>
-                </div>
-
-                <div className="flex-shrink-0 w-40">
-                  <div className="rounded-xl overflow-hidden border-2 border-gray-600">
-                    <div className="aspect-square bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-300 flex items-center justify-center"></div>
-                  </div>
-                  <p className="text-white font-semibold mt-2">Petey</p>
-                  <p className="text-white text-sm">Scien...</p>
-                </div>
+                ))}
               </div>
 
               {/* Texto informativo */}
