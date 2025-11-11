@@ -105,17 +105,18 @@ export default function NFTDetailPage() {
   };
 
   const handleShare = async () => {
+    const urlNft = `/nft/${nftId}`;
     const shareData = {
       title: nft?.nftAsset?.name || "Mi NFT",
       // text: nft?.nftAsset?.description || "Mira mi certificado NFT",
-      url: window.location.href
+      url: urlNft
     };
 
     try {
       if (navigator.share) {
         await navigator.share(shareData);
       } else {
-        await navigator.clipboard.writeText(window.location.href);
+        await navigator.clipboard.writeText(urlNft);
         alert("Enlace copiado al portapapeles");
       }
     } catch (err) {
