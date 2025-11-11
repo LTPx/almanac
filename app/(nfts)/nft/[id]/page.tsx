@@ -1,12 +1,10 @@
 import { Metadata } from "next";
 import NFTPublicPage from "./public-page";
 
-type Props = {
-  params: { id: string };
-};
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = params;
+export async function generateMetadata(context: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await context.params;
 
   try {
     // Fetch NFT data para metadata
