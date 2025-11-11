@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { reduceHeartsForFailedTest } from "@/lib/gamification";
+import { levenshtein, normalizeText } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,15 +58,26 @@ export async function POST(request: NextRequest) {
           : false;
         break;
 
-      case "FILL_IN_BLANK":
-        // Para completar espacios, comparar texto (case insensitive)
-        const correctText = question.answers.find(
-          (answer) => answer.isCorrect
-        )?.text;
-        isCorrect = correctText
-          ? correctText.toLowerCase().trim() === userAnswer.toLowerCase().trim()
-          : false;
+      case "FILL_IN_BLANK": {
+        const correctText = question.answers.find((a) => a.isCorrect)?.text;
+        if (!correctText) {
+          isCorrect = false;
+          break;
+        }
+
+        const correct = normalizeText(correctText);
+        const user = normalizeText(userAnswer);
+
+        if (correct === user) {
+          isCorrect = true;
+        } else {
+          const distance = levenshtein(correct, user);
+          // Permite un error de una letra si la palabra es de más de 5 caracteres
+          isCorrect = correct.length > 5 && distance <= 1;
+        }
+
         break;
+      }
 
       case "ORDER_WORDS":
         const userAnswerObj =
