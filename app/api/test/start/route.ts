@@ -77,13 +77,19 @@ export async function POST(request: NextRequest) {
         type: question.type,
         title: question.title,
         order: question.order,
-        content: question.content,
+        content:
+          question.type === "ORDER_WORDS"
+            ? {
+                //@ts-expect-error spread error
+                ...question.content,
+                //@ts-expect-error no words type
+                words: shuffle(question.content?.words)
+              }
+            : question.content,
         answers: shuffle(
           question.answers.map((answer) => ({
             id: answer.id,
-            text: answer.text,
-            order: answer.order
-            // No incluir isCorrect
+            text: answer.text
           }))
         )
       }))
