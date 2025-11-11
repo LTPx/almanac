@@ -19,7 +19,7 @@ import {
 import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { NFTAsset } from "@prisma/client";
+import { NFTAsset } from "@/lib/types";
 
 interface CompletedUnit {
   unitId: string;
