@@ -7,9 +7,15 @@ type ResultCardProps = {
   value: number | string;
   variant: "points" | "hearts" | "speed" | "accuracy";
   speed?: "rapid" | "normal" | "slow";
+  accuracyLabel?: string;
 };
 
-export const ResultCard = ({ value, variant, speed }: ResultCardProps) => {
+export const ResultCard = ({
+  value,
+  variant,
+  speed,
+  accuracyLabel
+}: ResultCardProps) => {
   const getImageSrc = () => {
     if (variant === "hearts") return "/heart.svg";
     return null;
@@ -23,7 +29,7 @@ export const ResultCard = ({ value, variant, speed }: ResultCardProps) => {
       if (speed === "slow") return "Lento";
       return "Normal";
     }
-    if (variant === "accuracy") return "Exacto";
+    if (variant === "accuracy") return accuracyLabel || "Exacto";
     return "";
   };
 
@@ -35,7 +41,16 @@ export const ResultCard = ({ value, variant, speed }: ResultCardProps) => {
       if (speed === "slow") return "border-orange-500";
       return "border-blue-500";
     }
-    if (variant === "accuracy") return "border-[#2ECC71]";
+
+    if (variant === "accuracy") {
+      const score =
+        typeof value === "number" ? value : parseInt(value as string);
+      if (score === 100) return "border-[#2ECC71]";
+      if (score >= 90) return "border-[#3498DB]";
+      if (score >= 80) return "border-[#9B59B6]";
+      if (score >= 70) return "border-[#F39C12]";
+      return "border-[#E67E22]";
+    }
     return "";
   };
 
@@ -47,7 +62,16 @@ export const ResultCard = ({ value, variant, speed }: ResultCardProps) => {
       if (speed === "slow") return "bg-orange-500";
       return "bg-blue-500";
     }
-    if (variant === "accuracy") return "bg-[#2ECC71]";
+
+    if (variant === "accuracy") {
+      const score =
+        typeof value === "number" ? value : parseInt(value as string);
+      if (score === 100) return "bg-[#2ECC71]";
+      if (score >= 90) return "bg-[#3498DB]";
+      if (score >= 80) return "bg-[#9B59B6]";
+      if (score >= 70) return "bg-[#F39C12]";
+      return "bg-[#E67E22]";
+    }
     return "";
   };
 
@@ -59,7 +83,16 @@ export const ResultCard = ({ value, variant, speed }: ResultCardProps) => {
       if (speed === "slow") return "text-orange-500";
       return "text-blue-500";
     }
-    if (variant === "accuracy") return "text-[#2ECC71]";
+
+    if (variant === "accuracy") {
+      const score =
+        typeof value === "number" ? value : parseInt(value as string);
+      if (score === 100) return "text-[#2ECC71]";
+      if (score >= 90) return "text-[#3498DB]";
+      if (score >= 80) return "text-[#9B59B6]";
+      if (score >= 70) return "text-[#F39C12]";
+      return "text-[#E67E22]";
+    }
     return "";
   };
 
