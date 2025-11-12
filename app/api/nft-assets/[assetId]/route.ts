@@ -35,6 +35,14 @@ export async function GET(
               }
             }
           }
+        },
+        collection: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            createdAt: true
+          }
         }
       }
     });
@@ -46,7 +54,29 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(nftAsset);
+    const collectionStats = nftAsset.collectionId
+      ? await prisma.nFTAsset.aggregate({
+          where: { collectionId: nftAsset.collectionId },
+          _count: true
+        })
+      : null;
+
+    const moreFromCollection = nftAsset.collectionId
+      ? await prisma.nFTAsset.findMany({
+          where: {
+            collectionId: nftAsset.collectionId,
+            id: { not: id }
+          },
+          take: 6,
+          orderBy: { createdAt: "desc" }
+        })
+      : [];
+
+    return NextResponse.json({
+      ...nftAsset,
+      collectionStats: collectionStats?._count || 0,
+      moreFromCollection
+    });
   } catch (error) {
     console.error("Error al obtener NFT Asset:", error);
     return NextResponse.json(
@@ -55,7 +85,6 @@ export async function GET(
     );
   }
 }
-
 export async function PUT(
   request: NextRequest,
   context: { params: Promise<{ assetId: string }> }

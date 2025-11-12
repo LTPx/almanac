@@ -1,15 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles } from "lucide-react";
 
 interface CollectionNFT {
-  id: string;
+  id: number;
   name: string;
   imageUrl: string;
-  tokenId?: string;
-  owner?: string;
   rarity?: string;
 }
 
@@ -18,16 +17,44 @@ interface ExploreTabProps {
   isActive: boolean;
 }
 
+const rarityColors: Record<string, string> = {
+  NORMAL: "text-gray-400",
+  RARE: "text-blue-400",
+  EPIC: "text-purple-400",
+  UNIQUE: "text-yellow-400"
+};
+
+const rarityLabels: Record<string, string> = {
+  NORMAL: "Normal",
+  RARE: "Rara",
+  EPIC: "Épica",
+  UNIQUE: "Única"
+};
+
 export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
+  const router = useRouter();
   const [collectionNFTs, setCollectionNFTs] = useState<CollectionNFT[]>([]);
   const [loadingCollection, setLoadingCollection] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
-  const userNFTIds = useState(() => new Set(nfts.map((nft) => nft.id)))[0];
+
+  const userNFTAssetIds = useState(() => {
+    const ids = new Set<number>();
+    nfts.forEach((nft) => {
+      if (nft.nftAssetId) {
+        ids.add(nft.nftAssetId);
+      }
+    });
+    return ids;
+  })[0];
 
   useEffect(() => {
-    userNFTIds.clear();
-    nfts.forEach((nft) => userNFTIds.add(nft.id));
-  }, [nfts, userNFTIds]);
+    userNFTAssetIds.clear();
+    nfts.forEach((nft) => {
+      if (nft.nftAssetId) {
+        userNFTAssetIds.add(nft.nftAssetId);
+      }
+    });
+  }, [nfts, userNFTAssetIds]);
 
   const fetchAllCollectionNFTs = useCallback(async () => {
     if (hasFetched) return;
@@ -54,10 +81,16 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
       const allNFTsArrays = await Promise.all(allNFTsPromises);
       const allNFTs = allNFTsArrays.flat();
 
-      const filteredNFTs = allNFTs.filter(
-        (nft: CollectionNFT) => !userNFTIds.has(nft.id)
-      );
+      const filteredNFTs = allNFTs.filter((nft: CollectionNFT) => {
+        const hasValidId = nft.id !== undefined && nft.id !== null;
+        const isNotOwned = !userNFTAssetIds.has(nft.id);
+        console.log(
+          `NFT ${nft.id}: hasValidId=${hasValidId}, isNotOwned=${isNotOwned}`
+        );
+        return hasValidId && isNotOwned;
+      });
 
+      console.log("Filtered NFTs (available):", filteredNFTs);
       setCollectionNFTs(filteredNFTs);
       setHasFetched(true);
     } catch (error) {
@@ -66,7 +99,7 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
     } finally {
       setLoadingCollection(false);
     }
-  }, [userNFTIds, hasFetched]);
+  }, [userNFTAssetIds, hasFetched]);
 
   useEffect(() => {
     if (isActive && !hasFetched) {
@@ -131,28 +164,36 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
   return (
     <div className="px-4 pt-6 pb-4">
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        {collectionNFTs.map((nft) => (
-          <div
-            key={nft.id}
-            className="relative aspect-square rounded-xl overflow-hidden bg-gray-800 hover:opacity-80 transition-opacity"
-          >
-            <img
-              src={nft.imageUrl || "/placeholder.png"}
-              alt={nft.name || "NFT"}
-              className="object-cover"
-            />
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-              <p className="text-xs font-medium truncate">
-                {nft.name || "NFT"}
-              </p>
-            </div>
-            {nft.rarity && (
-              <div className="absolute top-2 right-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded text-[10px] font-semibold text-white">
-                {nft.rarity}
+        {collectionNFTs.map((nft) => {
+          const rarityColor = rarityColors[nft.rarity || "NORMAL"];
+          const rarityLabel = rarityLabels[nft.rarity || "NORMAL"];
+
+          return (
+            <button
+              key={nft.id}
+              onClick={() => router.push(`/achievements/nft/${nft.id}`)}
+              className="relative aspect-square rounded-xl overflow-hidden bg-gray-800 hover:opacity-80 hover:scale-[1.02] transition-all active:scale-95"
+            >
+              <img
+                src={nft.imageUrl || "/placeholder.png"}
+                alt={nft.name || "NFT"}
+                className="object-cover w-full h-full"
+              />
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                <p className="text-xs font-medium truncate text-white">
+                  {nft.name || "NFT"}
+                </p>
               </div>
-            )}
-          </div>
-        ))}
+              {nft.rarity && (
+                <div
+                  className={`absolute top-2 right-2 ${rarityColor} bg-black/70 backdrop-blur-sm px-2 py-1 rounded text-[10px] font-semibold`}
+                >
+                  {rarityLabel}
+                </div>
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
