@@ -1,6 +1,6 @@
 "use client";
 
-import { Curriculum } from "@/lib/types";
+import { Curriculum, Unit } from "@/lib/types";
 import { useState, useCallback } from "react";
 
 export function useCurriculums() {
@@ -53,10 +53,40 @@ export function useCurriculums() {
     []
   );
 
+  const fetchCurriculumWithUnitsUserMetrics = useCallback(
+    async (
+      curriculumId: string,
+      userId: string
+    ): Promise<{
+      curriculum: Curriculum;
+      units: Unit[];
+      stats: { totalAnswerErrors: number };
+    } | null> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const contentsRes = await fetch(
+          `/api/app/contents?curriculumId=${curriculumId}&userId=${userId}`
+        );
+        if (!contentsRes.ok) throw new Error("Error al cargar contents");
+        const contentsData = await contentsRes.json();
+        return contentsData;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Error desconocido");
+        return null;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
   return {
     isLoading,
     error,
     fetchCurriculums,
-    fetchCurriculumWithUnits
+    fetchCurriculumWithUnits,
+    fetchCurriculumWithUnitsUserMetrics
   };
 }

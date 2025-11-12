@@ -12,12 +12,19 @@ import { useCurriculums } from "@/hooks/use-curriculums";
 import { Lesson, Unit, Curriculum } from "@/lib/types";
 import { FormattedTextDisplay } from "@/components/formatted-text-display";
 import { useCurriculumStore } from "@/store/useCurriculumStore";
+import { useUser } from "@/context/UserContext";
 
 function Contents() {
   const searchParams = useSearchParams();
   const unitIdParam = searchParams?.get("unit");
+  const user = useUser();
+  const userId = user?.id || "";
   const { selectedCurriculumId } = useCurriculumStore();
-  const { fetchCurriculumWithUnits, isLoading } = useCurriculums();
+  const {
+    fetchCurriculumWithUnits,
+    isLoading,
+    fetchCurriculumWithUnitsUserMetrics
+  } = useCurriculums();
   const [curriculum, setCurriculum] = useState<Curriculum | null>(null);
   const [openAccordion, setOpenAccordion] = useState<string>("");
 
@@ -25,6 +32,12 @@ function Contents() {
     const loadCurriculumUnits = async () => {
       if (!selectedCurriculumId) return;
 
+      const test = await fetchCurriculumWithUnitsUserMetrics(
+        selectedCurriculumId,
+        userId
+      );
+
+      console.log("test: ", test);
       const data = await fetchCurriculumWithUnits(selectedCurriculumId);
       if (data) {
         setCurriculum(data);
