@@ -270,3 +270,76 @@ export const getQuestions = cache(async (search: string) => {
 // ============== STATISTICS QUERIES ==============
 
 // ============== SEARCH QUERIES ==============
+export const getUnitsByCurriculumIdAndUserStats = cache(
+  async (curriculumId: string, userId: string) => {
+    const curriculum = await prisma.curriculum.findUnique({
+      where: { id: curriculumId },
+      include: {
+        units: {
+          where: { isActive: true },
+          orderBy: { order: "asc" },
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            lessons: {
+              where: { isActive: true },
+              select: {
+                id: true,
+                name: true,
+                description: true
+              }
+            },
+            testAttempt: {
+              where: { userId },
+              select: {
+                id: true,
+                answers: {
+                  where: { isCorrect: false },
+                  select: { id: true }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!curriculum) {
+      return {
+        curriculum: null,
+        units: [],
+        stats: { totalAnswerErrors: 0 }
+      };
+    }
+
+    const unitsWithStats = curriculum.units.map((unit) => {
+      const incorrectAnswersCount = unit.testAttempt.reduce(
+        (sum, attempt) => sum + attempt.answers.length,
+        0
+      );
+      return {
+        ...unit,
+        incorrectAnswersCount
+      };
+    });
+
+    const totalAnswerErrors = unitsWithStats.reduce(
+      (sum, unit) => sum + unit.incorrectAnswersCount,
+      0
+    );
+
+    return {
+      curriculum: {
+        id: curriculum.id,
+        title: curriculum.title,
+        difficulty: curriculum.difficulty,
+        audienceAgeRange: curriculum.audienceAgeRange
+      },
+      units: unitsWithStats,
+      stats: {
+        totalAnswerErrors
+      }
+    };
+  }
+);

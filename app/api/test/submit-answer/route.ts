@@ -112,42 +112,42 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar si ya existe una respuesta para esta pregunta en este intento
-    const existingAnswer = await prisma.testAnswer.findFirst({
-      where: {
+    // const existingAnswer = await prisma.testAnswer.findFirst({
+    //   where: {
+    //     testAttemptId,
+    //     questionId
+    //   }
+    // });
+
+    // let testAnswer;
+    // if (existingAnswer) {
+    //   // Actualizar respuesta existente
+    //   testAnswer = await prisma.testAnswer.update({
+    //     where: { id: existingAnswer.id },
+    //     data: {
+    //       userAnswer:
+    //         typeof userAnswer === "string"
+    //           ? userAnswer
+    //           : JSON.stringify(userAnswer),
+    //       isCorrect,
+    //       timeSpent
+    //     }
+    //   });
+    // } else {
+    // Crear nueva respuesta
+    const testAnswer = await prisma.testAnswer.create({
+      data: {
         testAttemptId,
-        questionId
+        questionId,
+        userAnswer:
+          typeof userAnswer === "string"
+            ? userAnswer
+            : JSON.stringify(userAnswer),
+        isCorrect,
+        timeSpent
       }
     });
-
-    let testAnswer;
-    if (existingAnswer) {
-      // Actualizar respuesta existente
-      testAnswer = await prisma.testAnswer.update({
-        where: { id: existingAnswer.id },
-        data: {
-          userAnswer:
-            typeof userAnswer === "string"
-              ? userAnswer
-              : JSON.stringify(userAnswer),
-          isCorrect,
-          timeSpent
-        }
-      });
-    } else {
-      // Crear nueva respuesta
-      testAnswer = await prisma.testAnswer.create({
-        data: {
-          testAttemptId,
-          questionId,
-          userAnswer:
-            typeof userAnswer === "string"
-              ? userAnswer
-              : JSON.stringify(userAnswer),
-          isCorrect,
-          timeSpent
-        }
-      });
-    }
+    // }
 
     if (!isCorrect) {
       await reduceHeartsForFailedTest(testAttempt.userId, testAttemptId);

@@ -12,22 +12,40 @@ import { useCurriculums } from "@/hooks/use-curriculums";
 import { Lesson, Unit, Curriculum } from "@/lib/types";
 import { FormattedTextDisplay } from "@/components/formatted-text-display";
 import { useCurriculumStore } from "@/store/useCurriculumStore";
+import { useUser } from "@/context/UserContext";
 
 function Contents() {
   const searchParams = useSearchParams();
   const unitIdParam = searchParams?.get("unit");
+  const user = useUser();
+  const userId = user?.id || "";
   const { selectedCurriculumId } = useCurriculumStore();
-  const { fetchCurriculumWithUnits, isLoading } = useCurriculums();
+  const {
+    fetchCurriculumWithUnits,
+    isLoading,
+    fetchCurriculumWithUnitsUserMetrics
+  } = useCurriculums();
   const [curriculum, setCurriculum] = useState<Curriculum | null>(null);
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [stats, setStats] = useState<{ totalAnswerErrors: number } | null>(
+    null
+  );
   const [openAccordion, setOpenAccordion] = useState<string>("");
 
   useEffect(() => {
     const loadCurriculumUnits = async () => {
       if (!selectedCurriculumId) return;
 
-      const data = await fetchCurriculumWithUnits(selectedCurriculumId);
+      const data = await fetchCurriculumWithUnitsUserMetrics(
+        selectedCurriculumId,
+        userId
+      );
+
       if (data) {
-        setCurriculum(data);
+        const { curriculum, units, stats } = data;
+        setCurriculum(curriculum);
+        setUnits(units);
+        setStats(stats);
         if (unitIdParam) {
           const unitId = parseInt(unitIdParam);
           const targetUnit = data.units?.find((u: Unit) => u.id === unitId);
@@ -51,6 +69,7 @@ function Contents() {
     };
 
     loadCurriculumUnits();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCurriculumId, fetchCurriculumWithUnits, unitIdParam]);
 
   if (isLoading) {
@@ -75,7 +94,7 @@ function Contents() {
     <div className="min-h-screen bg-neutral-900 text-white p-6 pb-20">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-[22px] font-bold mb-6">Temas</h1>
-        {curriculum.units?.map((unit: Unit) => (
+        {units.map((unit: Unit) => (
           <div
             key={unit.id}
             id={`unit-${unit.id}`}
@@ -120,7 +139,7 @@ function Contents() {
           <div className="border-2 border-neutral-600 rounded-2xl p-5 mb-6 flex items-center justify-between">
             <span className="text-lg font-semibold">Errores</span>
             <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-              +25
+              {stats?.totalAnswerErrors}
             </span>
           </div>
           <div className="relative">
