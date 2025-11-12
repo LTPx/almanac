@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles } from "lucide-react";
 
-interface CollectionNFT {
+interface NFTAsset {
   id: number;
   name: string;
   imageUrl: string;
-  rarity?: string;
+  rarity: string;
+  isUsed: boolean;
 }
 
 interface ExploreTabProps {
@@ -26,88 +27,47 @@ const rarityColors: Record<string, string> = {
 
 const rarityLabels: Record<string, string> = {
   NORMAL: "Normal",
-  RARE: "Rara",
-  EPIC: "Épica",
-  UNIQUE: "Única"
+  RARE: "Rare",
+  EPIC: "Epic",
+  UNIQUE: "Unique"
 };
 
 export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
   const router = useRouter();
-  const [collectionNFTs, setCollectionNFTs] = useState<CollectionNFT[]>([]);
-  const [loadingCollection, setLoadingCollection] = useState(false);
+  const [availableNFTs, setAvailableNFTs] = useState<NFTAsset[]>([]);
+  const [loading, setLoading] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
-
-  const userNFTAssetIds = useState(() => {
-    const ids = new Set<number>();
-    nfts.forEach((nft) => {
-      if (nft.nftAssetId) {
-        ids.add(nft.nftAssetId);
-      }
-    });
-    return ids;
-  })[0];
-
-  useEffect(() => {
-    userNFTAssetIds.clear();
-    nfts.forEach((nft) => {
-      if (nft.nftAssetId) {
-        userNFTAssetIds.add(nft.nftAssetId);
-      }
-    });
-  }, [nfts, userNFTAssetIds]);
-
-  const fetchAllCollectionNFTs = useCallback(async () => {
-    if (hasFetched) return;
-
-    try {
-      setLoadingCollection(true);
-      const collectionsResponse = await fetch("/api/nft-collections");
-      if (!collectionsResponse.ok) {
-        throw new Error("Error fetching collections");
-      }
-      const collections = await collectionsResponse.json();
-
-      const allNFTsPromises = collections.map(async (collection: any) => {
-        const response = await fetch(
-          `/api/nft-collections/${collection.id}/nfts?limit=50`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          return data.nfts || [];
-        }
-        return [];
-      });
-
-      const allNFTsArrays = await Promise.all(allNFTsPromises);
-      const allNFTs = allNFTsArrays.flat();
-
-      const filteredNFTs = allNFTs.filter((nft: CollectionNFT) => {
-        const hasValidId = nft.id !== undefined && nft.id !== null;
-        const isNotOwned = !userNFTAssetIds.has(nft.id);
-        console.log(
-          `NFT ${nft.id}: hasValidId=${hasValidId}, isNotOwned=${isNotOwned}`
-        );
-        return hasValidId && isNotOwned;
-      });
-
-      console.log("Filtered NFTs (available):", filteredNFTs);
-      setCollectionNFTs(filteredNFTs);
-      setHasFetched(true);
-    } catch (error) {
-      console.error("Error fetching collection NFTs:", error);
-      setCollectionNFTs([]);
-    } finally {
-      setLoadingCollection(false);
-    }
-  }, [userNFTAssetIds, hasFetched]);
 
   useEffect(() => {
     if (isActive && !hasFetched) {
-      fetchAllCollectionNFTs();
+      fetchAvailableNFTs();
     }
-  }, [isActive, hasFetched, fetchAllCollectionNFTs]);
+  }, [isActive, hasFetched]);
 
-  if (loadingCollection) {
+  const fetchAvailableNFTs = async () => {
+    try {
+      setLoading(true);
+
+      const response = await fetch("/api/nft-assets?isUsed=false");
+
+      if (!response.ok) {
+        throw new Error("Error fetching NFT assets");
+      }
+
+      const data = await response.json();
+      console.log("Available NFT Assets:", data);
+
+      setAvailableNFTs(data.nftAssets || []);
+      setHasFetched(true);
+    } catch (error) {
+      console.error("Error fetching available NFTs:", error);
+      setAvailableNFTs([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
     return (
       <div className="px-4 pt-6 pb-4">
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
@@ -119,7 +79,7 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
     );
   }
 
-  if (collectionNFTs.length === 0 && nfts.length === 0) {
+  if (availableNFTs.length === 0 && nfts.length === 0) {
     return (
       <div className="px-4 min-h-full flex flex-col items-center justify-center -mt-20">
         <div className="flex flex-col items-center gap-4 max-w-sm mx-auto text-center">
@@ -140,7 +100,7 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
     );
   }
 
-  if (collectionNFTs.length === 0 && nfts.length > 0) {
+  if (availableNFTs.length === 0 && nfts.length > 0) {
     return (
       <div className="px-4 min-h-full flex flex-col items-center justify-center -mt-20">
         <div className="flex flex-col items-center gap-4 max-w-sm mx-auto text-center">
@@ -164,7 +124,7 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
   return (
     <div className="px-4 pt-6 pb-4">
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        {collectionNFTs.map((nft) => {
+        {availableNFTs.map((nft) => {
           const rarityColor = rarityColors[nft.rarity || "NORMAL"];
           const rarityLabel = rarityLabels[nft.rarity || "NORMAL"];
 

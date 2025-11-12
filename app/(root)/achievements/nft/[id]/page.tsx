@@ -41,9 +41,9 @@ const rarityColors: Record<string, { bg: string; text: string }> = {
 
 const rarityLabels: Record<string, string> = {
   NORMAL: "Normal",
-  RARE: "Rara",
-  EPIC: "Épica",
-  UNIQUE: "Única"
+  RARE: "Rare",
+  EPIC: "Epic",
+  UNIQUE: "Unique"
 };
 
 export default function NFTAssetDetailPage() {
@@ -176,8 +176,6 @@ export default function NFTAssetDetailPage() {
           </h1>
           <p className="text-gray-400 text-sm">
             {nftAsset.collection?.name || "Sin colección"}
-            {nftAsset.collectionStats > 0 &&
-              ` · ${nftAsset.collectionStats} items`}
           </p>
         </div>
 

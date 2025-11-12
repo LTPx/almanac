@@ -64,6 +64,20 @@ export default function NFTDetailPage() {
   const [blockchainExpanded, setBlockchainExpanded] = useState(false);
   const [moreFromCollection, setMoreFromCollection] = useState<any[]>([]);
 
+  const rarityColors: Record<string, { bg: string; text: string }> = {
+    NORMAL: { bg: "from-gray-400 to-gray-600", text: "text-gray-400" },
+    RARE: { bg: "from-blue-400 to-blue-600", text: "text-blue-400" },
+    EPIC: { bg: "from-purple-400 to-purple-600", text: "text-purple-400" },
+    UNIQUE: { bg: "from-yellow-400 to-yellow-600", text: "text-yellow-400" }
+  };
+
+  const rarityLabels: Record<string, string> = {
+    NORMAL: "Normal",
+    RARE: "Rare",
+    EPIC: "Epic",
+    UNIQUE: "Unique"
+  };
+
   useEffect(() => {
     fetchNFTDetail();
   }, [nftId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -179,11 +193,13 @@ export default function NFTDetailPage() {
   }
 
   const achievements = nft.curriculum?.units || [];
+  const rarityColor =
+    rarityColors[nft.nftAsset?.rarity || ""] || rarityColors.NORMAL;
 
   return (
     <div className="min-h-screen bg-black text-white pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-black/80 backdrop-blur-sm border-b border-gray-800">
+      <div className="sticky top-[60px] z-10 bg-black/80 backdrop-blur-sm border-b border-gray-800">
         <div className="flex items-center justify-between p-4">
           <button
             onClick={() => router.back()}
@@ -216,6 +232,13 @@ export default function NFTDetailPage() {
             {nft.nftAsset?.collection?.name} · Owned by{" "}
             {nft.owner ? formatAddress(nft.owner) : ""}
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div
+            className={`${rarityColor.text} font-semibold text-sm px-3 py-1 bg-gray-800 rounded-full border border-gray-700`}
+          >
+            {rarityLabels[nft.nftAsset?.rarity || ""] || nft.nftAsset?.rarity}
+          </div>
         </div>
 
         {/* About Section */}
