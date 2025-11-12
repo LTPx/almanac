@@ -217,7 +217,6 @@ export function TestQuestion({
                     {isCorrect ? "¡Correcto!" : "Incorrecto"}
                   </span>
                 </motion.div>
-
                 {!isCorrect && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -243,9 +242,36 @@ export function TestQuestion({
                     </div>
                   </motion.div>
                 )}
+                {isCorrect &&
+                  question.type === "FILL_IN_BLANK" &&
+                  selected.trim().toLowerCase() !==
+                    getCorrectAnswer().trim().toLowerCase() && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2, duration: 0.3 }}
+                      className="bg-[#32C781]/10 border border-[#32C781]/50 rounded-lg p-4"
+                    >
+                      <div className="flex items-start gap-2">
+                        <CheckCircle className="w-5 h-5 text-[#32C781] mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-semibold text-[#32C781] mb-1">
+                            Respuesta correcta:
+                          </p>
+                          <p className="text-white font-medium">
+                            {getCorrectAnswer()}
+                          </p>
+                          {question.content.explanation && (
+                            <p className="text-gray-300 text-sm mt-2">
+                              {question.content.explanation}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
               </div>
             )}
-
             {!hasAnswered && (
               <Button
                 onClick={handleSubmitAnswer}
@@ -272,7 +298,6 @@ export function TestQuestion({
                   : "Check Answer →"}
               </Button>
             )}
-
             {hasAnswered && showResult && (
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -290,7 +315,6 @@ export function TestQuestion({
                 </Button>
               </motion.div>
             )}
-
             {correctAudio}
             {incorrectAudio}
           </div>
