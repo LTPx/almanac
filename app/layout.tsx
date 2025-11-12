@@ -4,6 +4,7 @@ import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "@/components/ui/sonner";
 import ClientWrapper from "@/components/client-wrapper";
+import DevGoogleAdManager from "@/components/dev-google-admanager";
 
 const notoSansKR = Noto_Sans_KR({
   weight: ["300", "400", "500", "700"],
@@ -31,6 +32,7 @@ export default function RootLayout({
         <NextTopLoader showSpinner={false} height={6} color="#000000" />
         <Toaster richColors position="top-right" />
         <ClientWrapper>{children}</ClientWrapper>
+        <DevGoogleAdManager />
       </body>
     </html>
   );
