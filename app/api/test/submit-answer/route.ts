@@ -119,35 +119,35 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    let testAnswer;
-    if (existingAnswer) {
-      // Actualizar respuesta existente
-      testAnswer = await prisma.testAnswer.update({
-        where: { id: existingAnswer.id },
-        data: {
-          userAnswer:
-            typeof userAnswer === "string"
-              ? userAnswer
-              : JSON.stringify(userAnswer),
-          isCorrect,
-          timeSpent
-        }
-      });
-    } else {
-      // Crear nueva respuesta
-      testAnswer = await prisma.testAnswer.create({
-        data: {
-          testAttemptId,
-          questionId,
-          userAnswer:
-            typeof userAnswer === "string"
-              ? userAnswer
-              : JSON.stringify(userAnswer),
-          isCorrect,
-          timeSpent
-        }
-      });
-    }
+    // let testAnswer;
+    // if (existingAnswer) {
+    //   // Actualizar respuesta existente
+    //   testAnswer = await prisma.testAnswer.update({
+    //     where: { id: existingAnswer.id },
+    //     data: {
+    //       userAnswer:
+    //         typeof userAnswer === "string"
+    //           ? userAnswer
+    //           : JSON.stringify(userAnswer),
+    //       isCorrect,
+    //       timeSpent
+    //     }
+    //   });
+    // } else {
+    // Crear nueva respuesta
+    const testAnswer = await prisma.testAnswer.create({
+      data: {
+        testAttemptId,
+        questionId,
+        userAnswer:
+          typeof userAnswer === "string"
+            ? userAnswer
+            : JSON.stringify(userAnswer),
+        isCorrect,
+        timeSpent
+      }
+    });
+    // }
 
     if (!isCorrect) {
       await reduceHeartsForFailedTest(testAttempt.userId, testAttemptId);
