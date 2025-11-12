@@ -33,7 +33,7 @@ export default function DevGoogleAdManager() {
       </Script>
 
       {/* Banner visible solo en modo dev */}
-
+      {/* 
       {isDev && (
         <div
           id="div-gpt-ad-12345-0"
@@ -49,7 +49,7 @@ export default function DevGoogleAdManager() {
         >
           <span>🧱 Anuncio de prueba (solo modo dev)</span>
         </div>
-      )}
+      )} */}
     </>
   );
 }
