@@ -1,6 +1,6 @@
 "use client";
 
-import { Curriculum, Unit } from "@/lib/types";
+import { ContentsResponse, Curriculum, Unit } from "@/lib/types";
 import { useState, useCallback } from "react";
 
 export function useCurriculums() {
@@ -57,11 +57,7 @@ export function useCurriculums() {
     async (
       curriculumId: string,
       userId: string
-    ): Promise<{
-      curriculum: Curriculum;
-      units: Unit[];
-      stats: { totalAnswerErrors: number };
-    } | null> => {
+    ): Promise<ContentsResponse | null> => {
       setIsLoading(true);
       setError(null);
 

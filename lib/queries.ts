@@ -279,6 +279,14 @@ export const getUnitsByCurriculumIdAndUserStats = cache(
           where: { isActive: true },
           orderBy: { order: "asc" },
           include: {
+            lessons: {
+              where: { isActive: true },
+              select: {
+                id: true,
+                name: true,
+                description: true
+              }
+            },
             testAttempt: {
               where: { userId },
               select: {

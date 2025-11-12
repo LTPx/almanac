@@ -186,3 +186,9 @@ export interface PurchaseResponse {
   };
   error?: string;
 }
+
+export interface ContentsResponse {
+  curriculum: Curriculum;
+  units: Unit[];
+  stats: { totalAnswerErrors: number };
+}
