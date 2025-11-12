@@ -112,12 +112,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar si ya existe una respuesta para esta pregunta en este intento
-    const existingAnswer = await prisma.testAnswer.findFirst({
-      where: {
-        testAttemptId,
-        questionId
-      }
-    });
+    // const existingAnswer = await prisma.testAnswer.findFirst({
+    //   where: {
+    //     testAttemptId,
+    //     questionId
+    //   }
+    // });
 
     // let testAnswer;
     // if (existingAnswer) {

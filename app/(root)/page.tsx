@@ -2,13 +2,13 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useUser } from "@/context/UserContext";
-import { Curriculum } from "@/lib/types";
+import { Curriculum, ProgressUnit } from "@/lib/types";
 import CourseHeader from "@/components/course-header";
 import { useGamification } from "@/hooks/useGamification";
-import { useCurriculums } from "@/hooks/use-curriculums";
 import LearningPath from "@/components/units-learning";
 import { useCurriculumStore } from "@/store/useCurriculumStore";
 import { Loader2, BookOpen } from "lucide-react";
+import { useHome } from "@/hooks/useHome";
 
 const ContentLoadingScreen = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -31,45 +31,41 @@ export default function HomePage() {
     useState<Curriculum | null>(null);
   const { selectedCurriculumId, setSelectedCurriculumId } =
     useCurriculumStore();
-
+  const [approvedUnits, setApprovedUnits] = useState<ProgressUnit>();
   const user = useUser();
   const userId = user?.id || "";
-  const { isLoading, error, fetchCurriculums, fetchCurriculumWithUnits } =
-    useCurriculums();
+  const { getHomeData, isLoading, error } = useHome();
+
   const {
     gamification,
     isLoading: isLoadingGamification,
     refetch: refetchGamification
   } = useGamification(userId);
 
-  useEffect(() => {
-    const loadUnits = async () => {
-      const data = await fetchCurriculums();
-      if (data) {
-        setCurriculums(data);
-        if (data.length > 0 && !selectedCurriculumId) {
-          setSelectedCurriculumId(data[0].id.toString());
-        }
+  const fetchHomeData = async (curriculumId: string) => {
+    const data = await getHomeData(curriculumId, userId);
+    if (data) {
+      const { allCurriculums, selectedCurriculum, progressUnit } = data;
+      setCurriculums(allCurriculums);
+      setSelectedCurriculum(selectedCurriculum);
+      setApprovedUnits(progressUnit);
+      if (allCurriculums.length > 0 && !selectedCurriculumId) {
+        setSelectedCurriculumId(allCurriculums[0].id.toString());
       }
-    };
-    loadUnits();
-  }, [fetchCurriculums, selectedCurriculumId, setSelectedCurriculumId]);
+    }
+  };
 
   useEffect(() => {
-    if (!selectedCurriculumId) return;
-
-    const loadUnit = async () => {
-      const unit = await fetchCurriculumWithUnits(selectedCurriculumId);
-      if (unit) setSelectedCurriculum(unit);
-    };
-    loadUnit();
-  }, [selectedCurriculumId, fetchCurriculumWithUnits]);
+    fetchHomeData(selectedCurriculumId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleTestComplete = useCallback(async () => {
     await refetchGamification();
   }, [refetchGamification]);
 
   const handleCurriculumChange = (curriculumId: string) => {
+    fetchHomeData(curriculumId);
     setSelectedCurriculumId(curriculumId);
   };
 
@@ -123,6 +119,9 @@ export default function HomePage() {
             key={selectedCurriculum.id}
             hearts={gamification?.hearts ?? 0}
             curriculum={selectedCurriculum}
+            approvedUnits={
+              approvedUnits?.approvedUnits.map((apu) => parseInt(apu.id)) || []
+            }
             userId={userId}
             onTestComplete={handleTestComplete}
           />

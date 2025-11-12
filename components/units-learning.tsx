@@ -4,10 +4,10 @@ import React, { useState } from "react";
 import { LessonGrid } from "./lesson-grid";
 import { TestSystem } from "./test/TestSystem";
 import { Curriculum, Unit } from "@/lib/types";
-import { useProgress } from "@/hooks/useProgress";
 
 type LearningPathProps = {
   curriculum: Curriculum;
+  approvedUnits: number[];
   userId: string;
   hearts: number;
   onTestComplete?: () => void;
@@ -17,13 +17,13 @@ const LearningPath: React.FC<LearningPathProps> = ({
   curriculum,
   userId,
   hearts,
-  onTestComplete
+  onTestComplete,
+  approvedUnits
 }) => {
   const [activeUnit, setActiveUnit] = useState<Unit | null>(null);
-  const { progress, isLoading, refetch } = useProgress(userId, curriculum.id);
   const handleCloseTest = () => {
     setActiveUnit(null);
-    refetch();
+    // refetch();
     if (onTestComplete) {
       onTestComplete();
     }
@@ -34,16 +34,12 @@ const LearningPath: React.FC<LearningPathProps> = ({
     return (
       <div className="flex flex-col">
         <div className="px-6 py-8">
-          {isLoading ? (
-            <div>Cargando progreso...</div>
-          ) : (
-            <LessonGrid
-              units={curriculum.units || []}
-              approvedUnits={progress.approvedUnits}
-              onStartUnit={setActiveUnit}
-              hearts={hearts}
-            />
-          )}
+          <LessonGrid
+            units={curriculum.units || []}
+            approvedUnits={approvedUnits}
+            onStartUnit={setActiveUnit}
+            hearts={hearts}
+          />
         </div>
       </div>
     );
@@ -67,16 +63,12 @@ const LearningPath: React.FC<LearningPathProps> = ({
   return (
     <div className="flex flex-col">
       <div className="px-6 py-8">
-        {isLoading ? (
-          <div>Cargando progreso...</div>
-        ) : (
-          <LessonGrid
-            units={curriculum.units || []}
-            approvedUnits={progress.approvedUnits}
-            onStartUnit={setActiveUnit}
-            hearts={hearts}
-          />
-        )}
+        <LessonGrid
+          units={curriculum.units || []}
+          approvedUnits={approvedUnits}
+          onStartUnit={setActiveUnit}
+          hearts={hearts}
+        />
       </div>
     </div>
   );

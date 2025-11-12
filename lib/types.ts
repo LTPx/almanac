@@ -192,3 +192,16 @@ export interface ContentsResponse {
   units: Unit[];
   stats: { totalAnswerErrors: number };
 }
+
+export interface ProgressUnit {
+  approvedUnits: { id: string; name: string }[];
+  curriculum: { id: string; name: string };
+  experiencePoints: number;
+  isCompleted: boolean;
+}
+
+export interface HomeAppResponse {
+  allCurriculums: Curriculum[];
+  selectedCurriculum: Curriculum;
+  progressUnit: ProgressUnit;
+}
