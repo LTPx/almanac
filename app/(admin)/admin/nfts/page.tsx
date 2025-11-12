@@ -282,10 +282,13 @@ export default function NFTsPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link href={`/admin/nfts/${nft.id}`}>
+                      <DropdownMenuItem asChild disabled={!nft.isUsed}>
+                        <Link
+                          href={`/nft/${nft.educationalNFT?.id}`}
+                          target="_blank"
+                        >
                           <Eye className="mr-2 h-4 w-4" />
-                          Ver detalles
+                          Link Público
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild disabled={nft.isUsed}>

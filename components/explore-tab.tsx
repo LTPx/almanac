@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles } from "lucide-react";
 
-interface CollectionNFT {
-  id: string;
+interface NFTAsset {
+  id: number;
   name: string;
   imageUrl: string;
-  tokenId?: string;
-  owner?: string;
-  rarity?: string;
+  rarity: string;
+  isUsed: boolean;
 }
 
 interface ExploreTabProps {
@@ -18,63 +18,56 @@ interface ExploreTabProps {
   isActive: boolean;
 }
 
+const rarityColors: Record<string, string> = {
+  NORMAL: "text-gray-400",
+  RARE: "text-blue-400",
+  EPIC: "text-purple-400",
+  UNIQUE: "text-yellow-400"
+};
+
+const rarityLabels: Record<string, string> = {
+  NORMAL: "Normal",
+  RARE: "Rare",
+  EPIC: "Epic",
+  UNIQUE: "Unique"
+};
+
 export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
-  const [collectionNFTs, setCollectionNFTs] = useState<CollectionNFT[]>([]);
-  const [loadingCollection, setLoadingCollection] = useState(false);
+  const router = useRouter();
+  const [availableNFTs, setAvailableNFTs] = useState<NFTAsset[]>([]);
+  const [loading, setLoading] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
-  const userNFTIds = useState(() => new Set(nfts.map((nft) => nft.id)))[0];
-
-  useEffect(() => {
-    userNFTIds.clear();
-    nfts.forEach((nft) => userNFTIds.add(nft.id));
-  }, [nfts, userNFTIds]);
-
-  const fetchAllCollectionNFTs = useCallback(async () => {
-    if (hasFetched) return;
-
-    try {
-      setLoadingCollection(true);
-      const collectionsResponse = await fetch("/api/nft-collections");
-      if (!collectionsResponse.ok) {
-        throw new Error("Error fetching collections");
-      }
-      const collections = await collectionsResponse.json();
-
-      const allNFTsPromises = collections.map(async (collection: any) => {
-        const response = await fetch(
-          `/api/nft-collections/${collection.id}/nfts?limit=50`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          return data.nfts || [];
-        }
-        return [];
-      });
-
-      const allNFTsArrays = await Promise.all(allNFTsPromises);
-      const allNFTs = allNFTsArrays.flat();
-
-      const filteredNFTs = allNFTs.filter(
-        (nft: CollectionNFT) => !userNFTIds.has(nft.id)
-      );
-
-      setCollectionNFTs(filteredNFTs);
-      setHasFetched(true);
-    } catch (error) {
-      console.error("Error fetching collection NFTs:", error);
-      setCollectionNFTs([]);
-    } finally {
-      setLoadingCollection(false);
-    }
-  }, [userNFTIds, hasFetched]);
 
   useEffect(() => {
     if (isActive && !hasFetched) {
-      fetchAllCollectionNFTs();
+      fetchAvailableNFTs();
     }
-  }, [isActive, hasFetched, fetchAllCollectionNFTs]);
+  }, [isActive, hasFetched]);
 
-  if (loadingCollection) {
+  const fetchAvailableNFTs = async () => {
+    try {
+      setLoading(true);
+
+      const response = await fetch("/api/nft-assets?isUsed=false");
+
+      if (!response.ok) {
+        throw new Error("Error fetching NFT assets");
+      }
+
+      const data = await response.json();
+      console.log("Available NFT Assets:", data);
+
+      setAvailableNFTs(data.nftAssets || []);
+      setHasFetched(true);
+    } catch (error) {
+      console.error("Error fetching available NFTs:", error);
+      setAvailableNFTs([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
     return (
       <div className="px-4 pt-6 pb-4">
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
@@ -86,7 +79,7 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
     );
   }
 
-  if (collectionNFTs.length === 0 && nfts.length === 0) {
+  if (availableNFTs.length === 0 && nfts.length === 0) {
     return (
       <div className="px-4 min-h-full flex flex-col items-center justify-center -mt-20">
         <div className="flex flex-col items-center gap-4 max-w-sm mx-auto text-center">
@@ -107,7 +100,7 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
     );
   }
 
-  if (collectionNFTs.length === 0 && nfts.length > 0) {
+  if (availableNFTs.length === 0 && nfts.length > 0) {
     return (
       <div className="px-4 min-h-full flex flex-col items-center justify-center -mt-20">
         <div className="flex flex-col items-center gap-4 max-w-sm mx-auto text-center">
@@ -131,28 +124,36 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
   return (
     <div className="px-4 pt-6 pb-4">
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        {collectionNFTs.map((nft) => (
-          <div
-            key={nft.id}
-            className="relative aspect-square rounded-xl overflow-hidden bg-gray-800 hover:opacity-80 transition-opacity"
-          >
-            <img
-              src={nft.imageUrl || "/placeholder.png"}
-              alt={nft.name || "NFT"}
-              className="object-cover"
-            />
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-              <p className="text-xs font-medium truncate">
-                {nft.name || "NFT"}
-              </p>
-            </div>
-            {nft.rarity && (
-              <div className="absolute top-2 right-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded text-[10px] font-semibold text-white">
-                {nft.rarity}
+        {availableNFTs.map((nft) => {
+          const rarityColor = rarityColors[nft.rarity || "NORMAL"];
+          const rarityLabel = rarityLabels[nft.rarity || "NORMAL"];
+
+          return (
+            <button
+              key={nft.id}
+              onClick={() => router.push(`/achievements/nft/${nft.id}`)}
+              className="relative aspect-square rounded-xl overflow-hidden bg-gray-800 hover:opacity-80 hover:scale-[1.02] transition-all active:scale-95"
+            >
+              <img
+                src={nft.imageUrl || "/placeholder.png"}
+                alt={nft.name || "NFT"}
+                className="object-cover w-full h-full"
+              />
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                <p className="text-xs font-medium truncate text-white">
+                  {nft.name || "NFT"}
+                </p>
               </div>
-            )}
-          </div>
-        ))}
+              {nft.rarity && (
+                <div
+                  className={`absolute top-2 right-2 ${rarityColor} bg-black/70 backdrop-blur-sm px-2 py-1 rounded text-[10px] font-semibold`}
+                >
+                  {rarityLabel}
+                </div>
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

@@ -14,6 +14,8 @@ import {
   Calendar
 } from "lucide-react";
 import Image from "next/image";
+import { getExplorerUrl } from "@/lib/utils";
+import Link from "next/link";
 
 interface NFTDetail {
   id: string;
@@ -101,7 +103,7 @@ export default function NFTPublicPage() {
   const handleShare = async () => {
     const shareData = {
       title: `${nft?.nftAsset?.name || "NFT"} - ${nft?.collectionName || "Collection"}`,
-      text: `Check out this NFT from ${nft?.collectionName || "the collection"}`,
+      // text: `Check out this NFT from ${nft?.collectionName || "the collection"}`,
       url: window.location.href
     };
 
@@ -130,13 +132,6 @@ export default function NFTPublicPage() {
       month: "long",
       day: "numeric"
     });
-  };
-
-  const openBlockExplorer = () => {
-    if (nft?.transactionHash) {
-      const explorerUrl = `https://etherscan.io/tx/${nft.transactionHash}`;
-      window.open(explorerUrl, "_blank");
-    }
   };
 
   if (loading) {
@@ -379,13 +374,14 @@ export default function NFTPublicPage() {
                       <span className="text-sm">{nft.tokenStandard}</span>
                     </div>
                     {nft.transactionHash && (
-                      <button
-                        onClick={openBlockExplorer}
+                      <Link
+                        href={getExplorerUrl(nft.contractAddress, nft.tokenId)}
+                        target="_blank"
                         className="flex items-center gap-2 text-sm text-green-400 hover:text-green-300 transition-colors mt-3"
                       >
-                        <span>View on Block Explorer</span>
+                        <span>View on Block Explorer </span>
                         <ExternalLink className="w-4 h-4" />
-                      </button>
+                      </Link>
                     )}
                   </div>
                 )}

@@ -2,29 +2,16 @@
 
 import { useState, useEffect, useCallback } from "react";
 
-// interface NFT {
-//   id: string;
-//   tokenId: string;
-//   unitId: string;
-//   contractAddress: string;
-//   transactionHash: string | null;
-//   metadataUri: string;
-//   mintedAt: string;
-//   metadata?: {
-//     name?: string;
-//     description?: string;
-//     image?: string;
-//     attributes?: Array<{
-//       trait_type: string;
-//       value: string;
-//     }>;
-//   };
-// }
-
 interface EducationalNFTAsset {
   id: string;
   name: string;
   imageUrl: string;
+  nftAssetId?: number;
+  tokenId?: string;
+  contractAddress?: string;
+  transactionHash?: string;
+  metadataUri?: string;
+  mintedAt?: string;
 }
 
 export function useNFTs(userId: string, useThirdweb: boolean = false) {

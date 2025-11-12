@@ -23,6 +23,7 @@ export async function GET(
       where: { userId },
       select: {
         id: true,
+        nftAssetId: true,
         curriculum: {
           select: {
             id: true,
@@ -74,6 +75,7 @@ export async function GET(
       nfts: nfts.map((nft) => {
         return {
           id: nft.id,
+          nftAssetId: nft.nftAssetId,
           name: nft.curriculum.title || nft.nftAsset?.name,
           imageUrl: nft.nftAsset?.imageUrl || null
         };
