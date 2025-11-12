@@ -15,6 +15,7 @@ import type {
 } from "@/lib/types";
 import StoreContent from "../store-content";
 import { ReportErrorModal } from "../modals/report-erros-modal";
+import InterstitialAd from "../interstitialAd";
 
 interface TestSystemProps {
   userId: string;
@@ -50,6 +51,8 @@ export function TestSystem({
   const [justAnsweredCorrect, setJustAnsweredCorrect] = useState(false);
   const [firstPassQuestionCount, setFirstPassQuestionCount] = useState(0);
   const [failedQuestions, setFailedQuestions] = useState<number[]>([]);
+  // const [showAdBeforeResults, setShowAdBeforeResults] = useState(false);
+  const [showAdBeforeStart, setShowAdBeforeStart] = useState(true);
 
   const [uniqueFailedQuestions, setUniqueFailedQuestions] = useState<
     Set<number>
@@ -129,11 +132,11 @@ export function TestSystem({
   );
 
   useEffect(() => {
-    if (!hasInitialized.current) {
+    if (!hasInitialized.current && !showAdBeforeStart) {
       handleStartTest(initialLessonId);
       hasInitialized.current = true;
     }
-  }, [handleStartTest, initialLessonId]);
+  }, [handleStartTest, initialLessonId, showAdBeforeStart]);
 
   const handleAnswer = useCallback(
     async (questionId: number, answer: string) => {
@@ -471,6 +474,10 @@ export function TestSystem({
           }
           onSubmit={handleReportError}
         />
+      )}
+
+      {showAdBeforeStart && (
+        <InterstitialAd onClose={() => setShowAdBeforeStart(false)} />
       )}
 
       <NoHeartsTestModal />
