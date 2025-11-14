@@ -4,7 +4,6 @@ import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "@/components/ui/sonner";
 import ClientWrapper from "@/components/client-wrapper";
-import DevGoogleAdManager from "@/components/dev-google-admanager";
 
 const notoSansKR = Noto_Sans_KR({
   weight: ["300", "400", "500", "700"],
@@ -18,6 +17,9 @@ export const metadata: Metadata = {
   description: "Learning App + NFTs blockchain",
   icons: {
     icon: "/almanac.svg"
+  },
+  other: {
+    "google-adsense-account": "ca-pub-1890321786950620"
   }
 };
 
@@ -32,7 +34,6 @@ export default function RootLayout({
         <NextTopLoader showSpinner={false} height={6} color="#000000" />
         <Toaster richColors position="top-right" />
         <ClientWrapper>{children}</ClientWrapper>
-        <DevGoogleAdManager />
       </body>
     </html>
   );
