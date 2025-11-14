@@ -5,9 +5,7 @@ export default async function PublicLayout({
 }>) {
   return (
     <main>
-      <div className="h-screen flex flex-col items-center justify-center">
-        {children}
-      </div>
+      <div className="">{children}</div>
     </main>
   );
 }
