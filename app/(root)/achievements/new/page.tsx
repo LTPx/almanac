@@ -14,7 +14,8 @@ import {
   Share2,
   Award,
   Calendar,
-  ExternalLink
+  ExternalLink,
+  ChevronLeft
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -228,236 +229,243 @@ export default function CreateCertificatePage() {
   }
 
   return (
-    <div className="min-h-screen py-8 px-4">
-      <div className="max-w-lg mx-auto pb-[30px]">
-        <div className="flex items-center justify-between mb-6">
+    <div className="min-h-screen ">
+      <div className="sticky top-[60px] z-10 backdrop-blur-sm  border-b border-gray-800">
+        <div className="flex items-center justify-between p-4  mx-auto">
           <button
             onClick={handleBack}
-            className="text-white hover:text-gray-300"
+            className="p-2 hover:bg-gray-800 rounded-full transition-colors"
           >
-            <ArrowLeft size={24} />
+            <ChevronLeft className="w-6 h-6" />
           </button>
           <h1 className="text-xl font-semibold text-white">Minting</h1>
-          <div className="w-6" />
+          <div className="w-10" />
         </div>
-        {currentStep !== 0 && currentStep !== 3 && <StepIndicator />}
-        <div className="text-center mb-4">
-          <h2 className="text-[22px] font-bold text-white">
-            {currentStep === 0 && "Crea una Medalla NFT"}
-            {currentStep === 1 && "Crea tu Medalla NFT"}
-            {currentStep === 2 && "Confirma los datos"}
-            {currentStep === 3 && "¡Éxito!"}
-          </h2>
-        </div>
-
-        <div className="rounded-xl py-6 px-2 lg:p-6 pb-[100px]">
-          {currentStep === 0 && (
-            <div className="space-y-6">
-              <div className="flex gap-4 overflow-x-auto pb-4">
-                {nftsAvailable.map((nft, index) => (
-                  <div className="flex-shrink-0 w-40" key={index}>
-                    <div className="rounded-xl overflow-hidden border-2 border-gray-600">
-                      <div className="aspect-square bg-gradient-to-br from-pink-300 via-blue-200 to-green-200 flex items-center justify-center">
-                        <img src={nft.imageUrl} alt="nft" />
-                      </div>
-                    </div>
-                    <p className="text-blue-400 font-semibold mt-2">
-                      {nft.name}
-                    </p>
-                    <p className="text-white text-sm">Social S...4 '24</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Texto informativo */}
-              <div className="text-gray-300 space-y-4">
-                <p>
-                  Tus medallas (NFT's) contienen tus resultados educativos y los
-                  preservan de una manera permanente. Los NFT's son fáciles de
-                  compartir e intercambiar
-                </p>
-              </div>
-              <button
-                onClick={() => setCurrentStep(1)}
-                className="w-full bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2 font-medium"
-              >
-                Iniciar nuevo Minting (NFT)
-              </button>
-            </div>
-          )}
-          {currentStep === 1 && (
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-3">
-                  Token
-                </label>
-                <select
-                  value={selectedUnitId}
-                  onChange={(e) => setSelectedUnitId(e.target.value)}
-                  className="w-full p-4 border border-gray-600 rounded-lg text-white"
-                  required
-                >
-                  <option value="">Selecciona un token...</option>
-                  {availableUnits.map((unit) => (
-                    <option key={unit.unitId} value={unit.unitId}>
-                      {unit.unitName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-3">
-                  Colección
-                </label>
-                <select
-                  value={selectedCollectionId || ""}
-                  onChange={(e) => setSelectedCollectionId(e.target.value)}
-                  className="w-full p-4 border border-gray-600 rounded-lg text-white"
-                  required
-                >
-                  <option value="">Selecciona una colección...</option>
-                  {collectionNfts.map((collection) => (
-                    <option key={collection.id} value={collection.id}>
-                      {collection.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-3">
-                  Descripción
-                </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Dedico este logro a..."
-                  className="w-full p-4 border border-gray-600 rounded-lg text-white resize-none"
-                  rows={4}
-                  maxLength={250}
-                />
-              </div>
-
-              <button
-                onClick={handleContinue}
-                disabled={!selectedUnitId}
-                className="w-full bg-[#1983DD] hover:bg-[#1A73E8] disabled:opacity-50 text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2"
-              >
-                Continuar
-                <ArrowRight size={20} />
-              </button>
-            </div>
-          )}
-
-          {currentStep === 2 && (
-            <div className="space-y-6">
-              <p className="text-white">
-                Vas a crear un NFT de: {selectedUnit?.unitName}
-              </p>
-              {description && <p className="text-gray-300">"{description}"</p>}
-
-              <div className="flex gap-3">
-                <button
-                  onClick={handleBack}
-                  className="flex items-center justify-center gap-2 flex-1 bg-gray-600 hover:bg-gray-700 text-white py-4 px-6 rounded-lg"
-                >
-                  <ArrowLeft size={20} /> Atrás
-                </button>
-                <Button
-                  onClick={handleContinue}
-                  disabled={loading}
-                  className="cursor-pointer flex-1 bg-[#1983DD] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="animate-spin" size={20} /> Minting...
-                    </>
-                  ) : (
-                    <>
-                      Crear NFT <Zap size={20} />
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {currentStep === 3 && mintedNFT && (
-            <div className="space-y-6">
-              <div className="overflow-hidden rounded-lg">
-                <div className="relative h-48 flex items-center justify-center">
-                  {mintedNFT.metadata?.image ? (
-                    <img
-                      src={mintedNFT.metadata.image}
-                      alt={mintedNFT.metadata.name || "NFT Certificate"}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Award className="h-16 w-16 text-white opacity-80" />
-                  )}
-                </div>
-
-                <div className="p-4">
-                  <div className="grid grid-cols-4">
-                    <div className="col-span-3 space-y-2">
-                      <h3 className="text-lg font-bold text-white">
-                        {mintedNFT.metadata?.name ||
-                          `Certificado #${mintedNFT.tokenId}`}
-                      </h3>
-                      {mintedNFT.metadata?.description && (
-                        <p className="text-gray-300 text-sm">
-                          {mintedNFT.metadata.description}
-                        </p>
-                      )}
-                      <div className="flex items-center text-sm text-gray-400">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        {new Date(mintedNFT.mintedAt).toLocaleDateString(
-                          "es-ES"
-                        )}
-                      </div>
-                      <div className="flex space-x-2 pt-2">
-                        <Button asChild size="sm">
-                          <a
-                            href={`https://amoy.polygonscan.com/token/${mintedNFT.contractAddress}?a=${mintedNFT.tokenId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Explorer
-                          </a>
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="col-span-1 flex justify-end items-end">
-                      <QRCodeSVG
-                        value={`https://amoy.polygonscan.com/token/${mintedNFT.contractAddress}?a=${mintedNFT.tokenId}`}
-                        size={80}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <button className="w-full bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2">
-                <Share2 size={20} /> Compartir
-              </button>
-              <div className="flex justify-center">
-                <Link
-                  href={"/achievements"}
-                  onClick={() => setCurrentStep(1)}
-                  className="text-center cursor-pointer w-full text-[#708BB1] hover:text-[#8FA6C7] text-center py-2 transition-colors"
-                >
-                  Volver a Mis Medallas
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-        {error && (
-          <div className="mt-4 p-4 bg-red-900 border border-red-600 text-red-300 rounded-lg">
-            {error}
+      </div>
+      <div className="px-4 py-8">
+        <div className=" mx-auto pb-[30px]">
+          {currentStep !== 0 && currentStep !== 3 && <StepIndicator />}
+          <div className="text-center mb-4">
+            <h2 className="text-[22px] font-bold text-white">
+              {currentStep === 0 && "Crea una Medalla NFT"}
+              {currentStep === 1 && "Crea tu Medalla NFT"}
+              {currentStep === 2 && "Confirma los datos"}
+              {currentStep === 3 && "¡Éxito!"}
+            </h2>
           </div>
-        )}
+
+          <div className="rounded-xl py-6 px-2 lg:p-6 pb-[100px]">
+            {currentStep === 0 && (
+              <div className="space-y-6">
+                <div className="flex gap-4 overflow-x-auto pb-4">
+                  {nftsAvailable.map((nft, index) => (
+                    <div className="flex-shrink-0 w-40" key={index}>
+                      <div className="rounded-xl overflow-hidden border-2 border-gray-600">
+                        <div className="aspect-square bg-gradient-to-br from-pink-300 via-blue-200 to-green-200 flex items-center justify-center">
+                          <img src={nft.imageUrl} alt="nft" />
+                        </div>
+                      </div>
+                      <p className="text-blue-400 font-semibold mt-2">
+                        {nft.name}
+                      </p>
+                      <p className="text-white text-sm">Social S...4 '24</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Texto informativo */}
+                <div className="text-gray-300 space-y-4">
+                  <p>
+                    Tus medallas (NFT's) contienen tus resultados educativos y
+                    los preservan de una manera permanente. Los NFT's son
+                    fáciles de compartir e intercambiar
+                  </p>
+                </div>
+                <button
+                  onClick={() => setCurrentStep(1)}
+                  className="w-full bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2 font-medium"
+                >
+                  Iniciar nuevo Minting (NFT)
+                </button>
+              </div>
+            )}
+            {currentStep === 1 && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                    Token
+                  </label>
+                  <select
+                    value={selectedUnitId}
+                    onChange={(e) => setSelectedUnitId(e.target.value)}
+                    className="w-full p-4 border border-gray-600 rounded-lg text-white"
+                    required
+                  >
+                    <option value="">Selecciona un token...</option>
+                    {availableUnits.map((unit) => (
+                      <option key={unit.unitId} value={unit.unitId}>
+                        {unit.unitName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                    Colección
+                  </label>
+                  <select
+                    value={selectedCollectionId || ""}
+                    onChange={(e) => setSelectedCollectionId(e.target.value)}
+                    className="w-full p-4 border border-gray-600 rounded-lg text-white"
+                    required
+                  >
+                    <option value="">Selecciona una colección...</option>
+                    {collectionNfts.map((collection) => (
+                      <option key={collection.id} value={collection.id}>
+                        {collection.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                    Descripción
+                  </label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Dedico este logro a..."
+                    className="w-full p-4 border border-gray-600 rounded-lg text-white resize-none"
+                    rows={4}
+                    maxLength={250}
+                  />
+                </div>
+
+                <button
+                  onClick={handleContinue}
+                  disabled={!selectedUnitId}
+                  className="w-full bg-[#1983DD] hover:bg-[#1A73E8] disabled:opacity-50 text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2"
+                >
+                  Continuar
+                  <ArrowRight size={20} />
+                </button>
+              </div>
+            )}
+
+            {currentStep === 2 && (
+              <div className="space-y-6">
+                <p className="text-white">
+                  Vas a crear un NFT de: {selectedUnit?.unitName}
+                </p>
+                {description && (
+                  <p className="text-gray-300">"{description}"</p>
+                )}
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleBack}
+                    className="flex items-center justify-center gap-2 flex-1 bg-gray-600 hover:bg-gray-700 text-white py-4 px-6 rounded-lg transition-colors"
+                  >
+                    <ArrowLeft size={20} /> Atrás
+                  </button>
+                  <button
+                    onClick={handleContinue}
+                    disabled={loading}
+                    className="cursor-pointer flex-1 bg-[#1983DD] hover:bg-[#1666B0] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="animate-spin" size={20} />{" "}
+                        Minting...
+                      </>
+                    ) : (
+                      <>
+                        Crear NFT <Zap size={20} />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 3 && mintedNFT && (
+              <div className="space-y-6">
+                <div className="overflow-hidden rounded-lg">
+                  <div className="relative h-48 flex items-center justify-center">
+                    {mintedNFT.metadata?.image ? (
+                      <img
+                        src={mintedNFT.metadata.image}
+                        alt={mintedNFT.metadata.name || "NFT Certificate"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Award className="h-16 w-16 text-white opacity-80" />
+                    )}
+                  </div>
+
+                  <div className="p-4">
+                    <div className="grid grid-cols-4">
+                      <div className="col-span-3 space-y-2">
+                        <h3 className="text-lg font-bold text-white">
+                          {mintedNFT.metadata?.name ||
+                            `Certificado #${mintedNFT.tokenId}`}
+                        </h3>
+                        {mintedNFT.metadata?.description && (
+                          <p className="text-gray-300 text-sm">
+                            {mintedNFT.metadata.description}
+                          </p>
+                        )}
+                        <div className="flex items-center text-sm text-gray-400">
+                          <Calendar className="h-4 w-4 mr-2" />
+                          {new Date(mintedNFT.mintedAt).toLocaleDateString(
+                            "es-ES"
+                          )}
+                        </div>
+                        <div className="flex space-x-2 pt-2">
+                          <Button asChild size="sm">
+                            <a
+                              href={`https://amoy.polygonscan.com/token/${mintedNFT.contractAddress}?a=${mintedNFT.tokenId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              Explorer
+                            </a>
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="col-span-1 flex justify-end items-end">
+                        <QRCodeSVG
+                          value={`https://amoy.polygonscan.com/token/${mintedNFT.contractAddress}?a=${mintedNFT.tokenId}`}
+                          size={80}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button className="w-full bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2">
+                  <Share2 size={20} /> Compartir
+                </button>
+                <div className="flex justify-center">
+                  <Link
+                    href={"/achievements"}
+                    onClick={() => setCurrentStep(1)}
+                    className="text-center cursor-pointer w-full text-[#708BB1] hover:text-[#8FA6C7] text-center py-2 transition-colors"
+                  >
+                    Volver a Mis Medallas
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+          {error && (
+            <div className="mt-4 p-4 bg-red-900 border border-red-600 text-red-300 rounded-lg">
+              {error}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
