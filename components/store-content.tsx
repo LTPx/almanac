@@ -244,10 +244,12 @@ export default function StoreContent({
               amount={1000}
               price="€4.99"
               icon={<Zap className="w-12 h-12 text-purple-500" />}
+              priceId="price_1SU91cRLp1UNwcaHjg3WnhKv"
             />
             <ZapCard
               amount={3000}
               price="€9.99"
+              priceId="price_1SU91cRLp1UNwcaHjg3WnhKv"
               icon={
                 <div className="flex">
                   <Zap className="w-10 h-10 text-purple-500 -mr-2" />
@@ -258,6 +260,7 @@ export default function StoreContent({
             <ZapCard
               amount={7500}
               price="€19.99"
+              priceId="price_1SU91cRLp1UNwcaHjg3WnhKv"
               icon={
                 <div className="grid grid-cols-2 gap-1">
                   <Zap className="w-8 h-8 text-purple-500" />
