@@ -255,10 +255,10 @@ export function TestQuestion({
                       <div className="flex items-start gap-2">
                         <CheckCircle className="w-5 h-5 text-[#32C781] mt-0.5 flex-shrink-0" />
                         <div>
-                          <p className="text-sm font-semibold text-[#32C781] mb-1">
-                            Respuesta correcta:
+                          <p className="text-medium text-white mb-1">
+                            Revisa la ortografía correcta
                           </p>
-                          <p className="text-white font-medium">
+                          <p className="text-white text-sm">
                             {getCorrectAnswer()}
                           </p>
                           {question.content.explanation && (
