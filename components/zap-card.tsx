@@ -8,19 +8,21 @@ interface ZapCardProps {
   price: string;
   icon: React.ReactNode;
   priceId: string;
+  userId: string;
 }
 
 export default function ZapCard({
   amount,
   price,
   icon,
-  priceId
+  priceId,
+  userId
 }: ZapCardProps) {
   async function handleClick() {
-    const res = await fetch("/api/payments/checkout", {
+    const res = await fetch("/api/payments/stripe/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ priceId })
+      body: JSON.stringify({ priceId, userId })
     });
 
     const data = await res.json();
