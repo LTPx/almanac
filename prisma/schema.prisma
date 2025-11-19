@@ -41,6 +41,14 @@ model User {
   heartTransactions    HeartTransaction[]
   zapTransactions      ZapTransaction[]
 
+  // Subscriptions
+  subscriptionStatus            SubscriptionStatus @default(FREE)
+  subscriptionCurrentPeriodEnd  DateTime?
+  subscriptionTrialEnd          DateTime?
+  subscriptionCancelAtPeriodEnd Boolean            @default(false)
+  subscription                  Subscription?
+  // ================================================================
+
   @@map("user")
 }
 
@@ -397,6 +405,73 @@ model NFTCollection {
   @@map("nft_collection")
 }
 
+model Subscription {
+  id       String          @id @default(cuid())
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String          @unique
+  platform PaymentPlatform
+
+  // Platform-specific IDs (solo uno será usado dependiendo de platform)
+  // STRIPE
+  stripeSubscriptionId String? @unique
+  stripeCustomerId     String?
+  stripePriceId        String?
+  stripeProductId      String?
+
+  // GOOGLE PLAY BILLING
+  googlePlaySubscriptionId String? @unique // purchaseToken de Google
+  googlePlayProductId      String? // SKU del producto
+  googlePlayOrderId        String? // orderId único de Google
+  googlePlayPackageName    String? // com.tuapp.nombre
+
+  // APPLE
+  appleTransactionId         String? @unique
+  appleOriginalTransactionId String?
+  appleProductId             String?
+
+  // Status (universal para todas las plataformas)
+  status SubscriptionStatus @default(TRIALING)
+
+  // Dates (universales)
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  trialStart         DateTime?
+  trialEnd           DateTime?
+  canceledAt         DateTime?
+  cancelAtPeriodEnd  Boolean   @default(false)
+  endedAt            DateTime?
+
+  // Metadata flexible (puede contener info específica de cada plataforma)
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([stripeSubscriptionId])
+  @@index([googlePlaySubscriptionId])
+  @@index([appleTransactionId])
+  @@index([platform, status])
+  @@map("subscription")
+}
+
+model PaymentTransaction {
+  id            String          @id @default(cuid())
+  userId        String
+  platform      PaymentPlatform
+  transactionId String // ID de la transacción en la plataforma
+  type          TransactionType
+  amount        Int? // En centavos (ej: 500 = $5.00)
+  currency      String? // USD, EUR, etc
+  status        String // succeeded, failed, pending, refunded
+  metadata      Json? // Info adicional específica de la plataforma
+  createdAt     DateTime        @default(now())
+
+  @@index([userId])
+  @@index([platform])
+  @@index([transactionId])
+  @@map("payment_transaction")
+}
+
 //ENUMS
 enum ZapTransactionType {
   UNIT_COMPLETED // Ganó ZAPs por completar unidad
@@ -446,4 +521,39 @@ enum DifficultyLevel {
   ADVANCED
 
   @@map("difficulty_level")
+}
+
+enum PaymentPlatform {
+  STRIPE
+  GOOGLE_PLAY
+  APPLE
+
+  @@map("payment_platform")
+}
+
+enum SubscriptionStatus {
+  FREE
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  INCOMPLETE // Incompleta (Stripe)
+  INCOMPLETE_EXPIRED // Incompleta y expirada (Stripe)
+  PAUSED
+  PENDING // Pendiente de confirmación (Google/Apple)
+  ON_HOLD // En espera (Google Play)
+  EXPIRED // Expirada
+
+  @@map("subscription_status")
+}
+
+enum TransactionType {
+  SUBSCRIPTION_START
+  SUBSCRIPTION_RENEWAL
+  SUBSCRIPTION_CANCEL
+  REFUND
+  TRIAL_CONVERSION
+
+  @@map("transaction_type")
 }
