@@ -6,7 +6,7 @@ import PremiumCard from "@/components/premium-card";
 import SpecialOfferCard from "@/components/offert-card";
 import ZapCard from "@/components/zap-card";
 import { useUser } from "@/context/UserContext";
-import type { UserStats, StoreContentProps } from "@/lib/types";
+import type { UserGamification, StoreContentProps } from "@/lib/types";
 
 export default function StoreContent({
   onBack,
@@ -18,7 +18,7 @@ export default function StoreContent({
   const user = useUser();
   const [zapTokens, setZapTokens] = useState<number | null>(null);
   const [hearts, setHearts] = useState<number | null>(null);
-  const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [userStats, setUserStats] = useState<UserGamification | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [heartQuantity, setHeartQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,12 +54,13 @@ export default function StoreContent({
 
   const loadUserStats = async () => {
     try {
-      const response = await fetch(`/api/hearts/purchase?userId=${userId}`);
+      // const response = await fetch(`/api/hearts/purchase?userId=${userId}`);
+      const response = await fetch(`/api/app/store?userId=${userId}`);
       if (response.ok) {
-        const data = await response.json();
-        setUserStats(data);
-        setZapTokens(data.currentZaps);
-        setHearts(data.currentHearts);
+        const { gamification } = await response.json();
+        setUserStats(gamification);
+        setZapTokens(gamification.currentZaps);
+        setHearts(gamification.currentHearts);
       }
     } catch (error) {
       console.error("Error cargando estadísticas:", error);

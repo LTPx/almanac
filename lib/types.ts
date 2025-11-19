@@ -156,7 +156,7 @@ export type Curriculum = {
   units: Unit[];
 };
 
-export interface UserStats {
+export interface UserGamification {
   currentZaps: number;
   currentHearts: number;
   exchangeRate: string;
