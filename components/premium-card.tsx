@@ -1,9 +1,43 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 
-export default function PremiumCard() {
+export default function PremiumCard({ userId }: { userId: string }) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubscribe = async () => {
+    try {
+      setIsLoading(true);
+
+      const response = await fetch("/api/payments/stripe/subscription", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          userId
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error al crear suscripción");
+      }
+
+      // Redirigir a Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error: any) {
+      console.error("Error:", error);
+      alert(error.message || "Ocurrió un error al procesar tu suscripción");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Card className="bg-gradient-to-b from-[#1881F0] to-[#1F960D] border-none text-white overflow-hidden relative">
       <CardContent className="p-6">
@@ -20,12 +54,26 @@ export default function PremiumCard() {
               Disfruta de vidas ilimitadas
               <br />y dile adiós a los anuncios
             </p>
-            <Button
-              className="bg-white text-gray-900 hover:bg-gray-100 font-semibold px-8 py-3 rounded-full"
-              size="lg"
-            >
-              PRUEBA 1 SEMANA GRATIS
-            </Button>
+            <div className="space-y-2">
+              <Button
+                onClick={handleSubscribe}
+                disabled={isLoading}
+                className="bg-white text-gray-900 hover:bg-gray-100 font-semibold px-8 py-3 rounded-full w-full sm:w-auto"
+                size="lg"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Procesando...
+                  </>
+                ) : (
+                  "PRUEBA 1 SEMANA GRATIS"
+                )}
+              </Button>
+              <p className="text-xs text-white/80 mt-2">
+                Luego $1/mes. Cancela cuando quieras.
+              </p>
+            </div>
           </div>
           <div className="bg-white/20 rounded-lg p-3 backdrop-blur-sm">
             <Plus className="w-8 h-8 text-white" />

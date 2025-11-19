@@ -224,7 +224,7 @@ export default function StoreContent({
       )}
 
       <div className="p-4 space-y-6">
-        <PremiumCard />
+        <PremiumCard userId={userId} />
 
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Ofertas especiales</h3>

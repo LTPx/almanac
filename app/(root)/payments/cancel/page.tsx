@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function CancelPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center p-6">
@@ -10,12 +12,12 @@ export default function CancelPage() {
         nuevamente cuando quieras.
       </p>
 
-      <a
+      <Link
         href="/"
         className="px-6 py-3 bg-purple-600 rounded-lg text-white hover:bg-purple-700 transition"
       >
         Volver al inicio
-      </a>
+      </Link>
     </div>
   );
 }
