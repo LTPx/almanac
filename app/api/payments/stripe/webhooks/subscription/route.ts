@@ -1,13 +1,12 @@
 import Stripe from "stripe";
-import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   typescript: true,
   apiVersion: "2025-10-29.clover"
 });
 
-const prisma = new PrismaClient();
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(req: Request) {
