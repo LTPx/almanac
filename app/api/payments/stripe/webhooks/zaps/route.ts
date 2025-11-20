@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import prisma from "@/lib/prisma";
+import stripe from "@/lib/stripe";
 
 export const config = {
   api: {
@@ -22,10 +23,6 @@ async function buffer(readable: ReadableStream<Uint8Array>) {
 
   return Buffer.concat(chunks);
 }
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-10-29.clover"
-});
 
 const TOKENS_BY_PRICE_ID: Record<string, number> = {
   zaps_1000: 1000,

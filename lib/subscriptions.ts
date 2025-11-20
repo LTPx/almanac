@@ -1,11 +1,6 @@
 import { SubscriptionStatus, PaymentPlatform } from "@prisma/client";
-import Stripe from "stripe";
 import prisma from "@/lib/prisma";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  typescript: true,
-  apiVersion: "2025-10-29.clover"
-});
+import stripe from "@/lib/stripe";
 
 export interface SubscriptionCheck {
   isActive: boolean;
