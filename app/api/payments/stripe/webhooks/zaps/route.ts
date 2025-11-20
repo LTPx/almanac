@@ -9,21 +9,6 @@ export const config = {
   }
 };
 
-// Helper para el raw body
-async function buffer(readable: ReadableStream<Uint8Array>) {
-  const reader = readable.getReader();
-  const chunks: Buffer[] = [];
-
-  let done = false;
-  while (!done) {
-    const { value, done: doneReading } = await reader.read();
-    if (value) chunks.push(Buffer.from(value));
-    done = doneReading;
-  }
-
-  return Buffer.concat(chunks);
-}
-
 const TOKENS_BY_PRICE_ID: Record<string, number> = {
   zaps_1000: 1000,
   zaps_3000: 3000,
@@ -31,14 +16,14 @@ const TOKENS_BY_PRICE_ID: Record<string, number> = {
 };
 
 export async function POST(req: Request) {
-  const rawBody = await buffer(req.body!);
+  const body = await req.text();
   const signature = req.headers.get("stripe-signature")!;
   const webhookSecret = process.env.STRIPE_ZAPS_WEBHOOK_SECRET!;
 
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: any) {
     console.error("❌ Error verificando firma de Stripe:", err.message);
     return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
