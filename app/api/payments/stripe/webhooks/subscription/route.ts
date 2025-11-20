@@ -1,5 +1,5 @@
-import Stripe from "stripe";
 import { NextResponse } from "next/server";
+import Stripe from "stripe";
 import prisma from "@/lib/prisma";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -7,7 +7,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-10-29.clover"
 });
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const webhookSecret = process.env.STRIPE_SUBSCRIPTION_WEBHOOK_SECRET!;
 
 export async function POST(req: Request) {
   try {
@@ -94,6 +94,10 @@ export async function POST(req: Request) {
 
         const mappedStatus = statusMap[subscription.status] || "FREE";
 
+        console.log("🔍 Iniciando upsert de suscripción...");
+        console.log("🔍 userId:", finalUser.id);
+        console.log("🔍 subscriptionId:", subscription.id);
+
         // ⭐ IMPORTANTE: En API 2025-03-31+, current_period está en items, no en subscription
         const subscriptionItem = subscription.items.data[0];
         const currentPeriodStart = subscriptionItem.current_period_start
@@ -102,6 +106,9 @@ export async function POST(req: Request) {
         const currentPeriodEnd = subscriptionItem.current_period_end
           ? new Date(subscriptionItem.current_period_end * 1000)
           : new Date();
+
+        console.log("🔍 currentPeriodStart:", currentPeriodStart);
+        console.log("🔍 currentPeriodEnd:", currentPeriodEnd);
 
         // Actualizar o crear suscripción CON PLATFORM
         await prisma.subscription.upsert({
@@ -356,7 +363,5 @@ export async function POST(req: Request) {
       { error: "Webhook handler failed" },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
