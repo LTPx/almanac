@@ -53,7 +53,7 @@ export default function PremiumCard({
   const handleCancelSubscription = async () => {
     if (
       !confirm(
-        "¿Estás seguro que deseas cancelar tu suscripción al final del período actual?"
+        "¿Estás seguro que deseas cancelar tu suscripción? Mantendrás el acceso hasta el final del período actual."
       )
     ) {
       return;
@@ -61,11 +61,61 @@ export default function PremiumCard({
 
     try {
       setIsLoading(true);
-      // TODO: Implementar endpoint de cancelación
-      alert("Funcionalidad de cancelación próximamente");
+
+      const response = await fetch("/api/payments/stripe/subscription/cancel", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ userId })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error al cancelar suscripción");
+      }
+
+      // Actualizar estado local
+      // await fetchSubscriptionStatus();
+
+      alert(data.message || "Suscripción cancelada exitosamente");
     } catch (error: any) {
       console.error("Error:", error);
-      alert("Error al cancelar suscripción");
+      alert(error.message || "Error al cancelar suscripción");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleReactivateSubscription = async () => {
+    try {
+      setIsLoading(true);
+
+      const response = await fetch(
+        "/api/payments/stripe/subscription/reactivate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ userId })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error al reactivar suscripción");
+      }
+
+      // Actualizar estado local
+      // await fetchSubscriptionStatus();
+
+      alert(data.message || "Suscripción reactivada exitosamente");
+    } catch (error: any) {
+      console.error("Error:", error);
+      alert(error.message || "Error al reactivar suscripción");
     } finally {
       setIsLoading(false);
     }
@@ -177,17 +227,41 @@ export default function PremiumCard({
             </div>
           )}
 
-          {/* Botón de gestión */}
-          {!subscription.willCancelAtPeriodEnd && (
-            <Button
-              onClick={handleCancelSubscription}
-              disabled={isLoading}
-              variant="outline"
-              className="w-full bg-white/10 hover:bg-white/20 text-white border-white/20"
-            >
-              Gestionar suscripción
-            </Button>
-          )}
+          {/* Botones de gestión */}
+          <div className="space-y-2">
+            {!subscription.willCancelAtPeriodEnd ? (
+              <Button
+                onClick={handleCancelSubscription}
+                disabled={isLoading}
+                variant="outline"
+                className="w-full bg-white/10 hover:bg-white/20 text-white border-white/20"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Procesando...
+                  </>
+                ) : (
+                  "Cancelar suscripción"
+                )}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleReactivateSubscription}
+                disabled={isLoading}
+                className="w-full bg-white text-cyan-700 hover:bg-white/90 font-semibold"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Procesando...
+                  </>
+                ) : (
+                  "Reactivar suscripción"
+                )}
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
     );
