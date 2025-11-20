@@ -6,7 +6,11 @@ import PremiumCard from "@/components/premium-card";
 import SpecialOfferCard from "@/components/offert-card";
 import ZapCard from "@/components/zap-card";
 import { useUser } from "@/context/UserContext";
-import type { UserGamification, StoreContentProps } from "@/lib/types";
+import type {
+  UserGamification,
+  StoreContentProps,
+  SubscriptionData
+} from "@/lib/types";
 
 export default function StoreContent({
   onBack,
@@ -26,6 +30,7 @@ export default function StoreContent({
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionData | null>();
 
   const userId = user?.id || "";
 
@@ -57,10 +62,11 @@ export default function StoreContent({
       // const response = await fetch(`/api/hearts/purchase?userId=${userId}`);
       const response = await fetch(`/api/app/store?userId=${userId}`);
       if (response.ok) {
-        const { gamification } = await response.json();
+        const { gamification, subscription } = await response.json();
         setUserStats(gamification);
         setZapTokens(gamification.currentZaps);
         setHearts(gamification.currentHearts);
+        setSubscription(subscription);
       }
     } catch (error) {
       console.error("Error cargando estadísticas:", error);
@@ -225,8 +231,7 @@ export default function StoreContent({
       )}
 
       <div className="p-4 space-y-6">
-        <PremiumCard userId={userId} />
-
+        <PremiumCard userId={userId} subscription={subscription} />
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Ofertas especiales</h3>
           <SpecialOfferCard

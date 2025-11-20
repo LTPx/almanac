@@ -192,3 +192,27 @@ export interface ContentsResponse {
   units: Unit[];
   stats: { totalAnswerErrors: number };
 }
+
+export interface SubscriptionData {
+  subscriptionStatus: string;
+  subscriptionCurrentPeriodEnd: string;
+  subscriptionTrialEnd: string | null;
+  subscriptionCancelAtPeriodEnd: boolean;
+  subscription: {
+    platform: string;
+    status: string;
+    currentPeriodStart: string;
+    currentPeriodEnd: string;
+    trialStart: string | null;
+    trialEnd: string | null;
+    cancelAtPeriodEnd: boolean;
+    stripeSubscriptionId: string;
+  } | null;
+  isActive: boolean;
+  isPremium: boolean;
+  isTrialing: boolean;
+  status: string;
+  platform?: string;
+  daysLeft?: number;
+  willCancelAtPeriodEnd: boolean;
+}
