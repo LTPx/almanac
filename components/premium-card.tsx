@@ -74,7 +74,7 @@ export default function PremiumCard({
   // Si tiene suscripción premium (activa o en trial)
   if (subscription?.isPremium) {
     return (
-      <Card className="bg-gradient-to-br from-green-600 via-emerald-600 to-green-700 border-none text-white overflow-hidden relative">
+      <Card className="bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-700 border-none text-white overflow-hidden relative">
         {/* Efecto de brillo */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
 
@@ -82,7 +82,11 @@ export default function PremiumCard({
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="bg-white/20 rounded-full p-2 backdrop-blur-sm">
-                <Crown className="w-6 h-6 text-white" />
+                <Crown
+                  className="w-6 h-6 text-white"
+                  color="#fbbf24"
+                  fill="#fbbf24"
+                />
               </div>
               <div>
                 <h3 className="text-xl font-bold flex items-center gap-2">
