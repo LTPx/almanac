@@ -163,7 +163,7 @@ export function StepPopover({
           whileTap={{ scale: 0.9 }}
         >
           <BookOpen
-            className={`w-6 h-6 ${getIconColor()} group-hover:opacity-100 transition-opacity drop-shadow-sm`}
+            className={`w-9 h-9 ${getIconColor()} group-hover:opacity-100 transition-opacity drop-shadow-sm`}
           />
         </motion.button>
         <div className="pr-10">

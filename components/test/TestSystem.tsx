@@ -395,20 +395,24 @@ export function TestSystem({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="flex-1 flex items-center justify-center px-6"
+            className="flex-1 flex flex-col px-6"
           >
-            <div className="text-center max-w-md w-full">
-              <h1 className="text-3xl font-bold text-[#EFFF0A] mb-3">
-                ¡Bien hecho!
-              </h1>
-              <p className="text-lg white mb-6">
-                Ahora vamos a repasar los errores
-              </p>
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center max-w-md w-full">
+                <h1 className="text-3xl font-bold text-[#EFFF0A] mb-3">
+                  Bien Hecho!
+                </h1>
+                <p className="text-lg white">
+                  Qué tal si damos otra mirada <br /> a los errores?
+                </p>
+              </div>
+            </div>
+            <div className="pb-10 max-w-md w-full mx-auto">
               <button
                 onClick={handleStartReview}
                 className="w-full py-3 bg-[#1983DD] hover:bg-[#1666B0] text-white font-semibold rounded-lg transition-colors"
               >
-                Comenzar repaso
+                Revisar Errores
               </button>
             </div>
           </motion.div>
