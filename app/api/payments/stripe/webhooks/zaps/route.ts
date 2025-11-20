@@ -52,7 +52,14 @@ export async function POST(req: Request) {
   // -----------------------------
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    console.log("session:", session);
+
+    if (session.mode !== "payment") {
+      console.log(
+        "⏭️ Ignorar checkout.session.completed (no es compra de zaps)"
+      );
+      return NextResponse.json({ received: true });
+    }
+
     const customerEmail = session.customer_details?.email;
     const priceId = session.metadata?.packageId;
     //@ts-expect-error stripe error

@@ -30,6 +30,14 @@ export async function POST(req: Request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
+
+        if (session.mode !== "subscription") {
+          console.log(
+            "⏭️ Ignorar checkout.session.completed (no es suscripción)"
+          );
+          break;
+        }
+
         console.log("Checkout completado:", session.id);
 
         const userId = session.metadata?.userId;
@@ -38,7 +46,6 @@ export async function POST(req: Request) {
           break;
         }
 
-        // Actualizar usuario con Stripe Customer ID
         await prisma.user.update({
           where: { id: userId },
           data: {
