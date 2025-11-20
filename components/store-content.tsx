@@ -6,7 +6,11 @@ import PremiumCard from "@/components/premium-card";
 import SpecialOfferCard from "@/components/offert-card";
 import ZapCard from "@/components/zap-card";
 import { useUser } from "@/context/UserContext";
-import type { UserStats, StoreContentProps } from "@/lib/types";
+import type {
+  UserGamification,
+  StoreContentProps,
+  SubscriptionData
+} from "@/lib/types";
 
 export default function StoreContent({
   onBack,
@@ -18,7 +22,7 @@ export default function StoreContent({
   const user = useUser();
   const [zapTokens, setZapTokens] = useState<number | null>(null);
   const [hearts, setHearts] = useState<number | null>(null);
-  const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [userStats, setUserStats] = useState<UserGamification | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [heartQuantity, setHeartQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,6 +30,7 @@ export default function StoreContent({
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionData | null>();
 
   const userId = user?.id || "";
 
@@ -54,12 +59,14 @@ export default function StoreContent({
 
   const loadUserStats = async () => {
     try {
-      const response = await fetch(`/api/hearts/purchase?userId=${userId}`);
+      // const response = await fetch(`/api/hearts/purchase?userId=${userId}`);
+      const response = await fetch(`/api/app/store?userId=${userId}`);
       if (response.ok) {
-        const data = await response.json();
-        setUserStats(data);
-        setZapTokens(data.currentZaps);
-        setHearts(data.currentHearts);
+        const { gamification, subscription } = await response.json();
+        setUserStats(gamification);
+        setZapTokens(gamification.currentZaps);
+        setHearts(gamification.currentHearts);
+        setSubscription(subscription);
       }
     } catch (error) {
       console.error("Error cargando estadísticas:", error);
@@ -224,126 +231,137 @@ export default function StoreContent({
       )}
 
       <div className="p-4 space-y-6">
-        <PremiumCard />
-
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Ofertas especiales</h3>
-          <SpecialOfferCard
-            userId={userId}
-            onZapsUpdate={(newZaps) => {
-              setZapTokens(newZaps);
-              loadUserStats();
-            }}
-          />
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Zaps</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <ZapCard
-              amount={1000}
-              price="€4.99"
-              icon={<Zap className="w-12 h-12 text-purple-500" />}
-            />
-            <ZapCard
-              amount={3000}
-              price="€9.99"
-              icon={
-                <div className="flex">
-                  <Zap className="w-10 h-10 text-purple-500 -mr-2" />
-                  <Zap className="w-10 h-10 text-purple-500" />
-                </div>
-              }
-            />
-            <ZapCard
-              amount={7500}
-              price="€19.99"
-              icon={
-                <div className="grid grid-cols-2 gap-1">
-                  <Zap className="w-8 h-8 text-purple-500" />
-                  <Zap className="w-8 h-8 text-purple-500" />
-                  <Zap className="w-8 h-8 text-purple-500" />
-                  <Zap className="w-8 h-8 text-purple-500" />
-                </div>
-              }
-            />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Vidas</h3>
-          <div className="bg-background rounded-2xl p-6 border border-gray-700">
-            <div className="flex items-start gap-4">
-              <div className="bg-red-500/20 p-3 rounded-xl">
-                <Heart className="w-8 h-8 text-red-500 fill-red-500" />
-              </div>
-              <div className="flex-1">
-                <h4 className="text-lg font-semibold mb-2">Set de vidas</h4>
-                <p className="text-gray-400 text-sm mb-4">
-                  Recarga tus vidas para tener más oportunidades de continuar en
-                  tus pruebas.
-                </p>
-                <div className="flex items-center gap-3 mb-4">
-                  <button
-                    onClick={handleDecrement}
-                    disabled={heartQuantity <= 1 || isPurchasing}
-                    className="w-8 h-8 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-
-                  <div className="flex items-center gap-2 text-purple-500 font-semibold">
-                    <span>
-                      {totalZapCost} Zaps × {heartQuantity}
-                    </span>
-                    <Heart className="w-5 h-5 text-red-500 fill-red-500" />
-                  </div>
-
-                  <button
-                    onClick={handleIncrement}
-                    disabled={
-                      !userStats ||
-                      heartQuantity >= userStats.canPurchase ||
-                      isPurchasing
-                    }
-                    className="w-8 h-8 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-
-                  <button
-                    onClick={purchaseHearts}
-                    disabled={
-                      isPurchasing || !userStats || userStats.canPurchase < 1
-                    }
-                    className={`ml-auto px-6 py-2 rounded-lg font-semibold transition-all ${
-                      isPurchasing || !userStats || userStats.canPurchase < 1
-                        ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                        : "bg-purple-600 hover:bg-purple-700 text-white"
-                    }`}
-                  >
-                    {isPurchasing ? (
-                      <span className="flex items-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Recargando...
-                      </span>
-                    ) : (
-                      "Recargar"
-                    )}
-                  </button>
-                </div>
-                {userStats && (
-                  <div className="mb-4 text-sm text-gray-400">
-                    <p>
-                      Tienes: {hearts ?? 0}/{userStats.maxHearts} vidas
-                    </p>
-                    <p>Puedes comprar: {userStats.canPurchase} vida(s)</p>
-                  </div>
-                )}
+        <PremiumCard userId={userId} subscription={subscription} />
+        {!subscription?.isPremium && (
+          <>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Ofertas especiales</h3>
+              <SpecialOfferCard
+                userId={userId}
+                onZapsUpdate={(newZaps) => {
+                  setZapTokens(newZaps);
+                  loadUserStats();
+                }}
+              />
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Zaps</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <ZapCard
+                  amount={1000}
+                  price="€4.99"
+                  icon={<Zap className="w-12 h-12 text-purple-500" />}
+                  priceId="price_1SU91cRLp1UNwcaHjg3WnhKv"
+                  userId={userId}
+                />
+                <ZapCard
+                  amount={3000}
+                  price="€9.99"
+                  priceId="price_1SUFJWRLp1UNwcaHoFumkLr0"
+                  userId={userId}
+                  icon={
+                    <div className="flex">
+                      <Zap className="w-10 h-10 text-purple-500 -mr-2" />
+                      <Zap className="w-10 h-10 text-purple-500" />
+                    </div>
+                  }
+                />
+                <ZapCard
+                  amount={7500}
+                  price="€19.99"
+                  priceId="price_1SU91cRLp1UNwcaHjg3WnhKv"
+                  userId={userId}
+                  icon={
+                    <div className="grid grid-cols-2 gap-1">
+                      <Zap className="w-8 h-8 text-purple-500" />
+                      <Zap className="w-8 h-8 text-purple-500" />
+                      <Zap className="w-8 h-8 text-purple-500" />
+                      <Zap className="w-8 h-8 text-purple-500" />
+                    </div>
+                  }
+                />
               </div>
             </div>
-          </div>
-        </div>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Vidas</h3>
+              <div className="bg-background rounded-2xl p-6 border border-gray-700">
+                <div className="flex items-start gap-4">
+                  <div className="bg-red-500/20 p-3 rounded-xl">
+                    <Heart className="w-8 h-8 text-red-500 fill-red-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-lg font-semibold mb-2">Set de vidas</h4>
+                    <p className="text-gray-400 text-sm mb-4">
+                      Recarga tus vidas para tener más oportunidades de
+                      continuar en tus pruebas.
+                    </p>
+                    <div className="flex items-center gap-3 mb-4">
+                      <button
+                        onClick={handleDecrement}
+                        disabled={heartQuantity <= 1 || isPurchasing}
+                        className="w-8 h-8 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                      >
+                        <Minus className="w-4 h-4" />
+                      </button>
+
+                      <div className="flex items-center gap-2 text-purple-500 font-semibold">
+                        <span>
+                          {totalZapCost} Zaps × {heartQuantity}
+                        </span>
+                        <Heart className="w-5 h-5 text-red-500 fill-red-500" />
+                      </div>
+
+                      <button
+                        onClick={handleIncrement}
+                        disabled={
+                          !userStats ||
+                          heartQuantity >= userStats.canPurchase ||
+                          isPurchasing
+                        }
+                        className="w-8 h-8 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        onClick={purchaseHearts}
+                        disabled={
+                          isPurchasing ||
+                          !userStats ||
+                          userStats.canPurchase < 1
+                        }
+                        className={`ml-auto px-6 py-2 rounded-lg font-semibold transition-all ${
+                          isPurchasing ||
+                          !userStats ||
+                          userStats.canPurchase < 1
+                            ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                            : "bg-purple-600 hover:bg-purple-700 text-white"
+                        }`}
+                      >
+                        {isPurchasing ? (
+                          <span className="flex items-center gap-2">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Recargando...
+                          </span>
+                        ) : (
+                          "Recargar"
+                        )}
+                      </button>
+                    </div>
+                    {userStats && (
+                      <div className="mb-4 text-sm text-gray-400">
+                        <p>
+                          Tienes: {hearts ?? 0}/{userStats.maxHearts} vidas
+                        </p>
+                        <p>Puedes comprar: {userStats.canPurchase} vida(s)</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
