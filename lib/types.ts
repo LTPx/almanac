@@ -6,6 +6,7 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
   image?: string | null | undefined;
+  isPremium?: boolean;
 }
 
 export interface Question {

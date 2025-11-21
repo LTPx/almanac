@@ -20,9 +20,13 @@ export default async function HomeLayout({
   }
 
   const user = session.user;
+  const status = user.subscriptionStatus;
+  const isTrialing = status === "TRIALING";
+  const isActive = status === "ACTIVE";
+  const isPremium = isTrialing || isActive;
 
   return (
-    <UserProvider user={user}>
+    <UserProvider user={{ ...user, isPremium }}>
       <div className="relative">
         <Navbar />
         <main>{children}</main>
