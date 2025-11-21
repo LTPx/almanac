@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-// import Script from "next/script";
 import AdBanner from "./adBanner";
 
 export default function InterstitialAd({
@@ -52,27 +51,6 @@ export default function InterstitialAd({
               dataAdFormat={"auto"}
               dataFullWidthResponsive={true}
             />
-            {/* Carga del script principal */}
-            {/* <Script
-              id="adsense-loader"
-              async
-              strategy="afterInteractive"
-              src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1890321786950620"
-              crossOrigin="anonymous"
-              onError={() => setIsAdBlocked(true)}
-            /> */}
-            {/* Bloque del anuncio */}
-            {/* <ins
-              className="adsbygoogle"
-              style={{ display: "block" }}
-              data-ad-client="ca-pub-1890321786950620"
-              data-ad-slot="3213001635"
-              data-ad-format="auto"
-              data-full-width-responsive="true"
-            />
-            <Script id="adsbygoogle-init" strategy="afterInteractive">
-              {`(adsbygoogle = window.adsbygoogle || []).push({});`}
-            </Script> */}
           </>
         ) : (
           <div className="p-4">
