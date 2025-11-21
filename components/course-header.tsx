@@ -21,6 +21,7 @@ interface CourseHeaderProps {
   zaps?: number;
   lives?: number;
   className?: string;
+  isPremium?: boolean;
 }
 
 const CourseHeader: React.FC<CourseHeaderProps> = ({
@@ -29,7 +30,8 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
   onUnitChange,
   zaps = 0,
   lives = 0,
-  className = ""
+  className = "",
+  isPremium = false
 }) => {
   const selectedCurriculum = curriculums.find(
     (u) => u.id.toString() === selectedCurriculumId
@@ -104,16 +106,22 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
                 >
                   <Zap className="w-5 h-5 text-purple-500 fill-current" />
                 </motion.div>
-                <motion.span
-                  key={`zap-value-${zaps}`}
-                  initial={{ y: -10, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: 10, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="text-sm font-medium text-purple-600"
-                >
-                  {zaps}
-                </motion.span>
+                {isPremium ? (
+                  <p className="text-purple-800 text-sm font-medium">
+                    Unlimited
+                  </p>
+                ) : (
+                  <motion.span
+                    key={`zap-value-${zaps}`}
+                    initial={{ y: -10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 10, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-sm font-medium text-purple-600"
+                  >
+                    {zaps}
+                  </motion.span>
+                )}
               </Link>
             </motion.div>
           </AnimatePresence>
@@ -155,18 +163,22 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
                   }`}
                 />
               </motion.div>
-              <motion.span
-                key={`lives-value-${lives}`}
-                initial={{ y: -10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 10, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className={`text-sm font-medium ${
-                  lives <= 2 ? "text-red-700 font-bold" : "text-red-600"
-                }`}
-              >
-                {lives}
-              </motion.span>
+              {isPremium ? (
+                <p className="text-red-800 text-sm font-medium">Unlimited</p>
+              ) : (
+                <motion.span
+                  key={`lives-value-${lives}`}
+                  initial={{ y: -10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 10, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className={`text-sm font-medium ${
+                    lives <= 2 ? "text-red-700 font-bold" : "text-red-600"
+                  }`}
+                >
+                  {lives}
+                </motion.span>
+              )}
             </motion.div>
           </AnimatePresence>
         </div>

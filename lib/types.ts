@@ -216,3 +216,16 @@ export interface SubscriptionData {
   daysLeft?: number;
   willCancelAtPeriodEnd: boolean;
 }
+
+export interface HomeAppResponse {
+  isPremium: boolean;
+  gamification: {
+    hearts: number;
+    maxHearts: number;
+    zapTokens: number;
+    totalCurriculumsCompleted: number;
+    unitTokens: any[];
+    needsHeartReset: boolean;
+    canPurchaseHeart: boolean;
+  };
+}

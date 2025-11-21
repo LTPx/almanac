@@ -45,7 +45,7 @@ export async function checkUserSubscription(
     daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   }
 
-  return {
+  const data = {
     isActive,
     isPremium,
     isTrialing,
@@ -54,6 +54,8 @@ export async function checkUserSubscription(
     daysLeft,
     willCancelAtPeriodEnd
   };
+
+  return data;
 }
 
 /**
@@ -244,9 +246,6 @@ export async function checkPremiumFeature(
   // feature: "unlimited_hearts" | "no_ads" | "advanced_content" | "priority_support"
 ): Promise<boolean> {
   const check = await checkUserSubscription(userId);
-
-  // Todos los usuarios premium tienen acceso a todas las funciones
-  // Puedes personalizar esto si quieres diferentes tiers
   return check.isPremium;
 }
 
