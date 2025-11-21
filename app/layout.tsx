@@ -4,7 +4,6 @@ import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "@/components/ui/sonner";
 import ClientWrapper from "@/components/client-wrapper";
-import AdSense from "@/components/adSense";
 
 const notoSansKR = Noto_Sans_KR({
   weight: ["300", "400", "500", "700"],
@@ -32,7 +31,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={notoSansKR.variable} suppressHydrationWarning>
       <head>
-        <AdSense pId="1890321786950620" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1890321786950620"
+          crossOrigin="anonymous"
+        />
       </head>
       <body className="antialiased" suppressHydrationWarning>
         <NextTopLoader showSpinner={false} height={6} color="#000000" />
