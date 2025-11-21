@@ -63,14 +63,14 @@ export default function SignInSection() {
           <p className="pt-3 text-sm text-muted-foreground">
             By continue, you agree to our{" "}
             <Link
-              href="#"
+              href="terms"
               className="underline underline-offset-4 hover:text-primary"
             >
               Terms of Service
             </Link>{" "}
             and{" "}
             <Link
-              href="#"
+              href="privacy-policy"
               className="underline underline-offset-4 hover:text-primary"
             >
               Privacy Policy
