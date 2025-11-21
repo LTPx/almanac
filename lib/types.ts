@@ -6,6 +6,7 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
   image?: string | null | undefined;
+  isPremium?: boolean;
 }
 
 export interface Question {
@@ -215,4 +216,17 @@ export interface SubscriptionData {
   platform?: string;
   daysLeft?: number;
   willCancelAtPeriodEnd: boolean;
+}
+
+export interface HomeAppResponse {
+  isPremium: boolean;
+  gamification: {
+    hearts: number;
+    maxHearts: number;
+    zapTokens: number;
+    totalCurriculumsCompleted: number;
+    unitTokens: any[];
+    needsHeartReset: boolean;
+    canPurchaseHeart: boolean;
+  };
 }

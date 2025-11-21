@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
+import stripe from "@/lib/stripe";
 
 export const config = {
   api: {
@@ -10,40 +9,21 @@ export const config = {
   }
 };
 
-// Helper para el raw body
-async function buffer(readable: ReadableStream<Uint8Array>) {
-  const reader = readable.getReader();
-  const chunks: Buffer[] = [];
-
-  let done = false;
-  while (!done) {
-    const { value, done: doneReading } = await reader.read();
-    if (value) chunks.push(Buffer.from(value));
-    done = doneReading;
-  }
-
-  return Buffer.concat(chunks);
-}
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-10-29.clover"
-});
-
 const TOKENS_BY_PRICE_ID: Record<string, number> = {
-  price_1000_tokens: 1000,
-  price_3000_tokens: 3000,
-  price_7500_tokens: 7500
+  zaps_1000: 1000,
+  zaps_3000: 3000,
+  zaps_7500: 7500
 };
 
 export async function POST(req: Request) {
-  const rawBody = await buffer(req.body!);
+  const body = await req.text();
   const signature = req.headers.get("stripe-signature")!;
-  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+  const webhookSecret = process.env.STRIPE_ZAPS_WEBHOOK_SECRET!;
 
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(rawBody, signature, endpointSecret);
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: any) {
     console.error("❌ Error verificando firma de Stripe:", err.message);
     return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
@@ -55,8 +35,15 @@ export async function POST(req: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
+    if (session.mode !== "payment") {
+      console.log(
+        "⏭️ Ignorar checkout.session.completed (no es compra de zaps)"
+      );
+      return NextResponse.json({ received: true });
+    }
+
     const customerEmail = session.customer_details?.email;
-    const priceId = session.metadata?.priceId; // Ideal si lo envías desde tu checkout
+    const priceId = session.metadata?.packageId;
     //@ts-expect-error stripe error
     const effectivePriceId = priceId || session?.line_items?.[0]?.price?.id;
 

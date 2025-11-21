@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import prisma from "@/lib/prisma";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  typescript: true,
-  apiVersion: "2025-10-29.clover"
-});
+import stripe from "@/lib/stripe";
 
 const webhookSecret = process.env.STRIPE_SUBSCRIPTION_WEBHOOK_SECRET!;
 
@@ -30,6 +26,14 @@ export async function POST(req: Request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
+
+        if (session.mode !== "subscription") {
+          console.log(
+            "⏭️ Ignorar checkout.session.completed (no es suscripción)"
+          );
+          break;
+        }
+
         console.log("Checkout completado:", session.id);
 
         const userId = session.metadata?.userId;
@@ -38,7 +42,6 @@ export async function POST(req: Request) {
           break;
         }
 
-        // Actualizar usuario con Stripe Customer ID
         await prisma.user.update({
           where: { id: userId },
           data: {

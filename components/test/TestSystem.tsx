@@ -16,6 +16,7 @@ import type {
 import StoreContent from "../store-content";
 import { ReportErrorModal } from "../modals/report-erros-modal";
 import InterstitialAd from "../interstitialAd";
+import { useUser } from "@/context/UserContext";
 
 interface TestSystemProps {
   userId: string;
@@ -52,7 +53,11 @@ export function TestSystem({
   const [firstPassQuestionCount, setFirstPassQuestionCount] = useState(0);
   const [failedQuestions, setFailedQuestions] = useState<number[]>([]);
   // const [showAdBeforeResults, setShowAdBeforeResults] = useState(false);
-  const [showAdBeforeStart, setShowAdBeforeStart] = useState(true);
+
+  const user = useUser();
+  const isPremium = user?.isPremium || false;
+  const showAd = isPremium ? false : true;
+  const [showAdBeforeStart, setShowAdBeforeStart] = useState(showAd);
 
   const [uniqueFailedQuestions, setUniqueFailedQuestions] = useState<
     Set<number>
@@ -481,7 +486,7 @@ export function TestSystem({
       )}
 
       {showAdBeforeStart && (
-        <InterstitialAd onClose={() => setShowAdBeforeStart(false)} />
+        <InterstitialAd onClose={() => setShowAdBeforeStart(false)} time={10} />
       )}
 
       <NoHeartsTestModal />

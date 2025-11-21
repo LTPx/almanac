@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Zap, Play, Loader2, X } from "lucide-react";
+import { Zap, Play, Loader2 } from "lucide-react";
+import AdScreen from "./ui/ad";
 
 interface AdInfo {
   currentZaps: number;
@@ -257,59 +258,11 @@ export default function SpecialOfferCard({
       {/* Modal de Anuncio */}
       {showAdModal && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border border-gray-700">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-white">
-                Viendo anuncio...
-              </h3>
-              {adProgress >= 100 && (
-                <button
-                  onClick={closeAdModal}
-                  className="text-gray-400 hover:text-white"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              )}
-            </div>
-
-            {/* Simulación del anuncio */}
-            <div className="bg-gray-800 rounded-lg p-8 mb-4 flex items-center justify-center min-h-[200px]">
-              {adProgress < 100 ? (
-                <div className="text-center">
-                  <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                  <p className="text-gray-400">
-                    Espera {Math.ceil((100 - adProgress) / 20)} segundos...
-                  </p>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Zap className="w-8 h-8 text-white fill-white" />
-                  </div>
-                  {message?.type === "success" && (
-                    <p className="text-green-400 font-semibold">
-                      {message.text}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Barra de progreso */}
-            <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-              <div
-                className="bg-purple-500 h-full transition-all duration-1000"
-                style={{ width: `${adProgress}%` }}
-              ></div>
-            </div>
-
-            <p className="text-center text-sm text-gray-400 mt-2">
-              {adProgress < 100
-                ? `${Math.round(adProgress)}% completado`
-                : "¡Anuncio completado!"}
-            </p>
-          </div>
+          <AdScreen
+            show={showAdModal}
+            progress={adProgress}
+            onClose={closeAdModal}
+          />
         </div>
       )}
     </>

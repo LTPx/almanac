@@ -1,13 +1,8 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
 import prisma from "@/lib/prisma";
+import stripe from "@/lib/stripe";
 
 const SUBSCRIPTION_ID = process.env.STRIPE_PRICE_ID_SUBSCRIPTION!;
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  typescript: true,
-  apiVersion: "2025-10-29.clover"
-});
 
 export async function POST(req: Request) {
   try {

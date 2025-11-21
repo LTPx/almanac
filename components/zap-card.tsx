@@ -22,7 +22,11 @@ export default function ZapCard({
     const res = await fetch("/api/payments/stripe/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ priceId, userId })
+      body: JSON.stringify({
+        priceId,
+        userId,
+        packageId: "zaps_".concat(`${amount}`)
+      })
     });
 
     const data = await res.json();

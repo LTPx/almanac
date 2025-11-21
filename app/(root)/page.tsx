@@ -4,11 +4,11 @@ import { useEffect, useState, useCallback } from "react";
 import { useUser } from "@/context/UserContext";
 import { Curriculum } from "@/lib/types";
 import CourseHeader from "@/components/course-header";
-import { useGamification } from "@/hooks/useGamification";
 import { useCurriculums } from "@/hooks/use-curriculums";
 import LearningPath from "@/components/units-learning";
 import { useCurriculumStore } from "@/store/useCurriculumStore";
 import { Loader2, BookOpen } from "lucide-react";
+import { useHome } from "@/hooks/useHome";
 
 const ContentLoadingScreen = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -36,11 +36,13 @@ export default function HomePage() {
   const userId = user?.id || "";
   const { isLoading, error, fetchCurriculums, fetchCurriculumWithUnits } =
     useCurriculums();
+
   const {
     gamification,
+    isPremium,
     isLoading: isLoadingGamification,
     refetch: refetchGamification
-  } = useGamification(userId);
+  } = useHome(userId);
 
   useEffect(() => {
     const loadUnits = async () => {
@@ -107,6 +109,7 @@ export default function HomePage() {
         onUnitChange={handleCurriculumChange}
         lives={gamification?.hearts ?? 0}
         zaps={gamification?.zapTokens ?? 0}
+        isPremium={isPremium}
       />
       {error && (
         <div className="px-6 py-4">
