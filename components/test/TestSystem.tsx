@@ -481,7 +481,7 @@ export function TestSystem({
       )}
 
       {showAdBeforeStart && (
-        <InterstitialAd onClose={() => setShowAdBeforeStart(false)} />
+        <InterstitialAd onClose={() => setShowAdBeforeStart(false)} time={10} />
       )}
 
       <NoHeartsTestModal />

@@ -3,9 +3,17 @@
 import { useEffect, useState } from "react";
 import Script from "next/script";
 
-export default function InterstitialAd({ onClose }: { onClose: () => void }) {
+export default function InterstitialAd({
+  onClose,
+  time
+}: {
+  onClose: () => void;
+  time: number;
+}) {
   const [isAdBlocked, setIsAdBlocked] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [isButtonEnabled, setIsButtonEnabled] = useState(false);
+  const [countdown, setCountdown] = useState(time);
 
   useEffect(() => {
     // Pequeña prueba: intenta cargar el script manualmente
@@ -14,6 +22,21 @@ export default function InterstitialAd({ onClose }: { onClose: () => void }) {
     test.async = true;
     test.onerror = () => setIsAdBlocked(true);
     document.body.appendChild(test);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setIsButtonEnabled(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   if (!isVisible) return null;
@@ -60,13 +83,19 @@ export default function InterstitialAd({ onClose }: { onClose: () => void }) {
         )}
 
         <button
+          disabled={!isButtonEnabled}
           onClick={() => {
             setIsVisible(false);
             onClose();
           }}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className={`mt-4 px-4 py-2 rounded-lg text-white transition 
+            ${
+              isButtonEnabled
+                ? "bg-blue-600 hover:bg-blue-700"
+                : "bg-gray-400 cursor-not-allowed"
+            }`}
         >
-          Comenzar test
+          {isButtonEnabled ? "Comenzar test" : `Espera ${countdown}s...`}
         </button>
       </div>
     </div>
