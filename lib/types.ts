@@ -155,6 +155,7 @@ export type Curriculum = {
   createdAt: Date;
   updatedAt: Date;
   units: Unit[];
+  isActive: boolean;
 };
 
 export interface UserGamification {

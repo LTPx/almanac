@@ -19,7 +19,9 @@ import {
   MoreHorizontal,
   BookOpen,
   Users,
-  GraduationCap
+  GraduationCap,
+  ToggleLeft,
+  ToggleRight
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -95,6 +97,16 @@ export default function CurriculumPage() {
     return response.json();
   };
 
+  const toggleCurriculumStatus = (id: string) => {
+    setCurriculums(
+      curriculums.map((curriculum) =>
+        curriculum.id === id
+          ? { ...curriculum, isActive: !curriculum.isActive }
+          : curriculum
+      )
+    );
+  };
+
   useEffect(() => {
     const loadUnits = async () => {
       try {
@@ -145,8 +157,20 @@ export default function CurriculumPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <CardTitle className="text-xl">
-                        {curriculum.title}
+                      <CardTitle className="text-xl space-x-2">
+                        <span>{curriculum.title}</span>
+                        <Badge
+                          variant={
+                            curriculum.isActive ? "default" : "secondary"
+                          }
+                          className={
+                            curriculum.isActive
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-gray-200 text-gray-900"
+                          }
+                        >
+                          {curriculum.isActive ? "Activo" : "Inactivo"}
+                        </Badge>
                       </CardTitle>
                       <Badge className={difficultyInfo.color}>
                         <span className="mr-1">{difficultyInfo.icon}</span>
@@ -205,6 +229,21 @@ export default function CurriculumPage() {
                           <BookOpen className="mr-2 h-4 w-4" />
                           Gestionar unidades
                         </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => toggleCurriculumStatus(curriculum.id)}
+                      >
+                        {curriculum.isActive ? (
+                          <>
+                            <ToggleLeft className="mr-2 h-4 w-4" />
+                            Desactivar
+                          </>
+                        ) : (
+                          <>
+                            <ToggleRight className="mr-2 h-4 w-4" />
+                            Activar
+                          </>
+                        )}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-red-600"
