@@ -97,14 +97,25 @@ export default function CurriculumPage() {
     return response.json();
   };
 
-  const toggleCurriculumStatus = (id: string) => {
-    setCurriculums(
-      curriculums.map((curriculum) =>
-        curriculum.id === id
-          ? { ...curriculum, isActive: !curriculum.isActive }
-          : curriculum
-      )
-    );
+  const toggleCurriculumStatus = async (id: string) => {
+    try {
+      await fetch(`/api/curriculums/${id}/active`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" }
+      });
+      toast.success(`Curriculum status actualizado`);
+
+      setCurriculums(
+        curriculums.map((curriculum) =>
+          curriculum.id === id
+            ? { ...curriculum, isActive: !curriculum.isActive }
+            : curriculum
+        )
+      );
+    } catch (error) {
+      console.log(error);
+      toast.error("No se pudo actualizar el curriculum");
+    }
   };
 
   useEffect(() => {
