@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Upload,
   CheckCircle,
@@ -9,17 +9,23 @@ import {
   FileJson,
   Loader2,
   Trash2,
-  Download
+  Download,
+  Edit,
+  FileUp
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import Editor from "@monaco-editor/react";
 
-export default function AdminSettingsPage() {
+export default function ImportContentPage() {
   const [file, setFile] = useState<File | null>(null);
   const [jsonData, setJsonData] = useState<any>(null);
+  const [jsonText, setJsonText] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [editorMode, setEditorMode] = useState<"upload" | "editor">("upload");
+  const editorRef = useRef<any>(null);
 
   const validateJSON = (data: any): string[] => {
     const errors: string[] = [];
@@ -30,7 +36,6 @@ export default function AdminSettingsPage() {
     }
 
     data.forEach((unit: any, unitIndex: number) => {
-      // Validar campos de la unidad
       if (!unit.name) errors.push(`Unidad ${unitIndex + 1}: Falta el nombre`);
       if (!unit.description)
         errors.push(`Unidad ${unitIndex + 1}: Falta la descripción`);
@@ -94,7 +99,6 @@ export default function AdminSettingsPage() {
               `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}: order debe ser un número`
             );
 
-          // Validar respuestas según el tipo de pregunta
           if (q.type === "MULTIPLE_CHOICE" || q.type === "TRUE_FALSE") {
             if (!Array.isArray(q.answers) || q.answers.length === 0) {
               errors.push(
@@ -130,7 +134,9 @@ export default function AdminSettingsPage() {
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
-          const json = JSON.parse(event.target?.result as string);
+          const text = event.target?.result as string;
+          const json = JSON.parse(text);
+          setJsonText(text);
           setJsonData(json);
           const errors = validateJSON(json);
           setValidationErrors(errors);
@@ -143,6 +149,27 @@ export default function AdminSettingsPage() {
     } else {
       alert("Por favor selecciona un archivo JSON válido");
       if (e.target) e.target.value = "";
+    }
+  };
+
+  const handleEditorChange = (value: string | undefined) => {
+    if (!value) {
+      setJsonData(null);
+      setValidationErrors([]);
+      return;
+    }
+
+    setJsonText(value);
+
+    try {
+      const json = JSON.parse(value);
+      setJsonData(json);
+      const errors = validateJSON(json);
+      setValidationErrors(errors);
+      setResult(null);
+    } catch (error: any) {
+      setJsonData(null);
+      setValidationErrors(["Error al parsear JSON: " + error.message]);
     }
   };
 
@@ -173,6 +200,7 @@ export default function AdminSettingsPage() {
         });
         setFile(null);
         setJsonData(null);
+        setJsonText("");
         const fileInput = document.getElementById(
           "file-input"
         ) as HTMLInputElement;
@@ -306,6 +334,46 @@ export default function AdminSettingsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const loadExampleIntoEditor = () => {
+    const example = [
+      {
+        name: "Unidad de Ejemplo",
+        description: "Esta es una unidad de ejemplo",
+        order: 1,
+        experiencePoints: 25,
+        lessons: [
+          {
+            name: "Lección de Ejemplo",
+            description: "Esta es una lección de ejemplo",
+            position: 1
+          }
+        ],
+        questions: [
+          {
+            type: "MULTIPLE_CHOICE",
+            title: "¿Cuál es el resultado de 5 + 4?",
+            order: 1,
+            content: {
+              options: ["7", "8", "9", "10"],
+              correctAnswer: "9",
+              explanation: "La suma de 5 + 4 = 9"
+            },
+            answers: [
+              { text: "7", isCorrect: false, order: 1 },
+              { text: "8", isCorrect: false, order: 2 },
+              { text: "9", isCorrect: true, order: 3 },
+              { text: "10", isCorrect: false, order: 4 }
+            ]
+          }
+        ]
+      }
+    ];
+
+    const jsonString = JSON.stringify(example, null, 2);
+    setJsonText(jsonString);
+    handleEditorChange(jsonString);
+  };
+
   const getStats = () => {
     if (!jsonData) return null;
 
@@ -326,7 +394,7 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="min-h-screen py-8">
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-4">
         <Card className="rounded-lg shadow-lg p-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -336,7 +404,7 @@ export default function AdminSettingsPage() {
                   Gestión de Contenido Educativo
                 </h1>
                 <p className="text-muted-foreground">
-                  Sube archivos JSON con unidades, lecciones y preguntas
+                  Sube archivos JSON o edita directamente en el editor
                 </p>
               </div>
             </div>
@@ -349,32 +417,100 @@ export default function AdminSettingsPage() {
             </button>
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-muted-foreground mb-2">
-              Seleccionar archivo JSON
-            </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
-              <input
-                id="file-input"
-                type="file"
-                accept=".json"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-              <label
-                htmlFor="file-input"
-                className="cursor-pointer flex flex-col items-center"
-              >
-                <Upload className="w-12 h-12 text-gray-400 mb-3" />
-                <span className="text-sm font-medium text-muted-foreground">
-                  {file ? file.name : "Haz clic para seleccionar un archivo"}
-                </span>
-                <span className="text-xs text-gray-500 mt-1">
-                  JSON únicamente
-                </span>
-              </label>
-            </div>
+          {/* Mode Selector */}
+          <div className="flex gap-2 mb-6">
+            <button
+              onClick={() => setEditorMode("upload")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                editorMode === "upload"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              <FileUp className="w-4 h-4" />
+              Subir Archivo
+            </button>
+            <button
+              onClick={() => setEditorMode("editor")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                editorMode === "editor"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              <Edit className="w-4 h-4" />
+              Editor JSON
+            </button>
           </div>
+
+          {/* Upload Mode */}
+          {editorMode === "upload" && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
+                Seleccionar archivo JSON
+              </label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+                <input
+                  id="file-input"
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="file-input"
+                  className="cursor-pointer flex flex-col items-center"
+                >
+                  <Upload className="w-12 h-12 text-gray-400 mb-3" />
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {file ? file.name : "Haz clic para seleccionar un archivo"}
+                  </span>
+                  <span className="text-xs text-gray-500 mt-1">
+                    JSON únicamente
+                  </span>
+                </label>
+              </div>
+            </div>
+          )}
+
+          {/* Editor Mode */}
+          {editorMode === "editor" && (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-muted-foreground">
+                  Editor JSON
+                </label>
+                <button
+                  onClick={loadExampleIntoEditor}
+                  className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  Cargar ejemplo
+                </button>
+              </div>
+              <div className="border border-gray-300 rounded-lg overflow-hidden">
+                <Editor
+                  height="500px"
+                  defaultLanguage="json"
+                  value={jsonText}
+                  onChange={handleEditorChange}
+                  theme="vs-dark"
+                  options={{
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    lineNumbers: "on",
+                    scrollBeyondLastLine: false,
+                    automaticLayout: true,
+                    tabSize: 2,
+                    formatOnPaste: true,
+                    formatOnType: true
+                  }}
+                  onMount={(editor) => {
+                    editorRef.current = editor;
+                  }}
+                />
+              </div>
+            </div>
+          )}
 
           {stats && validationErrors.length === 0 && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">

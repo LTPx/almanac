@@ -155,6 +155,7 @@ export type Curriculum = {
   createdAt: Date;
   updatedAt: Date;
   units: Unit[];
+  isActive: boolean;
 };
 
 export interface UserGamification {
@@ -230,3 +231,9 @@ export interface HomeAppResponse {
     canPurchaseHeart: boolean;
   };
 }
+
+export type CurriculumFilters = {
+  active?: "true" | "false";
+  difficulty?: "easy" | "medium" | "hard" | "all";
+  includeUnits?: boolean;
+};
