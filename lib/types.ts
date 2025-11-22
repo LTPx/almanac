@@ -231,3 +231,9 @@ export interface HomeAppResponse {
     canPurchaseHeart: boolean;
   };
 }
+
+export type CurriculumFilters = {
+  active?: "true" | "false";
+  difficulty?: "easy" | "medium" | "hard" | "all";
+  includeUnits?: boolean;
+};

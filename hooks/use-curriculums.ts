@@ -1,32 +1,43 @@
 "use client";
 
-import { ContentsResponse, Curriculum, Unit } from "@/lib/types";
+import { ContentsResponse, Curriculum, CurriculumFilters } from "@/lib/types";
 import { useState, useCallback } from "react";
 
 export function useCurriculums() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchCurriculums = useCallback(async (): Promise<
-    Curriculum[] | null
-  > => {
-    setIsLoading(true);
-    setError(null);
+  const fetchCurriculums = useCallback(
+    async (filters?: CurriculumFilters): Promise<Curriculum[] | null> => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const res = await fetch("/api/curriculums");
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || "Error al cargar curriculums");
+      try {
+        const query = filters
+          ? "?" +
+            Object.entries(filters)
+              .filter(([_, v]) => v !== undefined && v !== null)
+              .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`)
+              .join("&")
+          : "";
+
+        const res = await fetch(`/api/curriculums${query}`);
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || "Error al cargar curriculums");
+        }
+
+        return await res.json();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Error desconocido");
+        return null;
+      } finally {
+        setIsLoading(false);
       }
-      return await res.json();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   const fetchCurriculumWithUnits = useCallback(
     async (curriculumId: string): Promise<Curriculum | null> => {
@@ -66,8 +77,7 @@ export function useCurriculums() {
           `/api/app/contents?curriculumId=${curriculumId}&userId=${userId}`
         );
         if (!contentsRes.ok) throw new Error("Error al cargar contents");
-        const contentsData = await contentsRes.json();
-        return contentsData;
+        return await contentsRes.json();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error desconocido");
         return null;

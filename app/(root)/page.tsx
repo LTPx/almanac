@@ -46,7 +46,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const loadUnits = async () => {
-      const data = await fetchCurriculums();
+      const data = await fetchCurriculums({ active: "true" });
       if (data) {
         setCurriculums(data);
         if (data.length > 0 && !selectedCurriculumId) {

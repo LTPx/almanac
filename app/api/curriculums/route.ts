@@ -4,13 +4,21 @@ import prisma from "@/lib/prisma";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+
     const difficulty = searchParams.get("difficulty");
     const includeUnits = searchParams.get("includeUnits") === "true";
+    const activeParam = searchParams.get("active");
 
     const where: any = {};
 
     if (difficulty && difficulty !== "all") {
       where.difficulty = difficulty;
+    }
+
+    if (activeParam === "true") {
+      where.isActive = true;
+    } else if (activeParam === "false") {
+      where.isActive = false;
     }
 
     const curriculums = await prisma.curriculum.findMany({
