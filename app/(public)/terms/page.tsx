@@ -14,7 +14,7 @@ export default function TermsOfService() {
 
       <p>
         Welcome to Almanac by Openmind (“Almanac,” “we,” “us”). These Terms
-        govern your access to and use of openmind.cx and our Android/web
+        govern your access to and use of almanac.openmind.cx and our Android/web
         applications (the “Service”). By using the Service you agree to these
         Terms. If you don’t agree, do not use the Service.
       </p>
@@ -36,20 +36,20 @@ export default function TermsOfService() {
       <p>
         You must be 13 or older. The Service is not directed to children. If you
         are under your country’s digital age of consent, you may use the Service
-        only with parental/guardian consent.
+        only with parental or guardian consent.
       </p>
 
       <h2>3) Your account</h2>
       <p>
         You may sign up with email/password or Google Sign-In. You are
-        responsible for activity under your account. Notify us if you suspect
-        unauthorized access.
+        responsible for activity under your account. Notify us immediately if
+        you suspect unauthorized access.
       </p>
 
       <h2>4) Subscriptions, trials, and billing</h2>
       <p>
-        We offer free and optional paid plans (premium_monthly, premium_yearly)
-        and token packs.
+        We offer free features and optional paid plans, including
+        premium_monthly, premium_yearly, and token packs.
       </p>
       <ul>
         <li>Trials auto-renew unless canceled before they end.</li>
@@ -58,14 +58,15 @@ export default function TermsOfService() {
         <li>Manage billing via Google Play or our Stripe portal.</li>
       </ul>
       <p>
-        We may change prices; required legal notice will be provided. Changes
-        apply on your next renewal unless stated otherwise.
+        We may change prices; legally required notice will be provided. Price
+        changes apply at your next renewal unless otherwise stated.
       </p>
 
       <h2>5) Refunds & withdrawal</h2>
       <p>
-        Digital content performance begins immediately, affecting withdrawal
-        rights under local law. Mandatory consumer rights still apply.
+        Digital content performance begins immediately, which may affect
+        withdrawal rights under local consumer law. Mandatory consumer
+        protections still apply.
       </p>
       <p>
         <strong>Android:</strong> refunds follow Google Play policies.
@@ -78,82 +79,90 @@ export default function TermsOfService() {
       <h2>6) Ads, rewards, and in-app tokens</h2>
       <p>
         Tokens are virtual items, not money or cryptocurrency. They have no
-        monetary value and are non-transferable. Abuse (automation, spoofing) is
-        prohibited and may result in account action.
+        monetary value, are non-transferable, and cannot be redeemed outside the
+        Service. Abuse (automation, spoofing, manipulating ads or reward flows)
+        is prohibited and may result in account action.
       </p>
 
       <h2>7) NFT collectibles (Polygon)</h2>
       <p>
         Completing certain units may mint a non-financial NFT collectible on
-        Polygon. Keys are stored on your device; we do not control them.
+        Polygon. Keys are stored locally on your device; we do not control them.
       </p>
       <ul>
         <li>We may charge in-app tokens for minting.</li>
-        <li>Transfers/exports not available yet.</li>
-        <li>Metadata may be off-chain and updatable.</li>
-        <li>You assume all blockchain risks.</li>
+        <li>Transfers/exports are not yet available.</li>
+        <li>Metadata may be off-chain and may be updatable.</li>
+        <li>You assume all blockchain-related risks.</li>
       </ul>
 
       <h2>8) Acceptable use</h2>
       <p>
-        You agree not to break laws, interfere with ads/rewards/NFTs, scrape,
-        reverse-engineer, or automate completions or token accrual.
+        You agree not to break applicable laws, interfere with ads, rewards, or
+        NFT systems, scrape, reverse-engineer, disrupt, exploit bugs, or
+        automate progress or token accrual.
       </p>
 
       <h2>9) Intellectual property & license</h2>
       <p>
-        We own the Service and content. You receive a limited, personal,
-        non-commercial license. No uploads/comments available currently.
+        We own the Service and its content. You receive a limited, personal,
+        revocable, non-commercial license to use the Service. User-generated
+        uploads/comments are not currently available.
       </p>
 
       <h2>10) Third-party services</h2>
       <p>
-        We integrate Google AdMob/Ad Manager, Google Play, Stripe, RevenueCat,
-        analytics, hosting, and wallet/relayers. Their terms apply
-        independently.
+        We integrate Google AdMob, Google Ad Manager, Google Play Billing,
+        Stripe, RevenueCat, analytics tools, hosting providers, and Web3 wallet
+        infrastructure. Their terms apply independently.
       </p>
 
       <h2>11) Disclaimers</h2>
       <p>
-        The Service is provided “as is.” No warranty of accuracy or fitness for
-        a particular purpose. No investment, tax, or legal advice.
+        The Service is provided “as is” and without warranties, express or
+        implied. We do not guarantee accuracy, uptime, availability, or fitness
+        for a particular purpose. Nothing in the Service constitutes investment,
+        tax, or legal advice.
       </p>
 
       <h2>12) Limitation of liability</h2>
       <p>
-        Maximum liability is the higher of €100 or the amount you paid in the
-        last 12 months. No indirect or consequential damages. Mandatory
-        exceptions apply.
+        To the fullest extent permitted by law, our maximum liability is the
+        higher of €100 or the amount you paid in the previous 12 months. We are
+        not liable for indirect, incidental, special, or consequential damages.
+        Mandatory consumer law exceptions apply.
       </p>
 
       <h2>13) Indemnity</h2>
       <p>
-        You agree to indemnify us for claims arising from your unlawful use or
-        violation of these Terms.
+        You agree to indemnify us against claims arising from your unlawful
+        conduct, misuse of the Service, or breach of these Terms.
       </p>
 
       <h2>14) Suspension & termination</h2>
       <p>
-        We may suspend or terminate for breach, fraud, or legal compliance. You
-        may stop using the Service anytime. Some sections survive termination.
+        We may suspend or terminate access for breach, fraud, or compliance with
+        legal obligations. You may stop using the Service at any time.
+        Provisions that reasonably should survive termination do so.
       </p>
 
       <h2>15) Privacy</h2>
       <p>
         Our Privacy Policy explains how we process personal data. By using the
-        Service you accept it.
+        Service you agree to it.
       </p>
 
       <h2>16) Governing law & venue</h2>
       <p>
-        Spanish law governs these Terms. Courts of Illes Balears have exclusive
-        jurisdiction unless mandatory consumer laws apply.
+        These Terms are governed by Spanish law. Exclusive venue is in the
+        courts of Illes Balears, unless mandatory consumer protections require
+        otherwise.
       </p>
 
       <h2>17) Changes</h2>
       <p>
-        We may update these Terms. Material changes will include reasonable
-        notice. Continued use after effective date means acceptance.
+        We may update these Terms. Material changes will be communicated when
+        required. Continued use after the effective date constitutes acceptance.
       </p>
 
       <h2>18) Contact</h2>

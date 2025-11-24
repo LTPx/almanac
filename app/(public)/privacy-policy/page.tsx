@@ -14,9 +14,10 @@ export default function PrivacyPolicy() {
       <p>
         This Privacy Policy explains how Almanac by Openmind (“Almanac,” “we,”
         “us”) collects, uses, and shares information when you use our website
-        openmind.cx and our Android/web applications (the “Service”). We're
-        committed to privacy by design. In the EEA/UK/CH you control whether ads
-        are personalized. You can delete your account at any time.
+        almanac.openmind.cx / openmind.cx (the “Website”) and our Android and
+        web applications (the “App”). Users in the EEA/UK/CH can choose between
+        personalized ads, non-personalized ads, or rejecting advertising
+        cookies. You can delete your account at any time.
       </p>
 
       <h2>Controller & Contact</h2>
@@ -124,25 +125,74 @@ export default function PrivacyPolicy() {
       </p>
 
       <h2>Cookies, SDKs & Consent</h2>
-      <h3>Web (openmind.cx)</h3>
+
+      <h3>Cookies & Local Storage (Website)</h3>
       <p>
-        We use Google’s certified CMP under IAB TCF v2.2. If you refuse
-        personalization, we serve non-personalized ads and apply Consent Mode
-        v2.
+        The Website uses cookies, localStorage, and similar technologies for
+        essential functionality, analytics, and advertising. Cookies may be set
+        by us or by trusted partners such as Google Ad Manager, AdSense, and
+        Google Analytics.
+      </p>
+
+      <ul>
+        <li>
+          <strong>Essential cookies:</strong> login, security, language,
+          preferences.
+        </li>
+        <li>
+          <strong>Analytics cookies:</strong> Google Analytics 4 for aggregated
+          usage measurement.
+        </li>
+        <li>
+          <strong>Advertising cookies:</strong> Google Ad Manager / AdSense to
+          deliver personalized or non-personalized ads depending on your
+          consent.
+        </li>
+        <li>
+          <strong>LocalStorage:</strong> app settings, last session state, and
+          interface preferences.
+        </li>
+      </ul>
+
+      <p>
+        Data collected via advertising cookies may include IP address, device
+        identifiers, coarse location, ad interactions, and browsing behavior
+        within our Website.
+      </p>
+
+      <h3>Web (almanac.openmind.cx / openmind.cx)</h3>
+      <p>
+        We use Google's certified Consent Management Platform (CMP) under the
+        IAB TCF v2.2 framework. Users in the EEA/UK/CH can choose:
+      </p>
+      <ul>
+        <li>Personalized ads</li>
+        <li>Non-personalized ads</li>
+        <li>Reject all advertising cookies</li>
+      </ul>
+      <p>
+        When consent is denied, we serve non-personalized ads and apply Google
+        Consent Mode v2 to adjust analytics and advertising behavior.
       </p>
       <p>
         <strong>CMP provider:</strong> Google CMP (Ad Manager “Privacy &
-        messaging”)
+        Messaging”)
       </p>
       <p>
-        You can revisit choices anytime via the Privacy/Cookies link in the
-        footer.
+        You can revisit or change your choices at any time from the “Privacy /
+        Cookies” link in the footer.
       </p>
 
       <h3>Android</h3>
       <p>
         We use Google UMP to show the EEA/UK/CH consent flow. AdMob requests
         non-personalized ads if consent is denied.
+      </p>
+
+      <p>
+        Cookie collection and advertising on the Website comply with the EU
+        ePrivacy Directive and GDPR. Non-essential cookies are used only after
+        consent is given through our CMP.
       </p>
 
       <h2>Advertising & Rewarded Tokens</h2>
@@ -171,14 +221,14 @@ export default function PrivacyPolicy() {
       <h2>Service Providers & Partners</h2>
       <ul>
         <li>
-          <strong>Ads:</strong> Google AdMob, Google Ad Manager.
+          <strong>Ads:</strong> Google AdMob, Google Ad Manager, Google AdSense.
         </li>
         <li>
           <strong>Purchases:</strong> Google Play, Stripe, RevenueCat.
         </li>
         <li>
-          <strong>Analytics/Diagnostics:</strong> Firebase, Google Analytics,
-          Crashlytics, Sentry.
+          <strong>Analytics/Diagnostics:</strong> Firebase, Google Analytics 4
+          (GA4), Crashlytics, Sentry.
         </li>
         <li>
           <strong>Hosting:</strong> DigitalOcean.
@@ -200,7 +250,7 @@ export default function PrivacyPolicy() {
       <h2>Retention</h2>
       <ul>
         <li>Account data: until deletion or no longer needed.</li>
-        <li>Ad/analytics: ≤13 months.</li>
+        <li>Ad/analytics data: ≤13 months.</li>
         <li>Crash logs: ≤90 days.</li>
         <li>Backups: ~30-day rolling.</li>
       </ul>
@@ -214,7 +264,7 @@ export default function PrivacyPolicy() {
 
       <h2>Children</h2>
       <p>
-        The Service is not directed to children. If under digital age of
+        The Service is not directed to children. If under the digital age of
         consent, parental consent is required. Contact us if you believe a
         child’s data was collected improperly.
       </p>
