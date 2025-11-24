@@ -1,80 +1,94 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight, ShieldCheck, Sparkles, Coins } from "lucide-react";
 import Link from "next/link";
-import "./styles.css";
 
 export default function HomePage() {
   return (
-    <main className="home-container">
-      <header className="home-hero text-center">
-        <h1>Almanac by Openmind</h1>
-        <p className="hero-subtitle">
-          A learning platform that rewards progress. Study, earn tokens, and
-          unlock collectible achievements.
+    <main className="w-full min-h-screen">
+      {/* ------------------ HERO ------------------ */}
+      <section className="max-w-4xl mx-auto px-6 py-20 text-center">
+        <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+          Learn. Play. Earn Rewards.
+        </h1>
+        <p className="text-lg max-w-2xl mx-auto mb-8">
+          Almanac is your micro-learning gamified app with daily lessons,
+          optional NFT collectibles, and token rewards — all built for a fun and
+          frictionless learning experience.
         </p>
+        <Link href="/sign-in">
+          <Button size="lg" className="px-6 py-6 text-lg">
+            Get Started <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </Link>
+      </section>
 
-        <div className="hero-actions">
-          <Link href="/sign-up" className="btn-primary">
+      {/* ------------------ FEATURES ------------------ */}
+      <section className="max-w-5xl mx-auto px-6 py-10 grid md:grid-cols-3 gap-6">
+        <Card className="border-gray-200 shadow-sm">
+          <CardContent className="pt-6">
+            <Sparkles className="h-8 w-8 mb-4 text-indigo-600" />
+            <h3 className="font-semibold text-xl mb-2">Daily Learning</h3>
+            <p className="text-sm">
+              Short, engaging lessons designed to fit your daily rhythm.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-gray-200 shadow-sm">
+          <CardContent className="pt-6">
+            <Coins className="h-8 w-8 mb-4 text-yellow-600" />
+            <h3 className="font-semibold text-xl mb-2">Earn Tokens</h3>
+            <p className="text-sm">
+              Complete units, watch optional ads, and earn in-app token rewards.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-gray-200 shadow-sm">
+          <CardContent className="pt-6">
+            <ShieldCheck className="h-8 w-8 mb-4 text-green-600" />
+            <h3 className="font-semibold text-xl mb-2">NFT Collectibles</h3>
+            <p className="text-sm">
+              Earn optional Polygon-based NFT collectibles for completing
+              special units.
+            </p>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* ------------------ CTA SECTION ------------------ */}
+      <section className="max-w-4xl mx-auto px-6 py-20 text-center">
+        <h2 className="text-3xl font-bold mb-4">Start Free Today</h2>
+        <p className="mb-8">
+          No credit card required. Create your account and unlock your daily
+          learning flow.
+        </p>
+        <Link href="/sign-up">
+          <Button size="lg" className="px-6 py-6 text-lg">
             Create Account
-          </Link>
+          </Button>
+        </Link>
+      </section>
+
+      {/* ------------------ FOOTER ------------------ */}
+      <footer className="border-t py-10 text-center text-sm text-gray-500">
+        <p className="mb-2">
+          © {new Date().getFullYear()} Almanac by Openmind
+        </p>
+        <div className="flex items-center justify-center gap-4">
+          <a href="/privacy-policy" className="hover:text-white">
+            Privacy Policy
+          </a>
+          <a href="/terms" className="hover:text-white">
+            Terms of Service
+          </a>
+          <a href="/legal-notice" className="hover:text-white">
+            Legal Notice
+          </a>
         </div>
-      </header>
-
-      <section className="home-section bg-card">
-        <h2>What is Almanac?</h2>
-        <p>
-          Almanac is an educational web and Android application designed to help
-          you learn efficiently through structured units, interactive tests,
-          daily practice, and optional reward systems.
-        </p>
-        <p>
-          Users can access free content supported by ads or subscribe to a
-          premium plan for an ad-free experience.
-        </p>
-      </section>
-
-      <section className="home-section">
-        <h2>Main Features</h2>
-        <ul className="feature-list">
-          <li>📘 Structured learning units and tests</li>
-          <li>🔥 Daily streaks and practice tracking</li>
-          <li>🎁 Rewarded tokens for completing ads</li>
-          <li>⭐ Optional premium subscription (no ads)</li>
-          <li>🎨 Non-financial NFT collectibles across key milestones</li>
-          <li>🔐 Secure login with email or Google Sign-In</li>
-        </ul>
-      </section>
-
-      <section className="home-section">
-        <h2>Safe, Transparent, and Privacy-First</h2>
-        <p>
-          Almanac follows a privacy-by-design approach and complies with GDPR,
-          ePrivacy, and international standards. Ads follow Google’s Consent
-          Mode v2 and non-personalized rules where required.
-        </p>
-        <p>You can review our policies at any time:</p>
-
-        <ul>
-          <li>
-            <Link href="/privacy-policy">Privacy Policy</Link>
-          </li>
-          <li>
-            <Link href="/terms">Terms of Service</Link>
-          </li>
-          <li>
-            <Link href="/legal-notice">Legal Notice</Link>
-          </li>
-        </ul>
-      </section>
-
-      <footer className="home-footer">
-        <p>
-          © {new Date().getFullYear()} Almanac by Openmind. All rights
-          reserved.
-        </p>
-        <p className="footer-links">
-          <Link href="/privacy-policy">Privacy</Link> ·{" "}
-          <Link href="/terms">Terms</Link> ·{" "}
-          <Link href="/legal-notice">Legal Notice</Link>
-        </p>
       </footer>
     </main>
   );
