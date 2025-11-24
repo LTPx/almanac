@@ -16,7 +16,7 @@ export default async function HomeLayout({
   });
 
   if (!session) {
-    redirect("/sign-in");
+    redirect("/home");
   }
 
   const user = session.user;
