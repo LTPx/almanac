@@ -122,12 +122,8 @@ export async function DELETE(
       .catch(() => ({ removeLessons: false }));
 
     // Marcar la unidad como inactiva (soft delete)
-    await prisma.unit.update({
-      where: { id },
-      data: {
-        isActive: false,
-        updatedAt: new Date()
-      }
+    await prisma.unit.delete({
+      where: { id }
     });
 
     // Si el usuario eligió eliminar las lecciones también
