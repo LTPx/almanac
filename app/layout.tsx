@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import ClientWrapper from "@/components/client-wrapper";
 import CookieSettingsButton from "@/components/cookie-settings-button";
 import GDPRBanner from "@/components/gdpr-banner";
+import Script from "next/script";
 
 const notoSansKR = Noto_Sans_KR({
   weight: ["300", "400", "500", "700"],
@@ -33,11 +34,36 @@ export default function RootLayout({
   return (
     <html lang="en" className={notoSansKR.variable} suppressHydrationWarning>
       <head>
-        <script
+        <Script id="google-consent-mode" strategy="beforeInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            
+            // Por defecto: DENEGAR todo hasta que el usuario acepte
+            gtag('consent', 'default', {
+              'ad_storage': 'denied',
+              'ad_user_data': 'denied',
+              'ad_personalization': 'denied',
+              'analytics_storage': 'denied',
+              'wait_for_update': 500
+            });
+            
+            gtag('js', new Date());
+          `}
+        </Script>
+
+        <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1890321786950620"
           crossOrigin="anonymous"
+          strategy="afterInteractive"
         />
+
+        <Script id="google-ads-config" strategy="afterInteractive">
+          {`
+            gtag('config', 'ca-pub-1890321786950620');
+          `}
+        </Script>
       </head>
       <body className="antialiased" suppressHydrationWarning>
         <NextTopLoader showSpinner={false} height={6} color="#000000" />
