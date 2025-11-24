@@ -4,6 +4,8 @@ import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "@/components/ui/sonner";
 import ClientWrapper from "@/components/client-wrapper";
+import CookieSettingsButton from "@/components/cookie-settings-button";
+import GDPRBanner from "@/components/gdpr-banner";
 
 const notoSansKR = Noto_Sans_KR({
   weight: ["300", "400", "500", "700"],
@@ -40,6 +42,8 @@ export default function RootLayout({
       <body className="antialiased" suppressHydrationWarning>
         <NextTopLoader showSpinner={false} height={6} color="#000000" />
         <Toaster richColors position="top-right" />
+        <GDPRBanner />
+        <CookieSettingsButton />
         <ClientWrapper>{children}</ClientWrapper>
       </body>
     </html>

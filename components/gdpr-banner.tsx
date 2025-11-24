@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { X, Shield, Cookie } from "lucide-react";
 
@@ -20,6 +22,7 @@ export default function GDPRBanner() {
   const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const consent = localStorage.getItem("cookie-consent");
     if (!consent) {
       setShowBanner(true);
