@@ -6,6 +6,7 @@ import SignInForm from "@/components/sign-in-form";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { JSX, SVGProps } from "react";
+import { ChevronLeft } from "lucide-react";
 
 const GoogleIcon = (
   props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>
@@ -20,7 +21,14 @@ export default function SignInSection() {
     <div className="flex items-center justify-center min-h-screen">
       <div className="flex flex-1 flex-col justify-center px-4 py-10 lg:px-6">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="flex items-center">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/home"
+              className="flex items-center justify-center w-8 h-8 rounded-full border border-border hover:bg-accent transition-colors"
+              aria-label="Volver atrás"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </Link>
             <Logo />
           </div>
           <h3 className="mt-6 text-lg font-semibold text-foreground dark:text-foreground">
