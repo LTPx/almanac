@@ -24,9 +24,10 @@ export default async function HomeLayout({
   const isTrialing = status === "TRIALING";
   const isActive = status === "ACTIVE";
   const isPremium = isTrialing || isActive;
+  const hasWallet = !!user.walletAddress;
 
   return (
-    <UserProvider user={{ ...user, isPremium }}>
+    <UserProvider user={{ ...user, ...{ isPremium, hasWallet } }}>
       <div className="relative">
         <Navbar />
         <main>{children}</main>

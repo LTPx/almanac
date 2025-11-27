@@ -12,7 +12,8 @@ export function createUserWallet() {
   const wallet = ethers.Wallet.createRandom();
   return {
     address: wallet.address,
-    privateKey: wallet.privateKey
+    privateKey: wallet.privateKey,
+    mnemonic: wallet.mnemonic!.phrase
   };
 }
 
