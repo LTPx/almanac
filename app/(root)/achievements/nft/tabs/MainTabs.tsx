@@ -52,7 +52,7 @@ export default function MainTabs({ user }: { user: User }) {
           loading={loading}
           error={error}
           refetch={refetch}
-          hasWallet={false}
+          hasWallet={!!user.hasWallet}
         />
       </TabsContent>
     </Tabs>
