@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
 import { createUserWallet, encryptPrivateKey } from "./wallet-utils";
-
-const prisma = new PrismaClient();
+import prisma from "./prisma";
 
 export async function createWalletForUser(userId: string): Promise<string> {
   try {
