@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { completeCurriculum } from "@/lib/gamification";
 import prisma from "@/lib/prisma";
+import { calculateExperience, getFinalAnswers } from "@/lib/xp";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,11 +14,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Obtener el intento con todas sus respuestas
     const testAttempt = await prisma.testAttempt.findFirst({
       where: { id: testAttemptId },
       include: {
-        answers: true,
+        answers: {
+          orderBy: {
+            createdAt: "asc" // Ordenar por fecha para identificar reintentos
+          }
+        },
         unit: {
           include: {
             curriculum: true
@@ -48,10 +52,10 @@ export async function POST(request: NextRequest) {
     const timeElapsedMs = endTime.getTime() - startTime.getTime();
     const timeElapsedSeconds = Math.floor(timeElapsedMs / 1000);
 
-    // Calcular resultados
-    const correctAnswers = testAttempt.answers.filter(
-      (a) => a.isCorrect
-    ).length;
+    const finalAnswers = getFinalAnswers(testAttempt.answers);
+    const totalAttempts = testAttempt.answers.length;
+
+    const correctAnswers = finalAnswers.filter((a) => a.isCorrect).length;
     const score = (correctAnswers / testAttempt.totalQuestions) * 100;
     const passScore = 70;
     const passed = score >= passScore;
@@ -68,10 +72,12 @@ export async function POST(request: NextRequest) {
     });
 
     let experienceGained = 0;
+    let experienceBreakdown = null;
     let curriculumCompleted = false;
     let curriculumRewards = null;
 
     if (passed) {
+      // Verificar si es el primer intento del test completo
       const existingUnitProgress = await prisma.userUnitProgress.findUnique({
         where: {
           userId_unitId: {
@@ -81,10 +87,21 @@ export async function POST(request: NextRequest) {
         }
       });
 
-      if (!existingUnitProgress) {
-        // Primer intento aprobado: XP completa
-        experienceGained = testAttempt.unit.experiencePoints;
+      const isFirstAttempt = !existingUnitProgress;
 
+      const xpResult = calculateExperience({
+        baseExperience: testAttempt.unit.experiencePoints,
+        totalQuestions: testAttempt.totalQuestions,
+        correctAnswers,
+        totalAttempts,
+        timeElapsedSeconds,
+        isFirstAttempt
+      });
+
+      experienceGained = xpResult.finalExperience;
+      experienceBreakdown = xpResult.breakdown;
+
+      if (isFirstAttempt) {
         await prisma.userUnitProgress.create({
           data: {
             userId: testAttempt.userId,
@@ -93,40 +110,7 @@ export async function POST(request: NextRequest) {
             completedAt: new Date()
           }
         });
-
-        if (curriculumId) {
-          // ✅ Revisar si completó todas las unidades obligatorias
-          const unitsCurriculum = await prisma.unit.findMany({
-            where: {
-              curriculumId,
-              isActive: true,
-              mandatory: true
-            },
-            select: { id: true }
-          });
-
-          const completedUnits = await prisma.userUnitProgress.findMany({
-            where: {
-              userId: testAttempt.userId,
-              unitId: { in: unitsCurriculum.map((l) => l.id) }
-            }
-          });
-
-          curriculumCompleted =
-            completedUnits.length === unitsCurriculum.length;
-
-          if (curriculumCompleted) {
-            curriculumRewards = await completeCurriculum(
-              testAttempt.userId,
-              curriculumId
-            );
-            console.log("user tokens gain: ", curriculumRewards);
-          }
-        }
       } else {
-        // Usuario repite el test y aprueba: dar **mitad de XP** y sumarla
-        experienceGained = Math.floor(testAttempt.unit.experiencePoints / 2);
-
         await prisma.userUnitProgress.update({
           where: {
             userId_unitId: {
@@ -151,6 +135,34 @@ export async function POST(request: NextRequest) {
           }
         }
       });
+
+      if (curriculumId && isFirstAttempt) {
+        const unitsCurriculum = await prisma.unit.findMany({
+          where: {
+            curriculumId,
+            isActive: true,
+            mandatory: true
+          },
+          select: { id: true }
+        });
+
+        const completedUnits = await prisma.userUnitProgress.findMany({
+          where: {
+            userId: testAttempt.userId,
+            unitId: { in: unitsCurriculum.map((l) => l.id) }
+          }
+        });
+
+        curriculumCompleted = completedUnits.length === unitsCurriculum.length;
+
+        if (curriculumCompleted) {
+          curriculumRewards = await completeCurriculum(
+            testAttempt.userId,
+            curriculumId
+          );
+          console.log("user tokens gain: ", curriculumRewards);
+        }
+      }
     }
 
     return NextResponse.json({
@@ -159,8 +171,11 @@ export async function POST(request: NextRequest) {
         score,
         correctAnswers,
         totalQuestions: testAttempt.totalQuestions,
+        totalAttempts,
+        retriesUsed: totalAttempts - testAttempt.totalQuestions,
         passed,
         experienceGained,
+        experienceBreakdown,
         curriculumCompleted,
         curriculumRewards,
         timeQuizInSeconds: timeElapsedSeconds
