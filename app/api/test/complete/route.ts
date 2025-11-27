@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { completeCurriculum } from "@/lib/gamification";
+import { calculateXP, completeCurriculum } from "@/lib/gamification";
 import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
@@ -20,7 +20,8 @@ export async function POST(request: NextRequest) {
         answers: true,
         unit: {
           include: {
-            curriculum: true
+            curriculum: true,
+            questions: true
           }
         }
       }
@@ -41,6 +42,12 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    const {
+      answers,
+      unit: { questions, experiencePoints }
+    } = testAttempt;
+    const totalAttempts = answers.length;
+    const correctAnswers = answers.filter((a) => a.isCorrect).length;
 
     // Calcular tiempo transcurrido en segundos
     const startTime = new Date(testAttempt.startedAt);
@@ -49,12 +56,18 @@ export async function POST(request: NextRequest) {
     const timeElapsedSeconds = Math.floor(timeElapsedMs / 1000);
 
     // Calcular resultados
-    const correctAnswers = testAttempt.answers.filter(
-      (a) => a.isCorrect
-    ).length;
     const score = (correctAnswers / testAttempt.totalQuestions) * 100;
     const passScore = 70;
     const passed = score >= passScore;
+
+    const userXP = calculateXP({
+      questions: questions.length,
+      attempts: totalAttempts,
+      correct: correctAnswers,
+      incorrect: totalAttempts - correctAnswers,
+      timeSec: timeElapsedSeconds,
+      xpMax: experiencePoints
+    });
 
     // Actualizar el intento de test
     await prisma.testAttempt.update({
@@ -83,7 +96,8 @@ export async function POST(request: NextRequest) {
 
       if (!existingUnitProgress) {
         // Primer intento aprobado: XP completa
-        experienceGained = testAttempt.unit.experiencePoints;
+        // experienceGained = testAttempt.unit.experiencePoints;
+        experienceGained = userXP;
 
         await prisma.userUnitProgress.create({
           data: {
@@ -125,7 +139,8 @@ export async function POST(request: NextRequest) {
         }
       } else {
         // Usuario repite el test y aprueba: dar **mitad de XP** y sumarla
-        experienceGained = Math.floor(testAttempt.unit.experiencePoints / 2);
+        // experienceGained = Math.floor(testAttempt.unit.experiencePoints / 2);
+        experienceGained = userXP;
 
         await prisma.userUnitProgress.update({
           where: {
