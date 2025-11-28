@@ -8,6 +8,15 @@ const GAME_CONFIG = {
   TOKENS_PER_UNIT_COMPLETE: 1
 };
 
+type TestResult = {
+  questions: number;
+  attempts: number;
+  correct: number;
+  incorrect: number;
+  timeSec: number;
+  xpMax: number;
+};
+
 export async function resetHeartsByHours(userId: string) {
   const now = new Date();
   const user = await prisma.user.findUnique({
@@ -337,4 +346,37 @@ export async function dailyHeartResetCronJob() {
     failed: results.filter((r) => !r.success).length,
     results
   };
+}
+
+export function calculateXP(data: TestResult): number {
+  const { questions, attempts, correct, incorrect, timeSec, xpMax } = data;
+
+  console.log("test result data:", data);
+
+  const totalAnswers = correct + incorrect;
+  if (totalAnswers === 0) return 0;
+
+  // 1. Accuracy
+  const accuracy = correct / totalAnswers;
+
+  // 2. Speed bonus
+  const idealTime = questions * 12; // 12 seconds per question
+  let speedBonus = 0;
+
+  if (timeSec <= idealTime) {
+    speedBonus = 1;
+  } else if (timeSec >= idealTime * 2) {
+    speedBonus = 0;
+  } else {
+    speedBonus = 1 - (timeSec - idealTime) / idealTime;
+  }
+
+  // 3. Retry penalty
+  const retryFactor = Math.max(0.5, Math.min(1, questions / attempts));
+
+  // 4. Final XP formula (no decimals)
+  const xp = xpMax * (0.7 * accuracy + 0.2 * speedBonus + 0.1 * retryFactor);
+  console.log("XP calculated:", xp);
+
+  return Math.round(xp); // no decimals
 }

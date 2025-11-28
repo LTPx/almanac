@@ -1,9 +1,10 @@
-import { PrismaClient } from "@prisma/client";
 import { createUserWallet, encryptPrivateKey } from "./wallet-utils";
+import prisma from "./prisma";
 
-const prisma = new PrismaClient();
-
-export async function createWalletForUser(userId: string): Promise<string> {
+export async function createWalletForUser(userId: string): Promise<{
+  address: string;
+  mnemonic?: string;
+}> {
   try {
     console.log(`🔐 Creating wallet for user: ${userId}`);
 
@@ -19,7 +20,10 @@ export async function createWalletForUser(userId: string): Promise<string> {
     });
 
     console.log(`✅ Wallet created: ${wallet.address}`);
-    return wallet.address;
+    return {
+      address: wallet.address,
+      mnemonic: wallet.mnemonic
+    };
   } catch (error) {
     console.error("❌ Error creating wallet:", error);
     throw error;

@@ -7,6 +7,7 @@ export interface User {
   updatedAt: Date;
   image?: string | null | undefined;
   isPremium?: boolean;
+  hasWallet?: boolean;
 }
 
 export interface Question {
@@ -237,3 +238,15 @@ export type CurriculumFilters = {
   difficulty?: "easy" | "medium" | "hard" | "all";
   includeUnits?: boolean;
 };
+
+export interface EducationalNFTAsset {
+  id: string;
+  name: string;
+  imageUrl: string;
+  nftAssetId?: number;
+  tokenId?: string;
+  contractAddress?: string;
+  transactionHash?: string;
+  metadataUri?: string;
+  mintedAt?: string;
+}

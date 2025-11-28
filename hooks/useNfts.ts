@@ -1,18 +1,7 @@
 "use client";
 
+import { EducationalNFTAsset } from "@/lib/types";
 import { useState, useEffect, useCallback } from "react";
-
-interface EducationalNFTAsset {
-  id: string;
-  name: string;
-  imageUrl: string;
-  nftAssetId?: number;
-  tokenId?: string;
-  contractAddress?: string;
-  transactionHash?: string;
-  metadataUri?: string;
-  mintedAt?: string;
-}
 
 export function useNFTs(userId: string, useThirdweb: boolean = false) {
   const [nfts, setNfts] = useState<EducationalNFTAsset[]>([]);
