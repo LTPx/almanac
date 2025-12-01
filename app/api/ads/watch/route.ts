@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 const ZAP_REWARD = 20; // Zaps otorgados por ver un anuncio
-const AD_COOLDOWN_MINUTES = 30; // Tiempo de espera entre anuncios (30 minutos)
+const AD_COOLDOWN_MINUTES = 0; // Tiempo de espera entre anuncios (30 minutos)
 const AD_DURATION_SECONDS = 5; // Duración del anuncio en segundos
 
 // POST - Iniciar visualización de anuncio
