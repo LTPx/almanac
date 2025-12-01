@@ -176,7 +176,11 @@ const LessonNode: React.FC<LessonNodeProps> = ({
     <StepPopover
       unitId={unitId}
       title={name}
-      message={description || ""}
+      message={
+        isFirstMandatory
+          ? "Completa la unidad final para obtener el token que te permitirá crear tu certificado."
+          : description || ""
+      }
       buttonText="Empezar mi Prueba"
       onButtonClick={handleStartLesson}
       isLocked={false}
