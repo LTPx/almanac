@@ -8,6 +8,7 @@ export interface User {
   image?: string | null | undefined;
   isPremium?: boolean;
   hasWallet?: boolean;
+  isAdmin?: boolean;
 }
 
 export interface Question {
