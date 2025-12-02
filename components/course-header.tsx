@@ -98,15 +98,27 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
               key={`zaps-${zaps}`}
               initial={{ scale: 1 }}
               animate={{
-                scale: prevZaps.current !== zaps ? [1, 1.3, 1] : 1
+                scale: prevZaps.current !== zaps ? [1, 1.3, 1] : 1,
+                boxShadow: [
+                  "0 0 0px rgba(168, 85, 247, 0.4)",
+                  "0 0 20px rgba(168, 85, 247, 0.6)",
+                  "0 0 0px rgba(168, 85, 247, 0.4)"
+                ]
               }}
-              transition={{ duration: 0.3 }}
+              transition={{
+                duration: 0.3,
+                boxShadow: {
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }
+              }}
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-50 cursor-pointer hover:bg-purple-100 transition-colors"
             >
               <Link href="/store" className="flex items-center gap-2">
-                <motion.div
+                {/* <motion.div
                   animate={{
                     scale: [1, 1.2, 1],
                     rotate: prevZaps.current !== zaps ? [0, -10, 10, -10, 0] : 0
@@ -119,10 +131,10 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
                     },
                     rotate: { duration: 0.5 }
                   }}
-                >
-                  <Zap className="w-5 h-5 text-purple-500 fill-current" />
-                </motion.div>
-                {!isPremium ? (
+                > */}
+                <Zap className="w-5 h-5 text-purple-500 fill-current" />
+                {/* </motion.div> */}
+                {isPremium ? (
                   <motion.span
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
