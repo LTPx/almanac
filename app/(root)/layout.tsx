@@ -25,9 +25,12 @@ export default async function HomeLayout({
   const isActive = status === "ACTIVE";
   const isPremium = isTrialing || isActive;
   const hasWallet = !!user.walletAddress;
+  const adminUsers = process.env.ADMIN_USERS_IDS || "";
+  const users = adminUsers.split(", ");
+  const isAdmin = users.includes(user.id);
 
   return (
-    <UserProvider user={{ ...user, ...{ isPremium, hasWallet } }}>
+    <UserProvider user={{ ...user, isPremium, isAdmin, hasWallet }}>
       <div className="relative">
         <Navbar />
         <main>{children}</main>

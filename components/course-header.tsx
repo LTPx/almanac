@@ -12,6 +12,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Curriculum } from "@/lib/types";
+import { useNoHeartsModal } from "@/store/no-hearts-modal";
 
 interface CourseHeaderProps {
   curriculums: Curriculum[];
@@ -38,6 +39,7 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
   );
   const prevZaps = useRef(zaps);
   const prevLives = useRef(lives);
+  const { open: openNoHeartsModal } = useNoHeartsModal();
 
   useEffect(() => {
     prevZaps.current = zaps;
@@ -49,6 +51,12 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
       navigator.vibrate(10);
     }
     onUnitChange(value);
+  };
+
+  const handleHeartClick = () => {
+    if (lives === 0 && !isPremium) {
+      openNoHeartsModal("");
+    }
   };
 
   return (
@@ -100,16 +108,28 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
               <Link href="/store" className="flex items-center gap-2">
                 <motion.div
                   animate={{
+                    scale: [1, 1.2, 1],
                     rotate: prevZaps.current !== zaps ? [0, -10, 10, -10, 0] : 0
                   }}
-                  transition={{ duration: 0.5 }}
+                  transition={{
+                    scale: {
+                      duration: 0.8,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    },
+                    rotate: { duration: 0.5 }
+                  }}
                 >
                   <Zap className="w-5 h-5 text-purple-500 fill-current" />
                 </motion.div>
-                {isPremium ? (
-                  <p className="text-purple-800 text-sm font-medium">
-                    Unlimited
-                  </p>
+                {!isPremium ? (
+                  <motion.span
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="text-xl font-bold text-purple-600"
+                  >
+                    ∞
+                  </motion.span>
                 ) : (
                   <motion.span
                     key={`zap-value-${zaps}`}
@@ -125,7 +145,6 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
               </Link>
             </motion.div>
           </AnimatePresence>
-
           <AnimatePresence mode="wait">
             <motion.div
               key={`lives-${lives}`}
@@ -141,11 +160,12 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
               transition={{ duration: lives <= 2 ? 0.6 : 0.3 }}
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
+              onClick={lives === 0 && !isPremium ? handleHeartClick : undefined}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
                 lives <= 2
                   ? "bg-red-100 hover:bg-red-200"
                   : "bg-red-50 hover:bg-red-100"
-              }`}
+              } ${lives === 0 && !isPremium ? "cursor-pointer" : ""}`}
             >
               <motion.div
                 animate={{
@@ -164,7 +184,13 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
                 />
               </motion.div>
               {isPremium ? (
-                <p className="text-red-800 text-sm font-medium">Unlimited</p>
+                <motion.span
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="text-xl font-bold text-red-600"
+                >
+                  ∞
+                </motion.span>
               ) : (
                 <motion.span
                   key={`lives-value-${lives}`}

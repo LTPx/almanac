@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import {
   Trophy,
   Loader2,
-  CheckCircle,
   ArrowLeft,
   ArrowRight,
   Zap,
@@ -210,24 +209,6 @@ export default function CreateCertificatePage() {
     );
   }
 
-  if (availableUnits.length === 0 && currentStep !== 3) {
-    return (
-      <div className="min-h-screen flex items-center py-8 px-4">
-        <div className="max-w-lg mx-auto">
-          <div className="rounded-xl p-8 text-center">
-            <CheckCircle className="mx-auto text-green-500 mb-4" size={64} />
-            <h3 className="text-xl font-semibold text-white mb-2">
-              ¡Todos tus certificados están creados!
-            </h3>
-            <p className="text-gray-400">
-              Completa más unidades para obtener nuevos certificados.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen ">
       <div className="sticky top-[60px] z-10 backdrop-blur-sm  border-b border-gray-800">
@@ -273,7 +254,6 @@ export default function CreateCertificatePage() {
                   ))}
                 </div>
 
-                {/* Texto informativo */}
                 <div className="text-gray-300 space-y-4">
                   <p>
                     Tus medallas (NFT's) contienen tus resultados educativos y
@@ -281,12 +261,21 @@ export default function CreateCertificatePage() {
                     fáciles de compartir e intercambiar
                   </p>
                 </div>
-                <button
-                  onClick={() => setCurrentStep(1)}
-                  className="w-full bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2 font-medium"
-                >
-                  Iniciar nuevo Minting (NFT)
-                </button>
+
+                {availableUnits.length === 0 ? (
+                  <Link href="/">
+                    <button className="w-full bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2 font-medium">
+                      Obtener tokens de minteo
+                    </button>
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => setCurrentStep(1)}
+                    className="w-full bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2 font-medium"
+                  >
+                    Iniciar nuevo Minting (NFT)
+                  </button>
+                )}
               </div>
             )}
             {currentStep === 1 && (

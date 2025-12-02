@@ -63,14 +63,14 @@ export const NoHeartsModal = () => {
               Obtener Vidas
             </Button>
 
-            <Button
+            {/* <Button
               variant="ghost"
               className="w-full"
               size="lg"
               onClick={close}
             >
               Volver
-            </Button>
+            </Button> */}
           </div>
         </DialogFooter>
       </DialogContent>
