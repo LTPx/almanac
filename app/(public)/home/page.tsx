@@ -129,7 +129,8 @@ export default function HomePage() {
               Results
             </a>
             <a
-              href="#mission"
+              href="/OpenMind — White Paper.pdf"
+              target="_blank"
               className="hover:text-foreground transition-colors"
             >
               White paper
@@ -549,9 +550,11 @@ export default function HomePage() {
                   digital hygiene, and more. The white paper explains how we
                   choose and build each new path.
                 </p>
-                <button className="mt-3 self-start text-[11px] text-primary underline-offset-2 hover:underline transition-all">
-                  Read the roadmap in the white paper →
-                </button>
+                <a href="/OpenMind — White Paper.pdf" target="_blank">
+                  <button className="mt-3 self-start text-[11px] text-primary underline-offset-2 hover:underline transition-all">
+                    Read the roadmap in the white paper →
+                  </button>
+                </a>
               </article>
             </div>
 
@@ -707,7 +710,8 @@ export default function HomePage() {
               About
             </a>
             <a
-              href="#mission"
+              href="/OpenMind — White Paper.pdf"
+              target="_blank"
               className="hover:text-foreground transition-colors"
             >
               White paper
