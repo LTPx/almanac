@@ -2,11 +2,16 @@ import { NextResponse } from "next/server";
 import { getAllLessons } from "@/lib/queries";
 import prisma from "@/lib/prisma";
 
-// GET /api/units
-export async function GET() {
+// GET /api/lessons
+export async function GET(request: Request) {
   try {
-    const lessons = await getAllLessons();
-    return NextResponse.json(lessons);
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get("search")?.trim() || "";
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const pageSize = parseInt(searchParams.get("pageSize") || "20", 10);
+
+    const result = await getAllLessons(search, page, pageSize);
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Error fetching lessons:", error);
     return NextResponse.json(

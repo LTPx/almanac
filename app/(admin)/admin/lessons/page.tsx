@@ -24,7 +24,9 @@ import {
   Filter,
   Star,
   Layout,
-  List
+  List,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -69,9 +71,20 @@ export default function LessonsPage() {
   const [selectedUnit, setSelectedUnit] = useState<string>("all");
   const [deleteLessonId, setDeleteLessonId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "grouped">("grouped");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const pageSize = 20;
 
-  const fetchLessons = async () => {
-    const response = await fetch("/api/lessons");
+  const fetchLessons = async (page: number, search = "") => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+      search
+    });
+
+    const response = await fetch(`/api/lessons?${params}`);
     if (!response.ok) {
       throw new Error("Failed to fetch lessons");
     }
@@ -135,22 +148,35 @@ export default function LessonsPage() {
   };
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadUnits = async () => {
       try {
-        const [lessonsData, unitsData] = await Promise.all([
-          fetchLessons(),
-          fetchUnits()
-        ]);
-        setLessons(lessonsData);
+        const unitsData = await fetchUnits();
         setUnits(unitsData);
       } catch (error) {
-        console.error("Error loading data:", error);
-        toast.error("Error al cargar los datos");
+        console.error("Error loading units:", error);
+      }
+    };
+    loadUnits();
+  }, []);
+
+  useEffect(() => {
+    const loadLessons = async () => {
+      setLoading(true);
+      try {
+        const result = await fetchLessons(currentPage, searchTerm);
+        setLessons(result.data);
+        setTotalPages(result.pagination.totalPages);
+        setTotal(result.pagination.total);
+      } catch (error) {
+        console.error("Error loading lessons:", error);
+        toast.error("Error al cargar las lecciones");
+      } finally {
+        setLoading(false);
       }
     };
 
-    loadData();
-  }, []);
+    loadLessons();
+  }, [currentPage, searchTerm]);
 
   const renderLessonCard = (lesson: LessonAdmin) => (
     <Card key={lesson.id} className="bg-card border-border">
@@ -305,15 +331,32 @@ export default function LessonsPage() {
         </CardContent>
       </Card>
 
+      {/* Estadísticas */}
+      <div className="text-sm text-muted-foreground">
+        Mostrando{" "}
+        {loading
+          ? "..."
+          : `${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, total)} de ${total}`}{" "}
+        lecciones
+      </div>
+
       {/* Vista de lista */}
-      {viewMode === "list" && (
+      {loading ? (
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-muted-foreground">
+              Cargando lecciones...
+            </p>
+          </CardContent>
+        </Card>
+      ) : viewMode === "list" ? (
         <div className="grid gap-4">
           {filteredLessons.map((lesson) => renderLessonCard(lesson))}
         </div>
-      )}
+      ) : null}
 
       {/* Vista agrupada por unidad */}
-      {viewMode === "grouped" && (
+      {!loading && viewMode === "grouped" && (
         <div className="space-y-8">
           {Object.entries(groupedLessons).map(([key, group]) => (
             <div key={key} className="space-y-4">
@@ -333,7 +376,7 @@ export default function LessonsPage() {
       )}
 
       {/* Sin resultados */}
-      {filteredLessons.length === 0 && (
+      {!loading && filteredLessons.length === 0 && (
         <Card className="bg-card border-border">
           <CardContent className="text-center py-8 text-muted-foreground">
             <BookOpen className="mx-auto h-12 w-12" />
@@ -353,6 +396,75 @@ export default function LessonsPage() {
                 </Button>
               </Link>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Paginación */}
+      {!loading && filteredLessons.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                Página {currentPage} de {totalPages}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Anterior
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((page) => {
+                      return (
+                        page === 1 ||
+                        page === totalPages ||
+                        (page >= currentPage - 1 && page <= currentPage + 1)
+                      );
+                    })
+                    .map((page, index, array) => {
+                      const showEllipsisBefore =
+                        index > 0 && page - array[index - 1] > 1;
+
+                      return (
+                        <div key={page} className="flex items-center">
+                          {showEllipsisBefore && (
+                            <span className="px-2 text-muted-foreground">
+                              ...
+                            </span>
+                          )}
+                          <Button
+                            variant={
+                              currentPage === page ? "default" : "outline"
+                            }
+                            size="sm"
+                            onClick={() => setCurrentPage(page)}
+                            className="min-w-[40px]"
+                          >
+                            {page}
+                          </Button>
+                        </div>
+                      );
+                    })}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  Siguiente
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}

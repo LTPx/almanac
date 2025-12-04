@@ -159,27 +159,64 @@ export const getUnits = cache(async (search: string) => {
 
 // ============== LESSON QUERIES ==============
 
-export const getAllLessons = cache(async () => {
-  const data = await prisma.lesson.findMany({
-    where: {
-      isActive: true
-    },
-    include: {
-      unit: {
-        select: {
-          name: true
-        }
+export const getAllLessons = cache(
+  async (search = "", page = 1, pageSize = 20) => {
+    const whereClause = {
+      isActive: true,
+      ...(search
+        ? {
+            OR: [
+              {
+                name: {
+                  contains: search,
+                  mode: "insensitive"
+                }
+              },
+              {
+                description: {
+                  contains: search,
+                  mode: "insensitive"
+                }
+              }
+            ]
+          }
+        : {})
+    };
+
+    const skip = (page - 1) * pageSize;
+
+    const [data, total] = await Promise.all([
+      prisma.lesson.findMany({
+        //@ts-expect-error // --- IGNORE ---
+        where: whereClause,
+        include: {
+          unit: {
+            select: {
+              name: true
+            }
+          }
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize
+      }),
+      prisma.lesson.count({
+        //@ts-expect-error // --- IGNORE ---
+        where: whereClause
+      })
+    ]);
+
+    return {
+      data,
+      pagination: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize)
       }
-      // _count: {
-      //   select: {
-      //     questions: true
-      //   }
-      // }
-    },
-    orderBy: { createdAt: "desc" }
-  });
-  return data;
-});
+    };
+  }
+);
 
 export const getLessonById = cache(async (lessonId: number) => {
   const data = await prisma.lesson.findUnique({
