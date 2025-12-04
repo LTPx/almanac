@@ -81,13 +81,29 @@ export function TestSystem({
     reason: string;
     description: string;
   }) => {
-    console.log("📝 Reporte simulado:", {
-      ...report,
-      userId,
-      testAttemptId: currentTest?.testAttemptId,
-      timestamp: new Date().toISOString()
-    });
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch("/api/questions/report", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          questionId: report.questionId,
+          reason: report.reason,
+          description: report.description
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al enviar el reporte");
+      }
+
+      const data = await response.json();
+      console.log("✅ Reporte enviado exitosamente:", data);
+    } catch (error) {
+      console.error("❌ Error al enviar reporte:", error);
+      throw error;
+    }
   };
 
   useEffect(() => {
