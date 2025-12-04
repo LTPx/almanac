@@ -19,6 +19,7 @@ import StoreContent from "../store-content";
 import { ReportErrorModal } from "../modals/report-erros-modal";
 import InterstitialAd from "../interstitialAd";
 import { useUser } from "@/context/UserContext";
+import { SuccessCompletion } from "./SuccessCompletion";
 
 interface TestSystemProps {
   userId: string;
@@ -28,7 +29,12 @@ interface TestSystemProps {
   onHeartsChange?: (hearts: number) => void;
 }
 
-type TestState = "testing" | "review-intro" | "reviewing" | "results";
+type TestState =
+  | "testing"
+  | "review-intro"
+  | "reviewing"
+  | "results"
+  | "success-celebration";
 
 export function TestSystem({
   userId,
@@ -54,12 +60,10 @@ export function TestSystem({
   const [justAnsweredCorrect, setJustAnsweredCorrect] = useState(false);
   const [firstPassQuestionCount, setFirstPassQuestionCount] = useState(0);
   const [failedQuestions, setFailedQuestions] = useState<number[]>([]);
-
-  // 🔥 NUEVOS ESTADOS PARA STREAK
+  const [showSuccessCelebration, setShowSuccessCelebration] = useState(false);
   const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
   const [showStreakCelebration, setShowStreakCelebration] = useState(false);
 
-  // 💔 NUEVO ESTADO PARA HEARTBREAK
   const [showHeartBreakAnimation, setShowHeartBreakAnimation] = useState(false);
 
   const user = useUser();
@@ -139,7 +143,6 @@ export function TestSystem({
         setFirstPassQuestionCount(testData.questions.length);
         setFailedQuestions([]);
         setUniqueFailedQuestions(new Set());
-        // 🔥 RESETEAR STREAK AL INICIAR TEST
         setConsecutiveCorrect(0);
       }
     },
@@ -175,12 +178,10 @@ export function TestSystem({
       setJustAnsweredCorrect(result.isCorrect);
       setTimeout(() => setJustAnsweredCorrect(false), 1000);
 
-      // 🔥 DETECTAR RACHA DE 5 CORRECTAS
       if (result.isCorrect) {
         const newStreak = consecutiveCorrect + 1;
         setConsecutiveCorrect(newStreak);
 
-        // Mostrar celebración en racha de 5
         if (newStreak === 5) {
           setShowStreakCelebration(true);
         }
@@ -330,7 +331,7 @@ export function TestSystem({
       if (failedQuestions.length > 0) {
         setState("review-intro");
       } else {
-        handleCompleteTest();
+        setShowSuccessCelebration(true);
         return;
       }
     }
@@ -353,14 +354,12 @@ export function TestSystem({
 
   const handleStartReview = useCallback(() => {
     setState("reviewing");
-    // 🔥 RESETEAR STREAK AL INICIAR REVISIÓN
     setConsecutiveCorrect(0);
   }, []);
 
-  // 💔 HANDLER PARA HEARTBREAK ANIMATION
   const handleHeartBreakComplete = useCallback(() => {
     setShowHeartBreakAnimation(false);
-    handleOpenStore(); // Abre la tienda automáticamente
+    handleOpenStore();
   }, [handleOpenStore]);
 
   const progress = currentTest
@@ -525,20 +524,29 @@ export function TestSystem({
         <InterstitialAd onClose={() => setShowAdBeforeStart(false)} time={10} />
       )}
 
-      {/* 💔 ANIMACIÓN DE CORAZÓN ROTO */}
       <AnimatePresence>
         {showHeartBreakAnimation && (
           <HeartBreakAnimation onComplete={handleHeartBreakComplete} />
         )}
       </AnimatePresence>
 
-      {/* 🔥 ANIMACIÓN DE RACHA */}
       <AnimatePresence>
         {showStreakCelebration && (
           <StreakCelebration
             count={5}
             onComplete={() => {
               setShowStreakCelebration(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showSuccessCelebration && (
+          <SuccessCompletion
+            onComplete={() => {
+              setShowSuccessCelebration(false);
+              handleCompleteTest();
             }}
           />
         )}
