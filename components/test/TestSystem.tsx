@@ -20,6 +20,7 @@ import { ReportErrorModal } from "../modals/report-erros-modal";
 import InterstitialAd from "../interstitialAd";
 import { useUser } from "@/context/UserContext";
 import { SuccessCompletion } from "./SuccessCompletion";
+import { MistakeAnalyzerOverlay } from "./MistakeAnalyzerOverlay";
 
 interface TestSystemProps {
   userId: string;
@@ -63,7 +64,7 @@ export function TestSystem({
   const [showSuccessCelebration, setShowSuccessCelebration] = useState(false);
   const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
   const [showStreakCelebration, setShowStreakCelebration] = useState(false);
-
+  const [showMistakeAnalyzer, setShowMistakeAnalyzer] = useState(false);
   const [showHeartBreakAnimation, setShowHeartBreakAnimation] = useState(false);
 
   const user = useUser();
@@ -329,7 +330,8 @@ export function TestSystem({
       currentQuestionIndex === firstPassQuestionCount - 1
     ) {
       if (failedQuestions.length > 0) {
-        setState("review-intro");
+        setShowMistakeAnalyzer(true);
+        return;
       } else {
         setShowSuccessCelebration(true);
         return;
@@ -349,7 +351,8 @@ export function TestSystem({
     state,
     firstPassQuestionCount,
     failedQuestions.length,
-    handleCompleteTest
+    handleCompleteTest,
+    showSuccessCelebration
   ]);
 
   const handleStartReview = useCallback(() => {
@@ -536,6 +539,18 @@ export function TestSystem({
             count={5}
             onComplete={() => {
               setShowStreakCelebration(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showMistakeAnalyzer && (
+          <MistakeAnalyzerOverlay
+            errorCount={uniqueFailedQuestions.size}
+            onComplete={() => {
+              setShowMistakeAnalyzer(false);
+              setState("review-intro");
             }}
           />
         )}
