@@ -6,8 +6,10 @@ import { TestQuestion } from "./TestQuestion";
 import { TestResults } from "./TestResults";
 import { useTest } from "@/hooks/useTest";
 import { HeaderBar } from "../header-bar";
-import { NoHeartsTestModal } from "../modals/no-hearts-test-modal";
+// import { NoHeartsTestModal } from "../modals/no-hearts-test-modal";
 import { useNoHeartsTestModal } from "@/store/use-no-hearts-test-modal";
+import { StreakCelebration } from "./StreakCelebration";
+import { HeartBreakAnimation } from "./HeartBreakAnimation";
 
 import type {
   TestData,
@@ -52,7 +54,13 @@ export function TestSystem({
   const [justAnsweredCorrect, setJustAnsweredCorrect] = useState(false);
   const [firstPassQuestionCount, setFirstPassQuestionCount] = useState(0);
   const [failedQuestions, setFailedQuestions] = useState<number[]>([]);
-  // const [showAdBeforeResults, setShowAdBeforeResults] = useState(false);
+
+  // 🔥 NUEVOS ESTADOS PARA STREAK
+  const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
+  const [showStreakCelebration, setShowStreakCelebration] = useState(false);
+
+  // 💔 NUEVO ESTADO PARA HEARTBREAK
+  const [showHeartBreakAnimation, setShowHeartBreakAnimation] = useState(false);
 
   const user = useUser();
   const isPremium = user?.isPremium || false;
@@ -131,6 +139,8 @@ export function TestSystem({
         setFirstPassQuestionCount(testData.questions.length);
         setFailedQuestions([]);
         setUniqueFailedQuestions(new Set());
+        // 🔥 RESETEAR STREAK AL INICIAR TEST
+        setConsecutiveCorrect(0);
       }
     },
     [startTest, userId]
@@ -165,9 +175,26 @@ export function TestSystem({
       setJustAnsweredCorrect(result.isCorrect);
       setTimeout(() => setJustAnsweredCorrect(false), 1000);
 
+      // 🔥 DETECTAR RACHA DE 5 CORRECTAS
+      if (result.isCorrect) {
+        const newStreak = consecutiveCorrect + 1;
+        setConsecutiveCorrect(newStreak);
+
+        // Mostrar celebración en racha de 5
+        if (newStreak === 5) {
+          setShowStreakCelebration(true);
+        }
+      } else {
+        setConsecutiveCorrect(0);
+      }
+
       if (!result.isCorrect) {
         const newHearts = Math.max(0, currentHearts - 1);
         setCurrentHearts(newHearts);
+
+        if (newHearts === 0) {
+          setShowHeartBreakAnimation(true);
+        }
 
         if (state === "testing") {
           setFailedQuestions((prev) =>
@@ -208,7 +235,8 @@ export function TestSystem({
       submitAnswer,
       currentHearts,
       state,
-      currentQuestionIndex
+      currentQuestionIndex,
+      consecutiveCorrect
     ]
   );
 
@@ -325,7 +353,15 @@ export function TestSystem({
 
   const handleStartReview = useCallback(() => {
     setState("reviewing");
+    // 🔥 RESETEAR STREAK AL INICIAR REVISIÓN
+    setConsecutiveCorrect(0);
   }, []);
+
+  // 💔 HANDLER PARA HEARTBREAK ANIMATION
+  const handleHeartBreakComplete = useCallback(() => {
+    setShowHeartBreakAnimation(false);
+    handleOpenStore(); // Abre la tienda automáticamente
+  }, [handleOpenStore]);
 
   const progress = currentTest
     ? ((currentQuestionIndex + 1) / currentTest.questions.length) * 100
@@ -489,7 +525,26 @@ export function TestSystem({
         <InterstitialAd onClose={() => setShowAdBeforeStart(false)} time={10} />
       )}
 
-      <NoHeartsTestModal />
+      {/* 💔 ANIMACIÓN DE CORAZÓN ROTO */}
+      <AnimatePresence>
+        {showHeartBreakAnimation && (
+          <HeartBreakAnimation onComplete={handleHeartBreakComplete} />
+        )}
+      </AnimatePresence>
+
+      {/* 🔥 ANIMACIÓN DE RACHA */}
+      <AnimatePresence>
+        {showStreakCelebration && (
+          <StreakCelebration
+            count={5}
+            onComplete={() => {
+              setShowStreakCelebration(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* <NoHeartsTestModal /> */}
     </div>
   );
 }
