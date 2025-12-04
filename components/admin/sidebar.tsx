@@ -11,10 +11,11 @@ import {
   HelpCircle,
   // BarChart3,
   Heart,
-  Zap,
-  Trophy,
+  // Zap,
+  // Trophy,
   Coins,
-  Settings
+  Settings,
+  Flag
   // Settings,
   // Database
 } from "lucide-react";
@@ -25,20 +26,28 @@ const navigation = [
   { name: "Unidades", href: "/admin/units", icon: BookOpen },
   { name: "Lecciones", href: "/admin/lessons", icon: GraduationCap },
   { name: "Preguntas", href: "/admin/questions", icon: HelpCircle },
+  { name: "Problemas", href: "/admin/problem-reports", icon: Flag },
   { name: "NFTs", href: "/admin/nfts", icon: Coins },
   // { name: "Usuarios", href: "/admin/users", icon: Users },
   // { name: "Progreso", href: "/admin/progress", icon: BarChart3 },
-  { name: "Configuración", href: "/admin/settings", icon: Settings },
   {
-    name: "Gamificación",
-    href: "/admin/gamification",
-    icon: Trophy,
+    name: "Configuración",
+    href: "/admin/settings",
+    icon: Settings,
     children: [
-      { name: "Corazones", href: "/admin/gamification/hearts", icon: Heart },
-      { name: "ZAP Tokens", href: "/admin/gamification/zaps", icon: Zap },
-      { name: "Rachas", href: "/admin/gamification/streaks", icon: Trophy }
+      { name: "Corazones", href: "/admin/gamification/hearts", icon: Heart }
     ]
   }
+  // {
+  //   name: "Gamificación",
+  //   href: "/admin/gamification",
+  //   icon: Trophy,
+  //   children: [
+  //     { name: "Corazones", href: "/admin/gamification/hearts", icon: Heart },
+  //     { name: "ZAP Tokens", href: "/admin/gamification/zaps", icon: Zap },
+  //     { name: "Rachas", href: "/admin/gamification/streaks", icon: Trophy }
+  //   ]
+  // }
   // { name: "Analytics", href: "/admin/analytics", icon: Database },
 ];
 
