@@ -230,38 +230,58 @@ export const getLessonsByUnitId = cache(async (unitId: number) => {
 
 // ============== QUESTION QUERIES ==============
 
-export const getQuestions = cache(async (search: string) => {
-  const whereClause = {
-    isActive: true,
-    ...(search
-      ? {
-          title: {
-            contains: search,
-            mode: "insensitive"
+export const getQuestions = cache(
+  async (search: string, page = 1, pageSize = 10) => {
+    const whereClause = {
+      isActive: true,
+      ...(search
+        ? {
+            title: {
+              contains: search,
+              mode: "insensitive"
+            }
           }
-        }
-      : {})
-  };
+        : {})
+    };
 
-  const data = await prisma.question.findMany({
-    //@ts-expect-error // --- IGNORE ---
-    where: whereClause,
-    include: {
-      answers: true,
-      unit: {
-        select: {
-          name: true
-        }
-      },
-      _count: {
-        select: { answers: true }
+    const skip = (page - 1) * pageSize;
+
+    const [data, total] = await Promise.all([
+      prisma.question.findMany({
+        //@ts-expect-error // --- IGNORE ---
+        where: whereClause,
+        include: {
+          answers: true,
+          unit: {
+            select: {
+              name: true
+            }
+          },
+          _count: {
+            select: { answers: true }
+          }
+        },
+        orderBy: { createdAt: "asc" },
+        skip,
+        take: pageSize
+      }),
+      prisma.question.count({
+        //@ts-expect-error // --- IGNORE ---
+        where: whereClause
+      })
+    ]);
+
+    return {
+      data,
+      pagination: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize)
       }
-    },
-    orderBy: { createdAt: "asc" }
-  });
-
-  return data;
-});
+    };
+  }
+);
 
 // ============== TEST ATTEMPT QUERIES ==============
 
