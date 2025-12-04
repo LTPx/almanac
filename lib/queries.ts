@@ -119,6 +119,64 @@ export const getUserProgressByUnit = cache(
 
 // ============== UNIT QUERIES ==============
 
+export const getUnitsPagination = cache(
+  async (search: string, page = 1, pageSize = 15) => {
+    console.log("search: ", search);
+    const whereClause = {
+      // isActive: true,
+      ...(search
+        ? {
+            name: {
+              contains: search,
+              mode: "insensitive" // no distingue mayúsculas/minúsculas
+            }
+          }
+        : {})
+    };
+
+    const skip = (page - 1) * pageSize;
+
+    const [data, total] = await Promise.all([
+      prisma.unit.findMany({
+        //@ts-expect-error // --- IGNORE ---
+        where: whereClause,
+        include: {
+          lessons: {
+            where: { isActive: true },
+            orderBy: { createdAt: "asc" }
+          },
+          curriculum: {
+            select: {
+              id: true,
+              title: true
+            }
+          },
+          _count: {
+            select: { lessons: true, questions: true }
+          }
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize
+      }),
+      prisma.unit.count({
+        //@ts-expect-error // --- IGNORE ---
+        where: whereClause
+      })
+    ]);
+
+    return {
+      data,
+      pagination: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize)
+      }
+    };
+  }
+);
+
 export const getUnits = cache(async (search: string) => {
   console.log("search: ", search);
   const whereClause = {
