@@ -119,6 +119,64 @@ export const getUserProgressByUnit = cache(
 
 // ============== UNIT QUERIES ==============
 
+export const getUnitsPagination = cache(
+  async (search: string, page = 1, pageSize = 15) => {
+    console.log("search: ", search);
+    const whereClause = {
+      // isActive: true,
+      ...(search
+        ? {
+            name: {
+              contains: search,
+              mode: "insensitive" // no distingue mayúsculas/minúsculas
+            }
+          }
+        : {})
+    };
+
+    const skip = (page - 1) * pageSize;
+
+    const [data, total] = await Promise.all([
+      prisma.unit.findMany({
+        //@ts-expect-error // --- IGNORE ---
+        where: whereClause,
+        include: {
+          lessons: {
+            where: { isActive: true },
+            orderBy: { createdAt: "asc" }
+          },
+          curriculum: {
+            select: {
+              id: true,
+              title: true
+            }
+          },
+          _count: {
+            select: { lessons: true, questions: true }
+          }
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize
+      }),
+      prisma.unit.count({
+        //@ts-expect-error // --- IGNORE ---
+        where: whereClause
+      })
+    ]);
+
+    return {
+      data,
+      pagination: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize)
+      }
+    };
+  }
+);
+
 export const getUnits = cache(async (search: string) => {
   console.log("search: ", search);
   const whereClause = {
@@ -159,27 +217,64 @@ export const getUnits = cache(async (search: string) => {
 
 // ============== LESSON QUERIES ==============
 
-export const getAllLessons = cache(async () => {
-  const data = await prisma.lesson.findMany({
-    where: {
-      isActive: true
-    },
-    include: {
-      unit: {
-        select: {
-          name: true
-        }
+export const getAllLessons = cache(
+  async (search = "", page = 1, pageSize = 20) => {
+    const whereClause = {
+      isActive: true,
+      ...(search
+        ? {
+            OR: [
+              {
+                name: {
+                  contains: search,
+                  mode: "insensitive"
+                }
+              },
+              {
+                description: {
+                  contains: search,
+                  mode: "insensitive"
+                }
+              }
+            ]
+          }
+        : {})
+    };
+
+    const skip = (page - 1) * pageSize;
+
+    const [data, total] = await Promise.all([
+      prisma.lesson.findMany({
+        //@ts-expect-error // --- IGNORE ---
+        where: whereClause,
+        include: {
+          unit: {
+            select: {
+              name: true
+            }
+          }
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize
+      }),
+      prisma.lesson.count({
+        //@ts-expect-error // --- IGNORE ---
+        where: whereClause
+      })
+    ]);
+
+    return {
+      data,
+      pagination: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize)
       }
-      // _count: {
-      //   select: {
-      //     questions: true
-      //   }
-      // }
-    },
-    orderBy: { createdAt: "desc" }
-  });
-  return data;
-});
+    };
+  }
+);
 
 export const getLessonById = cache(async (lessonId: number) => {
   const data = await prisma.lesson.findUnique({
@@ -230,38 +325,58 @@ export const getLessonsByUnitId = cache(async (unitId: number) => {
 
 // ============== QUESTION QUERIES ==============
 
-export const getQuestions = cache(async (search: string) => {
-  const whereClause = {
-    isActive: true,
-    ...(search
-      ? {
-          title: {
-            contains: search,
-            mode: "insensitive"
+export const getQuestions = cache(
+  async (search: string, page = 1, pageSize = 10) => {
+    const whereClause = {
+      isActive: true,
+      ...(search
+        ? {
+            title: {
+              contains: search,
+              mode: "insensitive"
+            }
           }
-        }
-      : {})
-  };
+        : {})
+    };
 
-  const data = await prisma.question.findMany({
-    //@ts-expect-error // --- IGNORE ---
-    where: whereClause,
-    include: {
-      answers: true,
-      unit: {
-        select: {
-          name: true
-        }
-      },
-      _count: {
-        select: { answers: true }
+    const skip = (page - 1) * pageSize;
+
+    const [data, total] = await Promise.all([
+      prisma.question.findMany({
+        //@ts-expect-error // --- IGNORE ---
+        where: whereClause,
+        include: {
+          answers: true,
+          unit: {
+            select: {
+              name: true
+            }
+          },
+          _count: {
+            select: { answers: true }
+          }
+        },
+        orderBy: { createdAt: "asc" },
+        skip,
+        take: pageSize
+      }),
+      prisma.question.count({
+        //@ts-expect-error // --- IGNORE ---
+        where: whereClause
+      })
+    ]);
+
+    return {
+      data,
+      pagination: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize)
       }
-    },
-    orderBy: { createdAt: "asc" }
-  });
-
-  return data;
-});
+    };
+  }
+);
 
 // ============== TEST ATTEMPT QUERIES ==============
 

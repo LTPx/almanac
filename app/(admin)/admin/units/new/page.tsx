@@ -23,7 +23,7 @@ export default function CreateUnitPage() {
   const handleSubmit = async (data: UnitInput) => {
     setSubmitting(true);
     try {
-      const res = await fetch("/api/units", {
+      const res = await fetch("/api/admin/units", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)

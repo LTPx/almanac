@@ -26,7 +26,9 @@ import {
   List,
   Move,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -64,25 +66,32 @@ const questionTypeIcons = {
 
 export default function QuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
-  // const questions = mockQuestions;
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const pageSize = 10;
 
-  const fetchQuestions = async () => {
-    const response = await fetch("/api/questions");
+  const fetchQuestions = async (page: number, search = "") => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+      search
+    });
+
+    const response = await fetch(`/api/questions?${params}`);
     if (!response.ok) {
-      throw new Error("Failed to fetch lessons");
+      throw new Error("Failed to fetch questions");
     }
     return response.json();
   };
 
   const filteredQuestions = questions.filter((question) => {
-    const matchesSearch = question.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
     const matchesType =
       selectedType === "all" || question.type === selectedType;
-    return matchesSearch && matchesType;
+    return matchesType;
   });
 
   const getTypeIcon = (type: string) => {
@@ -93,19 +102,22 @@ export default function QuestionsPage() {
 
   useEffect(() => {
     const loadQuestions = async () => {
+      setLoading(true);
       try {
-        const unitsData = await fetchQuestions();
-        setQuestions(unitsData);
+        const result = await fetchQuestions(currentPage, searchTerm);
+        setQuestions(result.data);
+        setTotalPages(result.pagination.totalPages);
+        setTotal(result.pagination.total);
       } catch (error) {
         console.error("Error loading questions:", error);
         toast.error("Error loading questions");
       } finally {
-        // setLoading(false);
+        setLoading(false);
       }
     };
 
     loadQuestions();
-  }, []);
+  }, [currentPage, searchTerm]);
 
   return (
     <div className="space-y-6">
@@ -159,9 +171,47 @@ export default function QuestionsPage() {
         </CardContent>
       </Card>
 
+      {/* Estadísticas */}
+      <div className="text-sm text-muted-foreground">
+        Mostrando{" "}
+        {loading ? "..." : `${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, total)} de ${total}`}{" "}
+        preguntas
+      </div>
+
       {/* Lista de preguntas */}
       <div className="grid gap-4">
-        {filteredQuestions.map((question) => {
+        {loading ? (
+          <Card>
+            <CardContent className="pt-6">
+              <p className="text-center text-muted-foreground">
+                Cargando preguntas...
+              </p>
+            </CardContent>
+          </Card>
+        ) : filteredQuestions.length === 0 ? (
+          <Card className="bg-card border-border">
+            <CardContent className="text-center py-8 text-muted-foreground">
+              <HelpCircle className="mx-auto h-12 w-12" />
+              <h3 className="mt-4 text-lg font-semibold text-foreground">
+                No hay preguntas
+              </h3>
+              <p className="mt-2">
+                {searchTerm || selectedType !== "all"
+                  ? "No se encontraron preguntas con los filtros actuales."
+                  : "Comienza creando tu primera pregunta."}
+              </p>
+              {!searchTerm && selectedType === "all" && (
+                <Link href="/admin/questions/new">
+                  <Button className="mt-4">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Crear primera pregunta
+                  </Button>
+                </Link>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          filteredQuestions.map((question) => {
           const TypeIcon = getTypeIcon(question.type);
 
           return (
@@ -240,32 +290,80 @@ export default function QuestionsPage() {
               </CardHeader>
             </Card>
           );
-        })}
-
-        {filteredQuestions.length === 0 && (
-          <Card className="bg-card border-border">
-            <CardContent className="text-center py-8 text-muted-foreground">
-              <HelpCircle className="mx-auto h-12 w-12" />
-              <h3 className="mt-4 text-lg font-semibold text-foreground">
-                No hay preguntas
-              </h3>
-              <p className="mt-2">
-                {searchTerm || selectedType !== "all"
-                  ? "No se encontraron preguntas con los filtros actuales."
-                  : "Comienza creando tu primera pregunta."}
-              </p>
-              {!searchTerm && selectedType === "all" && (
-                <Link href="/admin/questions/new">
-                  <Button className="mt-4">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Crear primera pregunta
-                  </Button>
-                </Link>
-              )}
-            </CardContent>
-          </Card>
+        })
         )}
       </div>
+
+      {/* Paginación */}
+      {!loading && filteredQuestions.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                Página {currentPage} de {totalPages}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Anterior
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((page) => {
+                      // Mostrar primeras 2, últimas 2, y páginas alrededor de la actual
+                      return (
+                        page === 1 ||
+                        page === totalPages ||
+                        (page >= currentPage - 1 && page <= currentPage + 1)
+                      );
+                    })
+                    .map((page, index, array) => {
+                      // Mostrar "..." si hay gap
+                      const showEllipsisBefore =
+                        index > 0 && page - array[index - 1] > 1;
+
+                      return (
+                        <div key={page} className="flex items-center">
+                          {showEllipsisBefore && (
+                            <span className="px-2 text-muted-foreground">
+                              ...
+                            </span>
+                          )}
+                          <Button
+                            variant={
+                              currentPage === page ? "default" : "outline"
+                            }
+                            size="sm"
+                            onClick={() => setCurrentPage(page)}
+                            className="min-w-[40px]"
+                          >
+                            {page}
+                          </Button>
+                        </div>
+                      );
+                    })}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  Siguiente
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
