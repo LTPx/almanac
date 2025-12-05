@@ -47,7 +47,9 @@ model User {
   subscriptionTrialEnd          DateTime?
   subscriptionCancelAtPeriodEnd Boolean            @default(false)
   subscription                  Subscription?
-  // ================================================================
+
+  // Problem reports
+  problemReports ProblemReport[]
 
   @@map("user")
 }
@@ -206,9 +208,10 @@ model Question {
   updatedAt DateTime     @updatedAt
   content   Json
 
-  answers     Answer[]
-  testAnswers TestAnswer[]
-  citations   Citation[]
+  answers        Answer[]
+  testAnswers    TestAnswer[]
+  citations      Citation[]
+  problemReports ProblemReport[]
 
   @@map("question")
 }
@@ -288,6 +291,21 @@ model TestAnswer {
   createdAt     DateTime    @default(now())
 
   @@map("test_answer")
+}
+
+model ProblemReport {
+  id          Int                 @id @default(autoincrement())
+  question    Question            @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId  Int
+  user        User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId      String?
+  reason      String
+  description String?
+  status      ProblemReportStatus @default(PENDING)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@map("problem_report")
 }
 
 model UserStreak {
@@ -557,4 +575,13 @@ enum TransactionType {
   TRIAL_CONVERSION
 
   @@map("transaction_type")
+}
+
+enum ProblemReportStatus {
+  PENDING
+  IN_REVIEW
+  RESOLVED
+  DISMISSED
+
+  @@map("problem_report_status")
 }

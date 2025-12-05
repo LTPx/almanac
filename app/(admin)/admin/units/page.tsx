@@ -24,7 +24,9 @@ import {
   HelpCircle,
   Star,
   Layout,
-  List
+  List,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -59,9 +61,19 @@ export default function UnitsPage() {
   const [deleteUnitId, setDeleteUnitId] = useState<number | null>(null);
   const [removeLessons, setRemoveLessons] = useState<boolean>(true);
   const [viewMode, setViewMode] = useState<"list" | "grouped">("grouped");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const pageSize = 15;
 
-  const fetchUnits = async () => {
-    const response = await fetch("/api/units");
+  const fetchUnits = async (page: number) => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString()
+    });
+
+    const response = await fetch(`/api/admin/units?${params}`);
     if (!response.ok) {
       throw new Error("Failed to fetch units");
     }
@@ -116,17 +128,22 @@ export default function UnitsPage() {
 
   useEffect(() => {
     const loadUnits = async () => {
+      setLoading(true);
       try {
-        const unitsData = await fetchUnits();
-        setUnits(unitsData);
+        const result = await fetchUnits(currentPage);
+        setUnits(result.data);
+        setTotalPages(result.pagination.totalPages);
+        setTotal(result.pagination.total);
       } catch (error) {
         console.error("Error loading units:", error);
         toast.error("No se pudieron cargar las unidades");
+      } finally {
+        setLoading(false);
       }
     };
 
     loadUnits();
-  }, []);
+  }, [currentPage]);
 
   const renderUnitCard = (unit: Unit) => (
     <Card
@@ -292,15 +309,32 @@ export default function UnitsPage() {
         </div>
       </div>
 
+      {/* Estadísticas */}
+      <div className="text-sm text-muted-foreground">
+        Mostrando{" "}
+        {loading
+          ? "..."
+          : `${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, total)} de ${total}`}{" "}
+        unidades
+      </div>
+
       {/* Vista de lista */}
-      {viewMode === "list" && (
+      {loading ? (
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-muted-foreground">
+              Cargando unidades...
+            </p>
+          </CardContent>
+        </Card>
+      ) : viewMode === "list" ? (
         <div className="grid gap-6">
           {units.map((unit) => renderUnitCard(unit))}
         </div>
-      )}
+      ) : null}
 
       {/* Vista agrupada por currículum */}
-      {viewMode === "grouped" && (
+      {!loading && viewMode === "grouped" && (
         <div className="space-y-8">
           {Object.entries(groupedUnits).map(([key, group]) => (
             <div key={key} className="space-y-4">
@@ -319,6 +353,75 @@ export default function UnitsPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Paginación */}
+      {!loading && units.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                Página {currentPage} de {totalPages}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Anterior
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((page) => {
+                      return (
+                        page === 1 ||
+                        page === totalPages ||
+                        (page >= currentPage - 1 && page <= currentPage + 1)
+                      );
+                    })
+                    .map((page, index, array) => {
+                      const showEllipsisBefore =
+                        index > 0 && page - array[index - 1] > 1;
+
+                      return (
+                        <div key={page} className="flex items-center">
+                          {showEllipsisBefore && (
+                            <span className="px-2 text-muted-foreground">
+                              ...
+                            </span>
+                          )}
+                          <Button
+                            variant={
+                              currentPage === page ? "default" : "outline"
+                            }
+                            size="sm"
+                            onClick={() => setCurrentPage(page)}
+                            className="min-w-[40px]"
+                          >
+                            {page}
+                          </Button>
+                        </div>
+                      );
+                    })}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  Siguiente
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Confirmar eliminación */}
