@@ -15,7 +15,8 @@ import {
   // Trophy,
   Coins,
   Settings,
-  Flag
+  Flag,
+  MonitorPlay
   // Settings,
   // Database
 } from "lucide-react";
@@ -27,6 +28,7 @@ const navigation = [
   { name: "Lecciones", href: "/admin/lessons", icon: GraduationCap },
   { name: "Preguntas", href: "/admin/questions", icon: HelpCircle },
   { name: "Problemas", href: "/admin/problem-reports", icon: Flag },
+  { name: "Anuncios", href: "/admin/ads", icon: MonitorPlay },
   { name: "NFTs", href: "/admin/nfts", icon: Coins },
   // { name: "Usuarios", href: "/admin/users", icon: Users },
   // { name: "Progreso", href: "/admin/progress", icon: BarChart3 },
