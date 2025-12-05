@@ -124,10 +124,7 @@ Fecha: ${new Date().toLocaleString()}
         {loading && (
           <div className="grid grid-cols-2 gap-4 mb-8">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton
-                key={i}
-                className="h-40 w-full rounded-lg bg-gray-700"
-              />
+              <Skeleton key={i} className="h-40 w-full rounded-lg bg-card" />
             ))}
           </div>
         )}
@@ -164,7 +161,7 @@ Fecha: ${new Date().toLocaleString()}
             </div>
             <Link
               href={"/achievements/new"}
-              className="mb-[140px] w-full h-[50px] flex items-center justify-center bg-[#1983DD] hover:bg-[#1A73E8] text-white text-base font-medium rounded-lg"
+              className="mb-[140px] w-full h-[50px] flex items-center justify-center bg-[#1983DD] hover:bg-[#1666B0] text-white text-base font-medium rounded-lg transition-colors"
             >
               Crear Nueva Medalla (NFT)
             </Link>
@@ -174,19 +171,22 @@ Fecha: ${new Date().toLocaleString()}
     );
   }
 
+  // STEP 1: CREATE WALLET
   if (step === "create") {
     return (
       <div className="px-4 min-h-full flex items-center justify-center pt-6 pb-4">
-        <div className="max-w-md w-full bg-gray-800 rounded-2xl p-8 text-center">
+        <div className="max-w-md w-full bg-card rounded-2xl p-8 text-center border border-border">
           <div className="mb-6 flex justify-center">
-            <div className="w-20 h-20 bg-[#1983DD] bg-opacity-20 rounded-full flex items-center justify-center">
-              <Wallet className="w-10 h-10 text-[#1983DD]" />
+            <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center">
+              <Wallet className="w-10 h-10 text-primary" />
             </div>
           </div>
 
-          <h2 className="text-2xl font-bold text-white mb-3">Crea tu Wallet</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-3">
+            Crea tu Wallet
+          </h2>
 
-          <p className="text-gray-400 mb-6">
+          <p className="text-muted-foreground mb-6">
             Necesitas una wallet para poder mintear y almacenar tus NFTs de
             forma segura en la blockchain.
           </p>
@@ -201,7 +201,7 @@ Fecha: ${new Date().toLocaleString()}
           <Button
             onClick={handleCreateWallet}
             disabled={creatingWallet}
-            className="w-full h-12 bg-[#1983DD] hover:bg-[#1A73E8] text-white font-medium rounded-lg"
+            className="w-full h-12 bg-[#1983DD] hover:bg-[#1666B0] text-white font-medium rounded-lg transition-colors"
           >
             {creatingWallet ? (
               <span className="flex items-center gap-2">
@@ -213,7 +213,7 @@ Fecha: ${new Date().toLocaleString()}
             )}
           </Button>
 
-          <p className="text-sm text-gray-500 mt-4">
+          <p className="text-sm text-muted-foreground mt-4">
             Tu wallet se creará de forma automática y segura
           </p>
         </div>
@@ -221,38 +221,39 @@ Fecha: ${new Date().toLocaleString()}
     );
   }
 
+  // STEP 2: BACKUP MNEMONIC
   if (step === "backup" && walletData?.mnemonic) {
     return (
       <div className="px-4 min-h-full flex items-center justify-center pt-6 pb-4">
-        <div className="max-w-2xl w-full bg-gray-800 rounded-2xl p-8">
+        <div className="max-w-2xl w-full bg-card rounded-2xl p-8 border border-border">
           <div className="mb-6 flex justify-center">
-            <div className="w-16 h-16 bg-yellow-500 bg-opacity-20 rounded-full flex items-center justify-center">
-              <AlertCircle className="w-8 h-8 text-yellow-500" />
+            <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
+              <AlertCircle className="w-8 h-8 text-primary" />
             </div>
           </div>
 
-          <h2 className="text-2xl font-bold text-white mb-3 text-center">
+          <h2 className="text-2xl font-bold text-foreground mb-3 text-center">
             ¡Importante! Guarda tu Frase de Recuperación
           </h2>
 
-          <Alert className="mb-6 bg-yellow-500 bg-opacity-10 border-yellow-500">
-            <AlertCircle className="h-4 w-4 text-yellow-500" />
-            <AlertDescription className="text-yellow-200">
+          <Alert className="mb-6 bg-primary/10 border-primary">
+            <AlertCircle className="h-4 w-4 text-primary" />
+            <AlertDescription className="text-foreground">
               Esta es la ÚNICA vez que verás esta frase. Si la pierdes, no
               podrás recuperar tu wallet.
             </AlertDescription>
           </Alert>
 
-          <div className="bg-gray-900 rounded-lg p-6 mb-6">
+          <div className="bg-background rounded-lg p-6 mb-6 border border-border">
             <div className="flex justify-between items-center mb-4">
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-muted-foreground">
                 Frase de Recuperación (12 palabras)
               </span>
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={() => setShowMnemonic(!showMnemonic)}
-                className="text-gray-400 hover:text-white"
+                className="text-muted-foreground hover:text-foreground"
               >
                 {showMnemonic ? (
                   <EyeOff className="w-4 h-4" />
@@ -263,7 +264,7 @@ Fecha: ${new Date().toLocaleString()}
             </div>
 
             <div
-              className={`font-mono text-white mb-4 p-4 bg-gray-800 rounded ${showMnemonic ? "" : "blur-sm select-none"}`}
+              className={`font-mono text-foreground mb-4 p-4 bg-muted rounded ${showMnemonic ? "" : "blur-sm select-none"}`}
             >
               {walletData.mnemonic}
             </div>
@@ -272,12 +273,12 @@ Fecha: ${new Date().toLocaleString()}
               <Button
                 onClick={copyToClipboard}
                 variant="outline"
-                className="flex-1"
+                className="flex-1 border-primary/30 hover:bg-primary/10 hover:border-primary"
                 disabled={!showMnemonic}
               >
                 {copied ? (
                   <>
-                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    <CheckCircle2 className="w-4 h-4 mr-2 text-primary" />
                     Copiado
                   </>
                 ) : (
@@ -290,7 +291,7 @@ Fecha: ${new Date().toLocaleString()}
               <Button
                 onClick={downloadMnemonic}
                 variant="outline"
-                className="flex-1"
+                className="flex-1 border-primary/30 hover:bg-primary/10 hover:border-primary"
                 disabled={!showMnemonic}
               >
                 <Download className="w-4 h-4 mr-2" />
@@ -299,17 +300,17 @@ Fecha: ${new Date().toLocaleString()}
             </div>
           </div>
 
-          <div className="flex items-start gap-3 mb-6 p-4 bg-gray-900 rounded-lg">
+          <div className="flex items-start gap-3 mb-6 p-4 bg-background rounded-lg border border-border">
             <input
               type="checkbox"
               id="confirm"
               checked={confirmed}
               onChange={(e) => setConfirmed(e.target.checked)}
-              className="mt-1"
+              className="mt-1 accent-primary"
             />
             <label
               htmlFor="confirm"
-              className="text-sm text-gray-300 cursor-pointer"
+              className="text-sm text-muted-foreground cursor-pointer"
             >
               Confirmo que he guardado mi frase de recuperación en un lugar
               seguro y entiendo que no podré recuperarla después.
@@ -319,7 +320,7 @@ Fecha: ${new Date().toLocaleString()}
           <Button
             onClick={handleComplete}
             disabled={!confirmed}
-            className="w-full h-12 bg-[#1983DD] hover:bg-[#1A73E8] text-white font-medium rounded-lg disabled:opacity-50"
+            className="w-full h-12 bg-[#1983DD] hover:bg-[#1666B0] text-white font-medium rounded-lg disabled:opacity-50 transition-colors"
           >
             Continuar
           </Button>
@@ -328,26 +329,31 @@ Fecha: ${new Date().toLocaleString()}
     );
   }
 
+  // STEP 3: COMPLETE
   return (
     <div className="px-4 min-h-full flex items-center justify-center pt-6 pb-4">
-      <div className="max-w-md w-full bg-gray-800 rounded-2xl p-8 text-center">
+      <div className="max-w-md w-full bg-card rounded-2xl p-8 text-center border border-border">
         <div className="mb-6 flex justify-center">
-          <div className="w-20 h-20 bg-green-500 bg-opacity-20 rounded-full flex items-center justify-center">
-            <CheckCircle2 className="w-10 h-10 text-green-500" />
+          <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center">
+            <CheckCircle2 className="w-10 h-10 text-primary" />
           </div>
         </div>
 
-        <h2 className="text-2xl font-bold text-white mb-3">¡Wallet Creada!</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-3">
+          ¡Wallet Creada!
+        </h2>
 
-        <p className="text-gray-400 mb-4">
+        <p className="text-muted-foreground mb-4">
           Tu wallet ha sido creada exitosamente. Ya puedes empezar a mintear tus
           NFTs.
         </p>
 
         {walletData && (
-          <div className="bg-gray-900 rounded-lg p-4 mb-6">
-            <p className="text-xs text-gray-500 mb-1">Dirección de tu Wallet</p>
-            <p className="text-sm text-white font-mono break-all">
+          <div className="bg-background rounded-lg p-4 mb-6 border border-border">
+            <p className="text-xs text-muted-foreground mb-1">
+              Dirección de tu Wallet
+            </p>
+            <p className="text-sm text-foreground font-mono break-all">
               {walletData.address}
             </p>
           </div>
@@ -355,7 +361,7 @@ Fecha: ${new Date().toLocaleString()}
 
         <Button
           onClick={() => refetch()}
-          className="w-full h-12 bg-[#1983DD] hover:bg-[#1A73E8] text-white font-medium rounded-lg"
+          className="w-full h-12 bg-[#1983DD] hover:bg-[#1666B0] text-white font-medium rounded-lg transition-colors"
         >
           Comenzar
         </Button>
