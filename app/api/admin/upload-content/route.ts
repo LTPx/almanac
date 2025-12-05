@@ -2,9 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { contentUploadSchema } from "@/lib/content-schema";
 import prisma from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { verifyAdminSession } from "@/lib/admin-auth";
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers()
+    });
+
+    const adminCheck = verifyAdminSession(session);
+    if (adminCheck) return adminCheck;
+
     const body = await request.json();
 
     // Validar con Zod
@@ -116,9 +126,14 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
   try {
-    // Verificar autenticación de admin aquí si es necesario
+    const session = await auth.api.getSession({
+      headers: await headers()
+    });
+
+    const adminCheck = verifyAdminSession(session);
+    if (adminCheck) return adminCheck;
 
     await prisma.$transaction(async (tx) => {
       await tx.testAnswer.deleteMany();
