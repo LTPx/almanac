@@ -18,10 +18,10 @@ export function isUserAdmin(userId: string): boolean {
  * Verifica si la sesión pertenece a un administrador
  */
 export function isSessionAdmin(session: Session | null): boolean {
-  if (!session?.user?.id) {
+  if (!session?.userId) {
     return false;
   }
-  return isUserAdmin(session.user.id);
+  return isUserAdmin(session.userId);
 }
 
 /**
@@ -31,12 +31,11 @@ export function isSessionAdmin(session: Session | null): boolean {
  * const adminCheck = verifyAdminSession(session);
  * if (adminCheck) return adminCheck;
  */
-export function verifyAdminSession(session: Session | null): NextResponse | null {
+export function verifyAdminSession(
+  session: Session | null
+): NextResponse | null {
   if (!session) {
-    return NextResponse.json(
-      { error: "No autenticado" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
   }
 
   if (!isSessionAdmin(session)) {
