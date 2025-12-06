@@ -67,7 +67,7 @@ export default function CurriculumPage() {
   );
 
   const deleteCurriculum = async (curriculumId: string) => {
-    const response = await fetch(`/api/curriculums/${curriculumId}`, {
+    const response = await fetch(`/api/admin/curriculums/${curriculumId}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" }
     });
@@ -90,7 +90,7 @@ export default function CurriculumPage() {
   };
 
   const fetchCurriculums = async () => {
-    const response = await fetch("/api/curriculums");
+    const response = await fetch("/api/admin/curriculums");
     if (!response.ok) {
       throw new Error("Failed to fetch units");
     }
@@ -99,7 +99,7 @@ export default function CurriculumPage() {
 
   const toggleCurriculumStatus = async (id: string) => {
     try {
-      await fetch(`/api/curriculums/${id}/active`, {
+      await fetch(`/api/admin/curriculums/${id}/active`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" }
       });

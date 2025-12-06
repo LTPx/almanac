@@ -25,8 +25,8 @@ export default function CurriculumUnitsPage() {
     const fetchData = async () => {
       try {
         const [curriculumRes, unitsRes] = await Promise.all([
-          fetch(`/api/curriculums/${curriculumId}`),
-          fetch(`/api/units?search=${encodeURIComponent(searchTerm)}`)
+          fetch(`/api/admin/curriculums/${curriculumId}`),
+          fetch(`/api/admin/units?search=${encodeURIComponent(searchTerm)}`)
         ]);
 
         if (!curriculumRes.ok || !unitsRes.ok)
@@ -63,7 +63,7 @@ export default function CurriculumUnitsPage() {
     if (!curriculum) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/curriculums/${curriculumId}/units`, {
+      const res = await fetch(`/api/admin/curriculums/${curriculumId}/units`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ unitIds: curriculum.units.map((u) => u.id) })

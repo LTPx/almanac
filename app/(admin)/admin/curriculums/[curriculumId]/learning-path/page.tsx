@@ -27,8 +27,8 @@ export default function LearningPathPage({
 
     try {
       const [unitRes, positionsRes] = await Promise.all([
-        fetch(`/api/curriculums/${curriculumId}/units`),
-        fetch(`/api/curriculums/${curriculumId}/units/positions`)
+        fetch(`/api/admin/curriculums/${curriculumId}/units`),
+        fetch(`/api/admin/curriculums/${curriculumId}/units/positions`)
       ]);
 
       if (!unitRes.ok || !positionsRes.ok) {
