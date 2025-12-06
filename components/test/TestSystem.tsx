@@ -20,7 +20,7 @@ import { useUser } from "@/context/UserContext";
 
 interface TestSystemProps {
   userId: string;
-  initialUnitId: number;
+  unitId: number;
   onClose: () => void;
   hearts: number;
   onHeartsChange?: (hearts: number) => void;
@@ -30,7 +30,7 @@ type TestState = "testing" | "review-intro" | "reviewing" | "results";
 
 export function TestSystem({
   userId,
-  initialUnitId,
+  unitId,
   onClose,
   hearts: initialHearts,
   onHeartsChange
@@ -154,10 +154,10 @@ export function TestSystem({
 
   useEffect(() => {
     if (!hasInitialized.current && !showAdBeforeStart) {
-      handleStartTest(initialUnitId);
+      handleStartTest(unitId);
       hasInitialized.current = true;
     }
-  }, [handleStartTest, initialUnitId, showAdBeforeStart]);
+  }, [handleStartTest, unitId, showAdBeforeStart]);
 
   const handleAnswer = useCallback(
     async (questionId: number, answer: string) => {
