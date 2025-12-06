@@ -32,6 +32,7 @@ export function UnitAd({ unitId, className }: UnitAdProps) {
 
   useEffect(() => {
     fetchAds();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unitId]);
 
   useEffect(() => {
@@ -108,10 +109,7 @@ export function UnitAd({ unitId, className }: UnitAdProps) {
       </Button>
 
       {/* Contenido del ad */}
-      <div
-        className="cursor-pointer"
-        onClick={() => handleAdClick(currentAd)}
-      >
+      <div className="cursor-pointer" onClick={() => handleAdClick(currentAd)}>
         <div className="relative aspect-[16/9] w-full">
           <Image
             src={currentAd.imageUrl}
