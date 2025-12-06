@@ -56,7 +56,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
           <TestSystem
             hearts={hearts || 0}
             userId={userId}
-            initialLessonId={activeUnit.id}
+            initialUnitId={activeUnit.id}
             onClose={handleCloseTest}
           />
         </div>
