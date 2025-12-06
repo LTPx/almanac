@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUnitsByCurriculumId } from "@/lib/queries";
 import prisma from "@/lib/prisma";
 
 export async function GET(
@@ -9,8 +8,50 @@ export async function GET(
   const { curriculumId } = await context.params;
 
   try {
-    const lessons = await getUnitsByCurriculumId(curriculumId);
-    return NextResponse.json(lessons);
+    const curriculum = await prisma.curriculum.findUnique({
+      where: {
+        id: curriculumId
+      },
+      include: {
+        units: {
+          where: {
+            isActive: true
+          },
+          include: {
+            lessons: {
+              where: {
+                isActive: true
+              },
+              orderBy: {
+                position: "asc"
+              },
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                position: true,
+                unitId: true
+              }
+            },
+            ads: {
+              select: {
+                imageUrl: true,
+                targetUrl: true
+              }
+            }
+          },
+          orderBy: {
+            order: "asc"
+          }
+        },
+        _count: {
+          select: {
+            units: true
+          }
+        }
+      }
+    });
+    return NextResponse.json(curriculum?.units || []);
   } catch (error) {
     console.error("Error fetching lessons:", error);
     return NextResponse.json(
