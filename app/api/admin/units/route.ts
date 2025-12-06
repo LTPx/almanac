@@ -1,9 +1,19 @@
 import { NextResponse } from "next/server";
 import { getUnitsPagination } from "@/lib/queries";
 import prisma from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { verifyAdminSession } from "@/lib/admin-auth";
 
 export async function GET(request: Request) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers()
+    });
+
+    const adminCheck = verifyAdminSession(session);
+    if (adminCheck) return adminCheck;
+
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search")?.trim() || "";
     const page = parseInt(searchParams.get("page") || "1", 10);
@@ -22,6 +32,13 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers()
+    });
+
+    const adminCheck = verifyAdminSession(session);
+    if (adminCheck) return adminCheck;
+
     const body = await request.json();
     const { name, description, order } = body;
 

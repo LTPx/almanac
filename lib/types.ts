@@ -1,3 +1,5 @@
+import { Session } from "better-auth";
+
 export interface User {
   id: string;
   name: string;
@@ -9,6 +11,11 @@ export interface User {
   isPremium?: boolean;
   hasWallet?: boolean;
   isAdmin?: boolean;
+}
+
+export interface SessionApp {
+  session: Session;
+  user: User;
 }
 
 export interface Question {

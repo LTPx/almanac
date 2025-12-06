@@ -21,7 +21,7 @@ export default function EditCurriculumPage() {
   useEffect(() => {
     const fetchCurriculum = async () => {
       try {
-        const res = await fetch(`/api/curriculums/${curriculumId}`);
+        const res = await fetch(`/api/admin/curriculums/${curriculumId}`);
         if (!res.ok) throw new Error("Error al cargar curriculum");
         const curriculum = await res.json();
         setCurriculum(curriculum);
@@ -38,7 +38,7 @@ export default function EditCurriculumPage() {
   const handleSubmit = async (data: CurriculumInput) => {
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/curriculums/${curriculumId}`, {
+      const res = await fetch(`/api/admin/curriculums/${curriculumId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)

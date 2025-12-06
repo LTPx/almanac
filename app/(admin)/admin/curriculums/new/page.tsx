@@ -17,7 +17,7 @@ export default function NewCurriculumPage() {
   const handleSubmit = async (data: CurriculumInput) => {
     setSubmitting(true);
     try {
-      const res = await fetch("/api/curriculums", {
+      const res = await fetch("/api/admin/curriculums", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
