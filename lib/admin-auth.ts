@@ -2,8 +2,8 @@
  * Utilidades para verificar permisos de administrador
  */
 
-import { Session } from "better-auth/types";
 import { NextResponse } from "next/server";
+import { SessionApp } from "./types";
 
 /**
  * Verifica si un usuario es administrador
@@ -17,11 +17,11 @@ export function isUserAdmin(userId: string): boolean {
 /**
  * Verifica si la sesión pertenece a un administrador
  */
-export function isSessionAdmin(session: Session | null): boolean {
-  if (!session?.userId) {
+export function isSessionAdmin(session: SessionApp | null): boolean {
+  if (!session) {
     return false;
   }
-  return isUserAdmin(session.userId);
+  return isUserAdmin(session.user.id);
 }
 
 /**
@@ -32,7 +32,7 @@ export function isSessionAdmin(session: Session | null): boolean {
  * if (adminCheck) return adminCheck;
  */
 export function verifyAdminSession(
-  session: Session | null
+  session: SessionApp | null
 ): NextResponse | null {
   if (!session) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
