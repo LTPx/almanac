@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -15,28 +14,13 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, Eye, MousePointerClick } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-
-interface Unit {
-  id: number;
-  name: string;
-}
+import { AdForm } from "@/components/admin/ad-form";
 
 interface Ad {
   id: number;
@@ -58,24 +42,12 @@ interface Ad {
 
 export default function AdsPage() {
   const [ads, setAds] = useState<Ad[]>([]);
-  const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAd, setEditingAd] = useState<Ad | null>(null);
 
-  const [formData, setFormData] = useState({
-    unitId: "",
-    title: "",
-    description: "",
-    imageUrl: "",
-    targetUrl: "",
-    position: 0,
-    isActive: true
-  });
-
   useEffect(() => {
     fetchAds();
-    fetchUnits();
   }, []);
 
   const fetchAds = async () => {
@@ -90,19 +62,7 @@ export default function AdsPage() {
     }
   };
 
-  const fetchUnits = async () => {
-    try {
-      const response = await fetch("/api/admin/units");
-      const data = await response.json();
-      setUnits(data.data || []);
-    } catch (error) {
-      console.error("Error fetching units:", error);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async (formData: any) => {
     try {
       const url = editingAd
         ? `/api/admin/ads/${editingAd.id}`
@@ -112,14 +72,11 @@ export default function AdsPage() {
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          unitId: parseInt(formData.unitId)
-        })
+        body: JSON.stringify(formData)
       });
 
       if (response.ok) {
-        fetchAds();
+        await fetchAds();
         setIsDialogOpen(false);
         resetForm();
       }
@@ -146,29 +103,11 @@ export default function AdsPage() {
 
   const handleEdit = (ad: Ad) => {
     setEditingAd(ad);
-    setFormData({
-      unitId: ad.unit.id.toString(),
-      title: ad.title,
-      description: ad.description || "",
-      imageUrl: ad.imageUrl,
-      targetUrl: ad.targetUrl,
-      position: ad.position,
-      isActive: ad.isActive
-    });
     setIsDialogOpen(true);
   };
 
   const resetForm = () => {
     setEditingAd(null);
-    setFormData({
-      unitId: "",
-      title: "",
-      description: "",
-      imageUrl: "",
-      targetUrl: "",
-      position: 0,
-      isActive: true
-    });
   };
 
   const getCTR = (views: number, clicks: number) => {
@@ -207,124 +146,11 @@ export default function AdsPage() {
                   : "Crea un nuevo anuncio para una unidad"}
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="unitId">Unidad</Label>
-                <Select
-                  value={formData.unitId}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, unitId: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una unidad" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {units.map((unit) => (
-                      <SelectItem key={unit.id} value={unit.id.toString()}>
-                        {unit.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="title">Título</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Descripción</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="imageUrl">URL de Imagen</Label>
-                <Input
-                  id="imageUrl"
-                  value={formData.imageUrl}
-                  onChange={(e) =>
-                    setFormData({ ...formData, imageUrl: e.target.value })
-                  }
-                  placeholder="https://..."
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="targetUrl">URL de Destino</Label>
-                <Input
-                  id="targetUrl"
-                  value={formData.targetUrl}
-                  onChange={(e) =>
-                    setFormData({ ...formData, targetUrl: e.target.value })
-                  }
-                  placeholder="https://..."
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="position">Posición</Label>
-                  <Input
-                    id="position"
-                    type="number"
-                    value={formData.position}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        position: parseInt(e.target.value)
-                      })
-                    }
-                    min="0"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="isActive">Activo</Label>
-                  <div className="flex items-center space-x-2 h-10">
-                    <Switch
-                      id="isActive"
-                      checked={formData.isActive}
-                      onCheckedChange={(checked) =>
-                        setFormData({ ...formData, isActive: checked })
-                      }
-                    />
-                    <span className="text-sm">
-                      {formData.isActive ? "Sí" : "No"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsDialogOpen(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  {editingAd ? "Actualizar" : "Crear"}
-                </Button>
-              </DialogFooter>
-            </form>
+            <AdForm
+              editingAd={editingAd}
+              onSubmit={handleSubmit}
+              onCancel={() => setIsDialogOpen(false)}
+            />
           </DialogContent>
         </Dialog>
       </div>
