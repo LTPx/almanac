@@ -2,75 +2,195 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Heart, HeartCrack } from "lucide-react";
+import { Heart, HeartCrack, ShoppingBag, X } from "lucide-react";
 
 interface HeartBreakAnimationProps {
   onComplete: () => void;
+  onExit?: () => void;
 }
 
 export const HeartBreakAnimation: React.FC<HeartBreakAnimationProps> = ({
-  onComplete
+  onComplete,
+  onExit
 }) => {
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop with red tint */}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+      className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center backdrop-blur-md"
+    >
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="absolute inset-0 bg-slate-900/90 backdrop-blur-sm"
-      />
-
-      {/* The Modal */}
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{
-          scale: 1,
-          opacity: 1,
-          x: [0, -10, 10, -5, 5, 0] // The "Shake" Effect
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 300,
-          damping: 20,
-          x: { duration: 0.4 } // Shake duration
-        }}
-        className="relative z-10 w-full max-w-sm mx-4 bg-slate-800 border border-slate-700 rounded-3xl p-8 flex flex-col items-center text-center shadow-2xl shadow-red-900/20"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-[650px] h-[100dvh] bg-gradient-to-b from-background via-background to-card/50 flex flex-col items-center justify-center p-8 relative overflow-hidden"
       >
-        {/* The Breaking Heart Animation */}
-        <div className="relative mb-6">
-          <motion.div
-            initial={{ opacity: 1, scale: 1 }}
-            animate={{ opacity: 0, scale: 1.5 }}
-            transition={{ duration: 0.3 }}
-            className="absolute inset-0 flex items-center justify-center text-red-500"
+        {onExit && (
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.3 }}
+            onClick={onExit}
+            className="absolute top-6 right-6 z-20 p-2 rounded-full bg-card/80 hover:bg-card text-foreground/60 hover:text-foreground transition-colors"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
           >
-            <Heart size={80} fill="currentColor" />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1, type: "spring" }}
-            className="text-slate-600 relative z-10"
-          >
-            <HeartCrack size={80} />
-          </motion.div>
-        </div>
+            <X size={24} />
+          </motion.button>
+        )}
 
-        <h2 className="text-2xl font-bold text-white mb-2">Sin Corazones</h2>
-        <p className="text-slate-400 mb-8">
-          Te has quedado sin corazones. ¿Quieres comprar más para continuar?
-        </p>
+        <motion.div
+          initial={{ scale: 0, opacity: 1 }}
+          animate={{ scale: [0, 3, 4], opacity: [1, 0.5, 0] }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          className="absolute bg-gradient-to-r from-destructive/40 to-destructive/30 rounded-full w-64 h-64 blur-3xl"
+        />
 
-        {/* Action Button */}
-        <div className="w-full">
-          <button
+        <motion.div
+          initial={{ scale: 0, y: 50 }}
+          animate={{
+            scale: 1,
+            y: 0,
+            x: [0, -10, 10, -5, 5, 0]
+          }}
+          transition={{
+            scale: {
+              type: "spring",
+              stiffness: 200,
+              damping: 15,
+              delay: 0.1
+            },
+            y: {
+              type: "spring",
+              stiffness: 200,
+              damping: 15,
+              delay: 0.1
+            },
+            x: { duration: 0.4, delay: 0.6 }
+          }}
+          className="relative z-10 bg-card rounded-full p-2 shadow-lg"
+        >
+          <div className="bg-gradient-to-br from-destructive/90 to-destructive p-8 rounded-full shadow-[0_0_40px_rgba(237,83,40,0.5)] relative">
+            <motion.div
+              initial={{ opacity: 1, scale: 1 }}
+              animate={{ opacity: 0, scale: 1.3 }}
+              transition={{ duration: 0.4, delay: 0.8 }}
+              className="absolute inset-0 flex items-center justify-center"
+            >
+              <Heart size={80} fill="white" color="white" />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.9, type: "spring", stiffness: 200 }}
+              className="relative"
+            >
+              <HeartCrack size={80} color="white" strokeWidth={2.5} />
+            </motion.div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.1, duration: 0.5 }}
+          className="text-center mt-8 z-10 space-y-3"
+        >
+          <h1 className="text-3xl font-bold text-destructive">
+            ¡Sin Corazones!
+          </h1>
+          <p className="text-foreground/80 font-medium text-lg max-w-md">
+            Te has quedado sin corazones. Visita la tienda para continuar
+            aprendiendo.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.3, duration: 0.5 }}
+          className="mt-8 z-10 w-full max-w-md space-y-3"
+        >
+          <motion.button
             onClick={onComplete}
-            className="w-full py-4 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full py-4 bg-primary hover:brightness-110 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary/30 flex items-center justify-center gap-3"
           >
+            <ShoppingBag size={24} />
             Ir a la Tienda
-          </button>
-        </div>
+          </motion.button>
+
+          {onExit && (
+            <motion.button
+              onClick={onExit}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full py-3 bg-card/50 hover:bg-card border border-border text-foreground/80 hover:text-foreground font-semibold rounded-xl transition-all"
+            >
+              Salir del Examen
+            </motion.button>
+          )}
+        </motion.div>
+
+        {[...Array(8)].map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{
+              scale: [0, 1, 0],
+              opacity: [0, 1, 0],
+              x: [0, Math.cos((i * 45 * Math.PI) / 180) * 100],
+              y: [0, Math.sin((i * 45 * Math.PI) / 180) * 100]
+            }}
+            transition={{
+              duration: 1.5,
+              delay: 0.8 + i * 0.05,
+              ease: "easeOut"
+            }}
+            className="absolute w-2 h-2 bg-destructive/60 rounded-full"
+          />
+        ))}
+
+        <motion.div
+          initial={{ opacity: 0, x: 0, y: 0, rotate: 0 }}
+          animate={{
+            opacity: [0, 1, 0],
+            x: -60,
+            y: -40,
+            rotate: -45
+          }}
+          transition={{ duration: 1, delay: 0.9 }}
+          className="absolute"
+        >
+          <Heart
+            size={20}
+            fill="rgba(237,83,40,0.5)"
+            color="rgba(237,83,40,0.5)"
+          />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: 0, y: 0, rotate: 0 }}
+          animate={{
+            opacity: [0, 1, 0],
+            x: 60,
+            y: -30,
+            rotate: 45
+          }}
+          transition={{ duration: 1, delay: 0.95 }}
+          className="absolute"
+        >
+          <Heart
+            size={16}
+            fill="rgba(237,83,40,0.4)"
+            color="rgba(237,83,40,0.4)"
+          />
+        </motion.div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 };

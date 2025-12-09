@@ -278,6 +278,13 @@ export function TestSystem({
 
     setShowStore(false);
 
+    if (updatedHearts === 0) {
+      setTimeout(() => {
+        setShowHeartBreakAnimation(true);
+      }, 100);
+      return;
+    }
+
     if (updatedHearts > 0 && currentTest) {
       const currentQuestionId = currentTest.questions[currentQuestionIndex]?.id;
 
@@ -349,6 +356,7 @@ export function TestSystem({
         setShowMistakeAnalyzer(true);
         return;
       } else {
+        setState("success-celebration");
         setShowSuccessCelebration(true);
         return;
       }
@@ -367,8 +375,7 @@ export function TestSystem({
     state,
     firstPassQuestionCount,
     failedQuestions.length,
-    handleCompleteTest,
-    showSuccessCelebration
+    handleCompleteTest
   ]);
 
   const handleHeartBreakComplete = useCallback(() => {
@@ -399,56 +406,59 @@ export function TestSystem({
 
   return (
     <div className="bg-background h-[100dvh] flex flex-col overflow-hidden">
-      {(state === "testing" || state === "reviewing") && currentTest && (
-        <>
-          <HeaderBar
-            onClose={onClose}
-            hearts={currentHearts}
-            percentage={progress}
-            hasActiveSubscription={false}
-            justAnsweredCorrect={justAnsweredCorrect}
-          />
-          <div className="relative flex-1 flex items-center justify-center">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={animationKey}
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-                className="absolute w-full h-full flex"
-              >
-                <TestQuestion
-                  question={currentTest.questions[currentQuestionIndex]}
-                  onAnswer={handleAnswer}
-                  onNext={handleNext}
-                  onReportError={() => setShowReportModal(true)}
-                  showResult={
-                    !!answers[currentTest.questions[currentQuestionIndex]?.id]
-                  }
-                  isCorrect={
-                    answers[currentTest.questions[currentQuestionIndex]?.id]
-                      ?.isCorrect
-                  }
-                  selectedAnswer={
-                    answers[currentTest.questions[currentQuestionIndex]?.id]
-                      ?.answer
-                  }
-                />
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </>
-      )}
+      {(state === "testing" || state === "reviewing") &&
+        currentTest &&
+        !showSuccessCelebration &&
+        !showMistakeAnalyzer && (
+          <>
+            <HeaderBar
+              onClose={onClose}
+              hearts={currentHearts}
+              percentage={progress}
+              hasActiveSubscription={false}
+              justAnsweredCorrect={justAnsweredCorrect}
+            />
+            <div className="relative flex-1 flex items-center justify-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={animationKey}
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -50 }}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                  className="absolute w-full h-full flex"
+                >
+                  <TestQuestion
+                    question={currentTest.questions[currentQuestionIndex]}
+                    onAnswer={handleAnswer}
+                    onNext={handleNext}
+                    onReportError={() => setShowReportModal(true)}
+                    showResult={
+                      !!answers[currentTest.questions[currentQuestionIndex]?.id]
+                    }
+                    isCorrect={
+                      answers[currentTest.questions[currentQuestionIndex]?.id]
+                        ?.isCorrect
+                    }
+                    selectedAnswer={
+                      answers[currentTest.questions[currentQuestionIndex]?.id]
+                        ?.answer
+                    }
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </>
+        )}
 
       {state === "results" && results && currentTest && (
         <AnimatePresence>
           <motion.div
             key="results"
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className="absolute inset-0 w-full h-full flex items-center justify-center"
           >
             <TestResults
@@ -508,7 +518,10 @@ export function TestSystem({
 
       <AnimatePresence>
         {showHeartBreakAnimation && (
-          <HeartBreakAnimation onComplete={handleHeartBreakComplete} />
+          <HeartBreakAnimation
+            onComplete={handleHeartBreakComplete}
+            onExit={handleExitTest}
+          />
         )}
       </AnimatePresence>
 
@@ -541,15 +554,15 @@ export function TestSystem({
       <AnimatePresence>
         {showSuccessCelebration && (
           <SuccessCompletion
+            onStartComplete={() => {
+              handleCompleteTest();
+            }}
             onComplete={() => {
               setShowSuccessCelebration(false);
-              handleCompleteTest();
             }}
           />
         )}
       </AnimatePresence>
-
-      {/* <NoHeartsTestModal /> */}
     </div>
   );
 }

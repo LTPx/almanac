@@ -25,9 +25,11 @@ export const MistakeAnalyzerOverlay = ({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center"
     >
-      <div className="w-full max-w-[650px] h-[100dvh] bg-gradient-to-b from-background via-background to-card/50 flex flex-col p-8">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+
+      <div className="relative w-full max-w-[650px] h-[100dvh] bg-gradient-to-b from-background via-background to-card/50 flex flex-col p-8">
         <AnimatePresence mode="wait">
           {scanState === "scanning" ? (
             <motion.div
@@ -38,9 +40,7 @@ export const MistakeAnalyzerOverlay = ({
               transition={{ duration: 0.3 }}
               className="flex flex-col items-center justify-center flex-1 space-y-8"
             >
-              {/* Ícono de escaneo minimalista */}
               <div className="relative">
-                {/* Anillo sutil */}
                 <motion.div
                   animate={{ scale: [1, 1.3], opacity: [0.3, 0] }}
                   transition={{
@@ -51,7 +51,6 @@ export const MistakeAnalyzerOverlay = ({
                   className="absolute inset-0 rounded-full border-2 border-primary -inset-6"
                 />
 
-                {/* Contenedor del ícono */}
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
@@ -60,7 +59,6 @@ export const MistakeAnalyzerOverlay = ({
                   <ScanEye size={56} className="text-primary" />
                 </motion.div>
 
-                {/* Línea de escaneo */}
                 <motion.div
                   animate={{
                     y: ["-100%", "100%"],
@@ -76,7 +74,6 @@ export const MistakeAnalyzerOverlay = ({
                 />
               </div>
 
-              {/* Texto simple */}
               <div className="text-center space-y-2">
                 <h2 className="text-xl font-semibold text-foreground">
                   Analizando Resultados
@@ -94,10 +91,8 @@ export const MistakeAnalyzerOverlay = ({
               transition={{ duration: 0.4 }}
               className="flex-1 flex flex-col justify-between py-8"
             >
-              {/* Contenido principal */}
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center space-y-8 w-full max-w-md">
-                  {/* Ícono de resultado simple */}
                   <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
@@ -124,7 +119,6 @@ export const MistakeAnalyzerOverlay = ({
                     </motion.div>
                   </motion.div>
 
-                  {/* Títulos limpios */}
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -141,14 +135,12 @@ export const MistakeAnalyzerOverlay = ({
                     </p>
                   </motion.div>
 
-                  {/* Card de errores minimalista */}
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
                     className="relative bg-destructive/5 border border-destructive/30 rounded-xl p-5 backdrop-blur-sm overflow-hidden"
                   >
-                    {/* Efecto de brillo sutil */}
                     <motion.div
                       animate={{
                         x: ["-100%", "100%"],
@@ -181,7 +173,6 @@ export const MistakeAnalyzerOverlay = ({
                 </div>
               </div>
 
-              {/* Botón minimalista */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
