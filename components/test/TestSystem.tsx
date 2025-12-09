@@ -6,8 +6,10 @@ import { TestQuestion } from "./TestQuestion";
 import { TestResults } from "./TestResults";
 import { useTest } from "@/hooks/useTest";
 import { HeaderBar } from "../header-bar";
-import { NoHeartsTestModal } from "../modals/no-hearts-test-modal";
+// import { NoHeartsTestModal } from "../modals/no-hearts-test-modal";
 import { useNoHeartsTestModal } from "@/store/use-no-hearts-test-modal";
+import { StreakCelebration } from "./StreakCelebration";
+import { HeartBreakAnimation } from "./HeartBreakAnimation";
 
 import type {
   TestData,
@@ -17,6 +19,8 @@ import StoreContent from "../store-content";
 import { ReportErrorModal } from "../modals/report-erros-modal";
 import InterstitialAd from "../interstitialAd";
 import { useUser } from "@/context/UserContext";
+import { SuccessCompletion } from "./SuccessCompletion";
+import { MistakeAnalyzerOverlay } from "./MistakeAnalyzerOverlay";
 
 interface TestSystemProps {
   userId: string;
@@ -26,7 +30,12 @@ interface TestSystemProps {
   onHeartsChange?: (hearts: number) => void;
 }
 
-type TestState = "testing" | "review-intro" | "reviewing" | "results";
+type TestState =
+  | "testing"
+  | "review-intro"
+  | "reviewing"
+  | "results"
+  | "success-celebration";
 
 export function TestSystem({
   userId,
@@ -52,7 +61,11 @@ export function TestSystem({
   const [justAnsweredCorrect, setJustAnsweredCorrect] = useState(false);
   const [firstPassQuestionCount, setFirstPassQuestionCount] = useState(0);
   const [failedQuestions, setFailedQuestions] = useState<number[]>([]);
-  // const [showAdBeforeResults, setShowAdBeforeResults] = useState(false);
+  const [showSuccessCelebration, setShowSuccessCelebration] = useState(false);
+  const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
+  const [showStreakCelebration, setShowStreakCelebration] = useState(false);
+  const [showMistakeAnalyzer, setShowMistakeAnalyzer] = useState(false);
+  const [showHeartBreakAnimation, setShowHeartBreakAnimation] = useState(false);
 
   const user = useUser();
   const isPremium = user?.isPremium || false;
@@ -147,6 +160,7 @@ export function TestSystem({
         setFirstPassQuestionCount(testData.questions.length);
         setFailedQuestions([]);
         setUniqueFailedQuestions(new Set());
+        setConsecutiveCorrect(0);
       }
     },
     [startTest, userId]
@@ -181,9 +195,24 @@ export function TestSystem({
       setJustAnsweredCorrect(result.isCorrect);
       setTimeout(() => setJustAnsweredCorrect(false), 1000);
 
+      if (result.isCorrect) {
+        const newStreak = consecutiveCorrect + 1;
+        setConsecutiveCorrect(newStreak);
+
+        if (newStreak === 5) {
+          setShowStreakCelebration(true);
+        }
+      } else {
+        setConsecutiveCorrect(0);
+      }
+
       if (!result.isCorrect) {
         const newHearts = Math.max(0, currentHearts - 1);
         setCurrentHearts(newHearts);
+
+        if (newHearts === 0) {
+          setShowHeartBreakAnimation(true);
+        }
 
         if (state === "testing") {
           setFailedQuestions((prev) =>
@@ -224,7 +253,8 @@ export function TestSystem({
       submitAnswer,
       currentHearts,
       state,
-      currentQuestionIndex
+      currentQuestionIndex,
+      consecutiveCorrect
     ]
   );
 
@@ -247,6 +277,13 @@ export function TestSystem({
     }
 
     setShowStore(false);
+
+    if (updatedHearts === 0) {
+      setTimeout(() => {
+        setShowHeartBreakAnimation(true);
+      }, 100);
+      return;
+    }
 
     if (updatedHearts > 0 && currentTest) {
       const currentQuestionId = currentTest.questions[currentQuestionIndex]?.id;
@@ -316,9 +353,11 @@ export function TestSystem({
       currentQuestionIndex === firstPassQuestionCount - 1
     ) {
       if (failedQuestions.length > 0) {
-        setState("review-intro");
+        setShowMistakeAnalyzer(true);
+        return;
       } else {
-        handleCompleteTest();
+        setState("success-celebration");
+        setShowSuccessCelebration(true);
         return;
       }
     }
@@ -339,9 +378,10 @@ export function TestSystem({
     handleCompleteTest
   ]);
 
-  const handleStartReview = useCallback(() => {
-    setState("reviewing");
-  }, []);
+  const handleHeartBreakComplete = useCallback(() => {
+    setShowHeartBreakAnimation(false);
+    handleOpenStore();
+  }, [handleOpenStore]);
 
   const progress = currentTest
     ? ((currentQuestionIndex + 1) / currentTest.questions.length) * 100
@@ -366,88 +406,59 @@ export function TestSystem({
 
   return (
     <div className="bg-background h-[100dvh] flex flex-col overflow-hidden">
-      {(state === "testing" || state === "reviewing") && currentTest && (
-        <>
-          <HeaderBar
-            onClose={onClose}
-            hearts={currentHearts}
-            percentage={progress}
-            hasActiveSubscription={false}
-            justAnsweredCorrect={justAnsweredCorrect}
-          />
-          <div className="relative flex-1 flex items-center justify-center">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={animationKey}
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-                className="absolute w-full h-full flex"
-              >
-                <TestQuestion
-                  question={currentTest.questions[currentQuestionIndex]}
-                  onAnswer={handleAnswer}
-                  onNext={handleNext}
-                  onReportError={() => setShowReportModal(true)}
-                  showResult={
-                    !!answers[currentTest.questions[currentQuestionIndex]?.id]
-                  }
-                  isCorrect={
-                    answers[currentTest.questions[currentQuestionIndex]?.id]
-                      ?.isCorrect
-                  }
-                  selectedAnswer={
-                    answers[currentTest.questions[currentQuestionIndex]?.id]
-                      ?.answer
-                  }
-                />
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </>
-      )}
-
-      {state === "review-intro" && (
-        <AnimatePresence>
-          <motion.div
-            key="review-intro"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="flex-1 flex flex-col px-6"
-          >
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center max-w-md w-full">
-                <h1 className="text-3xl font-bold text-[#EFFF0A] mb-3">
-                  Bien Hecho!
-                </h1>
-                <p className="text-lg white">
-                  Qué tal si damos otra mirada <br /> a los errores?
-                </p>
-              </div>
+      {(state === "testing" || state === "reviewing") &&
+        currentTest &&
+        !showSuccessCelebration &&
+        !showMistakeAnalyzer && (
+          <>
+            <HeaderBar
+              onClose={onClose}
+              hearts={currentHearts}
+              percentage={progress}
+              hasActiveSubscription={false}
+              justAnsweredCorrect={justAnsweredCorrect}
+            />
+            <div className="relative flex-1 flex items-center justify-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={animationKey}
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -50 }}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                  className="absolute w-full h-full flex"
+                >
+                  <TestQuestion
+                    question={currentTest.questions[currentQuestionIndex]}
+                    onAnswer={handleAnswer}
+                    onNext={handleNext}
+                    onReportError={() => setShowReportModal(true)}
+                    showResult={
+                      !!answers[currentTest.questions[currentQuestionIndex]?.id]
+                    }
+                    isCorrect={
+                      answers[currentTest.questions[currentQuestionIndex]?.id]
+                        ?.isCorrect
+                    }
+                    selectedAnswer={
+                      answers[currentTest.questions[currentQuestionIndex]?.id]
+                        ?.answer
+                    }
+                  />
+                </motion.div>
+              </AnimatePresence>
             </div>
-            <div className="pb-10 max-w-md w-full mx-auto">
-              <button
-                onClick={handleStartReview}
-                className="w-full py-3 bg-[#1983DD] hover:bg-[#1666B0] text-white font-semibold rounded-lg transition-colors"
-              >
-                Revisar Errores
-              </button>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      )}
+          </>
+        )}
 
       {state === "results" && results && currentTest && (
         <AnimatePresence>
           <motion.div
             key="results"
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className="absolute inset-0 w-full h-full flex items-center justify-center"
           >
             <TestResults
@@ -509,7 +520,53 @@ export function TestSystem({
         />
       )}
 
-      <NoHeartsTestModal />
+      <AnimatePresence>
+        {showHeartBreakAnimation && (
+          <HeartBreakAnimation
+            onComplete={handleHeartBreakComplete}
+            onExit={handleExitTest}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showStreakCelebration && (
+          <StreakCelebration
+            count={5}
+            onComplete={() => {
+              setShowStreakCelebration(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showMistakeAnalyzer && (
+          <MistakeAnalyzerOverlay
+            errorCount={uniqueFailedQuestions.size}
+            onComplete={() => {
+              setShowMistakeAnalyzer(false);
+              setState("reviewing");
+              setCurrentQuestionIndex((prev) => prev + 1);
+              setQuestionStartTime(Date.now());
+              setAnimationKey((prev) => prev + 1);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showSuccessCelebration && (
+          <SuccessCompletion
+            onStartComplete={() => {
+              handleCompleteTest();
+            }}
+            onComplete={() => {
+              setShowSuccessCelebration(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { QRCodeSVG } from "qrcode.react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -10,16 +9,12 @@ import {
   ArrowLeft,
   ArrowRight,
   Zap,
-  Share2,
-  Award,
-  Calendar,
-  ExternalLink,
   ChevronLeft
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { NFTAsset } from "@/lib/types";
+import { NFTRevealCard } from "@/components/ui/mint-nft-card";
 
 interface CompletedUnit {
   unitId: string;
@@ -380,73 +375,12 @@ export default function CreateCertificatePage() {
             )}
 
             {currentStep === 3 && mintedNFT && (
-              <div className="space-y-6">
-                <div className="overflow-hidden rounded-lg">
-                  <div className="relative h-48 flex items-center justify-center">
-                    {mintedNFT.metadata?.image ? (
-                      <img
-                        src={mintedNFT.metadata.image}
-                        alt={mintedNFT.metadata.name || "NFT Certificate"}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <Award className="h-16 w-16 text-white opacity-80" />
-                    )}
-                  </div>
-
-                  <div className="p-4">
-                    <div className="grid grid-cols-4">
-                      <div className="col-span-3 space-y-2">
-                        <h3 className="text-lg font-bold text-white">
-                          {mintedNFT.metadata?.name ||
-                            `Certificado #${mintedNFT.tokenId}`}
-                        </h3>
-                        {mintedNFT.metadata?.description && (
-                          <p className="text-gray-300 text-sm">
-                            {mintedNFT.metadata.description}
-                          </p>
-                        )}
-                        <div className="flex items-center text-sm text-gray-400">
-                          <Calendar className="h-4 w-4 mr-2" />
-                          {new Date(mintedNFT.mintedAt).toLocaleDateString(
-                            "es-ES"
-                          )}
-                        </div>
-                        <div className="flex space-x-2 pt-2">
-                          <Button asChild size="sm">
-                            <a
-                              href={`https://amoy.polygonscan.com/token/${mintedNFT.contractAddress}?a=${mintedNFT.tokenId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <ExternalLink className="h-4 w-4 mr-2" />
-                              Explorer
-                            </a>
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="col-span-1 flex justify-end items-end">
-                        <QRCodeSVG
-                          value={`https://amoy.polygonscan.com/token/${mintedNFT.contractAddress}?a=${mintedNFT.tokenId}`}
-                          size={80}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <button className="w-full bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2">
-                  <Share2 size={20} /> Compartir
-                </button>
-                <div className="flex justify-center">
-                  <Link
-                    href={"/achievements"}
-                    onClick={() => setCurrentStep(1)}
-                    className="text-center cursor-pointer w-full text-[#708BB1] hover:text-[#8FA6C7] text-center py-2 transition-colors"
-                  >
-                    Volver a Mis Medallas
-                  </Link>
-                </div>
-              </div>
+              <NFTRevealCard
+                mintedNFT={mintedNFT}
+                onRevealComplete={() => {
+                  console.log("¡NFT revelado!");
+                }}
+              />
             )}
           </div>
           {error && (

@@ -94,66 +94,6 @@ const faqs = [
 export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-slate-50">
-      <header className="sticky top-0 z-10 bg-background border-b border-border">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-2">
-            <span className="rounded-full bg-card px-3 py-1 text-xs uppercase tracking-wide text-muted-foreground">
-              OpenMind
-            </span>
-            <span className="text-sm text-muted-foreground">×</span>
-            <span className="text-sm font-semibold text-foreground">
-              Almanac
-            </span>
-          </div>
-
-          <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-            <a
-              href="#how-it-works"
-              className="hover:text-foreground transition-colors"
-            >
-              How it works
-            </a>
-            <a
-              href="#content"
-              className="hover:text-foreground transition-colors"
-            >
-              Content
-            </a>
-            <a href="#nfts" className="hover:text-foreground transition-colors">
-              NFTs
-            </a>
-            <a
-              href="#results"
-              className="hover:text-foreground transition-colors"
-            >
-              Results
-            </a>
-            <a
-              href="/OpenMind — White Paper.pdf"
-              target="_blank"
-              className="hover:text-foreground transition-colors"
-            >
-              White paper
-            </a>
-          </nav>
-
-          <div className="flex items-center gap-2">
-            <Link
-              href={"/sign-in"}
-              className="rounded-full border border-border px-4 py-2 text-sm text-foreground hover:border-muted-foreground transition-colors"
-            >
-              Log in
-            </Link>
-            <Link
-              href={"/sign-up"}
-              className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
-            >
-              Play Almanac
-            </Link>
-          </div>
-        </div>
-      </header>
-
       <main className="flex-1">
         <section id="hero" className="border-b border-border">
           <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-12 md:flex-row md:items-center">
@@ -550,11 +490,11 @@ export default function HomePage() {
                   digital hygiene, and more. The white paper explains how we
                   choose and build each new path.
                 </p>
-                <a href="/OpenMind — White Paper.pdf" target="_blank">
+                <Link href="/white-paper">
                   <button className="mt-3 self-start text-[11px] text-primary underline-offset-2 hover:underline transition-all">
                     Read the roadmap in the white paper →
                   </button>
-                </a>
+                </Link>
               </article>
             </div>
 
