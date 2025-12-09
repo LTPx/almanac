@@ -10,7 +10,7 @@ import { SessionApp } from "./types";
  */
 export function isUserAdmin(userId: string): boolean {
   const adminUsers = process.env.ADMIN_USERS_IDS || "";
-  const users = adminUsers.split(", ").map((id) => id.trim());
+  const users = adminUsers.split(",").map((id) => id.trim());
   return users.includes(userId);
 }
 

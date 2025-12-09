@@ -26,7 +26,7 @@ export default async function HomeLayout({
   const isPremium = isTrialing || isActive;
   const hasWallet = !!user.walletAddress;
   const adminUsers = process.env.ADMIN_USERS_IDS || "";
-  const users = adminUsers.split(", ");
+  const users = adminUsers.split(",");
   const isAdmin = users.includes(user.id);
 
   return (
