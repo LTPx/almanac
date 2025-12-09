@@ -15,7 +15,6 @@ export const SuccessCompletion = ({
   const checkmarkPath = "M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z";
   const [shouldExit, setShouldExit] = useState(false);
 
-  // Llamar a onStartComplete inmediatamente al montar
   useEffect(() => {
     if (onStartComplete) {
       onStartComplete();
