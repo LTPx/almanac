@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
+import { verifyAdminSession } from "@/lib/admin-auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,9 +10,8 @@ export async function GET(request: NextRequest) {
       headers: await headers()
     });
 
-    if (!session?.user) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
+    const adminCheck = verifyAdminSession(session);
+    if (adminCheck) return adminCheck;
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
@@ -64,9 +64,8 @@ export async function PATCH(request: NextRequest) {
       headers: await headers()
     });
 
-    if (!session?.user) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
+    const adminCheck = verifyAdminSession(session);
+    if (adminCheck) return adminCheck;
 
     const { reportId, status } = await request.json();
 

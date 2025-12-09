@@ -3,7 +3,9 @@ import { Sidebar } from "@/components/admin/sidebar";
 import { Header } from "@/components/admin/header";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { AdminProvider } from "@/context/AdminContext";
+import { isSessionAdmin } from "@/lib/admin-auth";
 
 export default async function AdminLayout({
   children
@@ -14,7 +16,17 @@ export default async function AdminLayout({
     headers: await headers()
   });
 
-  const user = session?.user ?? null;
+  // Verificar si el usuario está autenticado
+  if (!session) {
+    redirect("/sign-in");
+  }
+
+  // Verificar si el usuario es administrador
+  if (!isSessionAdmin(session)) {
+    redirect("/home");
+  }
+
+  const user = session.user;
 
   return (
     <AdminProvider user={user}>

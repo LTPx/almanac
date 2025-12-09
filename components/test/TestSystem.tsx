@@ -24,7 +24,7 @@ import { MistakeAnalyzerOverlay } from "./MistakeAnalyzerOverlay";
 
 interface TestSystemProps {
   userId: string;
-  initialLessonId: number;
+  unitId: number;
   onClose: () => void;
   hearts: number;
   onHeartsChange?: (hearts: number) => void;
@@ -39,7 +39,7 @@ type TestState =
 
 export function TestSystem({
   userId,
-  initialLessonId,
+  unitId,
   onClose,
   hearts: initialHearts,
   onHeartsChange
@@ -168,10 +168,10 @@ export function TestSystem({
 
   useEffect(() => {
     if (!hasInitialized.current && !showAdBeforeStart) {
-      handleStartTest(initialLessonId);
+      handleStartTest(unitId);
       hasInitialized.current = true;
     }
-  }, [handleStartTest, initialLessonId, showAdBeforeStart]);
+  }, [handleStartTest, unitId, showAdBeforeStart]);
 
   const handleAnswer = useCallback(
     async (questionId: number, answer: string) => {
@@ -513,7 +513,11 @@ export function TestSystem({
       )}
 
       {showAdBeforeStart && (
-        <InterstitialAd onClose={() => setShowAdBeforeStart(false)} time={10} />
+        <InterstitialAd
+          onClose={() => setShowAdBeforeStart(false)}
+          time={10}
+          unitId={unitId}
+        />
       )}
 
       <AnimatePresence>

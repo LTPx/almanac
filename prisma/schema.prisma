@@ -51,6 +51,10 @@ model User {
   // Problem reports
   problemReports ProblemReport[]
 
+  // Ads tracking
+  adViews  AdView[]
+  adClicks AdClick[]
+
   @@map("user")
 }
 
@@ -176,6 +180,9 @@ model Unit {
   curriculumId       String?
   learningObjectives LearningObjective[]
   testAttempt        TestAttempt[]
+
+  // Ads
+  ads Ad[]
 
   @@map("unit")
 }
@@ -584,4 +591,47 @@ enum ProblemReportStatus {
   DISMISSED
 
   @@map("problem_report_status")
+}
+
+// ADS SYSTEM
+model Ad {
+  id          Int      @id @default(autoincrement())
+  unit        Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId      Int
+  title       String
+  description String?
+  imageUrl    String // URL de la imagen del ad
+  targetUrl   String // URL a la que redirige cuando se hace click
+  isActive    Boolean  @default(true)
+  position    Int      @default(0) // Orden de aparición si hay múltiples ads
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Tracking
+  views  AdView[]
+  clicks AdClick[]
+
+  @@map("ad")
+}
+
+model AdView {
+  id       Int      @id @default(autoincrement())
+  ad       Ad       @relation(fields: [adId], references: [id], onDelete: Cascade)
+  adId     Int
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  viewedAt DateTime @default(now())
+
+  @@map("ad_view")
+}
+
+model AdClick {
+  id        Int      @id @default(autoincrement())
+  ad        Ad       @relation(fields: [adId], references: [id], onDelete: Cascade)
+  adId      Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  clickedAt DateTime @default(now())
+
+  @@map("ad_click")
 }
