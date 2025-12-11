@@ -6,7 +6,7 @@ import { verifyAdminSession } from "@/lib/admin-auth";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -16,7 +16,9 @@ export async function GET(
     const adminCheck = verifyAdminSession(session);
     if (adminCheck) return adminCheck;
 
-    const questionId = parseInt(params.id);
+    const { id } = await context.params;
+
+    const questionId = parseInt(id);
 
     const question = await prisma.question.findUnique({
       where: { id: questionId },
