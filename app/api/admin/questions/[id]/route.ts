@@ -61,7 +61,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -70,8 +70,8 @@ export async function PUT(
 
     const adminCheck = verifyAdminSession(session);
     if (adminCheck) return adminCheck;
-
-    const questionId = parseInt(params.id);
+    const { id } = await context.params;
+    const questionId = parseInt(id);
     const body = await request.json();
     const { answers } = body;
     // const { title, type, unitId, order, isActive, content, answers } = body;
@@ -156,7 +156,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -165,8 +165,8 @@ export async function DELETE(
 
     const adminCheck = verifyAdminSession(session);
     if (adminCheck) return adminCheck;
-
-    const questionId = parseInt(params.id);
+    const { id } = await context.params;
+    const questionId = parseInt(id);
 
     // Verificar que la pregunta existe
     const existingQuestion = await prisma.question.findUnique({
