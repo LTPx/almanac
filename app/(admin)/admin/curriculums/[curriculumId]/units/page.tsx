@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Check, X } from "lucide-react";
+import { Check, X, Loader2, ChevronDown } from "lucide-react";
 import { Unit, Curriculum } from "@/lib/types";
 
 export default function CurriculumUnitsPage() {
@@ -19,34 +19,80 @@ export default function CurriculumUnitsPage() {
   const [allUnits, setAllUnits] = useState<Unit[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const pageSize = 15;
 
+  // Cargar curriculum solo una vez al montar
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCurriculum = async () => {
       try {
-        const [curriculumRes, unitsRes] = await Promise.all([
-          fetch(`/api/admin/curriculums/${curriculumId}`),
-          fetch(`/api/admin/units?search=${encodeURIComponent(searchTerm)}`)
-        ]);
+        setLoading(true);
+        const curriculumRes = await fetch(`/api/admin/curriculums/${curriculumId}`);
 
-        if (!curriculumRes.ok || !unitsRes.ok)
-          throw new Error("Error al cargar datos");
+        if (!curriculumRes.ok) throw new Error("Error al cargar curriculum");
 
         const curriculum = await curriculumRes.json();
-        const unitsData = await unitsRes.json();
         setCurriculum(curriculum);
-        setAllUnits(unitsData.data || []);
       } catch (err) {
         console.error(err);
-        toast.error("Error al cargar las unidades o curriculum");
+        toast.error("Error al cargar el curriculum");
       } finally {
         setLoading(false);
       }
     };
-    if (searchTerm.length === 0 || searchTerm.length > 2) {
-      fetchData();
+
+    fetchCurriculum();
+  }, [curriculumId]);
+
+  // Cargar unidades cuando cambia el término de búsqueda (con debounce)
+  useEffect(() => {
+    // Debounce: esperar 500ms después de que el usuario deje de escribir
+    const timeoutId = setTimeout(() => {
+      const fetchUnits = async () => {
+        if (searchTerm.length === 0 || searchTerm.length > 2) {
+          // Resetear unidades y página cuando cambia el término de búsqueda
+          setAllUnits([]);
+          setCurrentPage(1);
+          await loadUnits(1, searchTerm, true);
+        }
+      };
+
+      fetchUnits();
+    }, 500);
+
+    // Limpiar timeout si el usuario sigue escribiendo
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  const loadUnits = async (page: number, search: string, reset: boolean = false) => {
+    try {
+      const unitsRes = await fetch(
+        `/api/admin/units?search=${encodeURIComponent(search)}&page=${page}&pageSize=${pageSize}`
+      );
+
+      if (!unitsRes.ok) throw new Error("Error al cargar unidades");
+
+      const unitsData = await unitsRes.json();
+      const newUnits = unitsData.data || [];
+
+      setAllUnits((prev) => reset ? newUnits : [...prev, ...newUnits]);
+      setHasMore(unitsData.pagination.page < unitsData.pagination.totalPages);
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al cargar unidades");
     }
-  }, [curriculumId, searchTerm]);
+  };
+
+  const handleLoadMore = async () => {
+    setLoadingMore(true);
+    const nextPage = currentPage + 1;
+    await loadUnits(nextPage, searchTerm, false);
+    setCurrentPage(nextPage);
+    setLoadingMore(false);
+  };
 
   const toggleUnit = (unit: Unit) => {
     if (!curriculum) return;
@@ -131,32 +177,64 @@ export default function CurriculumUnitsPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <ScrollArea className="h-64 border rounded-md p-2">
-            {allUnits.length > 0 ? (
-              <div className="space-y-1">
-                {allUnits.map((unit) => {
-                  const isSelected = curriculum.units.some(
-                    (u) => u.id === unit.id
-                  );
-                  return (
-                    <Button
-                      key={unit.id}
-                      variant={isSelected ? "secondary" : "ghost"}
-                      className="w-full justify-between"
-                      onClick={() => toggleUnit(unit)}
-                    >
-                      <span>{unit.name}</span>
-                      {isSelected && <Check className="h-4 w-4" />}
-                    </Button>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-center text-sm text-muted-foreground">
-                No se encontraron unidades.
+          <div className="space-y-2">
+            <ScrollArea className="h-64 border rounded-md p-2">
+              {allUnits.length > 0 ? (
+                <div className="space-y-1">
+                  {allUnits.map((unit) => {
+                    const isSelected = curriculum.units.some(
+                      (u) => u.id === unit.id
+                    );
+                    return (
+                      <Button
+                        key={unit.id}
+                        variant={isSelected ? "secondary" : "ghost"}
+                        className="w-full justify-between"
+                        onClick={() => toggleUnit(unit)}
+                      >
+                        <span>{unit.name}</span>
+                        {isSelected && <Check className="h-4 w-4" />}
+                      </Button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-center text-sm text-muted-foreground py-8">
+                  No se encontraron unidades.
+                </p>
+              )}
+            </ScrollArea>
+
+            {/* Botón cargar más */}
+            {hasMore && allUnits.length > 0 && (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+              >
+                {loadingMore ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Cargando más unidades...
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="mr-2 h-4 w-4" />
+                    Cargar más unidades
+                  </>
+                )}
+              </Button>
+            )}
+
+            {/* Indicador de total */}
+            {allUnits.length > 0 && (
+              <p className="text-xs text-center text-muted-foreground">
+                {allUnits.length} unidades cargadas
+                {!hasMore && " (todas)"}
               </p>
             )}
-          </ScrollArea>
+          </div>
         </CardContent>
       </Card>
     </div>
