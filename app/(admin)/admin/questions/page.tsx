@@ -75,12 +75,16 @@ export default function QuestionsPage() {
   const [loading, setLoading] = useState(true);
   const pageSize = 10;
 
-  const fetchQuestions = async (page: number, search = "") => {
+  const fetchQuestions = async (page: number, search = "", type = "all") => {
     const params = new URLSearchParams({
       page: page.toString(),
       pageSize: pageSize.toString(),
       search
     });
+
+    if (type && type !== "all") {
+      params.append("type", type);
+    }
 
     const response = await fetch(`/api/questions?${params}`);
     if (!response.ok) {
@@ -88,12 +92,6 @@ export default function QuestionsPage() {
     }
     return response.json();
   };
-
-  const filteredQuestions = questions.filter((question) => {
-    const matchesType =
-      selectedType === "all" || question.type === selectedType;
-    return matchesType;
-  });
 
   const getTypeIcon = (type: string) => {
     const Icon =
@@ -114,12 +112,12 @@ export default function QuestionsPage() {
     return () => clearTimeout(timeoutId);
   }, [searchTerm, debouncedSearchTerm]);
 
-  // Cargar preguntas cuando cambia la página o el término de búsqueda debounced
+  // Cargar preguntas cuando cambia la página, búsqueda o tipo
   useEffect(() => {
     const loadQuestions = async () => {
       setLoading(true);
       try {
-        const result = await fetchQuestions(currentPage, debouncedSearchTerm);
+        const result = await fetchQuestions(currentPage, debouncedSearchTerm, selectedType);
         setQuestions(result.data);
         setTotalPages(result.pagination.totalPages);
         setTotal(result.pagination.total);
@@ -132,7 +130,7 @@ export default function QuestionsPage() {
     };
 
     loadQuestions();
-  }, [currentPage, debouncedSearchTerm]);
+  }, [currentPage, debouncedSearchTerm, selectedType]);
 
   return (
     <div className="space-y-6">
@@ -203,7 +201,7 @@ export default function QuestionsPage() {
               </p>
             </CardContent>
           </Card>
-        ) : filteredQuestions.length === 0 ? (
+        ) : questions.length === 0 ? (
           <Card className="bg-card border-border">
             <CardContent className="text-center py-8 text-muted-foreground">
               <HelpCircle className="mx-auto h-12 w-12" />
@@ -226,7 +224,7 @@ export default function QuestionsPage() {
             </CardContent>
           </Card>
         ) : (
-          filteredQuestions.map((question) => {
+          questions.map((question) => {
           const TypeIcon = getTypeIcon(question.type);
 
           return (
@@ -310,7 +308,7 @@ export default function QuestionsPage() {
       </div>
 
       {/* Paginación */}
-      {!loading && filteredQuestions.length > 0 && (
+      {!loading && questions.length > 0 && (
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
