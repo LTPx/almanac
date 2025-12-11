@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,7 +18,8 @@ import {
   Plus,
   Trash2,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Code
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -32,6 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { Unit } from "@/lib/types";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import Editor from "@monaco-editor/react";
 
 interface QuestionFormProps {
   initialData?: QuestionData | null;
@@ -113,7 +115,67 @@ export default function QuestionForm({
     initialData?.content?.correctAnswers?.join(", ") || ""
   );
 
+  const [jsonContent, setJsonContent] = useState<string>(() => {
+    if (initialData?.content && Object.keys(initialData.content).length > 0) {
+      return JSON.stringify(initialData.content, null, 2);
+    }
+    return "";
+  });
+
+  const [jsonError, setJsonError] = useState<string>("");
+  const editorRef = useRef<any>(null);
+
   const isLoading = submitting;
+
+  // Plantillas para tipos de preguntas complejas
+  const contentTemplates = {
+    ORDER_WORDS: {
+      sentence: "Cuando un valor cambia de signo también cambia de lado",
+      words: [
+        "Cuando",
+        "un",
+        "valor",
+        "cambia",
+        "de",
+        "signo",
+        "también",
+        "cambia",
+        "de",
+        "lado"
+      ],
+      correctOrder: [
+        "Cuando",
+        "un",
+        "valor",
+        "cambia",
+        "de",
+        "signo",
+        "también",
+        "cambia",
+        "de",
+        "lado"
+      ],
+      explanation: "Esta es una regla fundamental del álgebra"
+    },
+    MATCHING: {
+      pairs: [
+        { left: "Bitcoin", right: "Criptomoneda" },
+        { left: "Blockchain", right: "Tecnología de registro distribuido" },
+        { left: "Smart Contract", right: "Contrato inteligente" }
+      ],
+      explanation: "Empareja cada concepto con su definición"
+    },
+    DRAG_DROP: {
+      items: ["Item 1", "Item 2", "Item 3"],
+      zones: ["Zona A", "Zona B", "Zona C"],
+      correctMapping: {
+        "Item 1": "Zona A",
+        "Item 2": "Zona B",
+        "Item 3": "Zona C"
+      },
+      explanation: "Arrastra cada elemento a su zona correcta"
+    }
+  };
 
   const fetchUnits = async () => {
     const response = await fetch("/api/admin/units");
@@ -143,6 +205,44 @@ export default function QuestionForm({
     value: string | number | boolean | any
   ) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
+
+    // Si cambió el tipo de pregunta, cargar la plantilla correspondiente
+    if (key === "type") {
+      const questionType = value as QuestionType;
+      if (["ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(questionType)) {
+        const template = contentTemplates[questionType as keyof typeof contentTemplates];
+        if (template) {
+          setJsonContent(JSON.stringify(template, null, 2));
+          setJsonError("");
+        }
+      }
+    }
+  };
+
+  const handleJsonChange = (value: string | undefined) => {
+    if (!value) {
+      setJsonContent("");
+      setJsonError("");
+      return;
+    }
+
+    setJsonContent(value);
+
+    try {
+      JSON.parse(value);
+      setJsonError("");
+    } catch (error: any) {
+      setJsonError("JSON inválido: " + error.message);
+    }
+  };
+
+  const loadTemplate = () => {
+    const template = contentTemplates[formData.type as keyof typeof contentTemplates];
+    if (template) {
+      setJsonContent(JSON.stringify(template, null, 2));
+      setJsonError("");
+      toast.success("Plantilla cargada");
+    }
   };
 
   const handleAnswerChange = (
@@ -245,6 +345,26 @@ export default function QuestionForm({
         caseSensitive: false
       };
       formData.answers = [];
+    } else if (["ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(formData.type)) {
+      // Para tipos complejos, parsear el JSON del content
+      if (!jsonContent.trim()) {
+        toast.error("Debes proporcionar el contenido en formato JSON");
+        return;
+      }
+
+      if (jsonError) {
+        toast.error("El JSON tiene errores. Por favor corrígelos antes de guardar");
+        return;
+      }
+
+      try {
+        const parsedContent = JSON.parse(jsonContent);
+        formData.content = parsedContent;
+        formData.answers = [];
+      } catch (error: any) {
+        toast.error("Error al parsear JSON: " + error.message);
+        return;
+      }
     }
 
     // Actualizar el orden de las respuestas
@@ -516,6 +636,117 @@ export default function QuestionForm({
         </Card>
       )}
 
+      {/* Configuración para tipos complejos (ORDER_WORDS, MATCHING, DRAG_DROP) */}
+      {["ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(formData.type) && (
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Code className="h-5 w-5" />
+                  Configuración de Contenido (JSON)
+                </CardTitle>
+                <CardDescription>
+                  Edita el contenido de la pregunta en formato JSON
+                </CardDescription>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={loadTemplate}
+              >
+                Cargar Plantilla
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {jsonError && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{jsonError}</AlertDescription>
+              </Alert>
+            )}
+
+            <div className="border border-border rounded-lg overflow-hidden">
+              <Editor
+                height="400px"
+                defaultLanguage="json"
+                value={jsonContent}
+                onChange={handleJsonChange}
+                theme="vs-dark"
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  lineNumbers: "on",
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  tabSize: 2,
+                  formatOnPaste: true,
+                  formatOnType: true
+                }}
+                onMount={(editor) => {
+                  editorRef.current = editor;
+                }}
+              />
+            </div>
+
+            {formData.type === "ORDER_WORDS" && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200 font-semibold mb-2">
+                  Ejemplo de estructura:
+                </p>
+                <pre className="text-xs text-blue-700 dark:text-blue-300 overflow-x-auto">
+{`{
+  "sentence": "Frase completa que el usuario debe ordenar",
+  "words": ["Frase", "completa", "que", "el", "usuario", "debe", "ordenar"],
+  "correctOrder": ["Frase", "completa", "que", "el", "usuario", "debe", "ordenar"],
+  "explanation": "Explicación de la respuesta"
+}`}
+                </pre>
+              </div>
+            )}
+
+            {formData.type === "MATCHING" && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200 font-semibold mb-2">
+                  Ejemplo de estructura:
+                </p>
+                <pre className="text-xs text-blue-700 dark:text-blue-300 overflow-x-auto">
+{`{
+  "pairs": [
+    { "left": "Elemento 1", "right": "Definición 1" },
+    { "left": "Elemento 2", "right": "Definición 2" }
+  ],
+  "explanation": "Explicación de la respuesta"
+}`}
+                </pre>
+              </div>
+            )}
+
+            {formData.type === "DRAG_DROP" && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200 font-semibold mb-2">
+                  Ejemplo de estructura:
+                </p>
+                <pre className="text-xs text-blue-700 dark:text-blue-300 overflow-x-auto">
+{`{
+  "items": ["Item 1", "Item 2", "Item 3"],
+  "zones": ["Zona A", "Zona B", "Zona C"],
+  "correctMapping": {
+    "Item 1": "Zona A",
+    "Item 2": "Zona B",
+    "Item 3": "Zona C"
+  },
+  "explanation": "Explicación de la respuesta"
+}`}
+                </pre>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Vista previa */}
       <Card className="bg-card border-border">
         <CardHeader>
@@ -604,6 +835,21 @@ export default function QuestionForm({
                 </div>
               </div>
             )}
+
+            {["ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(formData.type) &&
+              jsonContent &&
+              !jsonError && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Vista previa del contenido JSON:
+                  </p>
+                  <div className="bg-muted border border-border rounded-lg p-4 max-h-60 overflow-y-auto">
+                    <pre className="text-xs text-foreground">
+                      {jsonContent}
+                    </pre>
+                  </div>
+                </div>
+              )}
           </div>
         </CardContent>
       </Card>
