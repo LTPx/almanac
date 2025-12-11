@@ -67,6 +67,7 @@ const questionTypeIcons = {
 export default function QuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -100,11 +101,25 @@ export default function QuestionsPage() {
     return Icon;
   };
 
+  // Debounce para el término de búsqueda
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      // Resetear a página 1 cuando cambia el término de búsqueda
+      if (searchTerm !== debouncedSearchTerm) {
+        setCurrentPage(1);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, debouncedSearchTerm]);
+
+  // Cargar preguntas cuando cambia la página o el término de búsqueda debounced
   useEffect(() => {
     const loadQuestions = async () => {
       setLoading(true);
       try {
-        const result = await fetchQuestions(currentPage, searchTerm);
+        const result = await fetchQuestions(currentPage, debouncedSearchTerm);
         setQuestions(result.data);
         setTotalPages(result.pagination.totalPages);
         setTotal(result.pagination.total);
@@ -117,7 +132,7 @@ export default function QuestionsPage() {
     };
 
     loadQuestions();
-  }, [currentPage, searchTerm]);
+  }, [currentPage, debouncedSearchTerm]);
 
   return (
     <div className="space-y-6">

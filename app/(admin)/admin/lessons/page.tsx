@@ -68,6 +68,7 @@ export default function LessonsPage() {
   const [lessons, setLessons] = useState<LessonAdmin[]>([]);
   const [units, setUnits] = useState<{ id: number; name: string }[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedUnit, setSelectedUnit] = useState<string>("all");
   const [deleteLessonId, setDeleteLessonId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "grouped">("grouped");
@@ -100,12 +101,9 @@ export default function LessonsPage() {
   };
 
   const filteredLessons = lessons.filter((lesson) => {
-    const matchesSearch =
-      lesson.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lesson.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesUnit =
       selectedUnit === "all" || lesson.unitId.toString() === selectedUnit;
-    return matchesSearch && matchesUnit;
+    return matchesUnit;
   });
 
   // Agrupar lecciones por unidad
@@ -159,11 +157,25 @@ export default function LessonsPage() {
     loadUnits();
   }, []);
 
+  // Debounce para el término de búsqueda
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      // Resetear a página 1 cuando cambia el término de búsqueda
+      if (searchTerm !== debouncedSearchTerm) {
+        setCurrentPage(1);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, debouncedSearchTerm]);
+
+  // Cargar lecciones cuando cambia la página o el término de búsqueda debounced
   useEffect(() => {
     const loadLessons = async () => {
       setLoading(true);
       try {
-        const result = await fetchLessons(currentPage, searchTerm);
+        const result = await fetchLessons(currentPage, debouncedSearchTerm);
         setLessons(result.data);
         setTotalPages(result.pagination.totalPages);
         setTotal(result.pagination.total);
@@ -176,7 +188,7 @@ export default function LessonsPage() {
     };
 
     loadLessons();
-  }, [currentPage, searchTerm]);
+  }, [currentPage, debouncedSearchTerm]);
 
   const renderLessonCard = (lesson: LessonAdmin) => (
     <Card key={lesson.id} className="bg-card border-border">
@@ -412,7 +424,9 @@ export default function LessonsPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
                   disabled={currentPage === 1}
                 >
                   <ChevronLeft className="h-4 w-4" />
