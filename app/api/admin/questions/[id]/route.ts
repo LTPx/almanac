@@ -6,7 +6,7 @@ import { verifyAdminSession } from "@/lib/admin-auth";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -16,7 +16,9 @@ export async function GET(
     const adminCheck = verifyAdminSession(session);
     if (adminCheck) return adminCheck;
 
-    const questionId = parseInt(params.id);
+    const { id } = await context.params;
+
+    const questionId = parseInt(id);
 
     const question = await prisma.question.findUnique({
       where: { id: questionId },
@@ -59,7 +61,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -68,10 +70,11 @@ export async function PUT(
 
     const adminCheck = verifyAdminSession(session);
     if (adminCheck) return adminCheck;
-
-    const questionId = parseInt(params.id);
+    const { id } = await context.params;
+    const questionId = parseInt(id);
     const body = await request.json();
-    const { title, type, unitId, order, isActive, content, answers } = body;
+    const { answers } = body;
+    // const { title, type, unitId, order, isActive, content, answers } = body;
 
     // Verificar que la pregunta existe
     const existingQuestion = await prisma.question.findUnique({
@@ -88,17 +91,17 @@ export async function PUT(
     // Actualizar la pregunta y sus respuestas en una transacción
     const question = await prisma.$transaction(async (tx) => {
       // Actualizar la pregunta
-      const updatedQuestion = await tx.question.update({
-        where: { id: questionId },
-        data: {
-          title,
-          type,
-          unitId: parseInt(unitId.toString()),
-          order: order || 1,
-          isActive: isActive ?? true,
-          content: content || {}
-        }
-      });
+      // const updatedQuestion = await tx.question.update({
+      //   where: { id: questionId },
+      //   data: {
+      //     title,
+      //     type,
+      //     unitId: parseInt(unitId.toString()),
+      //     order: order || 1,
+      //     isActive: isActive ?? true,
+      //     content: content || {}
+      //   }
+      // });
 
       // Eliminar las respuestas existentes
       await tx.answer.deleteMany({
@@ -153,7 +156,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -162,8 +165,8 @@ export async function DELETE(
 
     const adminCheck = verifyAdminSession(session);
     if (adminCheck) return adminCheck;
-
-    const questionId = parseInt(params.id);
+    const { id } = await context.params;
+    const questionId = parseInt(id);
 
     // Verificar que la pregunta existe
     const existingQuestion = await prisma.question.findUnique({
