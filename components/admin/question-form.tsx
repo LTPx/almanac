@@ -1,0 +1,871 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  Save,
+  Plus,
+  Trash2,
+  CheckCircle,
+  AlertCircle,
+  Code
+} from "lucide-react";
+import Link from "next/link";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Unit } from "@/lib/types";
+import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import Editor from "@monaco-editor/react";
+
+interface QuestionFormProps {
+  initialData?: QuestionData | null;
+  onSubmit: (data: QuestionInput) => Promise<void>;
+  submitting?: boolean;
+}
+
+export type QuestionData = {
+  id?: number;
+  title: string;
+  type: QuestionType;
+  unitId: number;
+  order: number;
+  isActive: boolean;
+  content: any;
+  answers?: AnswerData[];
+};
+
+export type AnswerData = {
+  id?: number;
+  text: string;
+  isCorrect: boolean;
+  order: number;
+};
+
+export type QuestionInput = {
+  title: string;
+  type: QuestionType;
+  unitId: number;
+  order: number;
+  isActive: boolean;
+  content: any;
+  answers: AnswerData[];
+};
+
+type QuestionType =
+  | "MULTIPLE_CHOICE"
+  | "FILL_IN_BLANK"
+  | "ORDER_WORDS"
+  | "TRUE_FALSE"
+  | "MATCHING"
+  | "DRAG_DROP";
+
+const questionTypes = [
+  { value: "MULTIPLE_CHOICE", label: "Opción múltiple" },
+  { value: "FILL_IN_BLANK", label: "Completar espacios" },
+  { value: "ORDER_WORDS", label: "Ordenar palabras" },
+  { value: "TRUE_FALSE", label: "Verdadero/Falso" },
+  { value: "MATCHING", label: "Emparejar" },
+  { value: "DRAG_DROP", label: "Arrastrar y soltar" }
+] as const;
+
+export default function QuestionForm({
+  initialData,
+  onSubmit,
+  submitting
+}: QuestionFormProps) {
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [formData, setFormData] = useState<QuestionInput>({
+    title: initialData?.title || "",
+    type: initialData?.type || "MULTIPLE_CHOICE",
+    unitId: initialData?.unitId || 0,
+    order: initialData?.order || 1,
+    isActive: initialData?.isActive ?? true,
+    content: initialData?.content || {},
+    answers: initialData?.answers || [
+      { text: "", isCorrect: false, order: 0 },
+      { text: "", isCorrect: false, order: 1 },
+      { text: "", isCorrect: false, order: 2 },
+      { text: "", isCorrect: false, order: 3 }
+    ]
+  });
+
+  const [trueFalseAnswer, setTrueFalseAnswer] = useState<boolean>(
+    initialData?.content?.correctAnswer ?? true
+  );
+
+  const [fillInBlankAnswers, setFillInBlankAnswers] = useState<string>(
+    initialData?.content?.correctAnswers?.join(", ") || ""
+  );
+
+  const [jsonContent, setJsonContent] = useState<string>(() => {
+    if (initialData?.content && Object.keys(initialData.content).length > 0) {
+      return JSON.stringify(initialData.content, null, 2);
+    }
+    return "";
+  });
+
+  const [jsonError, setJsonError] = useState<string>("");
+  const editorRef = useRef<any>(null);
+
+  const isLoading = submitting;
+
+  // Plantillas para tipos de preguntas complejas
+  const contentTemplates = {
+    ORDER_WORDS: {
+      sentence: "Cuando un valor cambia de signo también cambia de lado",
+      words: [
+        "Cuando",
+        "un",
+        "valor",
+        "cambia",
+        "de",
+        "signo",
+        "también",
+        "cambia",
+        "de",
+        "lado"
+      ],
+      correctOrder: [
+        "Cuando",
+        "un",
+        "valor",
+        "cambia",
+        "de",
+        "signo",
+        "también",
+        "cambia",
+        "de",
+        "lado"
+      ],
+      explanation: "Esta es una regla fundamental del álgebra"
+    },
+    MATCHING: {
+      pairs: [
+        { left: "Bitcoin", right: "Criptomoneda" },
+        { left: "Blockchain", right: "Tecnología de registro distribuido" },
+        { left: "Smart Contract", right: "Contrato inteligente" }
+      ],
+      explanation: "Empareja cada concepto con su definición"
+    },
+    DRAG_DROP: {
+      items: ["Item 1", "Item 2", "Item 3"],
+      zones: ["Zona A", "Zona B", "Zona C"],
+      correctMapping: {
+        "Item 1": "Zona A",
+        "Item 2": "Zona B",
+        "Item 3": "Zona C"
+      },
+      explanation: "Arrastra cada elemento a su zona correcta"
+    }
+  };
+
+  const fetchUnits = async () => {
+    const response = await fetch("/api/admin/units");
+    if (!response.ok) {
+      throw new Error("Failed to fetch units");
+    }
+    const data = await response.json();
+    return data.data || [];
+  };
+
+  useEffect(() => {
+    const loadUnits = async () => {
+      try {
+        const unitsData = await fetchUnits();
+        setUnits(unitsData);
+      } catch (error) {
+        console.error("Error loading units:", error);
+        toast.error("No se pudieron cargar las unidades");
+      }
+    };
+
+    loadUnits();
+  }, []);
+
+  const handleInputChange = (
+    key: keyof QuestionInput,
+    value: string | number | boolean | any
+  ) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+
+    // Si cambió el tipo de pregunta, cargar la plantilla correspondiente
+    if (key === "type") {
+      const questionType = value as QuestionType;
+      if (["ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(questionType)) {
+        const template = contentTemplates[questionType as keyof typeof contentTemplates];
+        if (template) {
+          setJsonContent(JSON.stringify(template, null, 2));
+          setJsonError("");
+        }
+      }
+    }
+  };
+
+  const handleJsonChange = (value: string | undefined) => {
+    if (!value) {
+      setJsonContent("");
+      setJsonError("");
+      return;
+    }
+
+    setJsonContent(value);
+
+    try {
+      JSON.parse(value);
+      setJsonError("");
+    } catch (error: any) {
+      setJsonError("JSON inválido: " + error.message);
+    }
+  };
+
+  const loadTemplate = () => {
+    const template = contentTemplates[formData.type as keyof typeof contentTemplates];
+    if (template) {
+      setJsonContent(JSON.stringify(template, null, 2));
+      setJsonError("");
+      toast.success("Plantilla cargada");
+    }
+  };
+
+  const handleAnswerChange = (
+    index: number,
+    field: "text" | "isCorrect",
+    value: string | boolean
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      answers: prev.answers.map((answer, i) =>
+        i === index ? { ...answer, [field]: value } : answer
+      )
+    }));
+  };
+
+  const addAnswer = () => {
+    setFormData((prev) => ({
+      ...prev,
+      answers: [
+        ...prev.answers,
+        { text: "", isCorrect: false, order: prev.answers.length }
+      ]
+    }));
+  };
+
+  const removeAnswer = (index: number) => {
+    if (formData.answers.length > 2) {
+      setFormData((prev) => ({
+        ...prev,
+        answers: prev.answers.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
+  const setCorrectAnswer = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      answers: prev.answers.map((answer, i) => ({
+        ...answer,
+        isCorrect: i === index
+      }))
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validaciones
+    if (!formData.title.trim()) {
+      toast.error("El título de la pregunta es requerido");
+      return;
+    }
+
+    if (!formData.unitId) {
+      toast.error("Debes seleccionar una unidad");
+      return;
+    }
+
+    // Validar según el tipo de pregunta
+    if (formData.type === "MULTIPLE_CHOICE") {
+      const hasCorrectAnswer = formData.answers.some((a) => a.isCorrect);
+      const allAnswersHaveText = formData.answers.every((a) => a.text.trim());
+
+      if (!hasCorrectAnswer) {
+        toast.error("Debes marcar una respuesta como correcta");
+        return;
+      }
+
+      if (!allAnswersHaveText) {
+        toast.error("Todas las opciones deben tener texto");
+        return;
+      }
+
+      // Actualizar content con las respuestas
+      formData.content = {
+        ...formData.content,
+        type: "MULTIPLE_CHOICE"
+      };
+    } else if (formData.type === "TRUE_FALSE") {
+      formData.content = {
+        correctAnswer: trueFalseAnswer
+      };
+      formData.answers = [
+        { text: "Verdadero", isCorrect: trueFalseAnswer, order: 0 },
+        { text: "Falso", isCorrect: !trueFalseAnswer, order: 1 }
+      ];
+    } else if (formData.type === "FILL_IN_BLANK") {
+      const correctAnswers = fillInBlankAnswers
+        .split(",")
+        .map((a) => a.trim())
+        .filter((a) => a);
+
+      if (correctAnswers.length === 0) {
+        toast.error("Debes proporcionar al menos una respuesta correcta");
+        return;
+      }
+
+      formData.content = {
+        correctAnswers,
+        caseSensitive: false
+      };
+      formData.answers = [];
+    } else if (["ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(formData.type)) {
+      // Para tipos complejos, parsear el JSON del content
+      if (!jsonContent.trim()) {
+        toast.error("Debes proporcionar el contenido en formato JSON");
+        return;
+      }
+
+      if (jsonError) {
+        toast.error("El JSON tiene errores. Por favor corrígelos antes de guardar");
+        return;
+      }
+
+      try {
+        const parsedContent = JSON.parse(jsonContent);
+        formData.content = parsedContent;
+        formData.answers = [];
+      } catch (error: any) {
+        toast.error("Error al parsear JSON: " + error.message);
+        return;
+      }
+    }
+
+    // Actualizar el orden de las respuestas
+    const answersWithOrder = formData.answers.map((answer, index) => ({
+      ...answer,
+      order: index
+    }));
+
+    await onSubmit({
+      ...formData,
+      answers: answersWithOrder
+    });
+  };
+
+  const hasCorrectAnswer = formData.answers.some((a) => a.isCorrect);
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Información básica */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle>Información Básica</CardTitle>
+          <CardDescription>Datos principales de la pregunta</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Pregunta *</Label>
+            <Textarea
+              id="title"
+              value={formData.title}
+              onChange={(e) => handleInputChange("title", e.target.value)}
+              placeholder="Escribe aquí tu pregunta..."
+              rows={3}
+              required
+              className="bg-background border-border text-foreground"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="space-y-2">
+              <Label htmlFor="type">Tipo de Pregunta *</Label>
+              <Select
+                value={formData.type}
+                onValueChange={(value) =>
+                  handleInputChange("type", value as QuestionType)
+                }
+              >
+                <SelectTrigger className="bg-background border-border text-foreground">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-card border-border">
+                  {questionTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="unit">Unidad *</Label>
+              <Select
+                value={formData.unitId.toString()}
+                onValueChange={(value) =>
+                  handleInputChange("unitId", parseInt(value))
+                }
+              >
+                <SelectTrigger className="bg-background border-border text-foreground">
+                  <SelectValue placeholder="Selecciona una unidad" />
+                </SelectTrigger>
+                <SelectContent className="bg-card border-border">
+                  {units.map((unit) => (
+                    <SelectItem key={unit.id} value={unit.id.toString()}>
+                      <div className="flex items-center gap-2">
+                        <span>{unit.name}</span>
+                        {unit._count && (
+                          <Badge variant="outline" className="text-xs">
+                            {unit._count.questions || 0} preguntas
+                          </Badge>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="order">Orden *</Label>
+              <Input
+                id="order"
+                type="number"
+                min="1"
+                value={formData.order}
+                onChange={(e) =>
+                  handleInputChange("order", parseInt(e.target.value) || 1)
+                }
+                className="bg-background border-border text-foreground"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="isActive"
+              checked={formData.isActive}
+              onCheckedChange={(checked) => handleInputChange("isActive", checked)}
+            />
+            <Label htmlFor="isActive">Pregunta activa</Label>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Respuestas para opción múltiple */}
+      {formData.type === "MULTIPLE_CHOICE" && (
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <CardTitle>Opciones de Respuesta</CardTitle>
+            <CardDescription>
+              Configura las opciones de respuesta. Marca una como correcta.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {!hasCorrectAnswer && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Debes marcar una respuesta como correcta antes de guardar
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {formData.answers.map((answer, index) => (
+              <div
+                key={index}
+                className="flex items-center space-x-4 p-4 border border-border rounded-lg bg-background"
+              >
+                <div className="flex-1">
+                  <Input
+                    placeholder={`Opción ${index + 1}`}
+                    value={answer.text}
+                    onChange={(e) =>
+                      handleAnswerChange(index, "text", e.target.value)
+                    }
+                    className="bg-background border-border text-foreground"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant={answer.isCorrect ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCorrectAnswer(index)}
+                  className={
+                    answer.isCorrect
+                      ? "bg-green-600 hover:bg-green-700 text-white"
+                      : ""
+                  }
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  {answer.isCorrect ? "Correcta" : "Marcar"}
+                </Button>
+                {formData.answers.length > 2 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeAnswer(index)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+
+            {formData.answers.length < 6 && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addAnswer}
+                className="w-full"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Agregar opción
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Configuración para completar espacios */}
+      {formData.type === "FILL_IN_BLANK" && (
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <CardTitle>Configuración de Espacios en Blanco</CardTitle>
+            <CardDescription>
+              Usa guiones bajos (____) o corchetes [respuesta] para marcar los
+              espacios en blanco en la pregunta principal.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                <strong>Ejemplo:</strong> Bitcoin fue creado en el año ____ por
+                ____
+              </p>
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                O usa: Bitcoin fue creado en el año [2008] por [Satoshi
+                Nakamoto]
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Respuestas correctas (separadas por coma) *</Label>
+              <Input
+                placeholder="2008, Satoshi Nakamoto"
+                value={fillInBlankAnswers}
+                onChange={(e) => setFillInBlankAnswers(e.target.value)}
+                className="bg-background border-border text-foreground"
+              />
+              <p className="text-xs text-muted-foreground">
+                Las respuestas deben estar en el orden en que aparecen los
+                espacios en blanco
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Configuración para verdadero/falso */}
+      {formData.type === "TRUE_FALSE" && (
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <CardTitle>Respuesta Correcta</CardTitle>
+            <CardDescription>
+              Selecciona la respuesta correcta para esta pregunta.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex space-x-4">
+              <Button
+                type="button"
+                variant={trueFalseAnswer ? "default" : "outline"}
+                className={`flex-1 h-16 ${
+                  trueFalseAnswer
+                    ? "bg-green-600 hover:bg-green-700 text-white"
+                    : ""
+                }`}
+                onClick={() => setTrueFalseAnswer(true)}
+              >
+                {trueFalseAnswer && <CheckCircle className="mr-2 h-5 w-5" />}
+                Verdadero
+              </Button>
+              <Button
+                type="button"
+                variant={!trueFalseAnswer ? "default" : "outline"}
+                className={`flex-1 h-16 ${
+                  !trueFalseAnswer
+                    ? "bg-green-600 hover:bg-green-700 text-white"
+                    : ""
+                }`}
+                onClick={() => setTrueFalseAnswer(false)}
+              >
+                {!trueFalseAnswer && <CheckCircle className="mr-2 h-5 w-5" />}
+                Falso
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Configuración para tipos complejos (ORDER_WORDS, MATCHING, DRAG_DROP) */}
+      {["ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(formData.type) && (
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Code className="h-5 w-5" />
+                  Configuración de Contenido (JSON)
+                </CardTitle>
+                <CardDescription>
+                  Edita el contenido de la pregunta en formato JSON
+                </CardDescription>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={loadTemplate}
+              >
+                Cargar Plantilla
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {jsonError && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{jsonError}</AlertDescription>
+              </Alert>
+            )}
+
+            <div className="border border-border rounded-lg overflow-hidden">
+              <Editor
+                height="400px"
+                defaultLanguage="json"
+                value={jsonContent}
+                onChange={handleJsonChange}
+                theme="vs-dark"
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  lineNumbers: "on",
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  tabSize: 2,
+                  formatOnPaste: true,
+                  formatOnType: true
+                }}
+                onMount={(editor) => {
+                  editorRef.current = editor;
+                }}
+              />
+            </div>
+
+            {formData.type === "ORDER_WORDS" && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200 font-semibold mb-2">
+                  Ejemplo de estructura:
+                </p>
+                <pre className="text-xs text-blue-700 dark:text-blue-300 overflow-x-auto">
+{`{
+  "sentence": "Frase completa que el usuario debe ordenar",
+  "words": ["Frase", "completa", "que", "el", "usuario", "debe", "ordenar"],
+  "correctOrder": ["Frase", "completa", "que", "el", "usuario", "debe", "ordenar"],
+  "explanation": "Explicación de la respuesta"
+}`}
+                </pre>
+              </div>
+            )}
+
+            {formData.type === "MATCHING" && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200 font-semibold mb-2">
+                  Ejemplo de estructura:
+                </p>
+                <pre className="text-xs text-blue-700 dark:text-blue-300 overflow-x-auto">
+{`{
+  "pairs": [
+    { "left": "Elemento 1", "right": "Definición 1" },
+    { "left": "Elemento 2", "right": "Definición 2" }
+  ],
+  "explanation": "Explicación de la respuesta"
+}`}
+                </pre>
+              </div>
+            )}
+
+            {formData.type === "DRAG_DROP" && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200 font-semibold mb-2">
+                  Ejemplo de estructura:
+                </p>
+                <pre className="text-xs text-blue-700 dark:text-blue-300 overflow-x-auto">
+{`{
+  "items": ["Item 1", "Item 2", "Item 3"],
+  "zones": ["Zona A", "Zona B", "Zona C"],
+  "correctMapping": {
+    "Item 1": "Zona A",
+    "Item 2": "Zona B",
+    "Item 3": "Zona C"
+  },
+  "explanation": "Explicación de la respuesta"
+}`}
+                </pre>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Vista previa */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle>Vista Previa</CardTitle>
+          <CardDescription>
+            Así se verá la pregunta para los estudiantes
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="p-6 bg-muted rounded-lg border border-border">
+            <h3 className="font-semibold text-lg mb-4 text-foreground">
+              {formData.title || "Tu pregunta aparecerá aquí..."}
+            </h3>
+
+            {formData.type === "MULTIPLE_CHOICE" &&
+              formData.answers.some((a) => a.text) && (
+                <div className="space-y-2">
+                  {formData.answers
+                    .filter((a) => a.text)
+                    .map((answer, index) => (
+                      <div
+                        key={index}
+                        className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                          answer.isCorrect
+                            ? "border-green-500 bg-green-50 dark:bg-green-950 text-foreground"
+                            : "border-border hover:bg-muted text-foreground"
+                        }`}
+                      >
+                        {answer.text}
+                        {answer.isCorrect && (
+                          <span className="ml-2 text-green-600 dark:text-green-400 text-sm font-semibold">
+                            (Correcta)
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              )}
+
+            {formData.type === "TRUE_FALSE" && (
+              <div className="space-y-2">
+                <div
+                  className={`p-3 border rounded-lg ${
+                    trueFalseAnswer
+                      ? "border-green-500 bg-green-50 dark:bg-green-950"
+                      : "border-border"
+                  }`}
+                >
+                  Verdadero
+                  {trueFalseAnswer && (
+                    <span className="ml-2 text-green-600 dark:text-green-400 text-sm font-semibold">
+                      (Correcta)
+                    </span>
+                  )}
+                </div>
+                <div
+                  className={`p-3 border rounded-lg ${
+                    !trueFalseAnswer
+                      ? "border-green-500 bg-green-50 dark:bg-green-950"
+                      : "border-border"
+                  }`}
+                >
+                  Falso
+                  {!trueFalseAnswer && (
+                    <span className="ml-2 text-green-600 dark:text-green-400 text-sm font-semibold">
+                      (Correcta)
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {formData.type === "FILL_IN_BLANK" && fillInBlankAnswers && (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Respuestas correctas:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {fillInBlankAnswers
+                    .split(",")
+                    .map((answer, index) => (
+                      <Badge key={index} variant="secondary">
+                        {answer.trim()}
+                      </Badge>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {["ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(formData.type) &&
+              jsonContent &&
+              !jsonError && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Vista previa del contenido JSON:
+                  </p>
+                  <div className="bg-muted border border-border rounded-lg p-4 max-h-60 overflow-y-auto">
+                    <pre className="text-xs text-foreground">
+                      {jsonContent}
+                    </pre>
+                  </div>
+                </div>
+              )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Botones de acción */}
+      <div className="flex justify-end space-x-4">
+        <Link href="/admin/questions">
+          <Button variant="outline" type="button">
+            Cancelar
+          </Button>
+        </Link>
+        <Button type="submit" disabled={isLoading}>
+          <Save className="mr-2 h-4 w-4" />
+          {isLoading ? "Guardando..." : initialData ? "Actualizar" : "Crear Pregunta"}
+        </Button>
+      </div>
+    </form>
+  );
+}

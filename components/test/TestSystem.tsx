@@ -66,6 +66,7 @@ export function TestSystem({
   const [showStreakCelebration, setShowStreakCelebration] = useState(false);
   const [showMistakeAnalyzer, setShowMistakeAnalyzer] = useState(false);
   const [showHeartBreakAnimation, setShowHeartBreakAnimation] = useState(false);
+  const [isAnimationPlaying, setIsAnimationPlaying] = useState(false);
 
   const user = useUser();
   const isPremium = user?.isPremium || false;
@@ -200,6 +201,7 @@ export function TestSystem({
         setConsecutiveCorrect(newStreak);
 
         if (newStreak === 5) {
+          setIsAnimationPlaying(true);
           setShowStreakCelebration(true);
         }
       } else {
@@ -444,6 +446,7 @@ export function TestSystem({
                       answers[currentTest.questions[currentQuestionIndex]?.id]
                         ?.answer
                     }
+                    isDisabled={isAnimationPlaying}
                   />
                 </motion.div>
               </AnimatePresence>
@@ -535,6 +538,7 @@ export function TestSystem({
             count={5}
             onComplete={() => {
               setShowStreakCelebration(false);
+              setIsAnimationPlaying(false);
             }}
           />
         )}

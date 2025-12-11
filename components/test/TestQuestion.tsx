@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Flag, Volume2 } from "lucide-react";
+import { CheckCircle, XCircle, Flag } from "lucide-react";
 import { MultipleChoiceQuestion } from "./multiple-choice-question";
 import { TrueFalseQuestion } from "./true-false-question";
 import { FillInBlankQuestion } from "./fill-in-blank-question";
 import { OrderWordsQuestion } from "./order-words-question";
 import { motion } from "framer-motion";
 import { useAudio } from "react-use";
-import { useTextToSpeech } from "@/hooks/useSpeech";
 
 interface TestQuestionProps {
   question: any;
@@ -19,6 +18,7 @@ interface TestQuestionProps {
   isCorrect?: boolean;
   selectedAnswer?: string;
   onReportError?: () => void;
+  isDisabled?: boolean;
 }
 
 export function TestQuestion({
@@ -28,6 +28,7 @@ export function TestQuestion({
   showResult = false,
   isCorrect = false,
   selectedAnswer,
+  isDisabled = false,
   onReportError
 }: TestQuestionProps) {
   const [selected, setSelected] = useState<string>(selectedAnswer || "");
@@ -36,12 +37,6 @@ export function TestQuestion({
   const [correctAudio, , correctControls] = useAudio({ src: "/correct.wav" });
   const [incorrectAudio, , incorrectControls] = useAudio({
     src: "/incorrect.wav"
-  });
-
-  const { speak, isSpeaking } = useTextToSpeech({
-    rate: 0.9,
-    pitch: 1,
-    volume: 1
   });
 
   useEffect(() => {
@@ -162,26 +157,6 @@ export function TestQuestion({
               <h1 className="text-center text-lg font-bold text-white lg:text-start lg:text-3xl flex-1">
                 {question.title}
               </h1>
-              <div className="flex justify-end w-full">
-                <button
-                  onClick={() => speak(question.title)}
-                  disabled={isSpeaking}
-                  className={`
-                    flex items-center justify-center w-8 h-8 rounded-full
-                    transition-all duration-200 flex-shrink-0
-                    ${
-                      isSpeaking
-                        ? "bg-[#1983DD] text-white"
-                        : "bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white"
-                    }
-                  `}
-                  aria-label="Escuchar pregunta"
-                >
-                  <Volume2
-                    className={`w-4 h-4 ${isSpeaking ? "animate-pulse" : ""}`}
-                  />
-                </button>
-              </div>
             </div>
             <div className="mb-6">{renderQuestionType()}</div>
 
@@ -310,6 +285,7 @@ export function TestQuestion({
                     mt-6 w-full text-white py-8 text-xl font-medium rounded-2xl shadow-md
                     ${isCorrect ? "bg-[#32C781] hover:bg-[#28a36a]" : "bg-red-500 hover:bg-red-600"}
                   `}
+                  disabled={isDisabled}
                 >
                   Continuar →
                 </Button>

@@ -33,9 +33,9 @@ export default function CurriculumUnitsPage() {
           throw new Error("Error al cargar datos");
 
         const curriculum = await curriculumRes.json();
-        const units = await unitsRes.json();
+        const unitsData = await unitsRes.json();
         setCurriculum(curriculum);
-        setAllUnits(units);
+        setAllUnits(unitsData.data || []);
       } catch (err) {
         console.error(err);
         toast.error("Error al cargar las unidades o curriculum");
