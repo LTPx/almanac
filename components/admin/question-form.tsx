@@ -210,7 +210,8 @@ export default function QuestionForm({
     if (key === "type") {
       const questionType = value as QuestionType;
       if (["ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(questionType)) {
-        const template = contentTemplates[questionType as keyof typeof contentTemplates];
+        const template =
+          contentTemplates[questionType as keyof typeof contentTemplates];
         if (template) {
           setJsonContent(JSON.stringify(template, null, 2));
           setJsonError("");
@@ -233,15 +234,6 @@ export default function QuestionForm({
       setJsonError("");
     } catch (error: any) {
       setJsonError("JSON inválido: " + error.message);
-    }
-  };
-
-  const loadTemplate = () => {
-    const template = contentTemplates[formData.type as keyof typeof contentTemplates];
-    if (template) {
-      setJsonContent(JSON.stringify(template, null, 2));
-      setJsonError("");
-      toast.success("Plantilla cargada");
     }
   };
 
@@ -345,7 +337,9 @@ export default function QuestionForm({
         caseSensitive: false
       };
       formData.answers = [];
-    } else if (["ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(formData.type)) {
+    } else if (
+      ["ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(formData.type)
+    ) {
       // Para tipos complejos, parsear el JSON del content
       if (!jsonContent.trim()) {
         toast.error("Debes proporcionar el contenido en formato JSON");
@@ -353,10 +347,12 @@ export default function QuestionForm({
       }
 
       if (jsonError) {
-        toast.error("El JSON tiene errores. Por favor corrígelos antes de guardar");
+        toast.error(
+          "El JSON tiene errores. Por favor corrígelos antes de guardar"
+        );
         return;
       }
-
+      debugger;
       try {
         const parsedContent = JSON.parse(jsonContent);
         formData.content = parsedContent;
@@ -472,7 +468,9 @@ export default function QuestionForm({
             <Switch
               id="isActive"
               checked={formData.isActive}
-              onCheckedChange={(checked) => handleInputChange("isActive", checked)}
+              onCheckedChange={(checked) =>
+                handleInputChange("isActive", checked)
+              }
             />
             <Label htmlFor="isActive">Pregunta activa</Label>
           </div>
@@ -650,14 +648,6 @@ export default function QuestionForm({
                   Edita el contenido de la pregunta en formato JSON
                 </CardDescription>
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={loadTemplate}
-              >
-                Cargar Plantilla
-              </Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -697,7 +687,7 @@ export default function QuestionForm({
                   Ejemplo de estructura:
                 </p>
                 <pre className="text-xs text-blue-700 dark:text-blue-300 overflow-x-auto">
-{`{
+                  {`{
   "sentence": "Frase completa que el usuario debe ordenar",
   "words": ["Frase", "completa", "que", "el", "usuario", "debe", "ordenar"],
   "correctOrder": ["Frase", "completa", "que", "el", "usuario", "debe", "ordenar"],
@@ -713,7 +703,7 @@ export default function QuestionForm({
                   Ejemplo de estructura:
                 </p>
                 <pre className="text-xs text-blue-700 dark:text-blue-300 overflow-x-auto">
-{`{
+                  {`{
   "pairs": [
     { "left": "Elemento 1", "right": "Definición 1" },
     { "left": "Elemento 2", "right": "Definición 2" }
@@ -730,7 +720,7 @@ export default function QuestionForm({
                   Ejemplo de estructura:
                 </p>
                 <pre className="text-xs text-blue-700 dark:text-blue-300 overflow-x-auto">
-{`{
+                  {`{
   "items": ["Item 1", "Item 2", "Item 3"],
   "zones": ["Zona A", "Zona B", "Zona C"],
   "correctMapping": {
@@ -825,13 +815,11 @@ export default function QuestionForm({
                   Respuestas correctas:
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {fillInBlankAnswers
-                    .split(",")
-                    .map((answer, index) => (
-                      <Badge key={index} variant="secondary">
-                        {answer.trim()}
-                      </Badge>
-                    ))}
+                  {fillInBlankAnswers.split(",").map((answer, index) => (
+                    <Badge key={index} variant="secondary">
+                      {answer.trim()}
+                    </Badge>
+                  ))}
                 </div>
               </div>
             )}
@@ -844,9 +832,7 @@ export default function QuestionForm({
                     Vista previa del contenido JSON:
                   </p>
                   <div className="bg-muted border border-border rounded-lg p-4 max-h-60 overflow-y-auto">
-                    <pre className="text-xs text-foreground">
-                      {jsonContent}
-                    </pre>
+                    <pre className="text-xs text-foreground">{jsonContent}</pre>
                   </div>
                 </div>
               )}
@@ -863,7 +849,11 @@ export default function QuestionForm({
         </Link>
         <Button type="submit" disabled={isLoading}>
           <Save className="mr-2 h-4 w-4" />
-          {isLoading ? "Guardando..." : initialData ? "Actualizar" : "Crear Pregunta"}
+          {isLoading
+            ? "Guardando..."
+            : initialData
+              ? "Actualizar"
+              : "Crear Pregunta"}
         </Button>
       </div>
     </form>

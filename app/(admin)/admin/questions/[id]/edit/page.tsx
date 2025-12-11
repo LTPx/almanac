@@ -65,7 +65,7 @@ export default function EditQuestionPage() {
       }
 
       toast.success("Pregunta actualizada exitosamente");
-      router.push("/admin/questions");
+      // router.push("/admin/questions");
     } catch (error) {
       console.error("Error al actualizar pregunta:", error);
       toast.error(
