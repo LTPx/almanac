@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Flame, Sparkles } from "lucide-react";
 
@@ -13,17 +13,36 @@ export const StreakCelebration: React.FC<StreakCelebrationProps> = ({
   count = 5,
   onComplete
 }) => {
+  const [isExiting, setIsExiting] = useState(false);
+
   useEffect(() => {
-    const timer = setTimeout(onComplete, 2500);
-    return () => clearTimeout(timer);
+    const exitTimer = setTimeout(() => {
+      setIsExiting(true);
+    }, 1000);
+
+    const completeTimer = setTimeout(() => {
+      onComplete();
+    }, 1500);
+
+    return () => {
+      clearTimeout(exitTimer);
+      clearTimeout(completeTimer);
+    };
   }, [onComplete]);
 
   return (
     <motion.div
       initial={{ scale: 0, opacity: 0, y: 50 }}
-      animate={{ scale: 1, opacity: 1, y: 0 }}
-      exit={{ scale: 1.5, opacity: 0, filter: "blur(10px)" }}
-      transition={{ type: "spring", stiffness: 400, damping: 15 }}
+      animate={
+        isExiting
+          ? { scale: 1.5, opacity: 0, filter: "blur(10px)" }
+          : { scale: 1, opacity: 1, y: 0 }
+      }
+      transition={
+        isExiting
+          ? { duration: 0.5, ease: "easeIn" }
+          : { type: "spring", stiffness: 400, damping: 15 }
+      }
       className="fixed inset-0 flex items-center justify-center pointer-events-none z-50"
     >
       {[...Array(12)].map((_, i) => (

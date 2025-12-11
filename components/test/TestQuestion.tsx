@@ -18,6 +18,7 @@ interface TestQuestionProps {
   isCorrect?: boolean;
   selectedAnswer?: string;
   onReportError?: () => void;
+  isDisabled?: boolean;
 }
 
 export function TestQuestion({
@@ -27,6 +28,7 @@ export function TestQuestion({
   showResult = false,
   isCorrect = false,
   selectedAnswer,
+  isDisabled = false,
   onReportError
 }: TestQuestionProps) {
   const [selected, setSelected] = useState<string>(selectedAnswer || "");
@@ -283,6 +285,7 @@ export function TestQuestion({
                     mt-6 w-full text-white py-8 text-xl font-medium rounded-2xl shadow-md
                     ${isCorrect ? "bg-[#32C781] hover:bg-[#28a36a]" : "bg-red-500 hover:bg-red-600"}
                   `}
+                  disabled={isDisabled}
                 >
                   Continuar →
                 </Button>
