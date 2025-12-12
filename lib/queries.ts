@@ -326,7 +326,7 @@ export const getLessonsByUnitId = cache(async (unitId: number) => {
 // ============== QUESTION QUERIES ==============
 
 export const getQuestions = cache(
-  async (search: string, page = 1, pageSize = 10) => {
+  async (search: string, page = 1, pageSize = 10, type?: string) => {
     const whereClause = {
       isActive: true,
       ...(search
@@ -335,6 +335,11 @@ export const getQuestions = cache(
               contains: search,
               mode: "insensitive"
             }
+          }
+        : {}),
+      ...(type && type !== "all"
+        ? {
+            type: type
           }
         : {})
     };

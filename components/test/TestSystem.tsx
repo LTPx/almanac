@@ -80,7 +80,16 @@ export function TestSystem({
   const { error, startTest, submitAnswer, completeTest } = useTest();
   const hasInitialized = useRef(false);
   const modalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isCompletingTestRef = useRef(false);
+  const hasCompletedRef = useRef(false);
+
   const { open: openNoHeartsModal } = useNoHeartsTestModal();
+  useEffect(() => {
+    return () => {
+      isCompletingTestRef.current = false;
+      hasCompletedRef.current = false;
+    };
+  }, []);
 
   const handleOpenStore = useCallback(() => {
     setShowStore(true);
@@ -162,6 +171,8 @@ export function TestSystem({
         setFailedQuestions([]);
         setUniqueFailedQuestions(new Set());
         setConsecutiveCorrect(0);
+        isCompletingTestRef.current = false;
+        hasCompletedRef.current = false;
       }
     },
     [startTest, userId]
@@ -173,6 +184,23 @@ export function TestSystem({
       hasInitialized.current = true;
     }
   }, [handleStartTest, unitId, showAdBeforeStart]);
+
+  // Advertencia al recargar página durante el test
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Solo mostrar advertencia si el test está activo
+      if (state === "testing" || state === "reviewing") {
+        e.preventDefault();
+        e.returnValue = ""; // Chrome requiere establecer returnValue
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [state]);
 
   const handleAnswer = useCallback(
     async (questionId: number, answer: string) => {
@@ -314,21 +342,36 @@ export function TestSystem({
 
   const handleCompleteTest = useCallback(async () => {
     if (!currentTest) return;
-    const testResults = await completeTest(currentTest.testAttemptId);
+    if (isCompletingTestRef.current || hasCompletedRef.current) {
+      console.log("⚠️ Test completion already in progress or completed");
+      return;
+    }
 
-    if (testResults) {
-      const totalQuestions = firstPassQuestionCount;
-      const failedCount = uniqueFailedQuestions.size;
-      const correctCount = totalQuestions - failedCount;
-      const accurateScore = (correctCount / totalQuestions) * 100;
+    isCompletingTestRef.current = true;
+    console.log("✅ Starting test completion...");
 
-      const correctedResults = {
-        ...testResults,
-        score: accurateScore
-      };
+    try {
+      const testResults = await completeTest(currentTest.testAttemptId);
 
-      setResults(correctedResults);
-      setState("results");
+      if (testResults) {
+        const totalQuestions = firstPassQuestionCount;
+        const failedCount = uniqueFailedQuestions.size;
+        const correctCount = totalQuestions - failedCount;
+        const accurateScore = (correctCount / totalQuestions) * 100;
+
+        const correctedResults = {
+          ...testResults,
+          score: accurateScore
+        };
+
+        setResults(correctedResults);
+        setState("results");
+        hasCompletedRef.current = true;
+        console.log("✅ Test completed successfully");
+      }
+    } catch (error) {
+      console.error("❌ Error completing test:", error);
+      isCompletingTestRef.current = false;
     }
   }, [
     currentTest,
