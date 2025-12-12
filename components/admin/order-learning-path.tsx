@@ -175,7 +175,7 @@ function useAssignments(
 ) {
   const [assignments, setAssignments] = useState<Assignments>(() => {
     const grid: Assignments = Object.fromEntries(
-      Array.from({ length: 12 * 5 }).map((_, i) => [`cell-${i}`, null])
+      Array.from({ length: 24 * 5 }).map((_, i) => [`cell-${i}`, null])
     );
     initialPositions.forEach((pos) => {
       grid[`cell-${pos.position}`] = `lesson-${pos.unitId}`;
