@@ -174,6 +174,23 @@ export function TestSystem({
     }
   }, [handleStartTest, unitId, showAdBeforeStart]);
 
+  // Advertencia al recargar página durante el test
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Solo mostrar advertencia si el test está activo
+      if (state === "testing" || state === "reviewing") {
+        e.preventDefault();
+        e.returnValue = ""; // Chrome requiere establecer returnValue
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [state]);
+
   const handleAnswer = useCallback(
     async (questionId: number, answer: string) => {
       if (!currentTest) return;
