@@ -45,38 +45,44 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     return grid.filter((rowData) => rowData.nodes.length > 0);
   };
 
-  const isRowUnlocked = (targetRow: number): boolean => {
+  const isAdjacentToCompleted = (unit: Node): boolean => {
     const pathLayout = generatePathLayout();
+    const maxRow =
+      pathLayout.length > 0 ? Math.max(...pathLayout.map((r) => r.row)) : 0;
 
-    const maxRow = Math.max(...pathLayout.map((r) => r.row));
-    if (targetRow === maxRow) return true;
+    const completedNodes = pathLayout
+      .flatMap((rowData) => rowData.nodes)
+      .filter((node) => approvedUnits.includes(node.id));
 
-    for (let row = maxRow; row > targetRow; row--) {
-      const rowData = pathLayout.find((r) => r.row === row);
-      if (!rowData) continue;
+    if (completedNodes.length === 0) {
+      const firstLesson = units
+        .filter((u) => {
+          const { row } = getRowCol(u.position);
+          return row === maxRow;
+        })
+        .reduce((min, u) => (u.position < min.position ? u : min), units[0]);
 
-      const mandatoryLessons = rowData.nodes.filter((n) => n.mandatory);
-
-      if (mandatoryLessons.length > 0) {
-        const allMandatoryCompleted = mandatoryLessons.every((unit) =>
-          approvedUnits.includes(unit.id)
-        );
-
-        if (!allMandatoryCompleted) {
-          return false;
-        }
-      }
+      return unit.id === firstLesson?.id;
     }
 
-    return true;
+    return completedNodes.some((completed) => {
+      const rowDiff = Math.abs(completed.row - unit.row);
+      const colDiff = Math.abs(completed.col - unit.col);
+
+      return (
+        (rowDiff === 0 && colDiff === 1) || (rowDiff === 1 && colDiff === 0)
+      );
+    });
   };
 
   const getLessonState = (unit: Node): "completed" | "available" | "locked" => {
     if (approvedUnits.includes(unit.id)) return "completed";
 
-    if (!isRowUnlocked(unit.row)) return "locked";
+    if (isAdjacentToCompleted(unit)) {
+      return "available";
+    }
 
-    return "available";
+    return "locked";
   };
 
   const getLockedColor = (mandatory: boolean) => {
