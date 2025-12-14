@@ -15,17 +15,17 @@ export async function GET(request: NextRequest) {
     if (adminCheck) return adminCheck;
 
     const { searchParams } = new URL(request.url);
-    const unitId = searchParams.get("unitId");
+    const curriculumId = searchParams.get("curriculumId");
 
-    const where = unitId ? { unitId: parseInt(unitId) } : {};
+    const where = curriculumId ? { curriculumId } : {};
 
     const ads = await prisma.ad.findMany({
       where,
       include: {
-        unit: {
+        curriculum: {
           select: {
             id: true,
-            name: true
+            title: true
           }
         },
         _count: {
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
           }
         }
       },
-      orderBy: [{ unitId: "asc" }, { position: "asc" }]
+      orderBy: [{ position: "asc" }]
     });
 
     return NextResponse.json(ads);
@@ -59,14 +59,20 @@ export async function POST(request: NextRequest) {
     if (adminCheck) return adminCheck;
 
     const body = await request.json();
-    const { unitId, title, description, imageUrl, targetUrl, position, isActive } =
-      body;
+    const {
+      curriculumId,
+      title,
+      description,
+      imageUrl,
+      targetUrl,
+      position,
+      isActive
+    } = body;
 
-    if (!unitId || !title || !imageUrl || !targetUrl) {
+    if (!curriculumId || !title || !imageUrl || !targetUrl) {
       return NextResponse.json(
         {
-          error:
-            "unitId, title, imageUrl y targetUrl son requeridos"
+          error: "curriculumId, title, imageUrl y targetUrl son requeridos"
         },
         { status: 400 }
       );
@@ -74,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     const ad = await prisma.ad.create({
       data: {
-        unitId,
+        curriculumId,
         title,
         description,
         imageUrl,
@@ -83,10 +89,10 @@ export async function POST(request: NextRequest) {
         isActive: isActive !== undefined ? isActive : true
       },
       include: {
-        unit: {
+        curriculum: {
           select: {
             id: true,
-            name: true
+            title: true
           }
         }
       }

@@ -25,6 +25,7 @@ import { MistakeAnalyzerOverlay } from "./MistakeAnalyzerOverlay";
 interface TestSystemProps {
   userId: string;
   unitId: number;
+  curriculumId: string;
   onClose: () => void;
   hearts: number;
   onHeartsChange?: (hearts: number) => void;
@@ -40,10 +41,12 @@ type TestState =
 export function TestSystem({
   userId,
   unitId,
+  curriculumId,
   onClose,
   hearts: initialHearts,
   onHeartsChange
 }: TestSystemProps) {
+  console.log("curriculumId ts: ", curriculumId);
   const [state, setState] = useState<TestState>("testing");
   const [showStore, setShowStore] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
@@ -561,8 +564,7 @@ export function TestSystem({
       {showAdBeforeStart && (
         <InterstitialAd
           onClose={() => setShowAdBeforeStart(false)}
-          time={10}
-          unitId={unitId}
+          curriculumId={curriculumId}
         />
       )}
 

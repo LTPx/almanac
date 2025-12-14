@@ -3,14 +3,14 @@ import prisma from "@/lib/prisma";
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ unitId: string }> }
+  context: { params: Promise<{ curriculumId: string }> }
 ) {
   try {
-    const { unitId } = await context.params;
+    const { curriculumId } = await context.params;
 
     const ads = await prisma.ad.findMany({
       where: {
-        unitId: parseInt(unitId),
+        curriculumId,
         isActive: true
       },
       orderBy: {

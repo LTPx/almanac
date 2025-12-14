@@ -19,12 +19,12 @@ interface Ad {
   };
 }
 
-interface UnitAdProps {
+interface CurriculumAdProps {
   unitId: number;
   className?: string;
 }
 
-export function UnitAd({ unitId, className }: UnitAdProps) {
+export function CurriculumAd({ unitId, className }: CurriculumAdProps) {
   const [ads, setAds] = useState<Ad[]>([]);
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);

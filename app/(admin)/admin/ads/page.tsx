@@ -30,9 +30,9 @@ interface Ad {
   targetUrl: string;
   isActive: boolean;
   position: number;
-  unit: {
-    id: number;
-    name: string;
+  curriculum: {
+    id: string;
+    title: string;
   };
   _count: {
     views: number;
@@ -177,7 +177,10 @@ export default function AdsPage() {
           <TableBody>
             {ads.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground">
+                <TableCell
+                  colSpan={7}
+                  className="text-center text-muted-foreground"
+                >
                   No hay anuncios creados
                 </TableCell>
               </TableRow>
@@ -185,7 +188,7 @@ export default function AdsPage() {
               ads.map((ad) => (
                 <TableRow key={ad.id}>
                   <TableCell className="font-medium">{ad.title}</TableCell>
-                  <TableCell>{ad.unit.name}</TableCell>
+                  <TableCell>{ad.curriculum.title}</TableCell>
                   <TableCell>
                     {ad.isActive ? (
                       <Badge variant="default">Activo</Badge>

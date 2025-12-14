@@ -19,6 +19,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
   hearts,
   onTestComplete
 }) => {
+  console.log(curriculum);
   const [activeUnit, setActiveUnit] = useState<Unit | null>(null);
   const { progress, isLoading, refetch } = useProgress(userId, curriculum.id);
   const handleCloseTest = () => {
@@ -57,6 +58,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
             hearts={hearts || 0}
             userId={userId}
             unitId={activeUnit.id}
+            curriculumId={curriculum.id}
             onClose={handleCloseTest}
           />
         </div>
