@@ -112,10 +112,7 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
       return;
     }
 
-    onSubmit({
-      ...formData,
-      curriculumId: parseInt(formData.curriculumId)
-    });
+    onSubmit(formData);
   };
 
   return (
