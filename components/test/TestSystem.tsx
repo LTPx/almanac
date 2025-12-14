@@ -564,7 +564,6 @@ export function TestSystem({
       {showAdBeforeStart && (
         <InterstitialAd
           onClose={() => setShowAdBeforeStart(false)}
-          time={10}
           curriculumId={curriculumId}
         />
       )}

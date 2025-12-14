@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 import AdBanner from "./adBanner";
 
 interface Ad {
@@ -14,24 +15,18 @@ interface Ad {
 
 export default function InterstitialAd({
   onClose,
-  time,
   curriculumId
 }: {
   onClose: () => void;
-  time: number;
   curriculumId: string;
 }) {
-  const [isAdBlocked, setIsAdBlocked] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-  const [isButtonEnabled, setIsButtonEnabled] = useState(false);
-  const [countdown, setCountdown] = useState(time);
-
-  // Estados para ads personalizados
   const [customAds, setCustomAds] = useState<Ad[]>([]);
   const [loadingAds, setLoadingAds] = useState(true);
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
   const [hasRegisteredView, setHasRegisteredView] = useState(false);
   const [showingGoogleAd, setShowingGoogleAd] = useState(false);
+  const [isAdBlocked, setIsAdBlocked] = useState(false);
 
   // Detectar bloqueador de anuncios
   useEffect(() => {
@@ -50,16 +45,22 @@ export default function InterstitialAd({
         if (response.ok) {
           const data = await response.json();
           setCustomAds(data);
+
+          // Si no hay ads, cerrar inmediatamente
+          if (data.length === 0) {
+            onClose();
+          }
         }
       } catch (error) {
         console.error("Error fetching ads:", error);
+        onClose(); // Cerrar si hay error
       } finally {
         setLoadingAds(false);
       }
     };
 
     fetchAds();
-  }, [curriculumId]);
+  }, [curriculumId, onClose]);
 
   // Registrar vista del ad personalizado
   useEffect(() => {
@@ -82,29 +83,7 @@ export default function InterstitialAd({
 
       registerView();
     }
-  }, [
-    customAds,
-    currentAdIndex,
-    hasRegisteredView,
-    isVisible,
-    showingGoogleAd
-  ]);
-
-  // Countdown timer
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          setIsButtonEnabled(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
+  }, [customAds, currentAdIndex, hasRegisteredView, isVisible, showingGoogleAd]);
 
   const handleAdClick = async (ad: Ad) => {
     try {
@@ -117,103 +96,44 @@ export default function InterstitialAd({
     }
   };
 
-  const handleNextAd = () => {
-    if (currentAdIndex < customAds.length - 1) {
+  const handleSkip = () => {
+    if (!showingGoogleAd && currentAdIndex < customAds.length - 1) {
+      // Ir al siguiente ad personalizado
       setCurrentAdIndex(currentAdIndex + 1);
       setHasRegisteredView(false);
-    } else {
+    } else if (!showingGoogleAd) {
+      // Terminamos los ads personalizados, mostrar Google Ad
       setShowingGoogleAd(true);
+    } else {
+      // Ya vimos Google Ad, mostrar el test
+      setIsVisible(false);
+      onClose();
     }
   };
 
-  if (!isVisible) return null;
+  if (!isVisible || loadingAds) return null;
 
   const currentAd = customAds[currentAdIndex];
-  const hasCustomAds = customAds.length > 0;
+
+  // Si no hay ads personalizados, mostrar Google Ad directamente
+  if (!currentAd && !showingGoogleAd && customAds.length === 0) {
+    setShowingGoogleAd(true);
+  }
 
   return (
-    <div className="absolute inset-0 z-[300] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="bg-white text-black rounded-2xl shadow-xl p-6 max-w-2xl w-full">
-        {loadingAds ? (
-          <div className="text-center p-8">
-            <p className="text-gray-500">Cargando...</p>
-          </div>
-        ) : !showingGoogleAd && hasCustomAds ? (
-          // Mostrar ad personalizado
-          <div className="space-y-4">
-            <div
-              className="cursor-pointer"
-              onClick={() => handleAdClick(currentAd)}
-            >
-              <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden">
-                <img
-                  src={currentAd.imageUrl}
-                  alt={currentAd.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="mt-4">
-                <h3 className="font-semibold text-lg mb-1">
-                  {currentAd.title}
-                </h3>
-                {currentAd.description && (
-                  <p className="text-sm text-gray-600 line-clamp-2">
-                    {currentAd.description}
-                  </p>
-                )}
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-xs text-gray-400">Anuncio</span>
-                  <span className="text-xs font-medium text-blue-600 hover:underline">
-                    Más información →
-                  </span>
-                </div>
-              </div>
-            </div>
+    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/90">
+      {showingGoogleAd ? (
+        // Mostrar Google AdSense
+        <div className="relative bg-white rounded-2xl shadow-xl p-6 max-w-2xl w-full mx-4">
+          {/* Botón X para saltar */}
+          <button
+            onClick={handleSkip}
+            className="absolute top-4 right-4 z-10 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full p-2 transition-all"
+            aria-label="Continuar al test"
+          >
+            <X className="w-5 h-5" />
+          </button>
 
-            {/* Indicadores de ads */}
-            <div className="flex justify-center gap-2">
-              {customAds.map((_, index) => (
-                <button
-                  key={index}
-                  className={`h-2 rounded-full transition-all ${
-                    index === currentAdIndex
-                      ? "w-6 bg-blue-600"
-                      : "w-2 bg-gray-300"
-                  }`}
-                  onClick={() => {
-                    setCurrentAdIndex(index);
-                    setHasRegisteredView(false);
-                  }}
-                />
-              ))}
-              {/* Indicador para Google AdSense */}
-              <button
-                className="h-2 w-2 rounded-full bg-gray-300"
-                onClick={() => setShowingGoogleAd(true)}
-              />
-            </div>
-
-            {/* Botón para siguiente ad o ir a Google Ad */}
-            <div className="flex gap-2">
-              {currentAdIndex < customAds.length - 1 ? (
-                <button
-                  onClick={handleNextAd}
-                  className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
-                >
-                  Siguiente anuncio →
-                </button>
-              ) : (
-                <button
-                  onClick={handleNextAd}
-                  className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
-                >
-                  Ver más anuncios →
-                </button>
-              )}
-            </div>
-          </div>
-        ) : (
-          // Mostrar Google AdSense (cuando no hay ads personalizados o ya los vimos todos)
           <div className="text-center">
             {!isAdBlocked ? (
               <>
@@ -234,25 +154,46 @@ export default function InterstitialAd({
               </div>
             )}
           </div>
-        )}
+        </div>
+      ) : currentAd ? (
+        // Mostrar ads personalizados
+        <div className="relative w-full h-full max-w-4xl max-h-[90vh] flex items-center justify-center p-4">
+          {/* Botón X para saltar */}
+          <button
+            onClick={handleSkip}
+            className="absolute top-4 right-4 z-10 bg-white/10 hover:bg-white/20 text-white rounded-full p-3 transition-all backdrop-blur-sm"
+            aria-label="Saltar anuncio"
+          >
+            <X className="w-6 h-6" />
+          </button>
 
-        {/* Botón para comenzar test */}
-        <button
-          disabled={!isButtonEnabled}
-          onClick={() => {
-            setIsVisible(false);
-            onClose();
-          }}
-          className={`w-full mt-6 px-4 py-3 rounded-lg text-white font-medium transition
-            ${
-              isButtonEnabled
-                ? "bg-blue-600 hover:bg-blue-700"
-                : "bg-gray-400 cursor-not-allowed"
-            }`}
-        >
-          {isButtonEnabled ? "Comenzar test" : `Espera ${countdown}s...`}
-        </button>
-      </div>
+          {/* Imagen del anuncio */}
+          <div
+            className="cursor-pointer w-full h-full flex items-center justify-center"
+            onClick={() => handleAdClick(currentAd)}
+          >
+            <img
+              src={currentAd.imageUrl}
+              alt={currentAd.title}
+              className="max-w-full max-h-full object-contain rounded-lg"
+            />
+          </div>
+
+          {/* Contador de ads */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+            {customAds.map((_, index) => (
+              <div
+                key={index}
+                className={`h-2 rounded-full transition-all ${
+                  index === currentAdIndex ? "w-6 bg-white" : "w-2 bg-white/40"
+                }`}
+              />
+            ))}
+            {/* Indicador para Google Ad */}
+            <div className="h-2 w-2 rounded-full bg-white/40" />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
