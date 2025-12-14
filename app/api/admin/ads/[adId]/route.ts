@@ -22,10 +22,10 @@ export async function GET(
     const ad = await prisma.ad.findUnique({
       where: { id: parseInt(adId) },
       include: {
-        unit: {
+        curriculum: {
           select: {
             id: true,
-            name: true
+            title: true
           }
         },
         _count: {
@@ -74,10 +74,10 @@ export async function PATCH(
       where: { id: parseInt(adId) },
       data: body,
       include: {
-        unit: {
+        curriculum: {
           select: {
             id: true,
-            name: true
+            title: true
           }
         },
         _count: {
