@@ -15,11 +15,11 @@ interface Ad {
 export default function InterstitialAd({
   onClose,
   time,
-  unitId
+  curriculumId
 }: {
   onClose: () => void;
   time: number;
-  unitId: number;
+  curriculumId: string;
 }) {
   const [isAdBlocked, setIsAdBlocked] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -46,7 +46,7 @@ export default function InterstitialAd({
   useEffect(() => {
     const fetchAds = async () => {
       try {
-        const response = await fetch(`/api/units/${unitId}/ads`);
+        const response = await fetch(`/api/curriculums/${curriculumId}/ads`);
         if (response.ok) {
           const data = await response.json();
           setCustomAds(data);
@@ -59,7 +59,7 @@ export default function InterstitialAd({
     };
 
     fetchAds();
-  }, [unitId]);
+  }, [curriculumId]);
 
   // Registrar vista del ad personalizado
   useEffect(() => {

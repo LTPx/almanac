@@ -32,12 +32,6 @@ export async function GET(
                 position: true,
                 unitId: true
               }
-            },
-            ads: {
-              select: {
-                imageUrl: true,
-                targetUrl: true
-              }
             }
           },
           orderBy: {
