@@ -7,11 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Search } from "lucide-react";
-
-interface Unit {
-  id: number;
-  name: string;
-}
+import { Curriculum } from "@/lib/types";
 
 interface Ad {
   id: number;
@@ -21,9 +17,9 @@ interface Ad {
   targetUrl: string;
   isActive: boolean;
   position: number;
-  unit: {
-    id: number;
-    name: string;
+  curriculum: {
+    id: string;
+    title: string;
   };
 }
 
@@ -35,8 +31,8 @@ interface AdFormProps {
 
 export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
   const [formData, setFormData] = useState({
-    unitId: "",
-    unitName: "",
+    curriculumId: "",
+    curriculumTitle: "",
     title: "",
     description: "",
     imageUrl: "",
@@ -46,7 +42,7 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
   });
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Unit[]>([]);
+  const [searchResults, setSearchResults] = useState<Curriculum[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -54,8 +50,8 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
   useEffect(() => {
     if (editingAd) {
       setFormData({
-        unitId: editingAd.unit.id.toString(),
-        unitName: editingAd.unit.name,
+        curriculumId: editingAd.curriculum.id.toString(),
+        curriculumTitle: editingAd.curriculum.title,
         title: editingAd.title,
         description: editingAd.description || "",
         imageUrl: editingAd.imageUrl,
@@ -63,13 +59,13 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
         position: editingAd.position,
         isActive: editingAd.isActive
       });
-      setSearchQuery(editingAd.unit.name);
+      setSearchQuery(editingAd.curriculum.title);
     }
   }, [editingAd]);
 
-  // Buscar unidades
+  // Buscar curriculums
   useEffect(() => {
-    const searchUnits = async () => {
+    const searchCurriculums = async () => {
       if (searchQuery.trim().length < 3) {
         setSearchResults([]);
         return;
@@ -78,47 +74,47 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
       setIsSearching(true);
       try {
         const response = await fetch(
-          `/api/admin/units?search=${encodeURIComponent(searchQuery)}&pageSize=5`
+          `/api/admin/curriculums?search=${encodeURIComponent(searchQuery)}&pageSize=5`
         );
         if (response.ok) {
           const data = await response.json();
           setSearchResults(data.data || []);
         }
       } catch (error) {
-        console.error("Error searching units:", error);
+        console.error("Error searching curriculums:", error);
       } finally {
         setIsSearching(false);
       }
     };
 
     const debounce = setTimeout(() => {
-      searchUnits();
+      searchCurriculums();
     }, 300);
 
     return () => clearTimeout(debounce);
   }, [searchQuery]);
 
-  const handleSelectUnit = (unit: Unit) => {
+  const handleSelectCurriculum = (curriculum: Curriculum) => {
     setFormData({
       ...formData,
-      unitId: unit.id.toString(),
-      unitName: unit.name
+      curriculumId: curriculum.id.toString(),
+      curriculumTitle: curriculum.title
     });
-    setSearchQuery(unit.name);
+    setSearchQuery(curriculum.title);
     setShowResults(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.unitId) {
+    if (!formData.curriculumId) {
       alert("Por favor selecciona una unidad");
       return;
     }
 
     onSubmit({
       ...formData,
-      unitId: parseInt(formData.unitId)
+      curriculumId: parseInt(formData.curriculumId)
     });
   };
 
@@ -126,19 +122,19 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Search de Unidad */}
       <div className="space-y-2">
-        <Label htmlFor="unit">Unidad</Label>
+        <Label htmlFor="curriculum">Curriculum</Label>
         <div className="relative">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              id="unit"
+              id="curriculum"
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 setShowResults(true);
               }}
               onFocus={() => setShowResults(true)}
-              placeholder="Buscar unidad..."
+              placeholder="Buscar curriculum..."
               className="pl-9"
               required
             />
@@ -151,16 +147,16 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
                 <div className="p-3 text-sm text-gray-500">Buscando...</div>
               ) : searchResults.length > 0 ? (
                 <ul>
-                  {searchResults.map((unit) => (
+                  {searchResults.map((curriculum) => (
                     <li
-                      key={unit.id}
+                      key={curriculum.id}
                       className="p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
-                      onClick={() => handleSelectUnit(unit)}
+                      onClick={() => handleSelectCurriculum(curriculum)}
                     >
                       <div className="text-gray-500 font-medium">
-                        {unit.name}
+                        {curriculum.title}
                       </div>
-                      {/* <div className="text-xs text-gray-500">ID: {unit.id}</div> */}
+                      {/* <div className="text-xs text-gray-500">ID: {curriculum.id}</div> */}
                     </li>
                   ))}
                 </ul>
@@ -172,10 +168,10 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
             </div>
           )}
         </div>
-        {formData.unitName && (
+        {formData.curriculumTitle && (
           <div className="text-sm text-gray-600">
             Seleccionado:{" "}
-            <span className="font-medium">{formData.unitName}</span>
+            <span className="font-medium">{formData.curriculumTitle}</span>
           </div>
         )}
       </div>

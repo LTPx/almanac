@@ -8,6 +8,9 @@ export async function GET(request: NextRequest) {
     const difficulty = searchParams.get("difficulty");
     const includeUnits = searchParams.get("includeUnits") === "true";
     const activeParam = searchParams.get("active");
+    const search = searchParams.get("search")?.trim() || "";
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const pageSize = parseInt(searchParams.get("pageSize") || "15", 10);
 
     const where: any = {};
 
@@ -21,8 +24,26 @@ export async function GET(request: NextRequest) {
       where.isActive = false;
     }
 
+    // Búsqueda por título
+    if (search) {
+      where.title = {
+        contains: search,
+        mode: "insensitive"
+      };
+    }
+
+    // Calcular paginación
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+
+    // Obtener total de registros
+    const total = await prisma.curriculum.count({ where });
+
+    // Obtener curriculums con paginación
     const curriculums = await prisma.curriculum.findMany({
       where,
+      skip,
+      take,
       orderBy: { createdAt: "desc" },
       include: {
         units: includeUnits
@@ -43,7 +64,15 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    return NextResponse.json(curriculums);
+    return NextResponse.json({
+      data: curriculums,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize)
+      }
+    });
   } catch (error) {
     console.error("Error al obtener curriculums:", error);
     return NextResponse.json(
