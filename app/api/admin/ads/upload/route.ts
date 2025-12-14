@@ -15,10 +15,18 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
+    const curriculumId = formData.get("curriculumId") as string;
 
     if (!file) {
       return NextResponse.json(
         { error: "No se proporcionó ningún archivo" },
+        { status: 400 }
+      );
+    }
+
+    if (!curriculumId) {
+      return NextResponse.json(
+        { error: "curriculumId es requerido" },
         { status: 400 }
       );
     }
@@ -40,8 +48,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Subir a S3
-    const result = await uploadFile(file, "ads");
+    // Subir a S3 en carpeta del curriculum
+    const result = await uploadFile(file, `ads/${curriculumId}`);
 
     return NextResponse.json({ url: result.url }, { status: 200 });
   } catch (error) {

@@ -143,6 +143,7 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
       try {
         const uploadFormData = new FormData();
         uploadFormData.append("file", selectedFile);
+        uploadFormData.append("curriculumId", formData.curriculumId);
 
         const response = await fetch("/api/admin/ads/upload", {
           method: "POST",
