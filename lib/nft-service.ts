@@ -77,38 +77,63 @@ function getContractForCollection(contractAddress: string) {
  */
 export function createNFTMetadata({
   courseName,
-  unitName,
+  // unitName,
   rarity,
   imageUrl,
   customDescription,
-  collectionName
+  collectionName,
+  startDate,
+  endDate
 }: {
   courseName: string;
-  unitName: string;
+  // unitName: string;
   rarity: Rarity;
   imageUrl: string;
   customDescription?: string;
   collectionName?: string;
+  startDate?: Date;
+  endDate?: Date;
 }): NFTMetadata {
-  const defaultDescription = `Certificado de completitud para la unidad "${unitName}" del curso "${courseName}"`;
+  const defaultDescription = `Certificado de completitud "${courseName}"`;
+
+  const attributes: Array<{ trait_type: string; value: string }> = [
+    { trait_type: "Rarity", value: rarity },
+    { trait_type: "Course", value: courseName },
+    { trait_type: "Type", value: "Educational Certificate" },
+  ];
+
+  // Agregar fecha de inicio si está disponible
+  if (startDate) {
+    attributes.push({
+      trait_type: "Start Date",
+      value: startDate.toISOString().split("T")[0]
+    });
+  }
+
+  // Agregar fecha de fin si está disponible
+  if (endDate) {
+    attributes.push({
+      trait_type: "Completed Date",
+      value: endDate.toISOString().split("T")[0]
+    });
+  } else {
+    // Fallback a la fecha actual si no hay endDate
+    attributes.push({
+      trait_type: "Completed Date",
+      value: new Date().toISOString().split("T")[0]
+    });
+  }
+
+  // Agregar colección si está disponible
+  if (collectionName) {
+    attributes.push({ trait_type: "Collection", value: collectionName });
+  }
 
   return {
-    name: `${courseName} - ${unitName}`,
+    name: `${courseName}`,
     description: customDescription || defaultDescription,
     image: imageUrl,
-    attributes: [
-      { trait_type: "Rarity", value: rarity },
-      { trait_type: "Course", value: courseName },
-      { trait_type: "Unit", value: unitName },
-      {
-        trait_type: "Completed Date",
-        value: new Date().toISOString().split("T")[0]
-      },
-      { trait_type: "Type", value: "Educational Certificate" },
-      ...(collectionName
-        ? [{ trait_type: "Collection", value: collectionName }]
-        : [])
-    ]
+    attributes
   };
 }
 
