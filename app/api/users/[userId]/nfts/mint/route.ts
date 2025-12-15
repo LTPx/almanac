@@ -54,9 +54,35 @@ export async function POST(
 
     const { user, userCurriculumToken } = validationResult.data!;
 
-    // 2) Crear metadatos del NFT con descripción personalizada
-    const courseName = "Almanac";
-    const unitName = userCurriculumToken.curriculum.title;
+    // 2) Obtener fechas de inicio y fin del curriculum desde userUnitProgress
+    const curriculumUnits = await prisma.unit.findMany({
+      where: { curriculumId: curriculumTokenId },
+      select: { id: true }
+    });
+
+    const unitIds = curriculumUnits.map((u) => u.id);
+
+    const userProgressRecords = await prisma.userUnitProgress.findMany({
+      where: {
+        userId,
+        unitId: { in: unitIds }
+      },
+      orderBy: { createdAt: "asc" }
+    });
+
+    // Fecha de inicio: el createdAt más antiguo
+    const startDate = userProgressRecords[0]?.createdAt;
+
+    // Fecha de fin: el completedAt más reciente (o createdAt si no hay completedAt)
+    const completedRecords = userProgressRecords
+      .filter((r) => r.completedAt)
+      .sort((a, b) => b.completedAt!.getTime() - a.completedAt!.getTime());
+
+    const endDate = completedRecords[0]?.completedAt || userProgressRecords[userProgressRecords.length - 1]?.createdAt;
+
+    // 3) Crear metadatos del NFT con descripción personalizada
+    const courseName = userCurriculumToken.curriculum.title;
+    // const unitName = userCurriculumToken.curriculum.title;
     const rarity = getRandomRarity();
     const { nftImage, nftImageId, rarityUsed } = await getAvailableNFTImage(
       rarity,
@@ -65,10 +91,12 @@ export async function POST(
 
     const metadata = createNFTMetadata({
       courseName,
-      unitName,
+      // unitName,
       customDescription: description,
       rarity: rarityUsed,
-      imageUrl: nftImage
+      imageUrl: nftImage,
+      startDate,
+      endDate
     });
 
     // 3) Mintear el NFT
