@@ -644,10 +644,10 @@ export default function HomePage() {
           </div>
           <div className="flex flex-wrap gap-4">
             <a
-              href="/about"
+              href="/legal-notice"
               className="hover:text-foreground transition-colors"
             >
-              About
+              Legal Notice
             </a>
             <a
               href="/OpenMind — White Paper.pdf"
@@ -663,7 +663,7 @@ export default function HomePage() {
               Contact
             </a>
             <a
-              href="/privacy"
+              href="/privacy-policy"
               className="hover:text-foreground transition-colors"
             >
               Privacy

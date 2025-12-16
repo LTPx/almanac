@@ -121,8 +121,8 @@ export default function CurriculumPage() {
   useEffect(() => {
     const loadUnits = async () => {
       try {
-        const curriculums = await fetchCurriculums();
-        setCurriculums(curriculums);
+        const response = await fetchCurriculums();
+        setCurriculums(response.data);
       } catch (error) {
         console.error("Error loading units:", error);
         toast.error("No se pudieron cargar los curriculums");
