@@ -1,17 +1,42 @@
 # Generador de Contenido con IA
 
-Esta funcionalidad permite generar contenido educativo automáticamente utilizando OpenAI GPT-4.
+Esta funcionalidad permite generar contenido educativo automáticamente utilizando **Google Gemini** (gratis) u **OpenAI GPT-4** (de pago).
 
 ## Configuración
 
-### 1. Obtener API Key de OpenAI
+### Opción 1: Google Gemini (Recomendado - GRATIS)
+
+#### 1. Obtener API Key de Gemini
+
+1. Ve a [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Inicia sesión con tu cuenta de Google
+3. Haz clic en "Create API Key"
+4. Copia la API key generada
+
+#### 2. Configurar Variable de Entorno
+
+Agrega la siguiente variable a tu archivo `.env`:
+
+```env
+GEMINI_API_KEY=tu_api_key_de_gemini_aqui
+```
+
+**Ventajas de Gemini:**
+- ✅ Plan gratuito generoso (1,500 requests/día)
+- ✅ No requiere tarjeta de crédito
+- ✅ Excelente calidad de generación
+- ✅ Modelos Gemini 1.5 Flash y Pro disponibles
+
+### Opción 2: OpenAI (De Pago)
+
+#### 1. Obtener API Key de OpenAI
 
 1. Ve a [OpenAI Platform](https://platform.openai.com/api-keys)
 2. Inicia sesión o crea una cuenta
 3. Genera una nueva API key
 4. Copia la API key (comienza con `sk-`)
 
-### 2. Configurar Variable de Entorno
+#### 2. Configurar Variable de Entorno
 
 Agrega la siguiente variable a tu archivo `.env`:
 
@@ -19,7 +44,21 @@ Agrega la siguiente variable a tu archivo `.env`:
 OPENAI_API_KEY=sk-tu_api_key_aqui
 ```
 
-### 3. Acceder al Generador
+#### 3. Agregar Créditos
+
+- Ve a [OpenAI Billing](https://platform.openai.com/account/billing)
+- Agrega créditos (mínimo $5) o configura método de pago
+
+### 3. Reiniciar Servidor
+
+Después de agregar las variables de entorno:
+
+```bash
+# Detén el servidor (Ctrl+C) y vuelve a iniciar
+npm run dev
+```
+
+### 4. Acceder al Generador
 
 1. Inicia sesión como administrador
 2. Ve a **Configuración > Generador IA** en el sidebar
@@ -29,18 +68,29 @@ OPENAI_API_KEY=sk-tu_api_key_aqui
 
 ### Generar Contenido
 
-1. **Completa los parámetros:**
+1. **Selecciona el proveedor de IA:**
+   - **Google Gemini (Gratis)** - Recomendado para empezar
+   - **OpenAI (De pago)** - Si ya tienes créditos
+
+2. **Completa los parámetros:**
    - **Track**: Categoría del curso (ej: Foundations, Physics, Biology)
    - **Phase**: Fase del aprendizaje (ej: Phase 1, Phase 2)
    - **Unit Name**: Nombre de la unidad
    - **Topic**: Tema o concepto principal
 
-2. **Selecciona el modelo de IA:**
-   - GPT-4o (Recomendado) - Más rápido y económico
+3. **Selecciona el modelo:**
+
+   **Gemini:**
+   - Gemini 1.5 Flash (Gratis, Rápido)
+   - Gemini 1.5 Pro (Gratis, Mejor calidad)
+   - Gemini 2.0 Flash (Experimental)
+
+   **OpenAI:**
+   - GPT-4o (Recomendado)
    - GPT-4 Turbo
    - GPT-4
 
-3. **Genera:** Haz clic en "Generar Contenido"
+4. **Genera:** Haz clic en "Generar Contenido"
 
 4. **Edita (Opcional):** El JSON generado aparecerá en el editor Monaco. Puedes editarlo directamente si necesitas hacer ajustes.
 
@@ -134,34 +184,58 @@ El archivo `lib/curriculum.json` contiene una lista de unidades predefinidas par
 ]
 ```
 
-## Costos
+## Comparación de Costos
 
-Ten en cuenta que cada generación consume tokens de OpenAI. El sistema muestra la cantidad de tokens usados después de cada generación.
+### Google Gemini (GRATIS)
+
+**Plan Gratuito:**
+- 1,500 requests por día
+- 1 millón de tokens por minuto
+- Sin costo
+- No requiere tarjeta de crédito
+
+**Modelos:**
+- Gemini 1.5 Flash: Rápido y eficiente
+- Gemini 1.5 Pro: Mejor calidad, más tokens
+
+### OpenAI (De Pago)
 
 **Costos aproximados (GPT-4o):**
 - Input: ~$5 / 1M tokens
 - Output: ~$15 / 1M tokens
+- Generación típica: ~$0.01-$0.05 por unidad
 
-Una generación típica usa entre 2,000-5,000 tokens totales (~$0.01-$0.05 por unidad).
+**Requiere:**
+- Créditos prepagados o método de pago
+- Mínimo $5 USD inicial
 
 ## Troubleshooting
 
 ### Error: "Cuota de OpenAI excedida" o "You exceeded your current quota"
 
-Este es el error más común. Ocurre cuando:
-- Tu cuenta de OpenAI no tiene créditos
-- No has agregado un método de pago
-- El plan gratuito ha expirado
+**Solución Rápida: Usa Gemini en su lugar**
+1. En el formulario, cambia "Proveedor de IA" a "Google Gemini"
+2. Asegúrate de tener `GEMINI_API_KEY` configurada
+3. Vuelve a generar
+
+**O agrega créditos a OpenAI:**
+1. Ve a [OpenAI Billing](https://platform.openai.com/account/billing)
+2. Agrega créditos ($5 mínimo) o configura método de pago
+3. Espera 1-2 minutos y vuelve a intentar
+
+### Error: "Gemini API key no configurada"
 
 **Solución:**
-1. Ve a [OpenAI Billing](https://platform.openai.com/account/billing)
-2. Opciones:
-   - **Plan de Prepago (Recomendado):** Agrega créditos ($5 mínimo)
-   - **Plan Mensual:** Configura un método de pago y límite mensual
-3. Verifica que tengas créditos disponibles
-4. Espera 1-2 minutos y vuelve a intentar
-
-**Costo promedio:** $0.01-$0.05 por unidad generada con GPT-4o
+1. Ve a [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Crea una API key gratuita
+3. Agrégala a tu archivo `.env`:
+   ```env
+   GEMINI_API_KEY=tu_api_key_aqui
+   ```
+4. Reinicia el servidor:
+   ```bash
+   npm run dev
+   ```
 
 ### Error: "OpenAI API key invalid"
 - Verifica que `OPENAI_API_KEY` esté correctamente configurada en `.env`

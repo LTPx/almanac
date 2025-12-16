@@ -22,6 +22,7 @@ interface GenerationParams {
   phase: string;
   unit: string;
   topic: string;
+  provider: string;
   model: string;
 }
 
@@ -31,7 +32,8 @@ export default function AIGeneratorPage() {
     phase: "",
     unit: "",
     topic: "",
-    model: "gpt-4o"
+    provider: "gemini",
+    model: "gemini-2.5-flash"
   });
   const [generating, setGenerating] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -162,7 +164,46 @@ export default function AIGeneratorPage() {
       phase: item.phase,
       unit: item.unit,
       topic: item.topic,
+      provider: params.provider,
       model: params.model
+    });
+  };
+
+  const getAvailableModels = () => {
+    if (params.provider === "gemini") {
+      return [
+        {
+          value: "gemini-2.5-flash",
+          label: "Gemini 2.5 Flash (Gratis, Rápido)"
+        }
+        // {
+        //   value: "gemini-1.5-pro",
+        //   label: "Gemini 1.5 Pro (Gratis, Mejor calidad)"
+        // },
+        // {
+        //   value: "gemini-2.0-flash-exp",
+        //   label: "Gemini 2.0 Flash (Experimental)"
+        // }
+      ];
+    } else {
+      return [
+        { value: "gpt-4o", label: "GPT-4o (Recomendado)" },
+        { value: "gpt-4-turbo", label: "GPT-4 Turbo" },
+        { value: "gpt-4", label: "GPT-4" }
+      ];
+    }
+  };
+
+  const handleProviderChange = (newProvider: string) => {
+    const defaultModels: Record<string, string> = {
+      gemini: "gemini-2.5-flash",
+      openai: "gpt-4o"
+    };
+
+    setParams({
+      ...params,
+      provider: newProvider,
+      model: defaultModels[newProvider] || "gpt-4o"
     });
   };
 
@@ -182,6 +223,32 @@ export default function AIGeneratorPage() {
             </div>
           </div>
 
+          {/* Info Alert */}
+          {params.provider === "gemini" && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start gap-2">
+                <Sparkles className="w-5 h-5 text-green-600 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-green-900 mb-1">
+                    Gemini - Plan Gratis Disponible
+                  </h3>
+                  <p className="text-sm text-green-700">
+                    Google Gemini ofrece un plan gratuito generoso. Perfecto
+                    para probar sin costo. Obtén tu API key gratis en{" "}
+                    <a
+                      href="https://makersuite.google.com/app/apikey"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline font-medium"
+                    >
+                      Google AI Studio
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Parameters Form */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
@@ -189,7 +256,9 @@ export default function AIGeneratorPage() {
               <input
                 type="text"
                 value={params.track}
-                onChange={(e) => setParams({ ...params, track: e.target.value })}
+                onChange={(e) =>
+                  setParams({ ...params, track: e.target.value })
+                }
                 placeholder="e.g., Foundations, Physics, Biology"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
@@ -200,14 +269,18 @@ export default function AIGeneratorPage() {
               <input
                 type="text"
                 value={params.phase}
-                onChange={(e) => setParams({ ...params, phase: e.target.value })}
+                onChange={(e) =>
+                  setParams({ ...params, phase: e.target.value })
+                }
                 placeholder="e.g., Phase 1, Phase 2"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Unit Name</label>
+              <label className="block text-sm font-medium mb-2">
+                Unit Name
+              </label>
               <input
                 type="text"
                 value={params.unit}
@@ -224,7 +297,9 @@ export default function AIGeneratorPage() {
               <input
                 type="text"
                 value={params.topic}
-                onChange={(e) => setParams({ ...params, topic: e.target.value })}
+                onChange={(e) =>
+                  setParams({ ...params, topic: e.target.value })
+                }
                 placeholder="e.g., What is Causality?"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
@@ -232,16 +307,34 @@ export default function AIGeneratorPage() {
 
             <div>
               <label className="block text-sm font-medium mb-2">
-                AI Model
+                Proveedor de IA
+              </label>
+              <select
+                value={params.provider}
+                onChange={(e) => handleProviderChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="gemini">Google Gemini (Gratis)</option>
+                <option value="openai">OpenAI (De pago)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Modelo de IA
               </label>
               <select
                 value={params.model}
-                onChange={(e) => setParams({ ...params, model: e.target.value })}
+                onChange={(e) =>
+                  setParams({ ...params, model: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               >
-                <option value="gpt-4o">GPT-4o (Recommended)</option>
-                <option value="gpt-4-turbo">GPT-4 Turbo</option>
-                <option value="gpt-4">GPT-4</option>
+                {getAvailableModels().map((model) => (
+                  <option key={model.value} value={model.value}>
+                    {model.label}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -299,10 +392,18 @@ export default function AIGeneratorPage() {
               <h3 className="font-semibold text-purple-900 mb-2">
                 Información de Generación
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                <div>
+                  <span className="text-purple-700">Proveedor:</span>{" "}
+                  <span className="font-medium capitalize">
+                    {generationMetadata.provider}
+                  </span>
+                </div>
                 <div>
                   <span className="text-purple-700">Modelo:</span>{" "}
-                  <span className="font-medium">{generationMetadata.model}</span>
+                  <span className="font-medium">
+                    {generationMetadata.model}
+                  </span>
                 </div>
                 <div>
                   <span className="text-purple-700">Tokens:</span>{" "}
@@ -312,7 +413,9 @@ export default function AIGeneratorPage() {
                 </div>
                 <div className="col-span-2">
                   <span className="text-purple-700">Topic:</span>{" "}
-                  <span className="font-medium">{generationMetadata.topic}</span>
+                  <span className="font-medium">
+                    {generationMetadata.topic}
+                  </span>
                 </div>
               </div>
             </div>
