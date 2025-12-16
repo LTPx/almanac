@@ -1,148 +1,57 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   Upload,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  FileJson,
   Loader2,
   Trash2,
   Download,
   Edit,
-  FileUp
+  FileUp,
+  FileJson
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import Editor from "@monaco-editor/react";
+import JSONEditor from "@/components/admin/JSONEditor";
+import ValidationErrors from "@/components/admin/ValidationErrors";
+import JSONStats from "@/components/admin/JSONStats";
+import ResultMessage from "@/components/admin/ResultMessage";
+import { useJSONValidation } from "@/hooks/useJSONValidation";
 
 export default function ImportContentPage() {
   const [file, setFile] = useState<File | null>(null);
-  const [jsonData, setJsonData] = useState<any>(null);
-  const [jsonText, setJsonText] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [result, setResult] = useState<any>(null);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [editorMode, setEditorMode] = useState<"upload" | "editor">("upload");
-  const editorRef = useRef<any>(null);
 
-  const validateJSON = (data: any): string[] => {
-    const errors: string[] = [];
+  const {
+    jsonData,
+    jsonText,
+    validationErrors,
+    handleJSONChange,
+    resetJSON,
+    getStats,
+    isValid
+  } = useJSONValidation();
 
-    if (!Array.isArray(data)) {
-      errors.push("El JSON debe ser un array de unidades");
-      return errors;
-    }
-
-    data.forEach((unit: any, unitIndex: number) => {
-      if (!unit.name) errors.push(`Unidad ${unitIndex + 1}: Falta el nombre`);
-      if (!unit.description)
-        errors.push(`Unidad ${unitIndex + 1}: Falta la descripción`);
-      if (typeof unit.order !== "number")
-        errors.push(`Unidad ${unitIndex + 1}: El orden debe ser un número`);
-      if (typeof unit.experiencePoints !== "number")
-        errors.push(
-          `Unidad ${unitIndex + 1}: experiencePoints debe ser un número`
-        );
-
-      if (!Array.isArray(unit.lessons)) {
-        errors.push(
-          `Unidad ${unitIndex + 1}: Debe tener un array de lecciones`
-        );
-      } else {
-        unit.lessons.forEach((lesson: any, lessonIndex: number) => {
-          if (!lesson.name)
-            errors.push(
-              `Unidad ${unitIndex + 1}, Lección ${lessonIndex + 1}: Falta el nombre`
-            );
-          if (!lesson.description)
-            errors.push(
-              `Unidad ${unitIndex + 1}, Lección ${lessonIndex + 1}: Falta la descripción`
-            );
-          if (typeof lesson.position !== "number")
-            errors.push(
-              `Unidad ${unitIndex + 1}, Lección ${lessonIndex + 1}: position debe ser un número`
-            );
-        });
-      }
-
-      if (!Array.isArray(unit.questions)) {
-        errors.push(
-          `Unidad ${unitIndex + 1}: Debe tener un array de preguntas`
-        );
-      } else {
-        unit.questions.forEach((q: any, qIndex: number) => {
-          const validTypes = [
-            "MULTIPLE_CHOICE",
-            "FILL_IN_BLANK",
-            "TRUE_FALSE",
-            "ORDER_WORDS",
-            "MATCHING",
-            "DRAG_DROP"
-          ];
-          if (!validTypes.includes(q.type)) {
-            errors.push(
-              `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}: Tipo inválido (debe ser ${validTypes.join(", ")})`
-            );
-          }
-          if (!q.title)
-            errors.push(
-              `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}: Falta el título`
-            );
-          if (!q.content)
-            errors.push(
-              `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}: Falta el contenido`
-            );
-          if (typeof q.order !== "number")
-            errors.push(
-              `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}: order debe ser un número`
-            );
-
-          if (q.type === "MULTIPLE_CHOICE" || q.type === "TRUE_FALSE") {
-            if (!Array.isArray(q.answers) || q.answers.length === 0) {
-              errors.push(
-                `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}: Debe tener respuestas`
-              );
-            } else {
-              q.answers.forEach((answer: any, aIndex: number) => {
-                if (!answer.text)
-                  errors.push(
-                    `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}, Respuesta ${aIndex + 1}: Falta el texto`
-                  );
-                if (typeof answer.isCorrect !== "boolean")
-                  errors.push(
-                    `Unidad ${unitIndex + 1}, Pregunta ${qIndex + 1}, Respuesta ${aIndex + 1}: isCorrect debe ser booleano`
-                  );
-              });
-            }
-          }
-        });
-      }
-    });
-
-    return errors;
-  };
+  const stats = getStats();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile && selectedFile.type === "application/json") {
       setFile(selectedFile);
       setResult(null);
-      setValidationErrors([]);
 
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
           const text = event.target?.result as string;
-          const json = JSON.parse(text);
-          setJsonText(text);
-          setJsonData(json);
-          const errors = validateJSON(json);
-          setValidationErrors(errors);
+          handleJSONChange(text);
         } catch (error: any) {
-          setValidationErrors(["Error al parsear JSON: " + error.message]);
-          setJsonData(null);
+          setResult({
+            success: false,
+            message: "Error al leer el archivo: " + error.message
+          });
         }
       };
       reader.readAsText(selectedFile);
@@ -152,29 +61,8 @@ export default function ImportContentPage() {
     }
   };
 
-  const handleEditorChange = (value: string | undefined) => {
-    if (!value) {
-      setJsonData(null);
-      setValidationErrors([]);
-      return;
-    }
-
-    setJsonText(value);
-
-    try {
-      const json = JSON.parse(value);
-      setJsonData(json);
-      const errors = validateJSON(json);
-      setValidationErrors(errors);
-      setResult(null);
-    } catch (error: any) {
-      setJsonData(null);
-      setValidationErrors(["Error al parsear JSON: " + error.message]);
-    }
-  };
-
   const handleUpload = async () => {
-    if (!jsonData || validationErrors.length > 0) {
+    if (!jsonData || !isValid) {
       return;
     }
 
@@ -199,8 +87,7 @@ export default function ImportContentPage() {
           stats: data.stats
         });
         setFile(null);
-        setJsonData(null);
-        setJsonText("");
+        resetJSON();
         const fileInput = document.getElementById(
           "file-input"
         ) as HTMLInputElement;
@@ -370,27 +257,8 @@ export default function ImportContentPage() {
     ];
 
     const jsonString = JSON.stringify(example, null, 2);
-    setJsonText(jsonString);
-    handleEditorChange(jsonString);
+    handleJSONChange(jsonString);
   };
-
-  const getStats = () => {
-    if (!jsonData) return null;
-
-    const units = jsonData.length;
-    const lessons = jsonData.reduce(
-      (acc: number, u: any) => acc + (u.lessons?.length || 0),
-      0
-    );
-    const questions = jsonData.reduce(
-      (acc: number, u: any) => acc + (u.questions?.length || 0),
-      0
-    );
-
-    return { units, lessons, questions };
-  };
-
-  const stats = getStats();
 
   return (
     <div className="min-h-screen py-8">
@@ -487,145 +355,31 @@ export default function ImportContentPage() {
                   Cargar ejemplo
                 </button>
               </div>
-              <div className="border border-gray-300 rounded-lg overflow-hidden">
-                <Editor
-                  height="500px"
-                  defaultLanguage="json"
-                  value={jsonText}
-                  onChange={handleEditorChange}
-                  theme="vs-dark"
-                  options={{
-                    minimap: { enabled: false },
-                    fontSize: 14,
-                    lineNumbers: "on",
-                    scrollBeyondLastLine: false,
-                    automaticLayout: true,
-                    tabSize: 2,
-                    formatOnPaste: true,
-                    formatOnType: true
-                  }}
-                  onMount={(editor) => {
-                    editorRef.current = editor;
-                  }}
-                />
-              </div>
+              <JSONEditor value={jsonText} onChange={handleJSONChange} />
             </div>
           )}
 
+          {/* Stats */}
           {stats && validationErrors.length === 0 && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <h3 className="font-semibold text-blue-900 mb-2">
-                Resumen del contenido
-              </h3>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold text-blue-600">
-                    {stats.units}
-                  </div>
-                  <div className="text-sm text-blue-700">Unidades</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-blue-600">
-                    {stats.lessons}
-                  </div>
-                  <div className="text-sm text-blue-700">Lecciones</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-blue-600">
-                    {stats.questions}
-                  </div>
-                  <div className="text-sm text-blue-700">Preguntas</div>
-                </div>
-              </div>
-            </div>
+            <JSONStats
+              units={stats.units}
+              lessons={stats.lessons}
+              questions={stats.questions}
+            />
           )}
 
-          {validationErrors.length > 0 && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-red-900 mb-2">
-                    Errores de validación
-                  </h3>
-                  <ul className="space-y-1 text-sm text-red-700 max-h-60 overflow-y-auto">
-                    {validationErrors.map((error, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <span className="text-red-500">•</span>
-                        <span>{error}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Validation Errors */}
+          <ValidationErrors errors={validationErrors} />
 
-          {result && (
-            <div
-              className={`border rounded-lg p-4 mb-6 ${
-                result.success
-                  ? "bg-green-50 border-green-200"
-                  : "bg-red-50 border-red-200"
-              }`}
-            >
-              <div className="flex items-start gap-2">
-                {result.success ? (
-                  <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                ) : (
-                  <XCircle className="w-5 h-5 text-red-600 mt-0.5" />
-                )}
-                <div className="flex-1">
-                  <h3
-                    className={`font-semibold mb-1 ${
-                      result.success ? "text-green-900" : "text-red-900"
-                    }`}
-                  >
-                    {result.success ? "¡Éxito!" : "Error"}
-                  </h3>
-                  <p
-                    className={`text-sm ${
-                      result.success ? "text-green-700" : "text-red-700"
-                    }`}
-                  >
-                    {result.message}
-                  </p>
-                  {result.stats && (
-                    <div className="mt-2 text-sm text-green-700">
-                      Creados: {result.stats.units} unidades,{" "}
-                      {result.stats.lessons} lecciones, {result.stats.questions}{" "}
-                      preguntas
-                    </div>
-                  )}
-                  {result.details && Array.isArray(result.details) && (
-                    <div className="mt-2">
-                      <ul className="text-sm text-red-700 space-y-1">
-                        {result.details
-                          .slice(0, 5)
-                          .map((detail: any, idx: number) => (
-                            <li key={idx}>
-                              • {detail.path}: {detail.message}
-                            </li>
-                          ))}
-                        {result.details.length > 5 && (
-                          <li className="text-red-600">
-                            ... y {result.details.length - 5} errores más
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Result Message */}
+          {result && <ResultMessage {...result} />}
 
           <div className="flex gap-4">
             <button
               onClick={handleUpload}
-              disabled={!jsonData || validationErrors.length > 0 || uploading}
+              disabled={!jsonData || !isValid || uploading}
               className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
-                !jsonData || validationErrors.length > 0 || uploading
+                !jsonData || !isValid || uploading
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-blue-600 text-white hover:bg-blue-700"
               }`}

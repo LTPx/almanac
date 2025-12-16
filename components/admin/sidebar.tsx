@@ -16,7 +16,8 @@ import {
   Coins,
   Settings,
   Flag,
-  MonitorPlay
+  MonitorPlay,
+  Sparkles
   // Settings,
   // Database
 } from "lucide-react";
@@ -37,6 +38,7 @@ const navigation = [
     href: "/admin/settings",
     icon: Settings,
     children: [
+      { name: "Generador IA", href: "/admin/ai-generator", icon: Sparkles },
       { name: "Corazones", href: "/admin/gamification/hearts", icon: Heart }
     ]
   }
