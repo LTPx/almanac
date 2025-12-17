@@ -72,6 +72,8 @@ export default function UserManagementPage() {
   const [zapReason, setZapReason] = useState("");
   const [tokenCurriculumId, setTokenCurriculumId] = useState("");
   const [tokenQuantity, setTokenQuantity] = useState(1);
+  const [assigningToken, setAssigningToken] = useState(false);
+  const [adjustingZaps, setAdjustingZaps] = useState(false);
 
   // Estados para test-mint
   const [testMintDialogOpen, setTestMintDialogOpen] = useState(false);
@@ -131,6 +133,7 @@ export default function UserManagementPage() {
       return;
     }
 
+    setAssigningToken(true);
     try {
       const response = await fetch(
         `/api/admin/users/${selectedUser.id}/curriculum-tokens`,
@@ -158,6 +161,8 @@ export default function UserManagementPage() {
     } catch (error) {
       console.error("Error assigning token:", error);
       alert("Error al asignar token");
+    } finally {
+      setAssigningToken(false);
     }
   };
 
@@ -167,6 +172,7 @@ export default function UserManagementPage() {
       return;
     }
 
+    setAdjustingZaps(true);
     try {
       const response = await fetch(`/api/admin/users/${selectedUser.id}/zaps`, {
         method: "POST",
@@ -191,6 +197,8 @@ export default function UserManagementPage() {
     } catch (error) {
       console.error("Error adjusting ZAPs:", error);
       alert("Error al ajustar ZAPs");
+    } finally {
+      setAdjustingZaps(false);
     }
   };
 
@@ -451,9 +459,13 @@ export default function UserManagementPage() {
                   className="w-24"
                   placeholder="Cant."
                 />
-                <Button onClick={handleAssignToken} className="gap-2">
+                <Button
+                  onClick={handleAssignToken}
+                  className="gap-2"
+                  disabled={assigningToken}
+                >
                   <Plus className="w-4 h-4" />
-                  Asignar
+                  {assigningToken ? "Asignando..." : "Asignar"}
                 </Button>
               </div>
             </div>
@@ -488,10 +500,10 @@ export default function UserManagementPage() {
               <Button
                 onClick={handleAdjustZaps}
                 className="w-full gap-2"
-                disabled={zapAmount === 0}
+                disabled={zapAmount === 0 || adjustingZaps}
               >
                 <Zap className="w-4 h-4" />
-                Ajustar ZAPs
+                {adjustingZaps ? "Ajustando..." : "Ajustar ZAPs"}
               </Button>
             </div>
           </Card>
