@@ -41,8 +41,15 @@ JSON FORMAT RULES (Strict):
 - Return ONLY valid JSON as an array with ONE unit object.
 - Structure: Root is an array containing ONE unit object. Each unit contains 'name', 'description', 'order', 'experiencePoints', 'lessons' (array), and 'questions' (array).
 - Each lesson must have: 'name', 'description', 'position' (number).
-- Questions Types allowed: MULTIPLE_CHOICE, FILL_IN_BLANK, TRUE_FALSE, ORDER_WORDS (max 8 words).
-- Each question must have: 'type', 'title', 'order' (number), 'content' (object with correctAnswer and optional explanation), 'answers' (array with 'text', 'isCorrect', 'order').
+- Questions Types allowed: MULTIPLE_CHOICE, FILL_IN_BLANK, TRUE_FALSE, ORDER_WORDS.
+- Question content format by type:
+  * MULTIPLE_CHOICE: content = { options: string[], correctAnswer: string, explanation?: string }
+  * FILL_IN_BLANK: content = { sentence: string, correctAnswer: string, explanation?: string }
+  * TRUE_FALSE: content = { correctAnswer: boolean (true or false, NOT string), explanation?: string }
+  * ORDER_WORDS: content = { sentence: string, words: string[], correctOrder: string[], explanation?: string }
+- Each question must have: 'type', 'title', 'order' (number), 'content' (object), 'answers' (array).
+- For MULTIPLE_CHOICE and TRUE_FALSE: 'answers' array with objects containing 'text', 'isCorrect', 'order'.
+- For FILL_IN_BLANK and ORDER_WORDS: 'answers' can be empty array [].
 - Quantity: 3 Lessons, 6-8 Questions.
 
 EXAMPLE STRUCTURE:
@@ -85,6 +92,42 @@ EXAMPLE STRUCTURE:
           { "text": "Option C", "isCorrect": false, "order": 3 },
           { "text": "Option D", "isCorrect": false, "order": 4 }
         ]
+      },
+      {
+        "type": "TRUE_FALSE",
+        "title": "Is this statement true?",
+        "order": 2,
+        "content": {
+          "correctAnswer": true,
+          "explanation": "Explanation here"
+        },
+        "answers": [
+          { "text": "TRUE", "isCorrect": true, "order": 1 },
+          { "text": "FALSE", "isCorrect": false, "order": 2 }
+        ]
+      },
+      {
+        "type": "FILL_IN_BLANK",
+        "title": "Complete the sentence",
+        "order": 3,
+        "content": {
+          "sentence": "The quick brown fox jumps over the lazy ___",
+          "correctAnswer": "dog",
+          "explanation": "Explanation here"
+        },
+        "answers": []
+      },
+      {
+        "type": "ORDER_WORDS",
+        "title": "Arrange these words in the correct order",
+        "order": 4,
+        "content": {
+          "sentence": "Form a complete sentence",
+          "words": ["is", "the", "sky", "blue"],
+          "correctOrder": ["the", "sky", "is", "blue"],
+          "explanation": "Explanation here"
+        },
+        "answers": []
       }
     ]
   }

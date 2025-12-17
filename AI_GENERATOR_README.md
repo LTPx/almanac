@@ -146,9 +146,25 @@ El generador crea JSON con la siguiente estructura:
 ## Tipos de Preguntas Soportados
 
 - **MULTIPLE_CHOICE**: Opción múltiple
-- **FILL_IN_BLANK**: Completar espacios en blanco
+  - content: `{ options: string[], correctAnswer: string, explanation?: string }`
+  - Requiere array de `answers` con opciones
+
 - **TRUE_FALSE**: Verdadero/Falso
-- **ORDER_WORDS**: Ordenar palabras (máximo 8 palabras)
+  - content: `{ correctAnswer: boolean, explanation?: string }`
+  - **IMPORTANTE**: correctAnswer debe ser `true` o `false` (booleano), NO "TRUE" o "FALSE" (string)
+  - Requiere array de `answers` con "TRUE" y "FALSE"
+
+- **FILL_IN_BLANK**: Completar espacios en blanco
+  - content: `{ sentence: string, correctAnswer: string, explanation?: string }`
+  - `sentence` es la frase con el espacio en blanco (ej: "El cielo es ___")
+  - `answers` puede ser array vacío `[]`
+
+- **ORDER_WORDS**: Ordenar palabras
+  - content: `{ sentence: string, words: string[], correctOrder: string[], explanation?: string }`
+  - `sentence` es la instrucción
+  - `words` son las palabras desordenadas
+  - `correctOrder` es el orden correcto de las palabras
+  - `answers` puede ser array vacío `[]`
 
 ## Características
 
