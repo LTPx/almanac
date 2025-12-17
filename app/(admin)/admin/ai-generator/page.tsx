@@ -10,6 +10,14 @@ import {
   BookOpen
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import JSONEditor from "@/components/admin/JSONEditor";
 import ValidationErrors from "@/components/admin/ValidationErrors";
 import JSONStats from "@/components/admin/JSONStats";
@@ -253,27 +261,25 @@ export default function AIGeneratorPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
               <label className="block text-sm font-medium mb-2">Track</label>
-              <input
+              <Input
                 type="text"
                 value={params.track}
                 onChange={(e) =>
                   setParams({ ...params, track: e.target.value })
                 }
                 placeholder="e.g., Foundations, Physics, Biology"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2">Phase</label>
-              <input
+              <Input
                 type="text"
                 value={params.phase}
                 onChange={(e) =>
                   setParams({ ...params, phase: e.target.value })
                 }
                 placeholder="e.g., Phase 1, Phase 2"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             </div>
 
@@ -281,12 +287,11 @@ export default function AIGeneratorPage() {
               <label className="block text-sm font-medium mb-2">
                 Unit Name
               </label>
-              <input
+              <Input
                 type="text"
                 value={params.unit}
                 onChange={(e) => setParams({ ...params, unit: e.target.value })}
                 placeholder="e.g., Introduction to Causality"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             </div>
 
@@ -294,14 +299,13 @@ export default function AIGeneratorPage() {
               <label className="block text-sm font-medium mb-2">
                 Topic / Concept Focus
               </label>
-              <input
+              <Input
                 type="text"
                 value={params.topic}
                 onChange={(e) =>
                   setParams({ ...params, topic: e.target.value })
                 }
                 placeholder="e.g., What is Causality?"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             </div>
 
@@ -309,33 +313,41 @@ export default function AIGeneratorPage() {
               <label className="block text-sm font-medium mb-2">
                 Proveedor de IA
               </label>
-              <select
+              <Select
                 value={params.provider}
-                onChange={(e) => handleProviderChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                onValueChange={handleProviderChange}
               >
-                <option value="gemini">Google Gemini (Gratis)</option>
-                <option value="openai">OpenAI (De pago)</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona un proveedor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gemini">Google Gemini (Gratis)</SelectItem>
+                  {/* <SelectItem value="openai">OpenAI (De pago)</SelectItem> */}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2">
                 Modelo de IA
               </label>
-              <select
+              <Select
                 value={params.model}
-                onChange={(e) =>
-                  setParams({ ...params, model: e.target.value })
+                onValueChange={(value) =>
+                  setParams({ ...params, model: value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               >
-                {getAvailableModels().map((model) => (
-                  <option key={model.value} value={model.value}>
-                    {model.label}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona un modelo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {getAvailableModels().map((model) => (
+                    <SelectItem key={model.value} value={model.value}>
+                      {model.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -490,7 +502,7 @@ export default function AIGeneratorPage() {
           )}
 
           {/* Info Box */}
-          <div className="mt-6 p-4 rounded-lg bg-gray-50">
+          <div className="bg-gray-800 mt-6 p-4 rounded-lg">
             <h3 className="font-semibold mb-2 text-sm">Cómo usar:</h3>
             <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
               <li>Completa los parámetros (Track, Phase, Unit, Topic)</li>
