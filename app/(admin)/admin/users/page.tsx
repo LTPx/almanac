@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -13,7 +12,7 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import { Search, Coins, Award, Zap, Eye } from "lucide-react";
+import { Search, Coins, Zap, Eye, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface UserResult {
@@ -185,23 +184,23 @@ export default function UsersPage() {
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant="secondary" className="gap-1">
-                      <Zap className="w-3 h-3" />
+                      <Zap className="w-3 h-3 text-purple-500 fill-current" />
                       {user.zapTokens}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant="secondary" className="gap-1">
-                      <Coins className="w-3 h-3" />
+                      <Heart className="w-3 h-3 text-red-500 fill-current" />
                       {user.hearts}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant="secondary" className="gap-1">
-                      <Award className="w-3 h-3" />
+                      <Coins className="w-3 h-3 text-yellow-500" />
                       {user.userCurriculumTokens.length}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="text-center text-primary">
                     {user.totalExperiencePoints.toLocaleString()}
                   </TableCell>
                   <TableCell className="text-center">
