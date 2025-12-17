@@ -22,6 +22,15 @@ const LearningPath: React.FC<LearningPathProps> = ({
   console.log(curriculum);
   const [activeUnit, setActiveUnit] = useState<Unit | null>(null);
   const { progress, isLoading, refetch } = useProgress(userId, curriculum.id);
+
+  const assignedUnits =
+    curriculum.units?.filter(
+      (unit) =>
+        unit.position !== null &&
+        unit.position !== undefined &&
+        unit.position >= 0
+    ) || [];
+
   const handleCloseTest = () => {
     setActiveUnit(null);
     refetch();
@@ -39,7 +48,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
             <div>Cargando progreso...</div>
           ) : (
             <LessonGrid
-              units={curriculum.units || []}
+              units={assignedUnits}
               approvedUnits={progress.approvedUnits}
               onStartUnit={setActiveUnit}
               hearts={hearts}
@@ -73,7 +82,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
           <div>Cargando progreso...</div>
         ) : (
           <LessonGrid
-            units={curriculum.units || []}
+            units={assignedUnits}
             approvedUnits={progress.approvedUnits}
             onStartUnit={setActiveUnit}
             hearts={hearts}
