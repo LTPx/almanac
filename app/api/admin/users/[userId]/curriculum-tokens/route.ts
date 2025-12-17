@@ -142,8 +142,7 @@ export async function GET(
             title: true
           }
         }
-      },
-      orderBy: { createdAt: "desc" }
+      }
     });
 
     return NextResponse.json({ tokens });
