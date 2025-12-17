@@ -5,14 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -28,8 +20,7 @@ import {
   Wallet,
   User,
   Calendar,
-  TrendingUp,
-  Sparkles
+  TrendingUp
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -74,16 +65,6 @@ export default function UserManagementPage() {
   const [tokenQuantity, setTokenQuantity] = useState(1);
   const [assigningToken, setAssigningToken] = useState(false);
   const [adjustingZaps, setAdjustingZaps] = useState(false);
-
-  // Estados para test-mint
-  const [testMintDialogOpen, setTestMintDialogOpen] = useState(false);
-  const [testMintCurriculumId, setTestMintCurriculumId] = useState("");
-  const [testMintCollectionId, setTestMintCollectionId] = useState("");
-  const [testMintDescription, setTestMintDescription] = useState("");
-  const [testMintRarity, setTestMintRarity] = useState<
-    "NORMAL" | "RARE" | "EPIC" | "UNIQUE"
-  >("NORMAL");
-  const [testMinting, setTestMinting] = useState(false);
 
   // Cargar curriculums al montar el componente
   useEffect(() => {
@@ -199,49 +180,6 @@ export default function UserManagementPage() {
       alert("Error al ajustar ZAPs");
     } finally {
       setAdjustingZaps(false);
-    }
-  };
-
-  const handleTestMint = async () => {
-    if (!selectedUser || !testMintCurriculumId || !testMintCollectionId) {
-      alert("Completa todos los campos requeridos");
-      return;
-    }
-
-    setTestMinting(true);
-    try {
-      const response = await fetch("/api/admin/nfts/test-mint", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: selectedUser.id,
-          curriculumId: testMintCurriculumId,
-          collectionId: testMintCollectionId,
-          description: testMintDescription || undefined,
-          rarity: testMintRarity
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert(
-          `NFT de prueba minteado exitosamente!\nToken ID: ${data.tokenId}\nTransaction: ${data.transactionHash}`
-        );
-        setTestMintDialogOpen(false);
-        // Reset form
-        setTestMintCurriculumId("");
-        setTestMintCollectionId("");
-        setTestMintDescription("");
-        setTestMintRarity("NORMAL");
-      } else {
-        alert(data.error || "Error al mintear NFT de prueba");
-      }
-    } catch (error) {
-      console.error("Error test minting:", error);
-      alert("Error al mintear NFT de prueba");
-    } finally {
-      setTestMinting(false);
     }
   };
 
@@ -451,14 +389,14 @@ export default function UserManagementPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Input
+                {/* <Input
                   type="number"
                   min="1"
                   value={tokenQuantity}
                   onChange={(e) => setTokenQuantity(Number(e.target.value))}
                   className="w-24"
                   placeholder="Cant."
-                />
+                /> */}
                 <Button
                   onClick={handleAssignToken}
                   className="gap-2"
@@ -506,90 +444,6 @@ export default function UserManagementPage() {
                 {adjustingZaps ? "Ajustando..." : "Ajustar ZAPs"}
               </Button>
             </div>
-          </Card>
-
-          {/* Test Mint NFT */}
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-purple-600" />
-              Mintear NFT de Prueba
-            </h2>
-            <p className="text-muted-foreground mb-4">
-              Mintea un NFT sin verificar requisitos (solo para testing)
-            </p>
-
-            <Dialog
-              open={testMintDialogOpen}
-              onOpenChange={setTestMintDialogOpen}
-            >
-              <DialogTrigger asChild>
-                <Button className="w-full gap-2" variant="secondary">
-                  <Sparkles className="w-4 h-4" />
-                  Abrir Test Mint
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Test Mint NFT</DialogTitle>
-                  <DialogDescription>
-                    Mintear NFT sin verificar tokens ni ZAPs (solo admins)
-                  </DialogDescription>
-                </DialogHeader>
-
-                <div className="space-y-4">
-                  <div>
-                    <Label>Curriculum ID</Label>
-                    <Input
-                      value={testMintCurriculumId}
-                      onChange={(e) => setTestMintCurriculumId(e.target.value)}
-                      placeholder="ID del curriculum"
-                    />
-                  </div>
-                  <div>
-                    <Label>Collection ID</Label>
-                    <Input
-                      value={testMintCollectionId}
-                      onChange={(e) => setTestMintCollectionId(e.target.value)}
-                      placeholder="ID de la colección"
-                    />
-                  </div>
-                  <div>
-                    <Label>Descripción (opcional)</Label>
-                    <Input
-                      value={testMintDescription}
-                      onChange={(e) => setTestMintDescription(e.target.value)}
-                      placeholder="Descripción del NFT"
-                    />
-                  </div>
-                  <div>
-                    <Label>Rarity</Label>
-                    <Select
-                      value={testMintRarity}
-                      onValueChange={(value: any) => setTestMintRarity(value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="NORMAL">Normal (95%)</SelectItem>
-                        <SelectItem value="RARE">Rare (4%)</SelectItem>
-                        <SelectItem value="EPIC">Epic (0.8%)</SelectItem>
-                        <SelectItem value="UNIQUE">Unique (0.2%)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <Button
-                    onClick={handleTestMint}
-                    disabled={testMinting}
-                    className="w-full gap-2"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    {testMinting ? "Minteando..." : "Mintear NFT de Prueba"}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
           </Card>
         </>
       )}
