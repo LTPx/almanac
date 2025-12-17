@@ -274,7 +274,8 @@ export async function POST(req: NextRequest) {
     let parsedContent;
     try {
       parsedContent = JSON.parse(content);
-    } catch (parseError) {
+    } catch (error: any) {
+      console.log(error);
       return NextResponse.json(
         {
           error: "Invalid JSON from AI",
