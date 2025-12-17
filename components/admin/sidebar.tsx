@@ -9,7 +9,7 @@ import {
   BookOpen,
   GraduationCap,
   HelpCircle,
-  Heart,
+  // Heart,
   Coins,
   Settings,
   Flag,
@@ -28,7 +28,7 @@ interface NavItem {
 
 // Content Section - Main educational content
 const contentNav: NavItem[] = [
-  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { name: "Curriculum", href: "/admin/curriculums", icon: BookOpen },
   { name: "Unidades", href: "/admin/units", icon: BookOpen },
   { name: "Lecciones", href: "/admin/lessons", icon: GraduationCap },
