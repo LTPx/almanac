@@ -38,7 +38,7 @@ const contentNav: NavItem[] = [
 
 // Management Section - App management
 const managementNav: NavItem[] = [
-  { name: "Usuarios", href: "/admin/users/manage", icon: Users },
+  { name: "Usuarios", href: "/admin/users", icon: Users },
   { name: "Problemas", href: "/admin/problem-reports", icon: Flag },
   { name: "Anuncios", href: "/admin/ads", icon: MonitorPlay },
   { name: "NFTs", href: "/admin/nfts", icon: Coins }
