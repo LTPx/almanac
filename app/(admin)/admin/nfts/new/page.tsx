@@ -27,7 +27,7 @@ export default function CreateNFTPage() {
     data.append("rarity", formData.rarity);
     if (formData.metadataUri) data.append("metadataUri", formData.metadataUri);
 
-    const res = await fetch("/api/nft-assets", {
+    const res = await fetch("/api/admin/nft-assets", {
       method: "POST",
       body: data
     });

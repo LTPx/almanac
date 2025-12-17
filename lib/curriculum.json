@@ -1,0 +1,37 @@
+[
+  {
+    "track": "Foundations",
+    "phase": "Phase 1",
+    "unit": "Introduction to Causality",
+    "topic": "What is Causality?",
+    "fileName": "foundations-phase1-unit1.json"
+  },
+  {
+    "track": "Foundations",
+    "phase": "Phase 1",
+    "unit": "Correlation vs Causation",
+    "topic": "Understanding the Difference",
+    "fileName": "foundations-phase1-unit2.json"
+  },
+  {
+    "track": "Foundations",
+    "phase": "Phase 2",
+    "unit": "Causal Thinking",
+    "topic": "How to Think About Causes",
+    "fileName": "foundations-phase2-unit1.json"
+  },
+  {
+    "track": "Physics",
+    "phase": "Phase 1",
+    "unit": "Forces and Motion",
+    "topic": "Newton's Laws",
+    "fileName": "physics-phase1-unit1.json"
+  },
+  {
+    "track": "Physics",
+    "phase": "Phase 1",
+    "unit": "Energy and Work",
+    "topic": "Conservation of Energy",
+    "fileName": "physics-phase1-unit2.json"
+  }
+]
