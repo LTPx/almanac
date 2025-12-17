@@ -356,7 +356,7 @@ export default function AIGeneratorPage() {
             <details className="border border-gray-300 rounded-lg p-4">
               <summary className="cursor-pointer font-medium flex items-center gap-2">
                 <BookOpen className="w-4 h-4" />
-                Cargar desde Curriculum (Quick Select)
+                Ejemplos (Quick Select)
               </summary>
               <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-2 max-h-60 overflow-y-auto">
                 {curriculum.map((item, idx) => (
