@@ -1,4 +1,3 @@
-// components/TutorialSpotlight.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -19,17 +18,42 @@ interface TutorialSpotlightProps {
   steps: TutorialStep[];
   onComplete: () => void;
   show: boolean;
+  onStepChange?: (step: number) => void;
 }
 
 export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
   steps,
   onComplete,
-  show
+  show,
+  onStepChange
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
-  // components/TutorialSpotlight.tsx
+  useEffect(() => {
+    if (onStepChange) {
+      onStepChange(currentStep);
+    }
+
+    const stepConfig = steps[currentStep];
+    if (stepConfig.id !== "review-units") {
+      const selectTrigger = document.querySelector(
+        ".course-header-select button"
+      );
+      const selectContent = document.querySelector(
+        "[data-radix-select-content]"
+      );
+
+      if (selectContent && selectTrigger instanceof HTMLElement) {
+        setTimeout(() => {
+          const isOpen = selectContent.getAttribute("data-state") === "open";
+          if (isOpen) {
+            selectTrigger.click();
+          }
+        }, 100);
+      }
+    }
+  }, [currentStep, onStepChange, steps]);
 
   useEffect(() => {
     if (!show) return;
@@ -38,18 +62,14 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       const stepConfig = steps[currentStep];
       let target: Element | null = null;
 
-      // Para el paso 2, buscar específicamente el SelectContent
       if (stepConfig.id === "review-units") {
         target =
           document.querySelector('[data-tutorial-select="true"]') ||
           document.querySelector("[data-radix-select-content]") ||
           document.querySelector('[role="listbox"]');
-      }
-      // Para el paso 3, buscar el primer nodo disponible
-      else if (stepConfig.id === "unit-explanations") {
+      } else if (stepConfig.id === "unit-explanations") {
         target = document.querySelector('[data-highest-position="true"]');
 
-        // Hacer scroll suave al nodo
         if (target) {
           target.scrollIntoView({
             behavior: "smooth",
@@ -69,7 +89,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       }
     };
 
-    // Ejecutar la acción del paso actual si existe
     if (steps[currentStep].action) {
       steps[currentStep].action?.();
       setTimeout(() => {
@@ -79,7 +98,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       updateTargetPosition();
     }
 
-    // Polling para mantener actualizada la posición
     const interval = setInterval(() => {
       if (
         steps[currentStep].id === "review-units" ||
@@ -98,6 +116,46 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       window.removeEventListener("scroll", updateTargetPosition);
     };
   }, [currentStep, steps, show]);
+
+  useEffect(() => {
+    if (!show) return;
+
+    const stepConfig = steps[currentStep];
+
+    if (stepConfig.id === "review-units") {
+      const selectItems = document.querySelectorAll('[role="option"]');
+      selectItems.forEach((item, index) => {
+        const element = item as HTMLElement;
+        if (index !== 0) {
+          element.style.pointerEvents = "none";
+          element.style.opacity = "0.4";
+          element.style.cursor = "not-allowed";
+        } else {
+          element.style.pointerEvents = "auto";
+          element.style.opacity = "1";
+          element.style.cursor = "pointer";
+        }
+      });
+    } else {
+      const selectItems = document.querySelectorAll('[role="option"]');
+      selectItems.forEach((item) => {
+        const element = item as HTMLElement;
+        element.style.pointerEvents = "auto";
+        element.style.opacity = "1";
+        element.style.cursor = "pointer";
+      });
+    }
+
+    return () => {
+      const selectItems = document.querySelectorAll('[role="option"]');
+      selectItems.forEach((item) => {
+        const element = item as HTMLElement;
+        element.style.pointerEvents = "auto";
+        element.style.opacity = "1";
+        element.style.cursor = "pointer";
+      });
+    };
+  }, [currentStep, steps, show, targetRect]);
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -152,7 +210,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
             fill="rgba(0, 0, 0, 0.7)"
             mask="url(#spotlight-mask)"
             className="pointer-events-auto"
-            onClick={handleSkip}
           />
         </svg>
 
@@ -171,7 +228,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
           <div className="w-full h-full border-4 border-purple-500 rounded-xl shadow-2xl shadow-purple-500/50 animate-pulse" />
         </motion.div>
 
-        {/* Tooltip */}
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -183,7 +239,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
             top: tooltipPosition.top
           }}
         >
-          {/* Botón cerrar */}
           <button
             onClick={handleSkip}
             className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors"
@@ -191,7 +246,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
             <X className="w-5 h-5" />
           </button>
 
-          {/* Contenido */}
           <div className="pr-6">
             {step.icon && (
               <div className="mb-3 text-purple-600">{step.icon}</div>
@@ -204,7 +258,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
             </p>
           </div>
 
-          {/* Footer */}
           <div className="flex items-center justify-between pt-4 border-t border-gray-200">
             <div className="flex gap-1">
               {steps.map((_, index) => (

@@ -28,6 +28,7 @@ interface CourseHeaderProps {
   lives?: number;
   className?: string;
   isPremium?: boolean;
+  preventSelectClose?: boolean;
 }
 
 export interface CourseHeaderRef {
@@ -44,7 +45,8 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
       zaps = 0,
       lives = 0,
       className = "",
-      isPremium = false
+      isPremium = false,
+      preventSelectClose = false
     },
     ref
   ) => {
@@ -91,6 +93,13 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
       }
     };
 
+    const handleSelectOpenChange = (open: boolean) => {
+      if (!open && preventSelectClose) {
+        return;
+      }
+      setIsSelectOpen(open);
+    };
+
     return (
       <div
         className={`w-full max-w-[650px] sticky top-0 z-50 bg-white border-b border-gray-200 px-4 py-4 shadow-sm ${className}`}
@@ -105,7 +114,7 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
               value={selectedCurriculumId}
               onValueChange={handleUnitChange}
               open={isSelectOpen}
-              onOpenChange={setIsSelectOpen}
+              onOpenChange={handleSelectOpenChange}
             >
               <SelectTrigger className="w-full text-black">
                 <SelectValue placeholder="Selecciona una unidad...">

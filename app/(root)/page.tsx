@@ -33,6 +33,7 @@ export default function HomePage() {
   const { selectedCurriculumId, setSelectedCurriculumId } =
     useCurriculumStore();
   const [showTutorial, setShowTutorial] = useState(false);
+  const [currentTutorialStep, setCurrentTutorialStep] = useState(0);
   const courseHeaderRef = useRef<CourseHeaderRef>(null);
 
   const user = useUser();
@@ -82,6 +83,7 @@ export default function HomePage() {
       }
     }
   ];
+
   useEffect(() => {
     const loadUnits = async () => {
       const data = await fetchCurriculums({ active: "true" });
@@ -105,17 +107,13 @@ export default function HomePage() {
     loadUnit();
   }, [selectedCurriculumId, fetchCurriculumWithUnits]);
 
-  // Verifica si debe mostrar el tutorial
   useEffect(() => {
-    // const tutorialCompleted = localStorage.getItem("tutorial_completed");
     if (
-      // !tutorialCompleted &&
       !isLoading &&
       !isLoadingGamification &&
       curriculums.length > 0 &&
       selectedCurriculum
     ) {
-      // Pequeño delay para asegurar que todo esté renderizado
       setTimeout(() => {
         setShowTutorial(true);
       }, 500);
@@ -133,8 +131,17 @@ export default function HomePage() {
   const handleTutorialComplete = () => {
     localStorage.setItem("tutorial_completed", "true");
     setShowTutorial(false);
-    // Cerrar el select si está abierto
+    setCurrentTutorialStep(0);
     courseHeaderRef.current?.closeSelect();
+  };
+
+  const handleTutorialStepChange = (step: number) => {
+    setCurrentTutorialStep(step);
+
+    const stepConfig = tutorialSteps[step];
+    if (stepConfig.id !== "review-units") {
+      courseHeaderRef.current?.closeSelect();
+    }
   };
 
   const isInitialLoading = isLoading && curriculums.length === 0;
@@ -174,6 +181,7 @@ export default function HomePage() {
         show={showTutorial}
         steps={tutorialSteps}
         onComplete={handleTutorialComplete}
+        onStepChange={handleTutorialStepChange}
       />
 
       <CourseHeader
@@ -184,6 +192,7 @@ export default function HomePage() {
         lives={gamification?.hearts ?? 0}
         zaps={gamification?.zapTokens ?? 0}
         isPremium={isPremium}
+        preventSelectClose={showTutorial && currentTutorialStep === 1}
       />
 
       {error && (
