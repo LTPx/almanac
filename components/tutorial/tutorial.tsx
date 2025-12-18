@@ -63,25 +63,37 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       let target: Element | null = null;
 
       if (stepConfig.id === "review-units") {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+
         target =
-          document.querySelector('[data-tutorial-select="true"]') ||
           document.querySelector("[data-radix-select-content]") ||
-          document.querySelector('[role="listbox"]');
-      } else if (stepConfig.id === "unit-explanations") {
-        target = document.querySelector('[data-highest-position="true"]');
+          document.querySelector('[data-tutorial-select="true"]') ||
+          document.querySelector('[role="listbox"]') ||
+          document.querySelector(".tutorial-select-content");
 
         if (target) {
-          target.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-            inline: "center"
-          });
+          const rect = target.getBoundingClientRect();
+
+          if (rect.height > 0 && rect.width > 0) {
+            setTargetRect(rect);
+          }
         }
+      } else if (stepConfig.id === "unit-explanations") {
+        target = document.querySelector('[data-highest-position="true"]');
       } else {
         target = document.querySelector(stepConfig.target);
       }
 
-      if (target) {
+      if (target && stepConfig.id !== "review-units") {
+        target.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "center"
+        });
+
         const rect = target.getBoundingClientRect();
         if (rect.height > 0 && rect.width > 0) {
           setTargetRect(rect);
@@ -91,8 +103,13 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
 
     if (steps[currentStep].action) {
       steps[currentStep].action?.();
+
       setTimeout(() => {
         updateTargetPosition();
+
+        setTimeout(() => {
+          updateTargetPosition();
+        }, 200);
       }, 300);
     } else {
       updateTargetPosition();
@@ -116,46 +133,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       window.removeEventListener("scroll", updateTargetPosition);
     };
   }, [currentStep, steps, show]);
-
-  useEffect(() => {
-    if (!show) return;
-
-    const stepConfig = steps[currentStep];
-
-    if (stepConfig.id === "review-units") {
-      const selectItems = document.querySelectorAll('[role="option"]');
-      selectItems.forEach((item, index) => {
-        const element = item as HTMLElement;
-        if (index !== 0) {
-          element.style.pointerEvents = "none";
-          element.style.opacity = "0.4";
-          element.style.cursor = "not-allowed";
-        } else {
-          element.style.pointerEvents = "auto";
-          element.style.opacity = "1";
-          element.style.cursor = "pointer";
-        }
-      });
-    } else {
-      const selectItems = document.querySelectorAll('[role="option"]');
-      selectItems.forEach((item) => {
-        const element = item as HTMLElement;
-        element.style.pointerEvents = "auto";
-        element.style.opacity = "1";
-        element.style.cursor = "pointer";
-      });
-    }
-
-    return () => {
-      const selectItems = document.querySelectorAll('[role="option"]');
-      selectItems.forEach((item) => {
-        const element = item as HTMLElement;
-        element.style.pointerEvents = "auto";
-        element.style.opacity = "1";
-        element.style.cursor = "pointer";
-      });
-    };
-  }, [currentStep, steps, show, targetRect]);
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -245,7 +222,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
           >
             <X className="w-5 h-5" />
           </button>
-
           <div className="pr-6">
             {step.icon && (
               <div className="mb-3 text-purple-600">{step.icon}</div>
@@ -257,7 +233,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
               {step.description}
             </p>
           </div>
-
           <div className="flex items-center justify-between pt-4 border-t border-gray-200">
             <div className="flex gap-1">
               {steps.map((_, index) => (
