@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useUser } from "@/context/UserContext";
 import { Curriculum } from "@/lib/types";
-import CourseHeader from "@/components/course-header";
+import CourseHeader, { CourseHeaderRef } from "@/components/course-header";
 import { useCurriculums } from "@/hooks/use-curriculums";
 import LearningPath from "@/components/units-learning";
 import { useCurriculumStore } from "@/store/useCurriculumStore";
-import { Loader2, BookOpen } from "lucide-react";
+import { Loader2, BookOpen, List, GraduationCap } from "lucide-react";
 import { useHome } from "@/hooks/useHome";
+import { TutorialSpotlight } from "@/components/tutorial/tutorial";
 
 const ContentLoadingScreen = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -31,6 +32,8 @@ export default function HomePage() {
     useState<Curriculum | null>(null);
   const { selectedCurriculumId, setSelectedCurriculumId } =
     useCurriculumStore();
+  const [showTutorial, setShowTutorial] = useState(false);
+  const courseHeaderRef = useRef<CourseHeaderRef>(null);
 
   const user = useUser();
   const userId = user?.id || "";
@@ -44,6 +47,41 @@ export default function HomePage() {
     refetch: refetchGamification
   } = useHome(userId);
 
+  const tutorialSteps = [
+    {
+      id: "welcome",
+      target: ".course-header-select",
+      title: "¡Bienvenido a Almanac! 🎉",
+      description:
+        "Aquí puedes elegir el curriculum que quieres estudiar. Cada curriculum tiene diferentes unidades de aprendizaje.",
+      icon: <BookOpen className="w-8 h-8" />,
+      position: "bottom" as const
+    },
+    {
+      id: "review-units",
+      target: "[data-radix-select-content]",
+      title: "Revisa las unidades 📚",
+      description:
+        "Explora todas las unidades disponibles. Cada una contiene diferentes lecciones que te ayudarán a aprender paso a paso.",
+      icon: <List className="w-8 h-8" />,
+      position: "bottom" as const,
+      action: () => {
+        courseHeaderRef.current?.openSelect();
+      }
+    },
+    {
+      id: "unit-explanations",
+      target: "[data-highest-position='true']",
+      title: "Aprende con explicaciones 📖",
+      description:
+        "Cada unidad tiene explicaciones detalladas que puedes revisar antes de hacer las pruebas. ¡Tómate tu tiempo para aprender!",
+      icon: <GraduationCap className="w-8 h-8" />,
+      position: "top" as const,
+      action: () => {
+        courseHeaderRef.current?.closeSelect();
+      }
+    }
+  ];
   useEffect(() => {
     const loadUnits = async () => {
       const data = await fetchCurriculums({ active: "true" });
@@ -67,6 +105,23 @@ export default function HomePage() {
     loadUnit();
   }, [selectedCurriculumId, fetchCurriculumWithUnits]);
 
+  // Verifica si debe mostrar el tutorial
+  useEffect(() => {
+    // const tutorialCompleted = localStorage.getItem("tutorial_completed");
+    if (
+      // !tutorialCompleted &&
+      !isLoading &&
+      !isLoadingGamification &&
+      curriculums.length > 0 &&
+      selectedCurriculum
+    ) {
+      // Pequeño delay para asegurar que todo esté renderizado
+      setTimeout(() => {
+        setShowTutorial(true);
+      }, 500);
+    }
+  }, [isLoading, isLoadingGamification, curriculums, selectedCurriculum]);
+
   const handleTestComplete = useCallback(async () => {
     await refetchGamification();
   }, [refetchGamification]);
@@ -75,8 +130,20 @@ export default function HomePage() {
     setSelectedCurriculumId(curriculumId);
   };
 
+  const handleTutorialComplete = () => {
+    localStorage.setItem("tutorial_completed", "true");
+    setShowTutorial(false);
+    // Cerrar el select si está abierto
+    courseHeaderRef.current?.closeSelect();
+  };
+
   const isInitialLoading = isLoading && curriculums.length === 0;
   const isGamificationLoading = isLoadingGamification && !gamification;
+
+  const resetTutorial = () => {
+    localStorage.removeItem("tutorial_completed");
+    setShowTutorial(true);
+  };
 
   if (isInitialLoading || isGamificationLoading) {
     return (
@@ -103,7 +170,14 @@ export default function HomePage() {
 
   return (
     <div className="HomePage">
+      <TutorialSpotlight
+        show={showTutorial}
+        steps={tutorialSteps}
+        onComplete={handleTutorialComplete}
+      />
+
       <CourseHeader
+        ref={courseHeaderRef}
         curriculums={curriculums}
         selectedCurriculumId={selectedCurriculumId}
         onUnitChange={handleCurriculumChange}
@@ -111,6 +185,7 @@ export default function HomePage() {
         zaps={gamification?.zapTokens ?? 0}
         isPremium={isPremium}
       />
+
       {error && (
         <div className="px-6 py-4">
           <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 text-red-700 dark:text-red-400 px-4 py-3 rounded">
@@ -118,10 +193,17 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
       {isLoading ? (
         <ContentLoadingScreen />
       ) : selectedCurriculum ? (
         <div className="h-full">
+          <button
+            onClick={resetTutorial}
+            className="fixed bottom-4 right-4 z-[10000] bg-purple-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-purple-700 transition-colors text-sm font-semibold"
+          >
+            🔄 Reiniciar Tutorial
+          </button>
           <LearningPath
             key={selectedCurriculum.id}
             hearts={gamification?.hearts ?? 0}

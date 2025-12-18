@@ -17,6 +17,7 @@ type LessonNodeProps = {
   shouldFloat?: boolean;
   hearts: number;
   isFirstMandatory?: boolean;
+  isHighestPosition?: boolean;
   onStartLesson: () => void;
 };
 
@@ -30,6 +31,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
   shouldFloat = false,
   hearts,
   isFirstMandatory = false,
+  isHighestPosition = false,
   onStartLesson
 }) => {
   const { open: openNoHeartsModal } = useNoHeartsModal();
@@ -116,6 +118,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
         ${isFirstMandatory ? "rounded-t-[2rem] rounded-b-lg" : "rounded-2xl"}
         border-2 ${state !== "locked" ? "cursor-pointer" : "cursor-not-allowed opacity-75"}
       `}
+      data-highest-position={isHighestPosition ? "true" : undefined}
     >
       <motion.div
         initial={{ scale: 0 }}

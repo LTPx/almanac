@@ -1,3 +1,4 @@
+// components/lesson-grid.tsx
 "use client";
 
 import React from "react";
@@ -94,7 +95,16 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
       ? units.reduce((min, unit) => (unit.position < min.position ? unit : min))
       : null;
 
+  // Encontrar el nodo con la MAYOR posición (el último en el grid)
   const pathLayout = generatePathLayout();
+  const allNodes = pathLayout.flatMap((rowData) => rowData.nodes);
+  const highestPositionNode =
+    allNodes.length > 0
+      ? allNodes.reduce((max, node) =>
+          node.position > max.position ? node : max
+        )
+      : null;
+
   const maxRow =
     pathLayout.length > 0 ? Math.max(...pathLayout.map((r) => r.row)) : 0;
 
@@ -132,7 +142,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
 
   return (
     <>
-      <div className="max-w-sm mx-auto">
+      <div className="max-w-sm mx-auto lesson-grid">
         {pathLayout.map((rowData, rowIndex) => {
           const isBottomRow = rowData.row === maxRow;
 
@@ -149,6 +159,10 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                 const isCompleted = nodeData
                   ? approvedUnits.includes(nodeData.id)
                   : false;
+                const isHighestPosition =
+                  nodeData && highestPositionNode
+                    ? nodeData.id === highestPositionNode.id
+                    : false;
 
                 return (
                   <motion.div
@@ -172,6 +186,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                         isFirstMandatory={
                           nodeData.id === firstLesson?.id && nodeData.mandatory
                         }
+                        isHighestPosition={isHighestPosition}
                         onStartLesson={() => onStartUnit(nodeData)}
                       />
                     ) : (

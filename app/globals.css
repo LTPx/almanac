@@ -3,6 +3,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
+[data-radix-popper-content-wrapper] {
+  z-index: 9999 !important;
+}
+
 :root {
   --background: oklch(0.2046 0 0);
   --foreground: oklch(0.9219 0 0);
