@@ -117,6 +117,26 @@ export const NFTRevealCard = ({
     onRevealComplete?.();
   };
 
+  const handleShare = async () => {
+    const urlNft = `/nft/${mintedNFT.id}`;
+    const shareData = {
+      title: mintedNFT.metadata?.name || "Mi NFT",
+      text: mintedNFT.metadata?.description || "Mira mi certificado NFT",
+      url: urlNft
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.origin + urlNft);
+        alert("Enlace copiado al portapapeles");
+      }
+    } catch (err) {
+      console.error("Error sharing:", err);
+    }
+  };
+
   const triggerConfetti = () => {
     if (!cardRef.current) return;
 
@@ -371,7 +391,7 @@ export const NFTRevealCard = ({
                 </div>
                 <div className="col-span-1 flex justify-end items-end">
                   <QRCodeSVG
-                    value={`https://amoy.polygonscan.com/token/${mintedNFT.contractAddress}?a=${mintedNFT.tokenId}`}
+                    value={`${typeof window !== "undefined" ? window.location.origin : ""}/nft/${mintedNFT.id}`}
                     size={80}
                   />
                 </div>
@@ -393,6 +413,7 @@ export const NFTRevealCard = ({
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={handleShare}
               className="w-full bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-lg"
             >
               <Share2 size={20} /> Compartir
