@@ -154,6 +154,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
         isCompleted={true}
         mandatory={mandatory}
         isFirstMandatory={isFirstMandatory}
+        isHighestPosition={isHighestPosition}
       >
         {nodeContent}
       </StepPopover>
@@ -173,6 +174,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
         buttonText="CERRADA"
         onButtonClick={() => {}}
         isLocked={true}
+        isHighestPosition={isHighestPosition}
       >
         {nodeContent}
       </StepPopover>
@@ -189,6 +191,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       isLocked={false}
       isOptional={!mandatory}
       isFirstMandatory={isFirstMandatory}
+      isHighestPosition={isHighestPosition}
     >
       {nodeContent}
     </StepPopover>

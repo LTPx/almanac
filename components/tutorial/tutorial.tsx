@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight, ArrowLeft } from "lucide-react";
 
@@ -29,14 +29,28 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(true);
+  const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (onStepChange) {
       onStepChange(currentStep);
     }
 
+    // Disparar evento personalizado
+    const event = new CustomEvent("tutorial-step-change", {
+      detail: { stepId: steps[currentStep].id, stepIndex: currentStep }
+    });
+    window.dispatchEvent(event);
+
     const stepConfig = steps[currentStep];
-    if (stepConfig.id !== "review-units") {
+
+    // Cerrar el select si no estamos en los pasos apropiados
+    if (stepConfig.id !== "review-units" && stepConfig.id !== "start-test") {
       const selectTrigger = document.querySelector(
         ".course-header-select button"
       );
@@ -45,12 +59,10 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       );
 
       if (selectContent && selectTrigger instanceof HTMLElement) {
-        setTimeout(() => {
-          const isOpen = selectContent.getAttribute("data-state") === "open";
-          if (isOpen) {
-            selectTrigger.click();
-          }
-        }, 100);
+        const isOpen = selectContent.getAttribute("data-state") === "open";
+        if (isOpen) {
+          selectTrigger.click();
+        }
       }
     }
   }, [currentStep, onStepChange, steps]);
@@ -58,93 +70,136 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
   useEffect(() => {
     if (!show) return;
 
+    // Limpiar intervalos previos
+    if (updateIntervalRef.current) {
+      clearInterval(updateIntervalRef.current);
+    }
+
     const updateTargetPosition = () => {
       const stepConfig = steps[currentStep];
       let target: Element | null = null;
 
       if (stepConfig.id === "review-units") {
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth"
-        });
-
         target =
           document.querySelector("[data-radix-select-content]") ||
           document.querySelector('[data-tutorial-select="true"]') ||
-          document.querySelector('[role="listbox"]') ||
-          document.querySelector(".tutorial-select-content");
+          document.querySelector('[role="listbox"]');
 
         if (target) {
           const rect = target.getBoundingClientRect();
+          if (rect.height > 0 && rect.width > 0) {
+            setTargetRect(rect);
+          }
+        }
+      } else if (stepConfig.id === "start-test") {
+        target = document.querySelector('[data-tutorial-start-button="true"]');
 
+        if (target) {
+          const rect = target.getBoundingClientRect();
           if (rect.height > 0 && rect.width > 0) {
             setTargetRect(rect);
           }
         }
       } else if (stepConfig.id === "unit-explanations") {
         target = document.querySelector('[data-highest-position="true"]');
+
+        if (target) {
+          const rect = target.getBoundingClientRect();
+          if (rect.height > 0 && rect.width > 0) {
+            setTargetRect(rect);
+          }
+        }
       } else {
         target = document.querySelector(stepConfig.target);
-      }
 
-      if (target && stepConfig.id !== "review-units") {
-        target.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-          inline: "center"
-        });
-
-        const rect = target.getBoundingClientRect();
-        if (rect.height > 0 && rect.width > 0) {
-          setTargetRect(rect);
+        if (target) {
+          const rect = target.getBoundingClientRect();
+          if (rect.height > 0 && rect.width > 0) {
+            setTargetRect(rect);
+          }
         }
       }
     };
 
+    // Marcar inicio de transición
+    setIsTransitioning(true);
+
+    // Ejecutar acción del paso si existe
     if (steps[currentStep].action) {
       steps[currentStep].action?.();
-
-      setTimeout(() => {
-        updateTargetPosition();
-
-        setTimeout(() => {
-          updateTargetPosition();
-        }, 200);
-      }, 300);
-    } else {
-      updateTargetPosition();
     }
 
-    const interval = setInterval(() => {
-      if (
-        steps[currentStep].id === "review-units" ||
-        steps[currentStep].id === "unit-explanations"
-      ) {
-        updateTargetPosition();
-      }
-    }, 100);
+    // Primera actualización rápida
+    requestAnimationFrame(() => {
+      updateTargetPosition();
+    });
 
-    window.addEventListener("resize", updateTargetPosition);
-    window.addEventListener("scroll", updateTargetPosition);
+    // Segunda actualización después de un breve delay
+    const quickUpdate = setTimeout(() => {
+      updateTargetPosition();
+      setIsTransitioning(false);
+    }, 150);
+
+    // Interval solo para pasos dinámicos
+    if (
+      steps[currentStep].id === "review-units" ||
+      steps[currentStep].id === "start-test"
+    ) {
+      updateIntervalRef.current = setInterval(updateTargetPosition, 100);
+    }
+
+    const handleResize = () => {
+      requestAnimationFrame(updateTargetPosition);
+    };
+
+    const handleScroll = () => {
+      requestAnimationFrame(updateTargetPosition);
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      clearInterval(interval);
-      window.removeEventListener("resize", updateTargetPosition);
-      window.removeEventListener("scroll", updateTargetPosition);
+      clearTimeout(quickUpdate);
+      if (updateIntervalRef.current) {
+        clearInterval(updateIntervalRef.current);
+      }
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [currentStep, steps, show]);
 
   const handleNext = () => {
+    if (isTransitioning) return;
+
     if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+      setIsTransitioning(true);
+      setFadeOut(true);
+
+      setTimeout(() => {
+        setCurrentStep(currentStep + 1);
+        setFadeOut(false);
+
+        // No reseteamos isTransitioning aquí, se resetea después del scroll
+      }, 200);
     } else {
       onComplete();
     }
   };
 
   const handlePrev = () => {
+    if (isTransitioning) return;
+
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+      setIsTransitioning(true);
+      setFadeOut(true);
+
+      setTimeout(() => {
+        setCurrentStep(currentStep - 1);
+        setFadeOut(false);
+
+        // No reseteamos isTransitioning aquí, se resetea después del scroll
+      }, 200);
     }
   };
 
@@ -158,11 +213,13 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
   const tooltipPosition = getTooltipPosition(targetRect, step.position);
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       <motion.div
+        key="tutorial-overlay"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
         className="fixed inset-0 z-[9998]"
       >
         <svg className="absolute inset-0 w-full h-full pointer-events-none">
@@ -170,8 +227,11 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
             <mask id="spotlight-mask">
               <rect width="100%" height="100%" fill="white" />
               <motion.rect
+                key={`spotlight-${currentStep}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
                 x={targetRect.left - 8}
                 y={targetRect.top - 8}
                 width={targetRect.width + 16}
@@ -191,9 +251,13 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
         </svg>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
+          key={`border-${currentStep}`}
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{
+            opacity: fadeOut ? 0 : 1,
+            scale: fadeOut ? 0.92 : 1
+          }}
+          transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
           className="absolute pointer-events-none z-[9999]"
           style={{
             left: targetRect.left - 12,
@@ -205,68 +269,100 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
           <div className="w-full h-full border-4 border-purple-500 rounded-xl shadow-2xl shadow-purple-500/50 animate-pulse" />
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.9 }}
-          transition={{ type: "spring", damping: 20, stiffness: 300 }}
-          className="absolute bg-white rounded-2xl shadow-2xl p-6 max-w-sm pointer-events-auto z-[9999]"
-          style={{
-            left: tooltipPosition.left,
-            top: tooltipPosition.top
-          }}
-        >
-          <button
-            onClick={handleSkip}
-            className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-          <div className="pr-6">
-            {step.icon && (
-              <div className="mb-3 text-purple-600">{step.icon}</div>
-            )}
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
-              {step.title}
-            </h3>
-            <p className="text-gray-600 mb-4 text-sm leading-relaxed">
-              {step.description}
-            </p>
-          </div>
-          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-            <div className="flex gap-1">
-              {steps.map((_, index) => (
-                <div
-                  key={index}
-                  className={`h-2 rounded-full transition-all ${
-                    index === currentStep
-                      ? "w-6 bg-purple-600"
-                      : "w-2 bg-gray-300"
-                  }`}
-                />
-              ))}
-            </div>
-
-            <div className="flex gap-2">
-              {currentStep > 0 && (
-                <button
-                  onClick={handlePrev}
-                  className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Atrás
-                </button>
-              )}
+        <AnimatePresence mode="wait">
+          {showTooltip && (
+            <motion.div
+              key={`tooltip-${currentStep}`}
+              initial={{ opacity: 0, y: 10, scale: 0.96 }}
+              animate={{
+                opacity: fadeOut ? 0 : 1,
+                y: fadeOut ? -10 : 0,
+                scale: fadeOut ? 0.96 : 1
+              }}
+              exit={{ opacity: 0, y: -10, scale: 0.96 }}
+              transition={{
+                duration: 0.3,
+                ease: [0.4, 0, 0.2, 1]
+              }}
+              className="absolute bg-white rounded-2xl shadow-2xl p-6 max-w-sm pointer-events-auto z-[9999]"
+              style={{
+                left: tooltipPosition.left,
+                top: tooltipPosition.top
+              }}
+            >
               <button
-                onClick={handleNext}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 text-sm font-semibold"
+                onClick={handleSkip}
+                className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors duration-200"
               >
-                {currentStep === steps.length - 1 ? "¡Empezar!" : "Siguiente"}
-                <ArrowRight className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
-            </div>
-          </div>
-        </motion.div>
+              <motion.div
+                className="pr-6"
+                animate={{ opacity: fadeOut ? 0 : 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                {step.icon && (
+                  <div className="mb-3 text-purple-600">{step.icon}</div>
+                )}
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  {step.title}
+                </h3>
+                <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                  {step.description}
+                </p>
+              </motion.div>
+              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                <div className="flex gap-1">
+                  {steps.map((_, index) => (
+                    <motion.div
+                      key={index}
+                      initial={false}
+                      animate={{
+                        width: index === currentStep ? 24 : 8,
+                        backgroundColor:
+                          index === currentStep ? "#9333ea" : "#d1d5db"
+                      }}
+                      transition={{
+                        duration: 0.3,
+                        ease: "easeInOut"
+                      }}
+                      className="h-2 rounded-full"
+                    />
+                  ))}
+                </div>
+
+                <div className="flex gap-2">
+                  {currentStep > 0 && (
+                    <motion.button
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                      transition={{ duration: 0.2 }}
+                      onClick={handlePrev}
+                      disabled={isTransitioning}
+                      className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1 disabled:opacity-50"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      Atrás
+                    </motion.button>
+                  )}
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleNext}
+                    disabled={isTransitioning}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 flex items-center gap-2 text-sm font-semibold disabled:opacity-50 shadow-md hover:shadow-lg"
+                  >
+                    {currentStep === steps.length - 1
+                      ? "¡Empezar!"
+                      : "Siguiente"}
+                    <ArrowRight className="w-4 h-4" />
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </AnimatePresence>
   );

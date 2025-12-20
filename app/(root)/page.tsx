@@ -7,7 +7,7 @@ import CourseHeader, { CourseHeaderRef } from "@/components/course-header";
 import { useCurriculums } from "@/hooks/use-curriculums";
 import LearningPath from "@/components/units-learning";
 import { useCurriculumStore } from "@/store/useCurriculumStore";
-import { Loader2, BookOpen, List, GraduationCap } from "lucide-react";
+import { Loader2, BookOpen, List, GraduationCap, Target } from "lucide-react";
 import { useHome } from "@/hooks/useHome";
 import { TutorialSpotlight } from "@/components/tutorial/tutorial";
 
@@ -81,6 +81,15 @@ export default function HomePage() {
       action: () => {
         courseHeaderRef.current?.closeSelect();
       }
+    },
+    {
+      id: "start-test",
+      target: "[data-tutorial-start-button='true']",
+      title: "¡Hora de practicar! 🎯",
+      description:
+        "Cuando estés listo, empieza una prueba para poner a prueba lo que has aprendido.",
+      icon: <Target className="w-8 h-8" />,
+      position: "bottom" as const
     }
   ];
 
@@ -139,7 +148,7 @@ export default function HomePage() {
     setCurrentTutorialStep(step);
 
     const stepConfig = tutorialSteps[step];
-    if (stepConfig.id !== "review-units") {
+    if (stepConfig.id !== "review-units" && stepConfig.id !== "start-test") {
       courseHeaderRef.current?.closeSelect();
     }
   };
@@ -183,7 +192,6 @@ export default function HomePage() {
         onComplete={handleTutorialComplete}
         onStepChange={handleTutorialStepChange}
       />
-
       <CourseHeader
         ref={courseHeaderRef}
         curriculums={curriculums}
