@@ -2,7 +2,15 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, Send, Trash2, BookOpen, ThumbsUp, ThumbsDown } from "lucide-react";
+import {
+  Loader2,
+  Send,
+  Trash2,
+  BookOpen,
+  ThumbsUp,
+  ThumbsDown
+} from "lucide-react";
+import { useUser } from "@/context/UserContext";
 
 interface Message {
   role: "user" | "assistant";
@@ -16,15 +24,18 @@ interface TopicData {
 }
 
 export default function AlmanacTutorPage() {
+  const user = useUser();
+  const userId = user?.id || "";
+  console.log(userId);
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [currentTopic, setCurrentTopic] = useState<string | null>(null);
+  // const [currentTopic, setCurrentTopic] = useState<string | null>(null);
   const [currentTopicData, setCurrentTopicData] = useState<TopicData | null>(
     null
   );
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [userId] = useState(() => `user_${Date.now()}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -37,7 +48,7 @@ export default function AlmanacTutorPage() {
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || loading) return;
+    if (!input.trim() || loading || !userId) return;
 
     const userMessage = input.trim();
     setInput("");
@@ -48,12 +59,12 @@ export default function AlmanacTutorPage() {
       const response = await fetch("/api/almanac/chat", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           userId,
-          message: userMessage,
-        }),
+          message: userMessage
+        })
       });
 
       const data = await response.json();
@@ -61,9 +72,9 @@ export default function AlmanacTutorPage() {
       if (response.ok) {
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: data.response },
+          { role: "assistant", content: data.response }
         ]);
-        setCurrentTopic(data.currentTopic);
+        // setCurrentTopic(data.currentTopic);
         setCurrentTopicData(data.currentTopicData);
         setSessionId(data.sessionId);
       } else {
@@ -71,8 +82,8 @@ export default function AlmanacTutorPage() {
           ...prev,
           {
             role: "assistant",
-            content: `Error: ${data.error || "Something went wrong"}`,
-          },
+            content: `Error: ${data.error || "Something went wrong"}`
+          }
         ]);
       }
     } catch (error) {
@@ -81,8 +92,8 @@ export default function AlmanacTutorPage() {
         ...prev,
         {
           role: "assistant",
-          content: "Error: Could not connect to the server",
-        },
+          content: "Error: Could not connect to the server"
+        }
       ]);
     } finally {
       setLoading(false);
@@ -94,12 +105,12 @@ export default function AlmanacTutorPage() {
       await fetch("/api/almanac/chat", {
         method: "DELETE",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ userId, wasHelpful }),
+        body: JSON.stringify({ userId, wasHelpful })
       });
       setMessages([]);
-      setCurrentTopic(null);
+      // setCurrentTopic(null);
       setCurrentTopicData(null);
       setSessionId(null);
     } catch (error) {
@@ -130,15 +141,17 @@ export default function AlmanacTutorPage() {
                         {currentTopicData.curriculumTitle}
                       </span>
                     )}
-                    {currentTopicData.curriculumTitle && currentTopicData.unitName && (
-                      <span className="text-gray-500"> / </span>
-                    )}
+                    {currentTopicData.curriculumTitle &&
+                      currentTopicData.unitName && (
+                        <span className="text-gray-500"> / </span>
+                      )}
                     {currentTopicData.unitName && (
                       <span className="text-gray-400">
                         {currentTopicData.unitName}
                       </span>
                     )}
-                    {(currentTopicData.curriculumTitle || currentTopicData.unitName) && (
+                    {(currentTopicData.curriculumTitle ||
+                      currentTopicData.unitName) && (
                       <span className="text-gray-500"> / </span>
                     )}
                     <span className="text-purple-400">

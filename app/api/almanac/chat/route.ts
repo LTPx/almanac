@@ -90,8 +90,17 @@ export async function POST(req: NextRequest) {
         : null,
       sessionId: userSessions.get(userId), // Incluir sessionId en la respuesta
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in almanac chat:", error);
+
+    // Si el error viene del agent (Gemini API), devolver el mensaje específico
+    if (error.message) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status || 500 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Something went wrong" },
       { status: 500 }

@@ -93,8 +93,21 @@ export class AlmanacAgent {
       const result = await model.generateContent(prompt);
       const response = JSON.parse(result.response.text());
       return response.topic_id;
-    } catch (e) {
+    } catch (e: any) {
       console.error("Router Error:", e);
+
+      // Si es un error de Gemini (429, 500, etc), propagarlo
+      if (e.status === 429) {
+        throw new Error("⚠️ Rate limit exceeded. Please wait a moment and try again.");
+      }
+      if (e.status >= 500) {
+        throw new Error("⚠️ Gemini service is temporarily unavailable. Please try again later.");
+      }
+      if (e.message?.includes("API key")) {
+        throw new Error("⚠️ API configuration error. Please contact support.");
+      }
+
+      // Para otros errores, retornar null para que el flujo continúe
       return null;
     }
   }
@@ -145,10 +158,27 @@ export class AlmanacAgent {
       { role: "user" as const, parts: [{ text: userInput }] },
     ];
 
-    const result = await model.generateContent({ contents: fullConversation });
-    const responseText = result.response.text();
+    try {
+      const result = await model.generateContent({ contents: fullConversation });
+      const responseText = result.response.text();
+      return responseText;
+    } catch (e: any) {
+      console.error("Tutor Generation Error:", e);
 
-    return responseText;
+      // Propagar errores de Gemini con mensajes claros
+      if (e.status === 429) {
+        throw new Error("⚠️ Too many requests. Please wait a moment before asking another question.");
+      }
+      if (e.status >= 500) {
+        throw new Error("⚠️ AI service is temporarily unavailable. Please try again in a few moments.");
+      }
+      if (e.message?.includes("API key")) {
+        throw new Error("⚠️ API configuration error. Please contact support.");
+      }
+
+      // Error genérico
+      throw new Error("⚠️ An error occurred while generating the response. Please try again.");
+    }
   }
 
   // --- MAIN CHAT FUNCTION ---
