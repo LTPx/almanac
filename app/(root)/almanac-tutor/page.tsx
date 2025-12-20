@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, Send, Trash2, BookOpen } from "lucide-react";
+import { Loader2, Send, Trash2, BookOpen, ThumbsUp, ThumbsDown } from "lucide-react";
 
 interface Message {
   role: "user" | "assistant";
@@ -23,6 +23,7 @@ export default function AlmanacTutorPage() {
   const [currentTopicData, setCurrentTopicData] = useState<TopicData | null>(
     null
   );
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [userId] = useState(() => `user_${Date.now()}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -64,6 +65,7 @@ export default function AlmanacTutorPage() {
         ]);
         setCurrentTopic(data.currentTopic);
         setCurrentTopicData(data.currentTopicData);
+        setSessionId(data.sessionId);
       } else {
         setMessages((prev) => [
           ...prev,
@@ -87,148 +89,191 @@ export default function AlmanacTutorPage() {
     }
   };
 
-  const clearConversation = async () => {
+  const clearConversation = async (wasHelpful?: boolean) => {
     try {
       await fetch("/api/almanac/chat", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ userId, wasHelpful }),
       });
       setMessages([]);
       setCurrentTopic(null);
       setCurrentTopicData(null);
+      setSessionId(null);
     } catch (error) {
       console.error("Error clearing conversation:", error);
     }
   };
 
+  const endWithFeedback = async (helpful: boolean) => {
+    await clearConversation(helpful);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 p-4">
+    <div className="min-h-screen bg-neutral-900 text-white p-6 pb-20">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="bg-white dark:bg-gray-800 rounded-t-xl shadow-lg p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <BookOpen className="w-8 h-8 text-purple-600" />
+              <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-white" />
+              </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Almanac Tutor
-                </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {currentTopicData ? (
-                    <span className="text-purple-600 font-medium">
-                      {currentTopicData.curriculumTitle && (
-                        <span className="text-blue-600">
-                          {currentTopicData.curriculumTitle} /{" "}
-                        </span>
-                      )}
-                      {currentTopicData.unitName && (
-                        <span className="text-gray-500">
-                          {currentTopicData.unitName} /{" "}
-                        </span>
-                      )}
+                <h1 className="text-[22px] font-bold">Almanac Tutor</h1>
+                {currentTopicData ? (
+                  <p className="text-sm text-gray-400">
+                    {currentTopicData.curriculumTitle && (
+                      <span className="text-blue-400">
+                        {currentTopicData.curriculumTitle}
+                      </span>
+                    )}
+                    {currentTopicData.curriculumTitle && currentTopicData.unitName && (
+                      <span className="text-gray-500"> / </span>
+                    )}
+                    {currentTopicData.unitName && (
+                      <span className="text-gray-400">
+                        {currentTopicData.unitName}
+                      </span>
+                    )}
+                    {(currentTopicData.curriculumTitle || currentTopicData.unitName) && (
+                      <span className="text-gray-500"> / </span>
+                    )}
+                    <span className="text-purple-400">
                       {currentTopicData.title}
                     </span>
-                  ) : (
-                    "Your AI tutor powered by your Almanac lessons"
-                  )}
-                </p>
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-400">
+                    Your AI tutor powered by your Almanac lessons
+                  </p>
+                )}
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearConversation}
-              disabled={messages.length === 0}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Clear
-            </Button>
+            <div className="flex gap-2">
+              {messages.length > 0 && sessionId && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => endWithFeedback(true)}
+                    title="This was helpful"
+                    className="border-neutral-600 hover:bg-neutral-800 hover:text-green-400"
+                  >
+                    <ThumbsUp className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => endWithFeedback(false)}
+                    title="This wasn't helpful"
+                    className="border-neutral-600 hover:bg-neutral-800 hover:text-red-400"
+                  >
+                    <ThumbsDown className="w-4 h-4" />
+                  </Button>
+                </>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => clearConversation()}
+                disabled={messages.length === 0}
+                className="border-neutral-600 hover:bg-neutral-800"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Clear
+              </Button>
+            </div>
           </div>
         </div>
 
-        {/* Messages */}
-        <div className="bg-white dark:bg-gray-800 shadow-lg p-6 h-[500px] overflow-y-auto">
-          {messages.length === 0 && (
-            <div className="text-center text-gray-500 dark:text-gray-400 mt-20">
-              <BookOpen className="w-16 h-16 mx-auto mb-4 text-purple-300" />
-              <p className="text-lg font-medium mb-2">
-                Welcome to Almanac Tutor!
-              </p>
-              <p className="text-sm">
-                Start a conversation by asking about any lesson from your
-                curriculum
-              </p>
-              <div className="mt-6 space-y-2">
-                <button
-                  onClick={() =>
-                    setInput("What topics can you help me learn about?")
-                  }
-                  className="block w-full max-w-md mx-auto px-4 py-2 text-sm bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors"
-                >
-                  What topics can you help me learn about?
-                </button>
-                <button
-                  onClick={() => setInput("I want to learn something new")}
-                  className="block w-full max-w-md mx-auto px-4 py-2 text-sm bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
-                >
-                  I want to learn something new
-                </button>
+        {/* Messages Container */}
+        <div className="border-2 border-neutral-600 rounded-2xl bg-neutral-800 overflow-hidden mb-4">
+          <div className="h-[500px] overflow-y-auto p-6">
+            {messages.length === 0 && (
+              <div className="text-center text-gray-400 mt-20">
+                <BookOpen className="w-16 h-16 mx-auto mb-4 text-purple-500 opacity-50" />
+                <p className="text-lg font-semibold mb-2 text-white">
+                  Welcome to Almanac Tutor!
+                </p>
+                <p className="text-sm mb-6">
+                  Start a conversation by asking about any lesson from your
+                  curriculum
+                </p>
+                <div className="max-w-md mx-auto space-y-3">
+                  <button
+                    onClick={() =>
+                      setInput("What topics can you help me learn about?")
+                    }
+                    className="block w-full px-4 py-3 text-sm bg-neutral-700 text-white rounded-xl hover:bg-neutral-600 transition-colors border border-neutral-600"
+                  >
+                    What topics can you help me learn about?
+                  </button>
+                  <button
+                    onClick={() => setInput("I want to learn something new")}
+                    className="block w-full px-4 py-3 text-sm bg-neutral-700 text-white rounded-xl hover:bg-neutral-600 transition-colors border border-neutral-600"
+                  >
+                    I want to learn something new
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`mb-4 flex ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
+            {messages.map((message, index) => (
               <div
-                className={`max-w-[80%] px-4 py-3 rounded-lg ${
-                  message.role === "user"
-                    ? "bg-purple-600 text-white"
-                    : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                key={index}
+                className={`mb-4 flex ${
+                  message.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                <div
+                  className={`max-w-[80%] px-4 py-3 rounded-2xl ${
+                    message.role === "user"
+                      ? "bg-purple-600 text-white"
+                      : "bg-neutral-700 text-gray-100 border border-neutral-600"
+                  }`}
+                >
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                    {message.content}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          {loading && (
-            <div className="flex justify-start mb-4">
-              <div className="bg-gray-100 dark:bg-gray-700 px-4 py-3 rounded-lg">
-                <Loader2 className="w-5 h-5 animate-spin text-purple-600" />
+            {loading && (
+              <div className="flex justify-start mb-4">
+                <div className="bg-neutral-700 border border-neutral-600 px-4 py-3 rounded-2xl">
+                  <Loader2 className="w-5 h-5 animate-spin text-purple-500" />
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <div ref={messagesEndRef} />
+            <div ref={messagesEndRef} />
+          </div>
         </div>
 
         {/* Input */}
-        <form
-          onSubmit={sendMessage}
-          className="bg-white dark:bg-gray-800 rounded-b-xl shadow-lg p-4 border-t border-gray-200 dark:border-gray-700"
-        >
-          <div className="flex space-x-2">
+        <form onSubmit={sendMessage}>
+          <div className="flex gap-3">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
               disabled={loading}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-700 dark:text-white disabled:opacity-50"
+              className="flex-1 px-5 py-4 bg-neutral-800 border-2 border-neutral-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 disabled:opacity-50 transition-colors"
             />
-            <Button type="submit" disabled={loading || !input.trim()}>
+            <Button
+              type="submit"
+              disabled={loading || !input.trim()}
+              className="px-6 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
               {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                <Send className="w-4 h-4" />
+                <Send className="w-5 h-5" />
               )}
             </Button>
           </div>

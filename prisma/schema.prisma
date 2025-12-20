@@ -55,6 +55,9 @@ model User {
   adViews  AdView[]
   adClicks AdClick[]
 
+  // Almanac Tutor
+  tutorSessions TutorSession[]
+
   @@map("user")
 }
 
@@ -199,6 +202,7 @@ model Lesson {
   updatedAt          DateTime            @updatedAt
   learningObjectives LearningObjective[]
   facts              Fact[]
+  tutorSessions      TutorSession[]
 
   @@map("lesson")
 }
@@ -635,4 +639,27 @@ model AdClick {
   clickedAt DateTime @default(now())
 
   @@map("ad_click")
+}
+
+// ALMANAC TUTOR SYSTEM
+model TutorSession {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  lesson     Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId   Int
+  messages   Json // Historial completo de mensajes
+  startedAt  DateTime @default(now())
+  lastActive DateTime @default(now())
+  endedAt    DateTime?
+
+  // Métricas de la sesión
+  messageCount    Int @default(0)
+  userMessages    Int @default(0)
+  tutorMessages   Int @default(0)
+  wasHelpful      Boolean? // Rating del usuario (opcional)
+
+  @@index([userId, startedAt])
+  @@index([lessonId])
+  @@map("tutor_session")
 }
