@@ -1,4 +1,3 @@
-// components/lesson-grid.tsx
 "use client";
 
 import React from "react";
@@ -12,13 +11,17 @@ interface LessonGridProps {
   approvedUnits: number[];
   hearts: number;
   onStartUnit: (unit: Unit) => void;
+  isInTutorialStep7?: boolean;
+  isInTutorialStep8?: boolean;
 }
 
 export const LessonGrid: React.FC<LessonGridProps> = ({
   units,
   approvedUnits,
   hearts,
-  onStartUnit
+  onStartUnit,
+  isInTutorialStep7 = false,
+  isInTutorialStep8 = false
 }) => {
   type Node = Unit & { type: "unit"; col: number; row: number };
 
@@ -95,12 +98,20 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
       ? units.reduce((min, unit) => (unit.position < min.position ? unit : min))
       : null;
 
-  // Encontrar el nodo con la MAYOR posición (el último en el grid)
   const pathLayout = generatePathLayout();
   const allNodes = pathLayout.flatMap((rowData) => rowData.nodes);
+
   const highestPositionNode =
     allNodes.length > 0
       ? allNodes.reduce((max, node) =>
+          node.position > max.position ? node : max
+        )
+      : null;
+
+  const optionalNodes = units.filter((u) => !u.mandatory);
+  const highestOptionalNode =
+    optionalNodes.length > 0
+      ? optionalNodes.reduce((max, node) =>
           node.position > max.position ? node : max
         )
       : null;
@@ -163,6 +174,15 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                   nodeData && highestPositionNode
                     ? nodeData.id === highestPositionNode.id
                     : false;
+                const isOptionalHighest =
+                  nodeData && highestOptionalNode && !nodeData.mandatory
+                    ? nodeData.id === highestOptionalNode.id
+                    : false;
+
+                const isFirstLesson =
+                  nodeData && firstLesson
+                    ? nodeData.id === firstLesson.id
+                    : false;
 
                 return (
                   <motion.div
@@ -187,6 +207,11 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                           nodeData.id === firstLesson?.id && nodeData.mandatory
                         }
                         isHighestPosition={isHighestPosition}
+                        isOptionalHighest={isOptionalHighest}
+                        isInTutorialStep7={
+                          isInTutorialStep7 && isOptionalHighest
+                        }
+                        isInTutorialStep8={isInTutorialStep8 && isFirstLesson}
                         onStartLesson={() => onStartUnit(nodeData)}
                       />
                     ) : (

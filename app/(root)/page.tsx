@@ -108,7 +108,6 @@ export default function HomePage() {
         icon: <Target className="w-8 h-8" />,
         position: "bottom" as const
       },
-
       {
         id: "test-demo",
         title: "Práctica Interactiva",
@@ -125,13 +124,36 @@ export default function HomePage() {
           />
         )
       },
-
       {
         id: "completed-unit",
         target: "[data-highest-position='true']",
         title: "¡Unidad Completada! 🎉",
         description:
           "Si apruebas la unidad, puedes continuar a la siguiente. ¡Sigue aprendiendo para completar todo el curriculum!",
+        icon: <Award className="w-8 h-8" />,
+        position: "top" as const,
+        action: () => {
+          courseHeaderRef.current?.closeSelect();
+        }
+      },
+      {
+        id: "optional-unit",
+        target: "[data-optional-node='true']",
+        title: "Unidades Opcionales 🌟",
+        description:
+          "Algunas unidades son obligatorias y otras son opcionales. Las opcionales te permiten practicar más y mejorar tus habilidades, pero no son necesarias para avanzar.",
+        icon: <Target className="w-8 h-8" />,
+        position: "top" as const,
+        action: () => {
+          courseHeaderRef.current?.closeSelect();
+        }
+      },
+      {
+        id: "final-unit",
+        target: "[data-first-mandatory='true']",
+        title: "¡Unidad Final! 🏆",
+        description:
+          "Cuando superes la unidad final, recibirás un token que te permitirá crear tu certificado digital único.",
         icon: <Award className="w-8 h-8" />,
         position: "top" as const,
         action: () => {
@@ -284,6 +306,7 @@ export default function HomePage() {
             userId={userId}
             onTestComplete={handleTestComplete}
             showAsCompleted={currentTutorialStep === 5}
+            showOptionalAsAvailable={currentTutorialStep === 6}
           />
         </div>
       ) : (
