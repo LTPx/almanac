@@ -11,17 +11,13 @@ interface LessonGridProps {
   approvedUnits: number[];
   hearts: number;
   onStartUnit: (unit: Unit) => void;
-  isInTutorialStep7?: boolean;
-  isInTutorialStep8?: boolean;
 }
 
 export const LessonGrid: React.FC<LessonGridProps> = ({
   units,
   approvedUnits,
   hearts,
-  onStartUnit,
-  isInTutorialStep7 = false,
-  isInTutorialStep8 = false
+  onStartUnit
 }) => {
   type Node = Unit & { type: "unit"; col: number; row: number };
 
@@ -81,11 +77,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
 
   const getLessonState = (unit: Node): "completed" | "available" | "locked" => {
     if (approvedUnits.includes(unit.id)) return "completed";
-
-    if (isAdjacentToCompleted(unit)) {
-      return "available";
-    }
-
+    if (isAdjacentToCompleted(unit)) return "available";
     return "locked";
   };
 
@@ -120,9 +112,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     pathLayout.length > 0 ? Math.max(...pathLayout.map((r) => r.row)) : 0;
 
   const containerVariants: Variants = {
-    hidden: {
-      opacity: 0
-    },
+    hidden: { opacity: 0 },
     show: {
       opacity: 1,
       transition: {
@@ -133,11 +123,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
   };
 
   const itemVariants: Variants = {
-    hidden: {
-      opacity: 0,
-      y: 30,
-      scale: 0.9
-    },
+    hidden: { opacity: 0, y: 30, scale: 0.9 },
     show: {
       opacity: 1,
       y: 0,
@@ -179,11 +165,6 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                     ? nodeData.id === highestOptionalNode.id
                     : false;
 
-                const isFirstLesson =
-                  nodeData && firstLesson
-                    ? nodeData.id === firstLesson.id
-                    : false;
-
                 return (
                   <motion.div
                     key={col}
@@ -208,10 +189,6 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                         }
                         isHighestPosition={isHighestPosition}
                         isOptionalHighest={isOptionalHighest}
-                        isInTutorialStep7={
-                          isInTutorialStep7 && isOptionalHighest
-                        }
-                        isInTutorialStep8={isInTutorialStep8 && isFirstLesson}
                         onStartLesson={() => onStartUnit(nodeData)}
                       />
                     ) : (

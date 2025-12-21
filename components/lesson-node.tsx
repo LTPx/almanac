@@ -19,8 +19,6 @@ type LessonNodeProps = {
   isFirstMandatory?: boolean;
   isHighestPosition?: boolean;
   isOptionalHighest?: boolean;
-  isInTutorialStep7?: boolean;
-  isInTutorialStep8?: boolean;
   onStartLesson: () => void;
 };
 
@@ -36,8 +34,6 @@ const LessonNode: React.FC<LessonNodeProps> = ({
   isFirstMandatory = false,
   isHighestPosition = false,
   isOptionalHighest = false,
-  isInTutorialStep7 = false,
-  isInTutorialStep8 = false,
   onStartLesson
 }) => {
   const { open: openNoHeartsModal } = useNoHeartsModal();
@@ -52,7 +48,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
           ? "bg-[#5EC16A] border-[#5EC16A]"
           : "bg-[#1983DD] border-[#1983DD]";
     }
-    if (state === "available" || isInTutorialStep7 || isInTutorialStep8) {
+    if (state === "available") {
       if (isFirstMandatory && mandatory) {
         return "bg-transparent";
       }
@@ -61,10 +57,6 @@ const LessonNode: React.FC<LessonNodeProps> = ({
         : "bg-[#1983DD] border-[#1983DD]";
     }
     return "";
-  };
-
-  const getIconColor = () => {
-    return "text-white";
   };
 
   const handleStartLesson = () => {
@@ -87,16 +79,8 @@ const LessonNode: React.FC<LessonNodeProps> = ({
 
   const nodeContent = (
     <motion.div
-      whileHover={
-        state !== "completed" && !isInTutorialStep7 && !isInTutorialStep8
-          ? { scale: 1.05, y: -2 }
-          : {}
-      }
-      whileTap={
-        state !== "completed" && !isInTutorialStep7 && !isInTutorialStep8
-          ? { scale: 0.95 }
-          : {}
-      }
+      whileHover={state !== "completed" ? { scale: 1.05, y: -2 } : {}}
+      whileTap={state !== "completed" ? { scale: 0.95 } : {}}
       animate={shouldFloat ? { y: [0, -8, 0] } : {}}
       transition={
         shouldFloat
@@ -125,12 +109,12 @@ const LessonNode: React.FC<LessonNodeProps> = ({
         ${
           isFirstMandatory
             ? getFirstMandatoryStyle()
-            : state === "locked" && !isInTutorialStep7 && !isInTutorialStep8
+            : state === "locked"
               ? `${color} border-dashed`
               : "shadow-lg"
         }
         ${isFirstMandatory ? "rounded-t-[2rem] rounded-b-lg" : "rounded-2xl"}
-        border-2 ${state !== "locked" || isInTutorialStep7 || isInTutorialStep8 ? "cursor-pointer" : "cursor-not-allowed opacity-75"}
+        border-2 ${state !== "locked" ? "cursor-pointer" : "cursor-not-allowed opacity-75"}
       `}
       data-highest-position={isHighestPosition ? "true" : undefined}
       data-optional-node={isOptionalHighest ? "true" : undefined}
@@ -147,14 +131,10 @@ const LessonNode: React.FC<LessonNodeProps> = ({
         }}
       >
         {state === "completed" && (
-          <CheckCircle className={`w-7 h-7 ${getIconColor()}`} />
+          <CheckCircle className="w-7 h-7 text-white" />
         )}
-        {(state === "available" || isInTutorialStep7 || isInTutorialStep8) && (
-          <BookOpen className="w-7 h-7 text-white" />
-        )}
-        {state === "locked" && !isInTutorialStep7 && !isInTutorialStep8 && (
-          <Lock className="w-6 h-6 text-white" />
-        )}
+        {state === "available" && <BookOpen className="w-7 h-7 text-white" />}
+        {state === "locked" && <Lock className="w-6 h-6 text-white" />}
       </motion.div>
     </motion.div>
   );
@@ -208,23 +188,13 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       unitId={unitId}
       title={name}
       message={description || ""}
-      buttonText={
-        isInTutorialStep7
-          ? "Solo para el Tutorial"
-          : isInTutorialStep8
-            ? "Solo para el Tutorial"
-            : "Empezar mi Prueba"
-      }
-      onButtonClick={
-        isInTutorialStep7 || isInTutorialStep8 ? () => {} : handleStartLesson
-      }
+      buttonText="Empezar mi Prueba"
+      onButtonClick={handleStartLesson}
       isLocked={false}
       isOptional={!mandatory}
       isFirstMandatory={isFirstMandatory}
       isHighestPosition={isHighestPosition}
       isOptionalHighest={isOptionalHighest}
-      isInTutorialStep7={isInTutorialStep7}
-      isInTutorialStep8={isInTutorialStep8}
     >
       {nodeContent}
     </StepPopover>

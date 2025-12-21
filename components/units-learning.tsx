@@ -11,6 +11,7 @@ type LearningPathProps = {
   userId: string;
   hearts: number;
   onTestComplete?: () => void;
+
   showAsCompleted?: boolean;
   showOptionalAsAvailable?: boolean;
   showAllCompletedExceptFirst?: boolean;
@@ -36,76 +37,70 @@ const LearningPath: React.FC<LearningPathProps> = ({
         unit.position >= 0
     ) || [];
 
-  const highestPositionUnit =
-    assignedUnits.length > 0
-      ? assignedUnits.reduce((max, unit) =>
-          unit.position > max.position ? unit : max
-        )
-      : null;
-
-  const optionalNodes = assignedUnits.filter((u) => !u.mandatory);
-  const highestOptionalNode =
-    optionalNodes.length > 0
-      ? optionalNodes.reduce((max, node) =>
-          node.position > max.position ? node : max
-        )
-      : null;
-
-  const firstLesson =
-    assignedUnits.length > 0
-      ? assignedUnits.reduce((min, unit) =>
-          unit.position < min.position ? unit : min
-        )
-      : null;
-
   let finalApprovedUnits = progress.approvedUnits;
 
-  if (showAsCompleted && highestPositionUnit) {
-    finalApprovedUnits = [...progress.approvedUnits, highestPositionUnit.id];
-  }
+  if (
+    showAsCompleted ||
+    showOptionalAsAvailable ||
+    showAllCompletedExceptFirst
+  ) {
+    const highestPositionUnit =
+      assignedUnits.length > 0
+        ? assignedUnits.reduce((max, unit) =>
+            unit.position > max.position ? unit : max
+          )
+        : null;
 
-  if (showOptionalAsAvailable && highestOptionalNode) {
-    const optionalRow = Math.floor(highestOptionalNode.position / 5);
-    const optionalCol = highestOptionalNode.position % 5;
+    const optionalNodes = assignedUnits.filter((u) => !u.mandatory);
+    const highestOptionalNode =
+      optionalNodes.length > 0
+        ? optionalNodes.reduce((max, node) =>
+            node.position > max.position ? node : max
+          )
+        : null;
 
-    const adjacentToApprove: number[] = [];
+    const firstLesson =
+      assignedUnits.length > 0
+        ? assignedUnits.reduce((min, unit) =>
+            unit.position < min.position ? unit : min
+          )
+        : null;
 
-    assignedUnits.forEach((unit) => {
-      const unitRow = Math.floor(unit.position / 5);
-      const unitCol = unit.position % 5;
+    if (showAsCompleted && highestPositionUnit) {
+      finalApprovedUnits = [...progress.approvedUnits, highestPositionUnit.id];
+    }
 
-      const rowDiff = Math.abs(unitRow - optionalRow);
-      const colDiff = Math.abs(unitCol - optionalCol);
+    if (showOptionalAsAvailable && highestOptionalNode) {
+      const optionalRow = Math.floor(highestOptionalNode.position / 5);
+      const optionalCol = highestOptionalNode.position % 5;
 
-      if (
-        (rowDiff === 0 && colDiff === 1) ||
-        (rowDiff === 1 && colDiff === 0)
-      ) {
-        adjacentToApprove.push(unit.id);
-      }
-    });
+      const adjacentToApprove: number[] = [];
 
-    finalApprovedUnits = [...progress.approvedUnits, ...adjacentToApprove];
-  }
+      assignedUnits.forEach((unit) => {
+        const unitRow = Math.floor(unit.position / 5);
+        const unitCol = unit.position % 5;
 
-  if (showAllCompletedExceptFirst && firstLesson) {
-    const allExceptFirst = assignedUnits
-      .filter((unit) => unit.id !== firstLesson.id)
-      .map((unit) => unit.id);
+        const rowDiff = Math.abs(unitRow - optionalRow);
+        const colDiff = Math.abs(unitCol - optionalCol);
 
-    console.log("🎯 PASO 8 - Tutorial Final Unit");
-    console.log(
-      "Primera lección:",
-      firstLesson.name,
-      "ID:",
-      firstLesson.id,
-      "Pos:",
-      firstLesson.position
-    );
-    console.log("Total unidades:", assignedUnits.length);
-    console.log("IDs a aprobar:", allExceptFirst);
+        if (
+          (rowDiff === 0 && colDiff === 1) ||
+          (rowDiff === 1 && colDiff === 0)
+        ) {
+          adjacentToApprove.push(unit.id);
+        }
+      });
 
-    finalApprovedUnits = allExceptFirst;
+      finalApprovedUnits = [...progress.approvedUnits, ...adjacentToApprove];
+    }
+
+    if (showAllCompletedExceptFirst && firstLesson) {
+      const allExceptFirst = assignedUnits
+        .filter((unit) => unit.id !== firstLesson.id)
+        .map((unit) => unit.id);
+
+      finalApprovedUnits = allExceptFirst;
+    }
   }
 
   const handleCloseTest = () => {
@@ -129,8 +124,6 @@ const LearningPath: React.FC<LearningPathProps> = ({
               approvedUnits={finalApprovedUnits}
               onStartUnit={setActiveUnit}
               hearts={hearts}
-              isInTutorialStep7={showOptionalAsAvailable}
-              isInTutorialStep8={showAllCompletedExceptFirst}
             />
           )}
         </div>
@@ -165,8 +158,6 @@ const LearningPath: React.FC<LearningPathProps> = ({
             approvedUnits={finalApprovedUnits}
             onStartUnit={setActiveUnit}
             hearts={hearts}
-            isInTutorialStep7={showOptionalAsAvailable}
-            isInTutorialStep8={showAllCompletedExceptFirst}
           />
         )}
       </div>

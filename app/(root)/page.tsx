@@ -1,47 +1,40 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useUser } from "@/context/UserContext";
 import { Curriculum } from "@/lib/types";
 import CourseHeader, { CourseHeaderRef } from "@/components/course-header";
 import { useCurriculums } from "@/hooks/use-curriculums";
-import LearningPath from "@/components/units-learning";
 import { useCurriculumStore } from "@/store/useCurriculumStore";
-import {
-  Loader2,
-  BookOpen,
-  List,
-  GraduationCap,
-  Target,
-  Award
-} from "lucide-react";
+import { Loader2, BookOpen } from "lucide-react";
 import { useHome } from "@/hooks/useHome";
 import { TutorialSpotlight } from "@/components/tutorial/tutorial";
+import { TutorialLearningPath } from "@/components/tutorial/tutorial-learning-path";
+import LearningPath from "@/components/units-learning";
+import {
+  TutorialProvider,
+  useTutorial
+} from "@/components/tutorial/tutorial-provider";
 import { TutorialTestSystem } from "@/components/tutorial/tutorial-test-system";
+import { createTutorialSteps } from "@/components/tutorial/tutorial-steps";
 
 const ContentLoadingScreen = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
     <div className="flex flex-col items-center gap-4">
-      <div className="relative">
-        <Loader2 className="w-12 h-12 animate-spin text-purple-500" />
-      </div>
-      <div className="text-center">
-        <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-          Cargando
-        </p>
-      </div>
+      <Loader2 className="w-12 h-12 animate-spin text-purple-500" />
+      <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+        Cargando
+      </p>
     </div>
   </div>
 );
 
-export default function HomePage() {
+function HomePageContent() {
   const [curriculums, setCurriculums] = useState<Curriculum[]>([]);
   const [selectedCurriculum, setSelectedCurriculum] =
     useState<Curriculum | null>(null);
   const { selectedCurriculumId, setSelectedCurriculumId } =
     useCurriculumStore();
-  const [showTutorial, setShowTutorial] = useState(false);
-  const [currentTutorialStep, setCurrentTutorialStep] = useState(0);
   const courseHeaderRef = useRef<CourseHeaderRef>(null);
 
   const user = useUser();
@@ -56,58 +49,21 @@ export default function HomePage() {
     refetch: refetchGamification
   } = useHome(userId);
 
-  const handleAdvanceToNextStep = useCallback(() => {
-    console.log("🚀 Avanzando al siguiente paso...");
-    setCurrentTutorialStep((prev) => {
-      console.log(`📍 Paso actual: ${prev}, Nuevo paso: ${prev + 1}`);
-      return prev + 1;
-    });
-  }, []);
+  const {
+    isActive: isTutorialActive,
+    currentStep,
+    hasCompleted,
+    startTutorial,
+    completeTutorial,
+    setStep,
+    nextStep,
+    resetTutorial
+  } = useTutorial();
 
   const tutorialSteps = useMemo(
     () => [
-      {
-        id: "welcome",
-        target: ".course-header-select",
-        title: "¡Bienvenido a Almanac! 🎉",
-        description:
-          "Aquí puedes elegir el curriculum que quieres estudiar. Cada curriculum tiene diferentes unidades de aprendizaje.",
-        icon: <BookOpen className="w-8 h-8" />,
-        position: "bottom" as const
-      },
-      {
-        id: "review-units",
-        target: "[data-radix-select-content]",
-        title: "Revisa las unidades 📚",
-        description:
-          "Explora todas las unidades disponibles. Cada una contiene diferentes lecciones que te ayudarán a aprender paso a paso.",
-        icon: <List className="w-8 h-8" />,
-        position: "bottom" as const,
-        action: () => {
-          courseHeaderRef.current?.openSelect();
-        }
-      },
-      {
-        id: "unit-explanations",
-        target: "[data-highest-position='true']",
-        title: "Aprende con explicaciones 📖",
-        description:
-          "Cada unidad tiene explicaciones detalladas que puedes revisar antes de hacer las pruebas. ¡Tómate tu tiempo para aprender!",
-        icon: <GraduationCap className="w-8 h-8" />,
-        position: "top" as const,
-        action: () => {
-          courseHeaderRef.current?.closeSelect();
-        }
-      },
-      {
-        id: "start-test",
-        target: "[data-tutorial-start-button='true']",
-        title: "¡Hora de practicar! 🎯",
-        description:
-          "Cuando estés listo, empieza una prueba. Ahora te mostraremos un ejemplo con los tipos de preguntas que encontrarás.",
-        icon: <Target className="w-8 h-8" />,
-        position: "bottom" as const
-      },
+      ...createTutorialSteps(courseHeaderRef).slice(0, 4), // Primeros 4 pasos
+      // Paso 5: Test Demo con customContent
       {
         id: "test-demo",
         title: "Práctica Interactiva",
@@ -119,49 +75,14 @@ export default function HomePage() {
             hearts={gamification?.hearts ?? 0}
             onClose={() => {
               console.log("✅ Test completado, avanzando al paso 6...");
-              handleAdvanceToNextStep();
+              nextStep();
             }}
           />
         )
       },
-      {
-        id: "completed-unit",
-        target: "[data-highest-position='true']",
-        title: "¡Unidad Completada! 🎉",
-        description:
-          "Si apruebas la unidad, puedes continuar a la siguiente. ¡Sigue aprendiendo para completar todo el curriculum!",
-        icon: <Award className="w-8 h-8" />,
-        position: "top" as const,
-        action: () => {
-          courseHeaderRef.current?.closeSelect();
-        }
-      },
-      {
-        id: "optional-unit",
-        target: "[data-optional-node='true']",
-        title: "Unidades Opcionales 🌟",
-        description:
-          "Algunas unidades son obligatorias y otras son opcionales. Las opcionales te permiten practicar más y mejorar tus habilidades, pero no son necesarias para avanzar.",
-        icon: <Target className="w-8 h-8" />,
-        position: "top" as const,
-        action: () => {
-          courseHeaderRef.current?.closeSelect();
-        }
-      },
-      {
-        id: "final-unit",
-        target: "[data-first-mandatory='true']",
-        title: "¡Unidad Final! 🏆",
-        description:
-          "Cuando superes la unidad final, recibirás un token que te permitirá crear tu certificado digital único.",
-        icon: <Award className="w-8 h-8" />,
-        position: "top" as const,
-        action: () => {
-          courseHeaderRef.current?.closeSelect();
-        }
-      }
+      ...createTutorialSteps(courseHeaderRef).slice(4) // Últimos 3 pasos (5, 6, 7)
     ],
-    [gamification?.hearts, handleAdvanceToNextStep]
+    [nextStep, gamification?.hearts, courseHeaderRef]
   );
 
   useEffect(() => {
@@ -191,17 +112,24 @@ export default function HomePage() {
     if (
       !isLoading &&
       !isLoadingGamification &&
+      !hasCompleted &&
       curriculums.length > 0 &&
-      selectedCurriculum
+      selectedCurriculum &&
+      !isTutorialActive
     ) {
-      const hasSeenTutorial = localStorage.getItem("tutorial_completed");
-      if (!hasSeenTutorial) {
-        setTimeout(() => {
-          setShowTutorial(true);
-        }, 500);
-      }
+      setTimeout(() => {
+        startTutorial();
+      }, 500);
     }
-  }, [isLoading, isLoadingGamification, curriculums, selectedCurriculum]);
+  }, [
+    isLoading,
+    isLoadingGamification,
+    hasCompleted,
+    curriculums,
+    selectedCurriculum,
+    isTutorialActive,
+    startTutorial
+  ]);
 
   const handleTestComplete = useCallback(async () => {
     await refetchGamification();
@@ -212,18 +140,15 @@ export default function HomePage() {
   };
 
   const handleTutorialComplete = () => {
-    localStorage.setItem("tutorial_completed", "true");
-    setShowTutorial(false);
-    setCurrentTutorialStep(0);
+    completeTutorial();
     courseHeaderRef.current?.closeSelect();
   };
 
   const handleTutorialStepChange = (step: number) => {
     console.log(`📌 Tutorial cambió a paso: ${step}`);
-    setCurrentTutorialStep(step);
+    setStep(step);
 
     const stepConfig = tutorialSteps[step];
-
     if (stepConfig?.id !== "review-units" && stepConfig?.id !== "start-test") {
       courseHeaderRef.current?.closeSelect();
     }
@@ -231,12 +156,6 @@ export default function HomePage() {
 
   const isInitialLoading = isLoading && curriculums.length === 0;
   const isGamificationLoading = isLoadingGamification && !gamification;
-
-  const resetTutorial = () => {
-    localStorage.removeItem("tutorial_completed");
-    setShowTutorial(true);
-    setCurrentTutorialStep(0);
-  };
 
   if (isInitialLoading || isGamificationLoading) {
     return (
@@ -263,13 +182,16 @@ export default function HomePage() {
 
   return (
     <div className="HomePage">
-      <TutorialSpotlight
-        show={showTutorial}
-        steps={tutorialSteps}
-        onComplete={handleTutorialComplete}
-        onStepChange={handleTutorialStepChange}
-        initialStep={currentTutorialStep}
-      />
+      {isTutorialActive && (
+        <TutorialSpotlight
+          show={true}
+          steps={tutorialSteps}
+          onComplete={handleTutorialComplete}
+          onStepChange={handleTutorialStepChange}
+          initialStep={currentStep}
+        />
+      )}
+
       <CourseHeader
         ref={courseHeaderRef}
         curriculums={curriculums}
@@ -278,7 +200,7 @@ export default function HomePage() {
         lives={gamification?.hearts ?? 0}
         zaps={gamification?.zapTokens ?? 0}
         isPremium={isPremium}
-        preventSelectClose={showTutorial && currentTutorialStep === 1}
+        preventSelectClose={isTutorialActive && currentStep === 1}
       />
 
       {error && (
@@ -293,21 +215,32 @@ export default function HomePage() {
         <ContentLoadingScreen />
       ) : selectedCurriculum ? (
         <div className="h-full">
-          <button
-            onClick={resetTutorial}
-            className="fixed bottom-4 right-4 z-[10000] bg-purple-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-purple-700 transition-colors text-sm font-semibold"
-          >
-            🔄 Reiniciar Tutorial
-          </button>
-          <LearningPath
-            key={selectedCurriculum.id}
-            hearts={gamification?.hearts ?? 0}
-            curriculum={selectedCurriculum}
-            userId={userId}
-            onTestComplete={handleTestComplete}
-            showAsCompleted={currentTutorialStep === 5}
-            showOptionalAsAvailable={currentTutorialStep === 6}
-          />
+          {hasCompleted && (
+            <button
+              onClick={resetTutorial}
+              className="fixed bottom-4 right-4 z-[10000] bg-purple-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-purple-700 transition-colors text-sm font-semibold"
+            >
+              🔄 Reiniciar Tutorial
+            </button>
+          )}
+
+          {isTutorialActive ? (
+            <TutorialLearningPath
+              key={selectedCurriculum.id}
+              hearts={gamification?.hearts ?? 0}
+              curriculum={selectedCurriculum}
+              userId={userId}
+              onTestComplete={handleTestComplete}
+            />
+          ) : (
+            <LearningPath
+              key={selectedCurriculum.id}
+              hearts={gamification?.hearts ?? 0}
+              curriculum={selectedCurriculum}
+              userId={userId}
+              onTestComplete={handleTestComplete}
+            />
+          )}
         </div>
       ) : (
         <div className="flex items-center justify-center min-h-[400px]">
@@ -317,5 +250,13 @@ export default function HomePage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <TutorialProvider>
+      <HomePageContent />
+    </TutorialProvider>
   );
 }
