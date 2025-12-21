@@ -129,6 +129,7 @@ export function TutorialTestSystem({
       setShowResult(true);
       setShowOverlay(false);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentQuestionIndex]
   );
 

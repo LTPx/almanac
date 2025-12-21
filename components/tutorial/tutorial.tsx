@@ -51,6 +51,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
     }
 
     isInternalChangeRef.current = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialStep]);
 
   useEffect(() => {
