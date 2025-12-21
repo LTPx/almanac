@@ -1,21 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { LessonGrid } from "./lesson-grid";
 import { TestSystem } from "./test/TestSystem";
 import { Curriculum, Unit } from "@/lib/types";
 import { useProgress } from "@/hooks/useProgress";
-import { TutorialTestSystem } from "./tutorial/tutorial-test-system";
 
 type LearningPathProps = {
   curriculum: Curriculum;
   userId: string;
   hearts: number;
   onTestComplete?: () => void;
-  isTutorialMode?: boolean;
-  onTutorialComplete?: () => void;
   showAsCompleted?: boolean;
-  openTutorialTest?: boolean; // Nueva prop
 };
 
 const LearningPath: React.FC<LearningPathProps> = ({
@@ -23,12 +19,8 @@ const LearningPath: React.FC<LearningPathProps> = ({
   userId,
   hearts,
   onTestComplete,
-  isTutorialMode = false,
-  onTutorialComplete,
-  showAsCompleted = false,
-  openTutorialTest = false
+  showAsCompleted = false
 }) => {
-  console.log(curriculum);
   const [activeUnit, setActiveUnit] = useState<Unit | null>(null);
   const { progress, isLoading, refetch } = useProgress(userId, curriculum.id);
 
@@ -40,7 +32,6 @@ const LearningPath: React.FC<LearningPathProps> = ({
         unit.position >= 0
     ) || [];
 
-  // Si estamos en el paso final del tutorial, encontrar el nodo con mayor posición
   const highestPositionUnit =
     assignedUnits.length > 0
       ? assignedUnits.reduce((max, unit) =>
@@ -48,34 +39,20 @@ const LearningPath: React.FC<LearningPathProps> = ({
         )
       : null;
 
-  // Crear lista de unidades aprobadas simulando que la de mayor posición está completada
   const tutorialApprovedUnits =
     showAsCompleted && highestPositionUnit
       ? [...progress.approvedUnits, highestPositionUnit.id]
       : progress.approvedUnits;
 
-  // Abrir automáticamente el test tutorial cuando se activa openTutorialTest
-  useEffect(() => {
-    if (openTutorialTest && !activeUnit && highestPositionUnit) {
-      setActiveUnit(highestPositionUnit);
-    }
-  }, [openTutorialTest, activeUnit, highestPositionUnit]);
-
   const handleCloseTest = () => {
     setActiveUnit(null);
-
-    // Si estamos en modo tutorial, marcar como completado
-    if (isTutorialMode && onTutorialComplete) {
-      onTutorialComplete();
-    }
-
     refetch();
     if (onTestComplete) {
       onTestComplete();
     }
   };
 
-  if (activeUnit && hearts === 0 && !isTutorialMode) {
+  if (activeUnit && hearts === 0) {
     setActiveUnit(null);
     return (
       <div className="flex flex-col">
@@ -99,20 +76,13 @@ const LearningPath: React.FC<LearningPathProps> = ({
     return (
       <div className="fixed inset-0 z-[100] flex justify-center items-start bg-black/50">
         <div className="w-full max-w-[650px] bg-white shadow-xl overflow-hidden">
-          {isTutorialMode ? (
-            <TutorialTestSystem
-              hearts={hearts || 0}
-              onClose={handleCloseTest}
-            />
-          ) : (
-            <TestSystem
-              hearts={hearts || 0}
-              userId={userId}
-              unitId={activeUnit.id}
-              curriculumId={curriculum.id}
-              onClose={handleCloseTest}
-            />
-          )}
+          <TestSystem
+            hearts={hearts || 0}
+            userId={userId}
+            unitId={activeUnit.id}
+            curriculumId={curriculum.id}
+            onClose={handleCloseTest}
+          />
         </div>
       </div>
     );

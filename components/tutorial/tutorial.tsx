@@ -6,12 +6,14 @@ import { X, ArrowRight, ArrowLeft } from "lucide-react";
 
 interface TutorialStep {
   id: string;
-  target: string;
+  target?: string;
   title: string;
   description: string;
   icon?: React.ReactNode;
   position?: "top" | "bottom" | "left" | "right";
   action?: () => void;
+  customContent?: React.ReactNode;
+  isFullScreen?: boolean;
 }
 
 interface TutorialSpotlightProps {
@@ -19,38 +21,52 @@ interface TutorialSpotlightProps {
   onComplete: () => void;
   show: boolean;
   onStepChange?: (step: number) => void;
+  initialStep?: number;
 }
 
 export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
   steps,
   onComplete,
   show,
-  onStepChange
+  onStepChange,
+  initialStep = 0
 }) => {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(initialStep);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(true);
+  const [showTooltip] = useState(true);
   const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isInternalChangeRef = useRef(false);
+
+  const step = steps[currentStep];
+  const isFullScreenStep = step?.isFullScreen || false;
 
   useEffect(() => {
-    if (onStepChange) {
+    if (!isInternalChangeRef.current && initialStep !== currentStep) {
+      console.log(
+        `🔄 Sincronizando desde padre: ${currentStep} → ${initialStep}`
+      );
+      setCurrentStep(initialStep);
+    }
+
+    isInternalChangeRef.current = false;
+  }, [initialStep]);
+
+  useEffect(() => {
+    if (onStepChange && isInternalChangeRef.current) {
+      console.log(`📌 Notificando cambio al padre: ${currentStep}`);
       onStepChange(currentStep);
     }
 
-    // Disparar evento personalizado
     const event = new CustomEvent("tutorial-step-change", {
-      detail: { stepId: steps[currentStep].id, stepIndex: currentStep }
+      detail: { stepId: steps[currentStep]?.id, stepIndex: currentStep }
     });
     window.dispatchEvent(event);
 
     const stepConfig = steps[currentStep];
 
-    // Cerrar el select si no estamos en los pasos apropiados
-    if (stepConfig.id !== "review-units" && stepConfig.id !== "start-test") {
+    if (stepConfig?.id !== "review-units" && stepConfig?.id !== "start-test") {
       const selectTrigger = document.querySelector(
         ".course-header-select button"
       );
@@ -68,9 +84,8 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
   }, [currentStep, onStepChange, steps]);
 
   useEffect(() => {
-    if (!show) return;
+    if (!show || isFullScreenStep) return;
 
-    // Limpiar intervalos previos
     if (updateIntervalRef.current) {
       clearInterval(updateIntervalRef.current);
     }
@@ -78,8 +93,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
     const updateTargetPosition = () => {
       const stepConfig = steps[currentStep];
 
-      // Si no hay target (como en el paso test-demo), no hacer nada
-      if (!stepConfig.target || stepConfig.target.trim() === "") {
+      if (!stepConfig?.target || stepConfig.target.trim() === "") {
         return;
       }
 
@@ -106,7 +120,10 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
             setTargetRect(rect);
           }
         }
-      } else if (stepConfig.id === "unit-explanations") {
+      } else if (
+        stepConfig.id === "unit-explanations" ||
+        stepConfig.id === "completed-unit"
+      ) {
         target = document.querySelector('[data-highest-position="true"]');
 
         if (target) {
@@ -127,35 +144,24 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       }
     };
 
-    // Marcar inicio de transición
     setIsTransitioning(true);
 
-    // Ejecutar acción del paso si existe
-    if (steps[currentStep].action) {
+    if (steps[currentStep]?.action) {
       steps[currentStep].action?.();
     }
 
-    // Si el paso no tiene target, completar el tutorial inmediatamente
-    if (!steps[currentStep].target || steps[currentStep].target.trim() === "") {
-      setIsTransitioning(false);
-      return;
-    }
-
-    // Primera actualización rápida
     requestAnimationFrame(() => {
       updateTargetPosition();
     });
 
-    // Segunda actualización después de un breve delay
     const quickUpdate = setTimeout(() => {
       updateTargetPosition();
       setIsTransitioning(false);
     }, 150);
 
-    // Interval solo para pasos dinámicos
     if (
-      steps[currentStep].id === "review-units" ||
-      steps[currentStep].id === "start-test"
+      steps[currentStep]?.id === "review-units" ||
+      steps[currentStep]?.id === "start-test"
     ) {
       updateIntervalRef.current = setInterval(updateTargetPosition, 100);
     }
@@ -179,7 +185,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [currentStep, steps, show]);
+  }, [currentStep, steps, show, isFullScreenStep]);
 
   const handleNext = () => {
     if (isTransitioning) return;
@@ -189,10 +195,9 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       setFadeOut(true);
 
       setTimeout(() => {
+        isInternalChangeRef.current = true;
         setCurrentStep(currentStep + 1);
         setFadeOut(false);
-
-        // No reseteamos isTransitioning aquí, se resetea después del scroll
       }, 200);
     } else {
       onComplete();
@@ -207,10 +212,9 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       setFadeOut(true);
 
       setTimeout(() => {
+        isInternalChangeRef.current = true;
         setCurrentStep(currentStep - 1);
         setFadeOut(false);
-
-        // No reseteamos isTransitioning aquí, se resetea después del scroll
       }, 200);
     }
   };
@@ -219,9 +223,27 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
     onComplete();
   };
 
-  if (!show || !targetRect) return null;
+  if (!show) return null;
 
-  const step = steps[currentStep];
+  if (step?.customContent) {
+    return (
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`custom-${currentStep}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="fixed inset-0 z-[9998]"
+        >
+          {step.customContent}
+        </motion.div>
+      </AnimatePresence>
+    );
+  }
+
+  if (!targetRect) return null;
+
   const tooltipPosition = getTooltipPosition(targetRect, step.position);
 
   return (

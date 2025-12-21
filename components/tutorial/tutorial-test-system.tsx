@@ -93,14 +93,12 @@ export function TutorialTestSystem({
 
     switch (question.type) {
       case "MULTIPLE_CHOICE":
-        // Para multiple choice, buscar en el array de answers
         const selectedAnswer = question.answers?.find(
           (a) => a.id.toString() === answer
         );
         return selectedAnswer?.isCorrect || false;
 
       case "FILL_IN_BLANK":
-        // Validación de que correctAnswer existe
         if (!question.content.correctAnswer) return false;
         return (
           answer.trim().toLowerCase() ===
@@ -141,7 +139,6 @@ export function TutorialTestSystem({
       setShowOverlay(true);
       setAnimationKey((prev) => prev + 1);
     } else {
-      // Mostrar resultados
       setShowResults(true);
     }
   }, [currentQuestionIndex]);
@@ -152,7 +149,6 @@ export function TutorialTestSystem({
 
   const progress = ((currentQuestionIndex + 1) / DEMO_QUESTIONS.length) * 100;
 
-  // Calcular resultados demo
   const correctAnswers = Object.values(answers).filter(
     (a) => a.isCorrect
   ).length;

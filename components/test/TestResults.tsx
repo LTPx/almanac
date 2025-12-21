@@ -10,7 +10,7 @@ interface TestResultsProps {
   lessonName: string;
   onReturnToLessons: () => void;
   hearts?: number;
-  isTutorialMode?: boolean; // Nueva prop
+  isTutorialMode?: boolean;
 }
 
 export function TestResults({

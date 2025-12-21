@@ -38,37 +38,30 @@ export function TutorialTestOverlay({
         className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-3xl shadow-2xl p-8 max-w-md mx-4 relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-16 translate-x-16" />
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-400/20 rounded-full blur-2xl translate-y-12 -translate-x-12" />
 
-        {/* Content */}
         <div className="relative z-10">
-          {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
             <span className="text-white text-sm font-semibold">
               Pregunta {questionNumber} de {totalQuestions}
             </span>
           </div>
 
-          {/* Icon */}
           <div className="flex justify-center mb-6">
             <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-white">
               {icon}
             </div>
           </div>
 
-          {/* Title */}
           <h2 className="text-2xl font-bold text-white text-center mb-4">
             {title}
           </h2>
 
-          {/* Description */}
           <p className="text-white/90 text-center mb-8 leading-relaxed">
             {description}
           </p>
 
-          {/* Continue button */}
           <button
             onClick={onComplete}
             className="w-full bg-white hover:bg-gray-100 text-purple-700 font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
@@ -77,13 +70,11 @@ export function TutorialTestOverlay({
             <ArrowRight className="w-5 h-5" />
           </button>
 
-          {/* Helper text */}
           <p className="text-white/60 text-xs text-center mt-4">
             Toca en cualquier lugar para continuar
           </p>
         </div>
 
-        {/* Animated glow */}
         <motion.div
           animate={{
             scale: [1, 1.2, 1],

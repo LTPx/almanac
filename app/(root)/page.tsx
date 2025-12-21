@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useUser } from "@/context/UserContext";
 import { Curriculum } from "@/lib/types";
 import CourseHeader, { CourseHeaderRef } from "@/components/course-header";
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useHome } from "@/hooks/useHome";
 import { TutorialSpotlight } from "@/components/tutorial/tutorial";
+import { TutorialTestSystem } from "@/components/tutorial/tutorial-test-system";
 
 const ContentLoadingScreen = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -41,9 +42,6 @@ export default function HomePage() {
     useCurriculumStore();
   const [showTutorial, setShowTutorial] = useState(false);
   const [currentTutorialStep, setCurrentTutorialStep] = useState(0);
-  const [isTutorialMode, setIsTutorialMode] = useState(false);
-  const [showFinalTutorialStep, setShowFinalTutorialStep] = useState(false);
-  const [openTutorialTest, setOpenTutorialTest] = useState(false); // Nueva flag
   const courseHeaderRef = useRef<CourseHeaderRef>(null);
 
   const user = useUser();
@@ -58,63 +56,91 @@ export default function HomePage() {
     refetch: refetchGamification
   } = useHome(userId);
 
-  const tutorialSteps = [
-    {
-      id: "welcome",
-      target: ".course-header-select",
-      title: "¡Bienvenido a Almanac! 🎉",
-      description:
-        "Aquí puedes elegir el curriculum que quieres estudiar. Cada curriculum tiene diferentes unidades de aprendizaje.",
-      icon: <BookOpen className="w-8 h-8" />,
-      position: "bottom" as const
-    },
-    {
-      id: "review-units",
-      target: "[data-radix-select-content]",
-      title: "Revisa las unidades 📚",
-      description:
-        "Explora todas las unidades disponibles. Cada una contiene diferentes lecciones que te ayudarán a aprender paso a paso.",
-      icon: <List className="w-8 h-8" />,
-      position: "bottom" as const,
-      action: () => {
-        courseHeaderRef.current?.openSelect();
+  const handleAdvanceToNextStep = useCallback(() => {
+    console.log("🚀 Avanzando al siguiente paso...");
+    setCurrentTutorialStep((prev) => {
+      console.log(`📍 Paso actual: ${prev}, Nuevo paso: ${prev + 1}`);
+      return prev + 1;
+    });
+  }, []);
+
+  const tutorialSteps = useMemo(
+    () => [
+      {
+        id: "welcome",
+        target: ".course-header-select",
+        title: "¡Bienvenido a Almanac! 🎉",
+        description:
+          "Aquí puedes elegir el curriculum que quieres estudiar. Cada curriculum tiene diferentes unidades de aprendizaje.",
+        icon: <BookOpen className="w-8 h-8" />,
+        position: "bottom" as const
+      },
+      {
+        id: "review-units",
+        target: "[data-radix-select-content]",
+        title: "Revisa las unidades 📚",
+        description:
+          "Explora todas las unidades disponibles. Cada una contiene diferentes lecciones que te ayudarán a aprender paso a paso.",
+        icon: <List className="w-8 h-8" />,
+        position: "bottom" as const,
+        action: () => {
+          courseHeaderRef.current?.openSelect();
+        }
+      },
+      {
+        id: "unit-explanations",
+        target: "[data-highest-position='true']",
+        title: "Aprende con explicaciones 📖",
+        description:
+          "Cada unidad tiene explicaciones detalladas que puedes revisar antes de hacer las pruebas. ¡Tómate tu tiempo para aprender!",
+        icon: <GraduationCap className="w-8 h-8" />,
+        position: "top" as const,
+        action: () => {
+          courseHeaderRef.current?.closeSelect();
+        }
+      },
+      {
+        id: "start-test",
+        target: "[data-tutorial-start-button='true']",
+        title: "¡Hora de practicar! 🎯",
+        description:
+          "Cuando estés listo, empieza una prueba. Ahora te mostraremos un ejemplo con los tipos de preguntas que encontrarás.",
+        icon: <Target className="w-8 h-8" />,
+        position: "bottom" as const
+      },
+
+      {
+        id: "test-demo",
+        title: "Práctica Interactiva",
+        description: "Demo del sistema de pruebas",
+        isFullScreen: true,
+        customContent: (
+          <TutorialTestSystem
+            key="tutorial-test-system"
+            hearts={gamification?.hearts ?? 0}
+            onClose={() => {
+              console.log("✅ Test completado, avanzando al paso 6...");
+              handleAdvanceToNextStep();
+            }}
+          />
+        )
+      },
+
+      {
+        id: "completed-unit",
+        target: "[data-highest-position='true']",
+        title: "¡Unidad Completada! 🎉",
+        description:
+          "Si apruebas la unidad, puedes continuar a la siguiente. ¡Sigue aprendiendo para completar todo el curriculum!",
+        icon: <Award className="w-8 h-8" />,
+        position: "top" as const,
+        action: () => {
+          courseHeaderRef.current?.closeSelect();
+        }
       }
-    },
-    {
-      id: "unit-explanations",
-      target: "[data-highest-position='true']",
-      title: "Aprende con explicaciones 📖",
-      description:
-        "Cada unidad tiene explicaciones detalladas que puedes revisar antes de hacer las pruebas. ¡Tómate tu tiempo para aprender!",
-      icon: <GraduationCap className="w-8 h-8" />,
-      position: "top" as const,
-      action: () => {
-        courseHeaderRef.current?.closeSelect();
-      }
-    },
-    {
-      id: "start-test",
-      target: "[data-tutorial-start-button='true']",
-      title: "¡Hora de practicar! 🎯",
-      description:
-        "Cuando estés listo, empieza una prueba. Ahora te mostraremos un ejemplo con los tipos de preguntas que encontrarás.",
-      icon: <Target className="w-8 h-8" />,
-      position: "bottom" as const
-    },
-    // PASO 5: Nodo completado - se muestra después del test demo
-    {
-      id: "completed-unit",
-      target: "[data-highest-position='true']",
-      title: "¡Unidad Completada! 🎉",
-      description:
-        "Si apruebas la unidad, puedes continuar a la siguiente. ¡Sigue aprendiendo para completar todo el curriculum!",
-      icon: <Award className="w-8 h-8" />,
-      position: "top" as const,
-      action: () => {
-        courseHeaderRef.current?.closeSelect();
-      }
-    }
-  ];
+    ],
+    [gamification?.hearts, handleAdvanceToNextStep]
+  );
 
   useEffect(() => {
     const loadUnits = async () => {
@@ -164,37 +190,19 @@ export default function HomePage() {
   };
 
   const handleTutorialComplete = () => {
-    if (showFinalTutorialStep) {
-      localStorage.setItem("tutorial_completed", "true");
-      setShowTutorial(false);
-      setShowFinalTutorialStep(false);
-      setCurrentTutorialStep(0);
-      setOpenTutorialTest(false);
-      courseHeaderRef.current?.closeSelect();
-      return;
-    }
-
+    localStorage.setItem("tutorial_completed", "true");
     setShowTutorial(false);
-    setIsTutorialMode(true);
-    setOpenTutorialTest(true); // Activar flag para abrir test
+    setCurrentTutorialStep(0);
+    courseHeaderRef.current?.closeSelect();
   };
 
-  const handleTutorialTestComplete = useCallback(() => {
-    setIsTutorialMode(false);
-    setOpenTutorialTest(false); // Desactivar flag
-    setShowFinalTutorialStep(true);
-    setTimeout(() => {
-      setShowTutorial(true);
-      setCurrentTutorialStep(4); // Índice 4 = paso 5 "completed-unit"
-    }, 300);
-  }, []);
-
   const handleTutorialStepChange = (step: number) => {
+    console.log(`📌 Tutorial cambió a paso: ${step}`);
     setCurrentTutorialStep(step);
 
     const stepConfig = tutorialSteps[step];
 
-    if (stepConfig.id !== "review-units" && stepConfig.id !== "start-test") {
+    if (stepConfig?.id !== "review-units" && stepConfig?.id !== "start-test") {
       courseHeaderRef.current?.closeSelect();
     }
   };
@@ -205,10 +213,7 @@ export default function HomePage() {
   const resetTutorial = () => {
     localStorage.removeItem("tutorial_completed");
     setShowTutorial(true);
-    setIsTutorialMode(false);
-    setShowFinalTutorialStep(false);
     setCurrentTutorialStep(0);
-    setOpenTutorialTest(false);
   };
 
   if (isInitialLoading || isGamificationLoading) {
@@ -241,6 +246,7 @@ export default function HomePage() {
         steps={tutorialSteps}
         onComplete={handleTutorialComplete}
         onStepChange={handleTutorialStepChange}
+        initialStep={currentTutorialStep}
       />
       <CourseHeader
         ref={courseHeaderRef}
@@ -277,10 +283,7 @@ export default function HomePage() {
             curriculum={selectedCurriculum}
             userId={userId}
             onTestComplete={handleTestComplete}
-            isTutorialMode={isTutorialMode}
-            onTutorialComplete={handleTutorialTestComplete}
-            showAsCompleted={showFinalTutorialStep}
-            openTutorialTest={openTutorialTest}
+            showAsCompleted={currentTutorialStep === 5}
           />
         </div>
       ) : (
