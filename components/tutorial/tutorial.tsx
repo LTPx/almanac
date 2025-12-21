@@ -77,6 +77,12 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
 
     const updateTargetPosition = () => {
       const stepConfig = steps[currentStep];
+
+      // Si no hay target (como en el paso test-demo), no hacer nada
+      if (!stepConfig.target || stepConfig.target.trim() === "") {
+        return;
+      }
+
       let target: Element | null = null;
 
       if (stepConfig.id === "review-units") {
@@ -127,6 +133,12 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
     // Ejecutar acción del paso si existe
     if (steps[currentStep].action) {
       steps[currentStep].action?.();
+    }
+
+    // Si el paso no tiene target, completar el tutorial inmediatamente
+    if (!steps[currentStep].target || steps[currentStep].target.trim() === "") {
+      setIsTransitioning(false);
+      return;
     }
 
     // Primera actualización rápida

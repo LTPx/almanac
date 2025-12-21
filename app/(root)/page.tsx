@@ -7,7 +7,14 @@ import CourseHeader, { CourseHeaderRef } from "@/components/course-header";
 import { useCurriculums } from "@/hooks/use-curriculums";
 import LearningPath from "@/components/units-learning";
 import { useCurriculumStore } from "@/store/useCurriculumStore";
-import { Loader2, BookOpen, List, GraduationCap, Target } from "lucide-react";
+import {
+  Loader2,
+  BookOpen,
+  List,
+  GraduationCap,
+  Target,
+  Award
+} from "lucide-react";
 import { useHome } from "@/hooks/useHome";
 import { TutorialSpotlight } from "@/components/tutorial/tutorial";
 
@@ -34,6 +41,9 @@ export default function HomePage() {
     useCurriculumStore();
   const [showTutorial, setShowTutorial] = useState(false);
   const [currentTutorialStep, setCurrentTutorialStep] = useState(0);
+  const [isTutorialMode, setIsTutorialMode] = useState(false);
+  const [showFinalTutorialStep, setShowFinalTutorialStep] = useState(false);
+  const [openTutorialTest, setOpenTutorialTest] = useState(false); // Nueva flag
   const courseHeaderRef = useRef<CourseHeaderRef>(null);
 
   const user = useUser();
@@ -87,9 +97,22 @@ export default function HomePage() {
       target: "[data-tutorial-start-button='true']",
       title: "¡Hora de practicar! 🎯",
       description:
-        "Cuando estés listo, empieza una prueba para poner a prueba lo que has aprendido.",
+        "Cuando estés listo, empieza una prueba. Ahora te mostraremos un ejemplo con los tipos de preguntas que encontrarás.",
       icon: <Target className="w-8 h-8" />,
       position: "bottom" as const
+    },
+    // PASO 5: Nodo completado - se muestra después del test demo
+    {
+      id: "completed-unit",
+      target: "[data-highest-position='true']",
+      title: "¡Unidad Completada! 🎉",
+      description:
+        "Si apruebas la unidad, puedes continuar a la siguiente. ¡Sigue aprendiendo para completar todo el curriculum!",
+      icon: <Award className="w-8 h-8" />,
+      position: "top" as const,
+      action: () => {
+        courseHeaderRef.current?.closeSelect();
+      }
     }
   ];
 
@@ -123,9 +146,12 @@ export default function HomePage() {
       curriculums.length > 0 &&
       selectedCurriculum
     ) {
-      setTimeout(() => {
-        setShowTutorial(true);
-      }, 500);
+      const hasSeenTutorial = localStorage.getItem("tutorial_completed");
+      if (!hasSeenTutorial) {
+        setTimeout(() => {
+          setShowTutorial(true);
+        }, 500);
+      }
     }
   }, [isLoading, isLoadingGamification, curriculums, selectedCurriculum]);
 
@@ -138,16 +164,36 @@ export default function HomePage() {
   };
 
   const handleTutorialComplete = () => {
-    localStorage.setItem("tutorial_completed", "true");
+    if (showFinalTutorialStep) {
+      localStorage.setItem("tutorial_completed", "true");
+      setShowTutorial(false);
+      setShowFinalTutorialStep(false);
+      setCurrentTutorialStep(0);
+      setOpenTutorialTest(false);
+      courseHeaderRef.current?.closeSelect();
+      return;
+    }
+
     setShowTutorial(false);
-    setCurrentTutorialStep(0);
-    courseHeaderRef.current?.closeSelect();
+    setIsTutorialMode(true);
+    setOpenTutorialTest(true); // Activar flag para abrir test
   };
+
+  const handleTutorialTestComplete = useCallback(() => {
+    setIsTutorialMode(false);
+    setOpenTutorialTest(false); // Desactivar flag
+    setShowFinalTutorialStep(true);
+    setTimeout(() => {
+      setShowTutorial(true);
+      setCurrentTutorialStep(4); // Índice 4 = paso 5 "completed-unit"
+    }, 300);
+  }, []);
 
   const handleTutorialStepChange = (step: number) => {
     setCurrentTutorialStep(step);
 
     const stepConfig = tutorialSteps[step];
+
     if (stepConfig.id !== "review-units" && stepConfig.id !== "start-test") {
       courseHeaderRef.current?.closeSelect();
     }
@@ -159,6 +205,10 @@ export default function HomePage() {
   const resetTutorial = () => {
     localStorage.removeItem("tutorial_completed");
     setShowTutorial(true);
+    setIsTutorialMode(false);
+    setShowFinalTutorialStep(false);
+    setCurrentTutorialStep(0);
+    setOpenTutorialTest(false);
   };
 
   if (isInitialLoading || isGamificationLoading) {
@@ -227,6 +277,10 @@ export default function HomePage() {
             curriculum={selectedCurriculum}
             userId={userId}
             onTestComplete={handleTestComplete}
+            isTutorialMode={isTutorialMode}
+            onTutorialComplete={handleTutorialTestComplete}
+            showAsCompleted={showFinalTutorialStep}
+            openTutorialTest={openTutorialTest}
           />
         </div>
       ) : (

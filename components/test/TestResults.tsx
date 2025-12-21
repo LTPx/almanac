@@ -10,9 +10,14 @@ interface TestResultsProps {
   lessonName: string;
   onReturnToLessons: () => void;
   hearts?: number;
+  isTutorialMode?: boolean; // Nueva prop
 }
 
-export function TestResults({ results, onReturnToLessons }: TestResultsProps) {
+export function TestResults({
+  results,
+  onReturnToLessons,
+  isTutorialMode = false
+}: TestResultsProps) {
   const isPassed = results.passed;
 
   const [finishAudio, , finishControls] = useAudio({
@@ -90,7 +95,11 @@ export function TestResults({ results, onReturnToLessons }: TestResultsProps) {
               w-full py-8 text-xl font-semibold rounded-2xl shadow-lg
               bg-[#1983DD] hover:bg-[#1666B0] text-white"
         >
-          {isPassed ? "Recibir Experiencia" : "Recibir Experiencia"}
+          {isTutorialMode
+            ? "Continuar"
+            : isPassed
+              ? "Recibir Experiencia"
+              : "Recibir Experiencia"}
         </Button>
       </div>
       {finishAudio}
