@@ -45,6 +45,11 @@ export class AlmanacAgent {
   private async routeTopic(userInput: string): Promise<string | null> {
     const topics = await this.getTopics();
 
+    if (topics.size === 0) {
+      console.warn("⚠️ No active topics found in database");
+      return null;
+    }
+
     // Crear la lista de topics disponibles para el router
     const topicList = Array.from(topics.entries())
       .map(([id, topic]) => {
@@ -91,7 +96,8 @@ export class AlmanacAgent {
 
     try {
       const result = await model.generateContent(prompt);
-      const response = JSON.parse(result.response.text());
+      const responseText = result.response.text();
+      const response = JSON.parse(responseText);
       return response.topic_id;
     } catch (e: any) {
       console.error("Router Error:", e);
@@ -191,6 +197,8 @@ export class AlmanacAgent {
     if (detectedTopic && detectedTopic !== "null") {
       if (topics.has(detectedTopic)) {
         this.currentTopicId = detectedTopic;
+      } else {
+        console.warn(`Topic ${detectedTopic} not found in topics map`);
       }
     }
 
