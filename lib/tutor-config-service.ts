@@ -6,7 +6,6 @@ export interface TutorConfigData {
   updatedAt: Date;
 }
 
-// Valores por defecto para las instrucciones
 const DEFAULT_ROUTER_INSTRUCTIONS = `You are the Intent Router for an educational app called Almanac.
 
 TASK:
@@ -34,7 +33,7 @@ CONSTRAINTS:
  */
 export async function getTutorConfig(): Promise<TutorConfigData> {
   let config = await prisma.tutorConfig.findUnique({
-    where: { id: "default" },
+    where: { id: "default" }
   });
 
   // Si no existe, crear con valores por defecto
@@ -43,15 +42,15 @@ export async function getTutorConfig(): Promise<TutorConfigData> {
       data: {
         id: "default",
         routerInstructions: DEFAULT_ROUTER_INSTRUCTIONS,
-        tutorInstructions: DEFAULT_TUTOR_INSTRUCTIONS,
-      },
+        tutorInstructions: DEFAULT_TUTOR_INSTRUCTIONS
+      }
     });
   }
 
   return {
     routerInstructions: config.routerInstructions,
     tutorInstructions: config.tutorInstructions,
-    updatedAt: config.updatedAt,
+    updatedAt: config.updatedAt
   };
 }
 
@@ -67,14 +66,16 @@ export async function updateTutorConfig(data: {
     update: data,
     create: {
       id: "default",
-      ...data,
-    },
+      routerInstructions:
+        data.routerInstructions ?? DEFAULT_ROUTER_INSTRUCTIONS,
+      tutorInstructions: data.tutorInstructions ?? DEFAULT_TUTOR_INSTRUCTIONS
+    }
   });
 
   return {
     routerInstructions: config.routerInstructions,
     tutorInstructions: config.tutorInstructions,
-    updatedAt: config.updatedAt,
+    updatedAt: config.updatedAt
   };
 }
 
@@ -84,6 +85,6 @@ export async function updateTutorConfig(data: {
 export async function resetTutorConfig(): Promise<TutorConfigData> {
   return await updateTutorConfig({
     routerInstructions: DEFAULT_ROUTER_INSTRUCTIONS,
-    tutorInstructions: DEFAULT_TUTOR_INSTRUCTIONS,
+    tutorInstructions: DEFAULT_TUTOR_INSTRUCTIONS
   });
 }

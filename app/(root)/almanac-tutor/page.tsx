@@ -141,7 +141,7 @@ export default function AlmanacTutorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-900 text-white p-6 pb-20">
+    <div className="min-h-screen bg-neutral-900 text-white p-6 pb-20 pt-[80px]">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
