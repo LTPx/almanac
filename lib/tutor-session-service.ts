@@ -26,8 +26,8 @@ export async function createTutorSession(
       messages: [],
       messageCount: 0,
       userMessages: 0,
-      tutorMessages: 0,
-    },
+      tutorMessages: 0
+    }
   });
 
   return session.id;
@@ -41,31 +41,25 @@ export async function addMessageToSession(
   message: TutorMessage
 ): Promise<void> {
   const session = await prisma.tutorSession.findUnique({
-    where: { id: sessionId },
+    where: { id: sessionId }
   });
 
   if (!session) {
     throw new Error("Session not found");
   }
 
-  const messages = session.messages as TutorMessage[];
+  const messages = session.messages as unknown as TutorMessage[];
   messages.push(message);
 
   await prisma.tutorSession.update({
     where: { id: sessionId },
     data: {
-      messages: messages,
+      messages: messages as any,
       messageCount: { increment: 1 },
-      userMessages:
-        message.role === "user"
-          ? { increment: 1 }
-          : undefined,
-      tutorMessages:
-        message.role === "model"
-          ? { increment: 1 }
-          : undefined,
-      lastActive: new Date(),
-    },
+      userMessages: message.role === "user" ? { increment: 1 } : undefined,
+      tutorMessages: message.role === "model" ? { increment: 1 } : undefined,
+      lastActive: new Date()
+    }
   });
 }
 
@@ -80,8 +74,8 @@ export async function endTutorSession(
     where: { id: sessionId },
     data: {
       endedAt: new Date(),
-      wasHelpful,
-    },
+      wasHelpful
+    }
   });
 }
 
@@ -98,11 +92,11 @@ export async function getOrCreateSession(
     where: {
       userId,
       lessonId,
-      endedAt: null,
+      endedAt: null
     },
     orderBy: {
-      lastActive: "desc",
-    },
+      lastActive: "desc"
+    }
   });
 
   if (activeSession) {
@@ -121,14 +115,14 @@ export async function getSessionMessages(
 ): Promise<TutorMessage[]> {
   const session = await prisma.tutorSession.findUnique({
     where: { id: sessionId },
-    select: { messages: true },
+    select: { messages: true }
   });
 
   if (!session) {
     return [];
   }
 
-  return session.messages as TutorMessage[];
+  return session.messages as unknown as TutorMessage[];
 }
 
 /**
@@ -142,15 +136,15 @@ export async function getUserSessions(userId: string) {
         include: {
           unit: {
             include: {
-              curriculum: true,
-            },
-          },
-        },
-      },
+              curriculum: true
+            }
+          }
+        }
+      }
     },
     orderBy: {
-      lastActive: "desc",
-    },
+      lastActive: "desc"
+    }
   });
 }
 
@@ -164,11 +158,11 @@ export async function getUserSessionsByLesson(
   return await prisma.tutorSession.findMany({
     where: {
       userId,
-      lessonId,
+      lessonId
     },
     orderBy: {
-      startedAt: "desc",
-    },
+      startedAt: "desc"
+    }
   });
 }
 
@@ -183,19 +177,17 @@ export async function getUserTutorStats(userId: string) {
       userMessages: true,
       tutorMessages: true,
       wasHelpful: true,
-      lessonId: true,
-    },
+      lessonId: true
+    }
   });
 
   const totalSessions = sessions.length;
-  const totalMessages = sessions.reduce(
-    (sum, s) => sum + s.messageCount,
-    0
-  );
+  const totalMessages = sessions.reduce((sum, s) => sum + s.messageCount, 0);
   const uniqueLessons = new Set(sessions.map((s) => s.lessonId)).size;
   const helpfulSessions = sessions.filter((s) => s.wasHelpful === true).length;
-  const unhelpfulSessions = sessions.filter((s) => s.wasHelpful === false)
-    .length;
+  const unhelpfulSessions = sessions.filter(
+    (s) => s.wasHelpful === false
+  ).length;
   const unratedSessions = sessions.filter((s) => s.wasHelpful === null).length;
 
   return {
@@ -208,7 +200,7 @@ export async function getUserTutorStats(userId: string) {
     helpfulnessRate:
       helpfulSessions + unhelpfulSessions > 0
         ? (helpfulSessions / (helpfulSessions + unhelpfulSessions)) * 100
-        : null,
+        : null
   };
 }
 
@@ -219,30 +211,30 @@ export async function getPopularLessons(limit: number = 10) {
   const lessons = await prisma.tutorSession.groupBy({
     by: ["lessonId"],
     _count: {
-      id: true,
+      id: true
     },
     orderBy: {
       _count: {
-        id: "desc",
-      },
+        id: "desc"
+      }
     },
-    take: limit,
+    take: limit
   });
 
   // Obtener detalles de las lecciones
   const lessonDetails = await prisma.lesson.findMany({
     where: {
       id: {
-        in: lessons.map((l) => l.lessonId),
-      },
+        in: lessons.map((l) => l.lessonId)
+      }
     },
     include: {
       unit: {
         include: {
-          curriculum: true,
-        },
-      },
-    },
+          curriculum: true
+        }
+      }
+    }
   });
 
   return lessons.map((l) => {
@@ -254,9 +246,9 @@ export async function getPopularLessons(limit: number = 10) {
         ? {
             name: lesson.name,
             unitName: lesson.unit.name,
-            curriculumTitle: lesson.unit.curriculum?.title,
+            curriculumTitle: lesson.unit.curriculum?.title
           }
-        : null,
+        : null
     };
   });
 }
@@ -271,9 +263,9 @@ export async function cleanOldSessions(daysOld: number = 90) {
   const result = await prisma.tutorSession.deleteMany({
     where: {
       lastActive: {
-        lt: cutoffDate,
-      },
-    },
+        lt: cutoffDate
+      }
+    }
   });
 
   return result.count;
