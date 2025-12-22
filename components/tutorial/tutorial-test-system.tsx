@@ -3,10 +3,10 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HeaderBar } from "../header-bar";
-import { CheckCircle, Sparkles, Target } from "lucide-react";
+import { CheckSquare, PenLine, ArrowDownUp } from "lucide-react";
 import { TestResults } from "../test/TestResults";
-import { TutorialTestOverlay } from "./tutorial-overlay";
 import { TestQuestion } from "../test/TestQuestion";
+import { TutorialInlineCard } from "./tutorial-overlay";
 
 interface TutorialTestSystemProps {
   onClose: () => void;
@@ -53,19 +53,19 @@ const DEMO_QUESTIONS = [
 
 const TUTORIAL_MESSAGES = [
   {
-    icon: <CheckCircle className="w-6 h-6" />,
+    icon: <CheckSquare className="w-6 h-6" />,
     title: "Preguntas de Opción Múltiple",
     description:
       "Selecciona la respuesta correcta entre las opciones disponibles. ¡Tómate tu tiempo para leer cada opción!"
   },
   {
-    icon: <Sparkles className="w-6 h-6" />,
+    icon: <PenLine className="w-6 h-6" />,
     title: "Preguntas de Completar",
     description:
       "Escribe la palabra o frase que complete correctamente la oración. La ortografía es importante."
   },
   {
-    icon: <Target className="w-6 h-6" />,
+    icon: <ArrowDownUp className="w-6 h-6" />,
     title: "Ordenar Palabras",
     description:
       "Arrastra las palabras para formar una oración con sentido. El orden correcto es clave."
@@ -82,7 +82,7 @@ export function TutorialTestSystem({
     [key: number]: { answer: string; isCorrect: boolean };
   }>({});
   const [showResults, setShowResults] = useState(false);
-  const [showOverlay, setShowOverlay] = useState(true);
+  const [showInlineCard, setShowInlineCard] = useState(true);
   const [animationKey, setAnimationKey] = useState(0);
 
   const currentQuestion = DEMO_QUESTIONS[currentQuestionIndex];
@@ -127,7 +127,6 @@ export function TutorialTestSystem({
       }));
 
       setShowResult(true);
-      setShowOverlay(false);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentQuestionIndex]
@@ -137,16 +136,12 @@ export function TutorialTestSystem({
     if (currentQuestionIndex < DEMO_QUESTIONS.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
       setShowResult(false);
-      setShowOverlay(true);
+      setShowInlineCard(true);
       setAnimationKey((prev) => prev + 1);
     } else {
       setShowResults(true);
     }
   }, [currentQuestionIndex]);
-
-  const handleOverlayComplete = useCallback(() => {
-    setShowOverlay(false);
-  }, []);
 
   const progress = ((currentQuestionIndex + 1) / DEMO_QUESTIONS.length) * 100;
 
@@ -202,20 +197,7 @@ export function TutorialTestSystem({
         justAnsweredCorrect={false}
       />
 
-      <AnimatePresence>
-        {showOverlay && (
-          <TutorialTestOverlay
-            icon={currentMessage.icon}
-            title={currentMessage.title}
-            description={currentMessage.description}
-            questionNumber={currentQuestionIndex + 1}
-            totalQuestions={DEMO_QUESTIONS.length}
-            onComplete={handleOverlayComplete}
-          />
-        )}
-      </AnimatePresence>
-
-      <div className="relative flex-1 flex items-center justify-center">
+      <div className="relative flex-1 flex items-center justify-center overflow-y-auto">
         <AnimatePresence mode="wait">
           <motion.div
             key={animationKey}
@@ -223,17 +205,39 @@ export function TutorialTestSystem({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="absolute w-full h-full flex"
+            className="w-full h-full flex flex-col"
           >
-            <TestQuestion
-              question={currentQuestion}
-              onAnswer={handleAnswer}
-              onNext={handleNext}
-              showResult={showResult}
-              isCorrect={answers[currentQuestion.id]?.isCorrect}
-              selectedAnswer={answers[currentQuestion.id]?.answer}
-              isDisabled={false}
-            />
+            <div className="flex-1 h-full pt-[30px]">
+              <div className="flex h-full items-center justify-center">
+                <div className="flex h-full flex-col justify-between w-full max-w-[650px] gap-y-2 px-6">
+                  <div>
+                    <AnimatePresence>
+                      {showInlineCard && (
+                        <TutorialInlineCard
+                          icon={currentMessage.icon}
+                          title={currentMessage.title}
+                          description={currentMessage.description}
+                          questionNumber={currentQuestionIndex + 1}
+                          totalQuestions={DEMO_QUESTIONS.length}
+                          onDismiss={() => setShowInlineCard(false)}
+                        />
+                      )}
+                    </AnimatePresence>
+                  </div>
+                  <div className="flex-1 flex flex-col mt-[-30px]">
+                    <TestQuestion
+                      question={currentQuestion}
+                      onAnswer={handleAnswer}
+                      onNext={handleNext}
+                      showResult={showResult}
+                      isCorrect={answers[currentQuestion.id]?.isCorrect}
+                      selectedAnswer={answers[currentQuestion.id]?.answer}
+                      isDisabled={false}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </motion.div>
         </AnimatePresence>
       </div>
