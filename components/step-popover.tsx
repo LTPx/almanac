@@ -1,4 +1,3 @@
-// step-popover.tsx - CÓDIGO COMPLETO
 "use client";
 
 import * as React from "react";
@@ -28,8 +27,6 @@ interface StepPopoverProps {
   unitId?: number;
   isHighestPosition?: boolean;
   isOptionalHighest?: boolean;
-  isInTutorialStep7?: boolean;
-  isInTutorialStep8?: boolean; // Nueva prop para paso 8
 }
 
 export function StepPopover({
@@ -46,9 +43,7 @@ export function StepPopover({
   mandatory = false,
   unitId,
   isHighestPosition = false,
-  isOptionalHighest = false,
-  isInTutorialStep7 = false,
-  isInTutorialStep8 = false // Nueva prop para paso 8
+  isOptionalHighest = false
 }: StepPopoverProps) {
   const router = useRouter();
   const [isHovered, setIsHovered] = React.useState(false);
@@ -63,42 +58,38 @@ export function StepPopover({
     const handleTutorialStep = (e: any) => {
       const { stepId } = e.detail;
 
+      // Cerrar TODOS los popovers primero
+      setIsOpen(false);
+
+      // Luego abrir solo el correspondiente al paso actual
       if (stepId === "start-test" && isHighestPosition) {
         if (openTimeoutRef.current) {
           clearTimeout(openTimeoutRef.current);
         }
         openTimeoutRef.current = setTimeout(() => {
           setIsOpen(true);
-        }, 50);
+        }, 100);
+      } else if (stepId === "completed-unit" && isHighestPosition) {
+        if (openTimeoutRef.current) {
+          clearTimeout(openTimeoutRef.current);
+        }
+        openTimeoutRef.current = setTimeout(() => {
+          setIsOpen(true);
+        }, 100);
       } else if (stepId === "optional-unit" && isOptionalHighest) {
         if (openTimeoutRef.current) {
           clearTimeout(openTimeoutRef.current);
         }
         openTimeoutRef.current = setTimeout(() => {
           setIsOpen(true);
-        }, 50);
+        }, 100);
       } else if (stepId === "final-unit" && isFirstMandatory) {
-        // Nuevo: abrir para el paso 8 (final-unit)
         if (openTimeoutRef.current) {
           clearTimeout(openTimeoutRef.current);
         }
         openTimeoutRef.current = setTimeout(() => {
           setIsOpen(true);
-        }, 50);
-      } else if (stepId === "unit-explanations") {
-        if (openTimeoutRef.current) {
-          clearTimeout(openTimeoutRef.current);
-        }
-        setIsOpen(false);
-      } else if (
-        stepId !== "start-test" &&
-        stepId !== "optional-unit" &&
-        stepId !== "final-unit"
-      ) {
-        if (openTimeoutRef.current) {
-          clearTimeout(openTimeoutRef.current);
-        }
-        setIsOpen(false);
+        }, 100);
       }
     };
 
@@ -191,7 +182,6 @@ export function StepPopover({
   };
 
   const getButtonTextColor = () => {
-    if (isInTutorialStep7 || isInTutorialStep8) return "text-gray-500";
     if (isLocked) return "text-gray-400";
     if (isCompleted) {
       if (isFirstMandatory && mandatory) return "text-gray-900";
@@ -209,10 +199,9 @@ export function StepPopover({
     return "text-white opacity-90";
   };
 
-  const buttonBgColor =
-    isLocked || isInTutorialStep7 || isInTutorialStep8
-      ? "bg-gray-600 hover:bg-gray-600"
-      : "bg-white hover:bg-white/90";
+  const buttonBgColor = isLocked
+    ? "bg-gray-600 hover:bg-gray-600"
+    : "bg-white hover:bg-white/90";
 
   const handleBookClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -221,7 +210,7 @@ export function StepPopover({
   };
 
   const handleOpenChange = (open: boolean) => {
-    // Solo permitir cambios manuales si no estamos en el tutorial del paso 4, 7 u 8
+    // Solo permitir cambios manuales si no estamos en el tutorial
     const isTutorialActive = document.querySelector(
       ".fixed.inset-0.z-\\[9998\\]"
     );
@@ -279,7 +268,7 @@ export function StepPopover({
                   }
                   className={`text-[15px] font-bold ${buttonBgColor} h-[60px] w-full focus-visible:ring-0 mt-3 ${getButtonTextColor()} rounded-xl transition-all duration-200`}
                   onClick={onButtonClick}
-                  disabled={isLocked || isInTutorialStep7 || isInTutorialStep8}
+                  disabled={isLocked}
                 >
                   {buttonText}
                 </Button>
