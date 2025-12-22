@@ -62,8 +62,7 @@ function HomePageContent() {
 
   const tutorialSteps = useMemo(
     () => [
-      ...createTutorialSteps(courseHeaderRef).slice(0, 4), // Primeros 4 pasos
-      // Paso 5: Test Demo con customContent
+      ...createTutorialSteps(courseHeaderRef).slice(0, 4),
       {
         id: "test-demo",
         title: "Práctica Interactiva",
@@ -80,7 +79,7 @@ function HomePageContent() {
           />
         )
       },
-      ...createTutorialSteps(courseHeaderRef).slice(4) // Últimos 3 pasos (5, 6, 7)
+      ...createTutorialSteps(courseHeaderRef).slice(4)
     ],
     [nextStep, gamification?.hearts, courseHeaderRef]
   );

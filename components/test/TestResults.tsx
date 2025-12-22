@@ -67,7 +67,7 @@ export function TestResults({
   const accuracyLabel = getAccuracyLabel(accuracyScore);
 
   return (
-    <div className="bg-background min-h-screen lg:p-6 flex flex-col items-center justify-center">
+    <div className="bg-background w-full max-w-[650px] min-h-screen lg:p-6 flex flex-col items-center justify-center">
       <div className="mx-auto flex h-full max-w-lg flex-col items-center justify-center gap-y-4 text-center lg:gap-y-8">
         <h1 className="text-lg font-bold text-[#EFFF0A] lg:text-3xl">
           {isPassed ? <>Completaste la prueba!</> : <>Completaste la prueba!</>}

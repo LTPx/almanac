@@ -177,7 +177,7 @@ export function TutorialTestSystem({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="absolute inset-0 w-full h-full flex items-center justify-center"
+            className="absolute inset-0 w-full h-full flex items-center justify-center bg-background"
           >
             <TestResults
               hearts={hearts}
@@ -193,7 +193,7 @@ export function TutorialTestSystem({
   }
 
   return (
-    <div className="bg-background h-[100dvh] flex flex-col overflow-hidden relative">
+    <div className="bg-background w-full max-w-[650px] h-[100dvh] flex flex-col overflow-hidden relative">
       <HeaderBar
         onClose={onClose}
         hearts={hearts}
