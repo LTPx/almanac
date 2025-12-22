@@ -15,6 +15,7 @@ type LearningPathProps = {
   showAsCompleted?: boolean;
   showOptionalAsAvailable?: boolean;
   showAllCompletedExceptFirst?: boolean;
+  isTutorialMode?: boolean;
 };
 
 const LearningPath: React.FC<LearningPathProps> = ({
@@ -24,7 +25,8 @@ const LearningPath: React.FC<LearningPathProps> = ({
   onTestComplete,
   showAsCompleted = false,
   showOptionalAsAvailable = false,
-  showAllCompletedExceptFirst = false
+  showAllCompletedExceptFirst = false,
+  isTutorialMode = false
 }) => {
   const [activeUnit, setActiveUnit] = useState<Unit | null>(null);
   const { progress, isLoading, refetch } = useProgress(userId, curriculum.id);
@@ -39,11 +41,9 @@ const LearningPath: React.FC<LearningPathProps> = ({
 
   let finalApprovedUnits = progress.approvedUnits;
 
-  if (
-    showAsCompleted ||
-    showOptionalAsAvailable ||
-    showAllCompletedExceptFirst
-  ) {
+  // LÓGICA MUTUAMENTE EXCLUSIVA: Solo una condición se ejecuta a la vez
+  if (showAsCompleted) {
+    // PASO 6: Solo el nodo más alto como completado
     const highestPositionUnit =
       assignedUnits.length > 0
         ? assignedUnits.reduce((max, unit) =>
@@ -51,6 +51,12 @@ const LearningPath: React.FC<LearningPathProps> = ({
           )
         : null;
 
+    if (highestPositionUnit) {
+      finalApprovedUnits = [highestPositionUnit.id];
+    }
+  } else if (showOptionalAsAvailable) {
+    // PASO 7: El nodo opcional más alto debe estar "available"
+    // Los nodos adyacentes deben estar "completed"
     const optionalNodes = assignedUnits.filter((u) => !u.mandatory);
     const highestOptionalNode =
       optionalNodes.length > 0
@@ -59,18 +65,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
           )
         : null;
 
-    const firstLesson =
-      assignedUnits.length > 0
-        ? assignedUnits.reduce((min, unit) =>
-            unit.position < min.position ? unit : min
-          )
-        : null;
-
-    if (showAsCompleted && highestPositionUnit) {
-      finalApprovedUnits = [...progress.approvedUnits, highestPositionUnit.id];
-    }
-
-    if (showOptionalAsAvailable && highestOptionalNode) {
+    if (highestOptionalNode) {
       const optionalRow = Math.floor(highestOptionalNode.position / 5);
       const optionalCol = highestOptionalNode.position % 5;
 
@@ -91,10 +86,20 @@ const LearningPath: React.FC<LearningPathProps> = ({
         }
       });
 
-      finalApprovedUnits = [...progress.approvedUnits, ...adjacentToApprove];
+      // Los adyacentes están completados, pero NO incluimos el opcional
+      // Esto permitirá que LessonGrid lo marque como "available"
+      finalApprovedUnits = adjacentToApprove;
     }
+  } else if (showAllCompletedExceptFirst) {
+    // PASO 8: Todos completados excepto el primero
+    const firstLesson =
+      assignedUnits.length > 0
+        ? assignedUnits.reduce((min, unit) =>
+            unit.position < min.position ? unit : min
+          )
+        : null;
 
-    if (showAllCompletedExceptFirst && firstLesson) {
+    if (firstLesson) {
       const allExceptFirst = assignedUnits
         .filter((unit) => unit.id !== firstLesson.id)
         .map((unit) => unit.id);
@@ -124,6 +129,8 @@ const LearningPath: React.FC<LearningPathProps> = ({
               approvedUnits={finalApprovedUnits}
               onStartUnit={setActiveUnit}
               hearts={hearts}
+              isTutorialMode={isTutorialMode}
+              showOptionalAsAvailable={showOptionalAsAvailable}
             />
           )}
         </div>
@@ -158,6 +165,8 @@ const LearningPath: React.FC<LearningPathProps> = ({
             approvedUnits={finalApprovedUnits}
             onStartUnit={setActiveUnit}
             hearts={hearts}
+            isTutorialMode={isTutorialMode}
+            showOptionalAsAvailable={showOptionalAsAvailable}
           />
         )}
       </div>

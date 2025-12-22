@@ -11,13 +11,17 @@ interface LessonGridProps {
   approvedUnits: number[];
   hearts: number;
   onStartUnit: (unit: Unit) => void;
+  isTutorialMode?: boolean;
+  showOptionalAsAvailable?: boolean;
 }
 
 export const LessonGrid: React.FC<LessonGridProps> = ({
   units,
   approvedUnits,
   hearts,
-  onStartUnit
+  onStartUnit,
+  isTutorialMode = false,
+  showOptionalAsAvailable = false
 }) => {
   type Node = Unit & { type: "unit"; col: number; row: number };
 
@@ -75,12 +79,6 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     });
   };
 
-  const getLessonState = (unit: Node): "completed" | "available" | "locked" => {
-    if (approvedUnits.includes(unit.id)) return "completed";
-    if (isAdjacentToCompleted(unit)) return "available";
-    return "locked";
-  };
-
   const getLockedColor = (mandatory: boolean) => {
     return mandatory ? "border-[#90D398]" : "border-[#708BB1]";
   };
@@ -107,6 +105,31 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
           node.position > max.position ? node : max
         )
       : null;
+
+  const getLessonState = (unit: Node): "completed" | "available" | "locked" => {
+    // En modo tutorial, aplicar lógica especial
+    if (isTutorialMode) {
+      // Si está en approvedUnits, está completado
+      if (approvedUnits.includes(unit.id)) return "completed";
+
+      // CASO ESPECIAL: Paso 7 - el nodo opcional más alto debe estar "available"
+      if (
+        showOptionalAsAvailable &&
+        highestOptionalNode &&
+        unit.id === highestOptionalNode.id
+      ) {
+        return "available";
+      }
+
+      // Todo lo demás está bloqueado
+      return "locked";
+    }
+
+    // Modo normal: usar lógica de adyacencia
+    if (approvedUnits.includes(unit.id)) return "completed";
+    if (isAdjacentToCompleted(unit)) return "available";
+    return "locked";
+  };
 
   const maxRow =
     pathLayout.length > 0 ? Math.max(...pathLayout.map((r) => r.row)) : 0;
