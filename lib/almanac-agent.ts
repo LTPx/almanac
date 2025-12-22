@@ -4,6 +4,7 @@ import {
   getAvailableTopics,
   getTopicById,
 } from "./almanac-db-service";
+import { getTutorConfig, TutorConfigData } from "./tutor-config-service";
 
 // --- TYPES ---
 interface ChatMessage {
@@ -17,12 +18,22 @@ export class AlmanacAgent {
   private currentTopicId: string | null;
   private genAI: GoogleGenerativeAI;
   private availableTopics: Map<string, AlmanacTopicData> | null;
+  private tutorConfig: TutorConfigData | null;
 
   constructor(apiKey: string) {
     this.chatHistory = [];
     this.currentTopicId = null;
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.availableTopics = null;
+    this.tutorConfig = null;
+  }
+
+  // Lazy loading de la configuración del tutor desde la DB
+  private async getConfig(): Promise<TutorConfigData> {
+    if (!this.tutorConfig) {
+      this.tutorConfig = await getTutorConfig();
+    }
+    return this.tutorConfig;
   }
 
   // Lazy loading de los topics desde la DB
@@ -44,6 +55,7 @@ export class AlmanacAgent {
   // --- STEP A: THE ROUTER ---
   private async routeTopic(userInput: string): Promise<string | null> {
     const topics = await this.getTopics();
+    const config = await this.getConfig();
 
     if (topics.size === 0) {
       console.warn("⚠️ No active topics found in database");
@@ -61,21 +73,14 @@ export class AlmanacAgent {
       })
       .join("\n");
 
+    // Usar instrucciones personalizables desde la DB
     const routerInstruction = `
-      You are the Intent Router for an educational app called Almanac.
-
-      TASK:
-      Analyze the conversation history and latest input.
-      Determine which topic from the list below the user is asking about.
+      ${config.routerInstructions}
 
       AVAILABLE TOPICS:
       ${topicList}
 
-      RULES:
-      - If user asks about a new topic, return that topic_id (e.g., "lesson_1").
-      - If user asks a follow-up question (e.g., "Give an example", "Why?"), return "${this.currentTopicId || "null"}".
-      - If input is off-topic or unclear, return "null".
-      - Match topics by keywords, subject matter, or explicit mentions.
+      CURRENT TOPIC: ${this.currentTopicId || "null"}
     `;
 
     // Initialize Router Model (Flash is fast/cheap)
@@ -126,6 +131,7 @@ export class AlmanacAgent {
 
     // Obtener el topic actual desde la DB
     const topicData = await getTopicById(this.currentTopicId);
+    const config = await this.getConfig();
 
     if (!topicData) {
       throw new Error("Topic not found in database");
@@ -135,18 +141,12 @@ export class AlmanacAgent {
       ? `${topicData.curriculumTitle} - ${topicData.title}`
       : topicData.title;
 
+    // Usar instrucciones personalizables desde la DB
     const tutorInstruction = `
-      You are a Socratic Tutor for the Almanac educational platform.
+      ${config.tutorInstructions}
 
       CURRENT TOPIC: ${displayName}
       ${topicData.unitName ? `Unit: ${topicData.unitName}` : ""}
-
-      CONSTRAINTS:
-      1. Answer using ONLY the Source Material below.
-      2. If asked about outside topics, politely refuse and redirect to the current topic.
-      3. Use the Socratic method: Be brief, ask guiding questions, and help students discover answers.
-      4. Reference the facts provided, especially CORE FACTS (🔑).
-      5. Keep responses concise (2-4 sentences max).
 
       SOURCE MATERIAL:
       ${topicData.content}

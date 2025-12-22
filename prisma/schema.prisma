@@ -663,3 +663,13 @@ model TutorSession {
   @@index([lessonId])
   @@map("tutor_session")
 }
+
+model TutorConfig {
+  id                  String   @id @default("default") // Solo una fila
+  routerInstructions  String
+  tutorInstructions   String
+  updatedAt           DateTime @updatedAt
+  createdAt           DateTime @default(now())
+
+  @@map("tutor_config")
+}
