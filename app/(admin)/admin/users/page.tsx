@@ -224,7 +224,7 @@ export default function UsersPage() {
                         <Eye className="w-4 h-4" />
                         Ver
                       </Button>
-                      <Button
+                      {/* <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleViewTutorStats(user.id)}
@@ -233,7 +233,7 @@ export default function UsersPage() {
                       >
                         <BookOpen className="w-4 h-4" />
                         Tutor
-                      </Button>
+                      </Button> */}
                     </div>
                   </TableCell>
                 </TableRow>
