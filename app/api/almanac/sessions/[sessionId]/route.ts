@@ -2,15 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 // GET /api/almanac/sessions/{sessionId}
-// Obtiene los detalles completos de una sesión incluyendo mensajes
 export async function GET(
   req: NextRequest,
-  { params }: { params: { sessionId: string } }
+  context: { params: Promise<{ sessionId: string }> }
 ) {
   try {
-    const { sessionId } = params;
+    const { sessionId } = await context.params;
 
-    // Obtener sesión completa
     const session = await prisma.tutorSession.findUnique({
       where: { id: sessionId },
       include: {

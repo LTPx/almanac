@@ -46,6 +46,24 @@ export default function AlmanacTutorPage() {
     scrollToBottom();
   }, [messages]);
 
+  // Guardar sesión cuando el usuario salga de la página
+  useEffect(() => {
+    return () => {
+      // Cleanup: Finalizar sesión cuando el componente se desmonte
+      if (sessionId && userId) {
+        fetch("/api/almanac/chat", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ userId })
+        }).catch((error) => {
+          console.error("Error saving session on unmount:", error);
+        });
+      }
+    };
+  }, [sessionId, userId]);
+
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || loading || !userId) return;

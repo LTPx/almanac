@@ -13,6 +13,7 @@ import {
   Bot
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import Link from "next/link";
 
 interface Message {
@@ -107,7 +108,7 @@ export default function SessionDetailsPage() {
     return (
       <div className="p-6">
         <div className="flex items-center justify-center h-64">
-          <p className="text-gray-500">Loading session details...</p>
+          <p className="text-muted-foreground">Loading session details...</p>
         </div>
       </div>
     );
@@ -117,7 +118,7 @@ export default function SessionDetailsPage() {
     return (
       <div className="p-6">
         <div className="flex items-center justify-center h-64">
-          <p className="text-red-500">{error || "Session not found"}</p>
+          <p className="text-destructive">{error || "Session not found"}</p>
         </div>
       </div>
     );
@@ -136,80 +137,80 @@ export default function SessionDetailsPage() {
           </Link>
           <div>
             <h1 className="text-3xl font-bold">Session Details</h1>
-            <p className="text-gray-500">Session ID: {sessionId}</p>
+            <p className="text-muted-foreground">Session ID: {sessionId}</p>
           </div>
         </div>
       </div>
 
       {/* Session Info */}
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="border rounded-lg p-4 bg-white shadow-sm">
+        <Card className="p-4">
           <h3 className="font-semibold mb-4">User Information</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-500">Name:</span>
+              <span className="text-muted-foreground">Name:</span>
               <span className="font-medium">{session.user.name}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Email:</span>
+              <span className="text-muted-foreground">Email:</span>
               <span className="font-medium">{session.user.email}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">User ID:</span>
+              <span className="text-muted-foreground">User ID:</span>
               <span className="font-mono text-xs">{session.user.id}</span>
             </div>
           </div>
-        </div>
+        </Card>
 
-        <div className="border rounded-lg p-4 bg-white shadow-sm">
+        <Card className="p-4">
           <h3 className="font-semibold mb-4">Lesson Information</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-500">Lesson:</span>
+              <span className="text-muted-foreground">Lesson:</span>
               <span className="font-medium">{session.lesson.name}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Unit:</span>
+              <span className="text-muted-foreground">Unit:</span>
               <span className="font-medium">{session.lesson.unitName}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Curriculum:</span>
+              <span className="text-muted-foreground">Curriculum:</span>
               <span className="font-medium">
                 {session.lesson.curriculumTitle}
               </span>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* Session Stats */}
-      <div className="border rounded-lg p-4 bg-white shadow-sm">
+      <Card className="p-4">
         <h3 className="font-semibold mb-4">Session Statistics</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div>
-            <p className="text-sm text-gray-500">Total Messages</p>
+            <p className="text-sm text-muted-foreground">Total Messages</p>
             <p className="text-2xl font-bold">{session.messageCount}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">User Messages</p>
+            <p className="text-sm text-muted-foreground">User Messages</p>
             <p className="text-2xl font-bold text-blue-600">
               {session.userMessages}
             </p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Tutor Messages</p>
+            <p className="text-sm text-muted-foreground">Tutor Messages</p>
             <p className="text-2xl font-bold text-purple-600">
               {session.tutorMessages}
             </p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Duration</p>
+            <p className="text-sm text-muted-foreground">Duration</p>
             <p className="text-2xl font-bold">
               {formatDuration(session.startedAt, session.endedAt)}
             </p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Feedback</p>
+            <p className="text-sm text-muted-foreground">Feedback</p>
             <div className="mt-1">
               {session.wasHelpful === true && (
                 <Badge className="bg-green-100 text-green-800">
@@ -229,33 +230,33 @@ export default function SessionDetailsPage() {
             </div>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Timeline */}
-      <div className="border rounded-lg p-4 bg-white shadow-sm">
+      <Card className="p-4">
         <h3 className="font-semibold mb-4">Timeline</h3>
         <div className="space-y-2 text-sm">
           <div className="flex items-center space-x-2">
-            <Clock className="h-4 w-4 text-gray-400" />
-            <span className="text-gray-500">Started:</span>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Started:</span>
             <span className="font-medium">{formatDate(session.startedAt)}</span>
           </div>
           <div className="flex items-center space-x-2">
-            <Clock className="h-4 w-4 text-gray-400" />
-            <span className="text-gray-500">Last Active:</span>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Last Active:</span>
             <span className="font-medium">
               {formatDate(session.lastActive)}
             </span>
           </div>
           {session.endedAt && (
             <div className="flex items-center space-x-2">
-              <Clock className="h-4 w-4 text-gray-400" />
-              <span className="text-gray-500">Ended:</span>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">Ended:</span>
               <span className="font-medium">{formatDate(session.endedAt)}</span>
             </div>
           )}
           <div className="flex items-center space-x-2">
-            <span className="text-gray-500">Status:</span>
+            <span className="text-muted-foreground">Status:</span>
             {session.isActive ? (
               <Badge className="bg-blue-100 text-blue-800">Active</Badge>
             ) : (
@@ -263,10 +264,10 @@ export default function SessionDetailsPage() {
             )}
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Conversation */}
-      <div className="border rounded-lg bg-white shadow-sm">
+      <Card>
         <div className="p-4 border-b">
           <h3 className="font-semibold flex items-center">
             <MessageSquare className="h-5 w-5 mr-2" />
@@ -286,7 +287,7 @@ export default function SessionDetailsPage() {
                   <div className="flex items-center mb-1 space-x-2">
                     {message.role === "user" ? (
                       <>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                           {formatTime(message.timestamp)}
                         </span>
                         <User className="h-4 w-4 text-blue-500" />
@@ -300,7 +301,7 @@ export default function SessionDetailsPage() {
                         <span className="text-sm font-medium text-purple-600">
                           Tutor
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                           {formatTime(message.timestamp)}
                         </span>
                       </>
@@ -309,8 +310,8 @@ export default function SessionDetailsPage() {
                   <div
                     className={`px-4 py-3 rounded-lg ${
                       message.role === "user"
-                        ? "bg-blue-50 border border-blue-200"
-                        : "bg-purple-50 border border-purple-200"
+                        ? "bg-blue-100 border border-blue-200 text-black"
+                        : "bg-purple-100 border border-purple-200 text-black"
                     }`}
                   >
                     <p className="text-sm whitespace-pre-wrap leading-relaxed">
@@ -322,7 +323,7 @@ export default function SessionDetailsPage() {
             ))}
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
