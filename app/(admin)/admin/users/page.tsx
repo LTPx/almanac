@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import { Search, Coins, Zap, Eye, Heart } from "lucide-react";
+import { Search, Coins, Zap, Eye, Heart, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface UserResult {
@@ -111,9 +111,9 @@ export default function UsersPage() {
     router.push(`/admin/users/${userId}/manage`);
   };
 
-  // const handleViewTutorStats = (userId: string) => {
-  //   router.push(`/admin/users/${userId}/tutor`);
-  // };
+  const handleViewTutorStats = (userId: string) => {
+    router.push(`/admin/users/${userId}/tutor`);
+  };
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-7xl space-y-6">
@@ -224,7 +224,7 @@ export default function UsersPage() {
                         <Eye className="w-4 h-4" />
                         Ver
                       </Button>
-                      {/* <Button
+                      <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleViewTutorStats(user.id)}
@@ -233,7 +233,7 @@ export default function UsersPage() {
                       >
                         <BookOpen className="w-4 h-4" />
                         Tutor
-                      </Button> */}
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
