@@ -46,23 +46,31 @@ export default function AlmanacTutorPage() {
     scrollToBottom();
   }, [messages]);
 
-  // Guardar sesión cuando el usuario salga de la página
+  // Cargar sesión activa al montar el componente
   useEffect(() => {
-    return () => {
-      // Cleanup: Finalizar sesión cuando el componente se desmonte
-      if (sessionId && userId) {
-        fetch("/api/almanac/chat", {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ userId })
-        }).catch((error) => {
-          console.error("Error saving session on unmount:", error);
-        });
+    if (!userId) return;
+
+    const loadActiveSession = async () => {
+      try {
+        const response = await fetch(`/api/almanac/chat?userId=${userId}`);
+        const data = await response.json();
+
+        if (data.session && data.messages.length > 0) {
+          setSessionId(data.session.id);
+          setMessages(
+            data.messages.map((msg: any) => ({
+              role: msg.role === "model" ? "assistant" : msg.role,
+              content: msg.content,
+            }))
+          );
+        }
+      } catch (error) {
+        console.error("Error loading active session:", error);
       }
     };
-  }, [sessionId, userId]);
+
+    loadActiveSession();
+  }, [userId]);
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -4,6 +4,8 @@ import {
   getOrCreateSession,
   addMessageToSession,
   endTutorSession,
+  getActiveSession,
+  getSessionMessages,
 } from "@/lib/tutor-session-service";
 
 // In-memory storage for agents (Simulating a session store)
@@ -12,6 +14,49 @@ const agents = new Map<string, AlmanacAgent>();
 
 // Map para asociar userId con sessionId actual
 const userSessions = new Map<string, string>();
+
+// GET: Cargar sesión activa del usuario
+export async function GET(req: NextRequest) {
+  try {
+    const userId = req.nextUrl.searchParams.get("userId");
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "userId is required" },
+        { status: 400 }
+      );
+    }
+
+    // Buscar sesión activa en la base de datos
+    const activeSession = await getActiveSession(userId);
+
+    if (!activeSession) {
+      return NextResponse.json({ session: null, messages: [] });
+    }
+
+    // Obtener mensajes de la sesión
+    const messages = await getSessionMessages(activeSession.id);
+
+    return NextResponse.json({
+      session: {
+        id: activeSession.id,
+        lessonId: activeSession.lessonId,
+        startedAt: activeSession.startedAt,
+        lastActive: activeSession.lastActive,
+      },
+      messages: messages.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      })),
+    });
+  } catch (error) {
+    console.error("Error loading active session:", error);
+    return NextResponse.json(
+      { error: "Failed to load session" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,7 +81,19 @@ export async function POST(req: NextRequest) {
 
     // Crear o recuperar el agente del usuario
     if (!agents.has(userId)) {
-      agents.set(userId, new AlmanacAgent(apiKey));
+      const newAgent = new AlmanacAgent(apiKey);
+
+      // Intentar restaurar historial desde sesión activa
+      const activeSession = await getActiveSession(userId);
+      if (activeSession) {
+        const messages = await getSessionMessages(activeSession.id);
+        if (messages.length > 0) {
+          newAgent.restoreHistory(messages);
+          userSessions.set(userId, activeSession.id);
+        }
+      }
+
+      agents.set(userId, newAgent);
     }
 
     const agent = agents.get(userId)!;

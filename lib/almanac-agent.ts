@@ -234,6 +234,13 @@ export class AlmanacAgent {
     return this.chatHistory;
   }
 
+  restoreHistory(messages: Array<{ role: "user" | "model"; content: string }>): void {
+    this.chatHistory = messages.map((msg) => ({
+      role: msg.role,
+      parts: [{ text: msg.content }],
+    }));
+  }
+
   getCurrentTopic(): string | null {
     return this.currentTopicId;
   }

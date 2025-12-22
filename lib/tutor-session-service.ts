@@ -167,6 +167,22 @@ export async function getUserSessionsByLesson(
 }
 
 /**
+ * Obtiene la sesión activa de un usuario (si existe)
+ * Una sesión está activa si endedAt es null
+ */
+export async function getActiveSession(userId: string) {
+  return await prisma.tutorSession.findFirst({
+    where: {
+      userId,
+      endedAt: null
+    },
+    orderBy: {
+      lastActive: "desc"
+    }
+  });
+}
+
+/**
  * Obtiene estadísticas de uso del tutor para un usuario
  */
 export async function getUserTutorStats(userId: string) {
