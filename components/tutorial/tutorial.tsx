@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight, ArrowLeft } from "lucide-react";
 
@@ -39,8 +39,53 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
   const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isInternalChangeRef = useRef(false);
 
+  const userScrolling = useRef(false);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+  const lastScrollTarget = useRef<Element | "top" | null>(null);
+
   const step = steps[currentStep];
   const isFullScreenStep = step?.isFullScreen || false;
+
+  const scrollToTarget = useCallback(
+    (element: Element, force: boolean = false) => {
+      if (userScrolling.current && !force) return;
+
+      if (lastScrollTarget.current === element && !force) return;
+
+      const rect = element.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+
+      const isInView = rect.top >= 100 && rect.bottom <= viewportHeight - 100;
+      if (isInView && !force) return;
+
+      lastScrollTarget.current = element;
+
+      const absoluteTop = window.pageYOffset + rect.top;
+      const middle = absoluteTop - viewportHeight / 2 + rect.height / 2;
+
+      const shouldUseInstant =
+        force || Math.abs(window.pageYOffset - middle) > viewportHeight;
+
+      window.scrollTo({
+        top: middle,
+        behavior: shouldUseInstant ? "auto" : "smooth"
+      });
+    },
+    []
+  );
+
+  const scrollToTop = useCallback((instant: boolean = false) => {
+    lastScrollTarget.current = null;
+
+    window.scrollTo({
+      top: 0,
+      behavior: instant ? "auto" : "smooth"
+    });
+
+    setTimeout(() => {
+      userScrolling.current = false;
+    }, 300);
+  }, []);
 
   useEffect(() => {
     if (!isInternalChangeRef.current && initialStep !== currentStep) {
@@ -48,10 +93,11 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
         `🔄 Sincronizando desde padre: ${currentStep} → ${initialStep}`
       );
       setCurrentStep(initialStep);
+
+      lastScrollTarget.current = null;
     }
 
     isInternalChangeRef.current = false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialStep]);
 
   useEffect(() => {
@@ -96,6 +142,14 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
 
       if (!stepConfig?.target || stepConfig.target.trim() === "") {
         return;
+      }
+
+      const shouldScrollToTop =
+        stepConfig.id === "review-units" || stepConfig.id === "final-unit";
+
+      if (shouldScrollToTop && lastScrollTarget.current !== "top") {
+        scrollToTop(true);
+        lastScrollTarget.current = "top" as any;
       }
 
       let target: Element | null = null;
@@ -149,6 +203,10 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
           }
         }
       }
+
+      if (target && !userScrolling.current && !shouldScrollToTop) {
+        scrollToTarget(target, false);
+      }
     };
 
     setIsTransitioning(true);
@@ -157,14 +215,17 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       steps[currentStep].action?.();
     }
 
-    requestAnimationFrame(() => {
-      updateTargetPosition();
-    });
+    const initialDelay = isInternalChangeRef.current ? 100 : 150;
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        updateTargetPosition();
+      });
+    }, initialDelay);
 
     const quickUpdate = setTimeout(() => {
       updateTargetPosition();
       setIsTransitioning(false);
-    }, 150);
+    }, 250);
 
     if (
       steps[currentStep]?.id === "review-units" ||
@@ -178,6 +239,16 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
     };
 
     const handleScroll = () => {
+      userScrolling.current = true;
+
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
+      }
+
+      scrollTimeout.current = setTimeout(() => {
+        userScrolling.current = false;
+      }, 1000);
+
       requestAnimationFrame(updateTargetPosition);
     };
 
@@ -189,16 +260,21 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       if (updateIntervalRef.current) {
         clearInterval(updateIntervalRef.current);
       }
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
+      }
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [currentStep, steps, show, isFullScreenStep]);
+  }, [currentStep, steps, show, isFullScreenStep, scrollToTarget, scrollToTop]);
+
   const handleNext = () => {
     if (isTransitioning) return;
 
     if (currentStep < steps.length - 1) {
       setIsTransitioning(true);
       setFadeOut(true);
+      lastScrollTarget.current = null;
 
       setTimeout(() => {
         isInternalChangeRef.current = true;
@@ -216,6 +292,8 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
     if (currentStep > 0) {
       setIsTransitioning(true);
       setFadeOut(true);
+      lastScrollTarget.current = null;
+      userScrolling.current = false;
 
       setTimeout(() => {
         isInternalChangeRef.current = true;
