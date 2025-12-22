@@ -121,11 +121,17 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
             setTargetRect(rect);
           }
         }
-      } else if (
-        stepConfig.id === "unit-explanations" ||
-        stepConfig.id === "completed-unit"
-      ) {
+      } else if (stepConfig.id === "unit-explanations") {
         target = document.querySelector('[data-highest-position="true"]');
+
+        if (target) {
+          const rect = target.getBoundingClientRect();
+          if (rect.height > 0 && rect.width > 0) {
+            setTargetRect(rect);
+          }
+        }
+      } else if (stepConfig.id === "completed-unit") {
+        target = document.querySelector('[data-highest-position-node="true"]');
 
         if (target) {
           const rect = target.getBoundingClientRect();
@@ -187,7 +193,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       window.removeEventListener("scroll", handleScroll);
     };
   }, [currentStep, steps, show, isFullScreenStep]);
-
   const handleNext = () => {
     if (isTransitioning) return;
 

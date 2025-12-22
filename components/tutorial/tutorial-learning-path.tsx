@@ -33,26 +33,15 @@ export function TutorialLearningPath({
   }
 
   const getTutorialProps = () => {
-    // Mapeo correcto considerando que test-demo está en índice 4
-    // Paso 0: welcome
-    // Paso 1: review-units
-    // Paso 2: unit-explanations
-    // Paso 3: start-test
-    // Paso 4: test-demo (INSERTADO)
-    // Paso 5: completed-unit (antes era 4)
-    // Paso 6: optional-unit (antes era 5)
-    // Paso 7: final-unit (antes era 6)
-
     switch (currentStep) {
-      case 5: // COMPLETED_UNIT
+      case 5:
         return {
           showAsCompleted: true,
           showOptionalAsAvailable: false,
           showAllCompletedExceptFirst: false,
           isTutorialMode: true
         };
-
-      case 6: // OPTIONAL_UNIT
+      case 6:
         return {
           showAsCompleted: false,
           showOptionalAsAvailable: true,
@@ -60,7 +49,7 @@ export function TutorialLearningPath({
           isTutorialMode: true
         };
 
-      case 7: // FINAL_UNIT
+      case 7:
         return {
           showAsCompleted: false,
           showOptionalAsAvailable: false,

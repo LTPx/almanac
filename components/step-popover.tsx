@@ -56,15 +56,18 @@ export function StepPopover({
   React.useEffect(() => {
     const handleTutorialStep = (e: any) => {
       const { stepId } = e.detail;
+
       const popoverSteps = {
-        highestPosition: ["unit-explanations", "start-test", "completed-unit"],
+        highestPosition: ["unit-explanations", "start-test"],
         optionalHighest: ["optional-unit"],
         firstMandatory: ["final-unit"]
       };
+
       const shouldBeOpen =
         (isHighestPosition && popoverSteps.highestPosition.includes(stepId)) ||
         (isOptionalHighest && popoverSteps.optionalHighest.includes(stepId)) ||
         (isFirstMandatory && popoverSteps.firstMandatory.includes(stepId));
+
       if (shouldBeOpen && !isOpen) {
         if (openTimeoutRef.current) {
           clearTimeout(openTimeoutRef.current);
@@ -85,7 +88,6 @@ export function StepPopover({
       }
     };
   }, [isHighestPosition, isOptionalHighest, isFirstMandatory, isOpen]);
-
   const startPulseAnimation = React.useCallback(async () => {
     while (loopsCompleted.current < 4 && !animationCancelled.current) {
       if (isHovered) break;
@@ -194,7 +196,6 @@ export function StepPopover({
   };
 
   const handleOpenChange = (open: boolean) => {
-    // Solo permitir cambios manuales si no estamos en el tutorial
     const isTutorialActive = document.querySelector(
       ".fixed.inset-0.z-\\[9998\\]"
     );

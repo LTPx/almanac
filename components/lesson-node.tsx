@@ -103,20 +103,22 @@ const LessonNode: React.FC<LessonNodeProps> = ({
             }
       }
       className={`
-        w-full h-full lg:h-16 flex items-center justify-center
-        relative
-        ${getBackgroundColor()}
-        ${
-          isFirstMandatory
-            ? getFirstMandatoryStyle()
-            : state === "locked"
-              ? `${color} border-dashed`
-              : "shadow-lg"
-        }
-        ${isFirstMandatory ? "rounded-t-[2rem] rounded-b-lg" : "rounded-2xl"}
-        border-2 ${state !== "locked" ? "cursor-pointer" : "cursor-not-allowed opacity-75"}
-      `}
-      // data-highest-position={isHighestPosition ? "true" : undefined}
+      w-full h-full lg:h-16 flex items-center justify-center
+      relative
+      ${getBackgroundColor()}
+      ${
+        isFirstMandatory
+          ? getFirstMandatoryStyle()
+          : state === "locked"
+            ? `${color} border-dashed`
+            : "shadow-lg"
+      }
+      ${isFirstMandatory ? "rounded-t-[2rem] rounded-b-lg" : "rounded-2xl"}
+      border-2 ${state !== "locked" ? "cursor-pointer" : "cursor-not-allowed opacity-75"}
+    `}
+      data-highest-position-node={
+        isHighestPosition && state === "completed" ? "true" : undefined
+      }
       data-optional-node={isOptionalHighest ? "true" : undefined}
       data-first-mandatory={isFirstMandatory ? "true" : undefined}
     >
