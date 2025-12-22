@@ -116,7 +116,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
         ${isFirstMandatory ? "rounded-t-[2rem] rounded-b-lg" : "rounded-2xl"}
         border-2 ${state !== "locked" ? "cursor-pointer" : "cursor-not-allowed opacity-75"}
       `}
-      data-highest-position={isHighestPosition ? "true" : undefined}
+      // data-highest-position={isHighestPosition ? "true" : undefined}
       data-optional-node={isOptionalHighest ? "true" : undefined}
       data-first-mandatory={isFirstMandatory ? "true" : undefined}
     >

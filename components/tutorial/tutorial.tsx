@@ -410,13 +410,14 @@ function getTooltipPosition(
   const spacing = 20;
   const tooltipWidth = 384;
   const padding = 16;
+  const topSpacing = 70;
 
   let left = targetRect.left + targetRect.width / 2 - tooltipWidth / 2;
   let top = 0;
 
   switch (position) {
     case "top":
-      top = targetRect.top - 220 - spacing;
+      top = targetRect.top - 220 - topSpacing;
       break;
     case "bottom":
       top = targetRect.bottom + spacing;

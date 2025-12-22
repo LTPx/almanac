@@ -53,43 +53,27 @@ export function StepPopover({
   const animationCancelled = React.useRef(false);
   const openTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  // Escuchar eventos del tutorial para abrir/cerrar el popover
   React.useEffect(() => {
     const handleTutorialStep = (e: any) => {
       const { stepId } = e.detail;
-
-      // Cerrar TODOS los popovers primero
-      setIsOpen(false);
-
-      // Luego abrir solo el correspondiente al paso actual
-      if (stepId === "start-test" && isHighestPosition) {
+      const popoverSteps = {
+        highestPosition: ["unit-explanations", "start-test", "completed-unit"],
+        optionalHighest: ["optional-unit"],
+        firstMandatory: ["final-unit"]
+      };
+      const shouldBeOpen =
+        (isHighestPosition && popoverSteps.highestPosition.includes(stepId)) ||
+        (isOptionalHighest && popoverSteps.optionalHighest.includes(stepId)) ||
+        (isFirstMandatory && popoverSteps.firstMandatory.includes(stepId));
+      if (shouldBeOpen && !isOpen) {
         if (openTimeoutRef.current) {
           clearTimeout(openTimeoutRef.current);
         }
         openTimeoutRef.current = setTimeout(() => {
           setIsOpen(true);
         }, 100);
-      } else if (stepId === "completed-unit" && isHighestPosition) {
-        if (openTimeoutRef.current) {
-          clearTimeout(openTimeoutRef.current);
-        }
-        openTimeoutRef.current = setTimeout(() => {
-          setIsOpen(true);
-        }, 100);
-      } else if (stepId === "optional-unit" && isOptionalHighest) {
-        if (openTimeoutRef.current) {
-          clearTimeout(openTimeoutRef.current);
-        }
-        openTimeoutRef.current = setTimeout(() => {
-          setIsOpen(true);
-        }, 100);
-      } else if (stepId === "final-unit" && isFirstMandatory) {
-        if (openTimeoutRef.current) {
-          clearTimeout(openTimeoutRef.current);
-        }
-        openTimeoutRef.current = setTimeout(() => {
-          setIsOpen(true);
-        }, 100);
+      } else if (!shouldBeOpen && isOpen) {
+        setIsOpen(false);
       }
     };
 
@@ -100,7 +84,7 @@ export function StepPopover({
         clearTimeout(openTimeoutRef.current);
       }
     };
-  }, [isHighestPosition, isOptionalHighest, isFirstMandatory]);
+  }, [isHighestPosition, isOptionalHighest, isFirstMandatory, isOpen]);
 
   const startPulseAnimation = React.useCallback(async () => {
     while (loopsCompleted.current < 4 && !animationCancelled.current) {
@@ -231,6 +215,7 @@ export function StepPopover({
             className={`${getPopoverClass()} rounded-xl relative`}
             asChild
             forceMount
+            data-highest-position={isHighestPosition ? "true" : undefined}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: -10 }}
