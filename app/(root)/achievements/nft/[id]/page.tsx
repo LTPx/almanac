@@ -65,7 +65,7 @@ export default function NFTAssetDetailPage() {
     } else {
       console.warn("Asset ID is undefined, waiting...");
     }
-  }, [assetId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [assetId]);
 
   const fetchNFTAssetDetail = async () => {
     try {

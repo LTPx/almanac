@@ -1,9 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MessageSquare, Clock, ThumbsUp, ThumbsDown, User, Bot } from "lucide-react";
+import {
+  ArrowLeft,
+  MessageSquare,
+  Clock,
+  ThumbsUp,
+  ThumbsDown,
+  User,
+  Bot
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
@@ -39,7 +47,6 @@ interface SessionDetails {
 
 export default function SessionDetailsPage() {
   const params = useParams();
-  const router = useRouter();
   const userId = params.id as string;
   const sessionId = params.sessionId as string;
 
@@ -78,14 +85,14 @@ export default function SessionDetailsPage() {
       month: "short",
       day: "numeric",
       hour: "2-digit",
-      minute: "2-digit",
+      minute: "2-digit"
     });
   };
 
   const formatTime = (dateString: string) => {
     return new Date(dateString).toLocaleTimeString("en-US", {
       hour: "2-digit",
-      minute: "2-digit",
+      minute: "2-digit"
     });
   };
 
@@ -167,7 +174,9 @@ export default function SessionDetailsPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Curriculum:</span>
-              <span className="font-medium">{session.lesson.curriculumTitle}</span>
+              <span className="font-medium">
+                {session.lesson.curriculumTitle}
+              </span>
             </div>
           </div>
         </div>
@@ -183,15 +192,21 @@ export default function SessionDetailsPage() {
           </div>
           <div>
             <p className="text-sm text-gray-500">User Messages</p>
-            <p className="text-2xl font-bold text-blue-600">{session.userMessages}</p>
+            <p className="text-2xl font-bold text-blue-600">
+              {session.userMessages}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Tutor Messages</p>
-            <p className="text-2xl font-bold text-purple-600">{session.tutorMessages}</p>
+            <p className="text-2xl font-bold text-purple-600">
+              {session.tutorMessages}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Duration</p>
-            <p className="text-2xl font-bold">{formatDuration(session.startedAt, session.endedAt)}</p>
+            <p className="text-2xl font-bold">
+              {formatDuration(session.startedAt, session.endedAt)}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Feedback</p>
@@ -228,7 +243,9 @@ export default function SessionDetailsPage() {
           <div className="flex items-center space-x-2">
             <Clock className="h-4 w-4 text-gray-400" />
             <span className="text-gray-500">Last Active:</span>
-            <span className="font-medium">{formatDate(session.lastActive)}</span>
+            <span className="font-medium">
+              {formatDate(session.lastActive)}
+            </span>
           </div>
           {session.endedAt && (
             <div className="flex items-center space-x-2">
@@ -263,19 +280,29 @@ export default function SessionDetailsPage() {
                 key={index}
                 className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
-                <div className={`max-w-[80%] ${message.role === "user" ? "order-2" : "order-1"}`}>
+                <div
+                  className={`max-w-[80%] ${message.role === "user" ? "order-2" : "order-1"}`}
+                >
                   <div className="flex items-center mb-1 space-x-2">
                     {message.role === "user" ? (
                       <>
-                        <span className="text-xs text-gray-500">{formatTime(message.timestamp)}</span>
+                        <span className="text-xs text-gray-500">
+                          {formatTime(message.timestamp)}
+                        </span>
                         <User className="h-4 w-4 text-blue-500" />
-                        <span className="text-sm font-medium text-blue-600">User</span>
+                        <span className="text-sm font-medium text-blue-600">
+                          User
+                        </span>
                       </>
                     ) : (
                       <>
                         <Bot className="h-4 w-4 text-purple-500" />
-                        <span className="text-sm font-medium text-purple-600">Tutor</span>
-                        <span className="text-xs text-gray-500">{formatTime(message.timestamp)}</span>
+                        <span className="text-sm font-medium text-purple-600">
+                          Tutor
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {formatTime(message.timestamp)}
+                        </span>
                       </>
                     )}
                   </div>

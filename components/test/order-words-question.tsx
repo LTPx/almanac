@@ -34,7 +34,6 @@ export function OrderWordsQuestion({
   useEffect(() => {
     setSlots(Array(totalSlots).fill(null));
     setAvailableWords([...question.content.words]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.content.words]);
 
   useEffect(() => {

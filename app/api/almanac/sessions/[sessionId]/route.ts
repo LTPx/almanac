@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionMessages } from "@/lib/tutor-session-service";
 import prisma from "@/lib/prisma";
 
 // GET /api/almanac/sessions/{sessionId}
@@ -19,19 +18,19 @@ export async function GET(
           include: {
             unit: {
               include: {
-                curriculum: true,
-              },
-            },
-          },
+                curriculum: true
+              }
+            }
+          }
         },
         user: {
           select: {
             id: true,
             name: true,
-            email: true,
-          },
-        },
-      },
+            email: true
+          }
+        }
+      }
     });
 
     if (!session) {
@@ -46,7 +45,7 @@ export async function GET(
         id: session.lessonId,
         name: session.lesson.name,
         unitName: session.lesson.unit.name,
-        curriculumTitle: session.lesson.unit.curriculum?.title,
+        curriculumTitle: session.lesson.unit.curriculum?.title
       },
       messages: session.messages,
       messageCount: session.messageCount,
@@ -56,7 +55,7 @@ export async function GET(
       lastActive: session.lastActive,
       endedAt: session.endedAt,
       wasHelpful: session.wasHelpful,
-      isActive: session.endedAt === null,
+      isActive: session.endedAt === null
     };
 
     return NextResponse.json(response);

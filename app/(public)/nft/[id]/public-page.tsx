@@ -61,7 +61,6 @@ export default function NFTPublicPage() {
 
   useEffect(() => {
     fetchNFTDetail();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nftId]);
 
   const fetchNFTDetail = async () => {

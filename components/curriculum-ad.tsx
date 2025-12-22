@@ -32,7 +32,6 @@ export function CurriculumAd({ unitId, className }: CurriculumAdProps) {
 
   useEffect(() => {
     fetchAds();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unitId]);
 
   useEffect(() => {
