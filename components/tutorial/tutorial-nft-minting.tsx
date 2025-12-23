@@ -7,20 +7,15 @@ import {
   Zap,
   Award,
   Calendar,
-  ExternalLink,
-  Share2,
   Sparkles,
   ChevronLeft
 } from "lucide-react";
-// Nota: Instala qrcode.react si aún no lo tienes: npm install qrcode.react
-import { QRCodeSVG } from "qrcode.react";
 import { AnimatePresence, motion } from "motion/react";
 
 interface TutorialNFTMintingProps {
   onClose: () => void;
 }
 
-// Datos simulados para el tutorial
 const MOCK_UNITS = [
   { id: "1", name: "Educación Básica", courseName: "Matemáticas" },
   { id: "2", name: "Historia Universal", courseName: "Historia" },
@@ -56,7 +51,6 @@ const MOCK_MINTED_NFT = {
   tokenId: "12345",
   contractAddress: "0x1234567890abcdef",
   transactionHash: "0xabcdef1234567890",
-  metadataUri: "ipfs://tutorial",
   mintedAt: new Date().toISOString(),
   metadata: {
     name: "Certificado de Educación Básica",
@@ -160,7 +154,9 @@ const StepIndicator = ({ currentStep }: { currentStep: number }) => (
   </div>
 );
 
-export function TutorialNFTMinting({ onClose }: TutorialNFTMintingProps) {
+export default function TutorialNFTMinting({
+  onClose
+}: TutorialNFTMintingProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedUnitId, setSelectedUnitId] = useState("");
   const [selectedCollectionId, setSelectedCollectionId] = useState("");
@@ -176,7 +172,6 @@ export function TutorialNFTMinting({ onClose }: TutorialNFTMintingProps) {
       onClose();
     } else if (currentStep > 0) {
       setCurrentStep((prev) => prev - 1);
-      // Reset estados si es necesario
       if (currentStep === 3) {
         setIsFlipped(false);
         setShowInitialAnimation(false);
@@ -193,14 +188,12 @@ export function TutorialNFTMinting({ onClose }: TutorialNFTMintingProps) {
   const handleMint = useCallback(async () => {
     setIsMinting(true);
 
-    // Simular proceso de minteo (3 segundos)
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
     setIsMinting(false);
     setCurrentStep(3);
     setShowInitialAnimation(true);
 
-    // Animación inicial dura 2 segundos
     setTimeout(() => {
       setShowInitialAnimation(false);
     }, 2000);
@@ -212,8 +205,8 @@ export function TutorialNFTMinting({ onClose }: TutorialNFTMintingProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-[#1a1a1a] overflow-y-auto">
-      <div className="sticky top-0 z-[10000] backdrop-blur-sm border-b border-gray-800 bg-[#1a1a1a]/90">
+    <div className="w-full max-w-[650px] min-h-screen bg-[#0a0a0a] relative overflow-y-auto scrollbar-hide">
+      <div className="sticky top-0 z-[10000] backdrop-blur-sm border-b border-gray-800 ">
         <div className="flex items-center justify-between p-4 max-w-2xl mx-auto">
           <button
             onClick={handleBack}
@@ -240,9 +233,8 @@ export function TutorialNFTMinting({ onClose }: TutorialNFTMintingProps) {
           </h2>
         </div>
 
-        <div className="bg-[#242424] rounded-xl p-6 relative">
+        <div className="">
           <AnimatePresence mode="wait">
-            {/* Paso 0: Introducción */}
             {currentStep === 0 && (
               <motion.div
                 key="step-0"
@@ -295,7 +287,6 @@ export function TutorialNFTMinting({ onClose }: TutorialNFTMintingProps) {
               </motion.div>
             )}
 
-            {/* Paso 1: Selección */}
             {currentStep === 1 && (
               <motion.div
                 key="step-1"
@@ -376,7 +367,6 @@ export function TutorialNFTMinting({ onClose }: TutorialNFTMintingProps) {
               </motion.div>
             )}
 
-            {/* Paso 2: Confirmación */}
             {currentStep === 2 && (
               <motion.div
                 key="step-2"
@@ -459,7 +449,6 @@ export function TutorialNFTMinting({ onClose }: TutorialNFTMintingProps) {
               </motion.div>
             )}
 
-            {/* Paso 3: NFT Revelado */}
             {currentStep === 3 && (
               <motion.div
                 key="step-3"
@@ -475,7 +464,7 @@ export function TutorialNFTMinting({ onClose }: TutorialNFTMintingProps) {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="absolute inset-0 z-50 flex items-center justify-center bg-[#1a1a1a]/80 backdrop-blur-sm"
+                      className="fixed inset-0 z-50 flex items-center justify-center bg-[#1a1a1a]/80 backdrop-blur-sm"
                     >
                       <motion.div
                         initial={{ scale: 0, rotate: -180 }}
@@ -486,7 +475,7 @@ export function TutorialNFTMinting({ onClose }: TutorialNFTMintingProps) {
                           stiffness: 200,
                           damping: 20
                         }}
-                        className="relative"
+                        className="relative flex flex-col items-center"
                       >
                         <motion.div
                           className="w-32 h-32 rounded-full bg-gradient-to-br from-[#32C781] to-[#1983DD] flex items-center justify-center"
@@ -508,7 +497,7 @@ export function TutorialNFTMinting({ onClose }: TutorialNFTMintingProps) {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.5 }}
-                          className="text-center mt-4 text-white font-semibold"
+                          className="text-center mt-4 text-white font-semibold text-lg"
                         >
                           ¡NFT Creado Exitosamente!
                         </motion.p>
@@ -525,21 +514,24 @@ export function TutorialNFTMinting({ onClose }: TutorialNFTMintingProps) {
                   }}
                   transition={{ delay: 2, duration: 0.5 }}
                   className="relative w-full max-w-sm"
-                  style={{ perspective: "1000px" }}
+                  style={{ perspective: "1000px", minHeight: "500px" }}
                 >
                   <motion.div
                     className="relative w-full cursor-pointer"
                     onClick={handleReveal}
                     animate={{ rotateY: isFlipped ? 180 : 0 }}
                     transition={{ duration: 1, ease: "easeInOut" }}
-                    style={{ transformStyle: "preserve-3d" }}
+                    style={{
+                      transformStyle: "preserve-3d",
+                      minHeight: "500px"
+                    }}
                   >
-                    {/* Parte trasera (oculta) */}
                     <motion.div
-                      className="relative overflow-hidden rounded-lg h-full"
+                      className="relative overflow-hidden rounded-lg"
                       style={{
                         backfaceVisibility: "hidden",
-                        WebkitBackfaceVisibility: "hidden"
+                        WebkitBackfaceVisibility: "hidden",
+                        minHeight: "500px"
                       }}
                       animate={
                         !isFlipped
@@ -554,7 +546,7 @@ export function TutorialNFTMinting({ onClose }: TutorialNFTMintingProps) {
                       }
                       transition={{ duration: 2, repeat: Infinity }}
                     >
-                      <div className="relative h-full min-h-[400px] bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center border-4 border-slate-600">
+                      <div className="relative h-[500px] bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center border-4 border-slate-600">
                         {!isFlipped && <EnergyRings />}
                         <div className="text-slate-400 flex flex-col items-center z-10">
                           <motion.div
@@ -589,16 +581,16 @@ export function TutorialNFTMinting({ onClose }: TutorialNFTMintingProps) {
                       </div>
                     </motion.div>
 
-                    {/* Parte frontal (NFT revelado) */}
                     <motion.div
                       className="absolute top-0 left-0 w-full overflow-hidden rounded-lg"
                       style={{
                         backfaceVisibility: "hidden",
                         WebkitBackfaceVisibility: "hidden",
-                        transform: "rotateY(180deg)"
+                        transform: "rotateY(180deg)",
+                        minHeight: "500px"
                       }}
                     >
-                      <div className="relative h-60 flex items-center justify-center overflow-hidden shadow-2xl shadow-[#32C781]/30">
+                      <div className="relative h-80 flex items-center justify-center overflow-hidden shadow-2xl shadow-[#32C781]/30">
                         <motion.img
                           initial={{ scale: 0.8, opacity: 0 }}
                           animate={isFlipped ? { scale: 1, opacity: 1 } : {}}
@@ -644,18 +636,6 @@ export function TutorialNFTMinting({ onClose }: TutorialNFTMintingProps) {
                                 MOCK_MINTED_NFT.mintedAt
                               ).toLocaleDateString("es-ES")}
                             </div>
-                            <div className="flex space-x-2 pt-2">
-                              <button className="text-sm px-3 py-1 bg-[#1983DD] text-white rounded hover:bg-[#1A73E8] transition-colors flex items-center gap-1">
-                                <ExternalLink className="h-3 w-3" />
-                                Ver en Explorer
-                              </button>
-                            </div>
-                          </div>
-                          <div className="col-span-1 flex justify-end items-end">
-                            <QRCodeSVG
-                              value={`https://tutorial.almanac.com/nft/${MOCK_MINTED_NFT.tokenId}`}
-                              size={80}
-                            />
                           </div>
                         </div>
                       </motion.div>
@@ -684,7 +664,7 @@ export function TutorialNFTMinting({ onClose }: TutorialNFTMintingProps) {
                         className="w-full bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors"
                         onClick={onClose}
                       >
-                        <Share2 size={20} /> Finalizar Tutorial
+                        Finalizar Tutorial
                       </button>
                     </motion.div>
                   )}

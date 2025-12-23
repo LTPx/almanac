@@ -41,9 +41,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
 
   let finalApprovedUnits = progress.approvedUnits;
 
-  // LÓGICA MUTUAMENTE EXCLUSIVA: Solo una condición se ejecuta a la vez
   if (showAsCompleted) {
-    // PASO 6: Solo el nodo más alto como completado
     const highestPositionUnit =
       assignedUnits.length > 0
         ? assignedUnits.reduce((max, unit) =>
@@ -55,8 +53,6 @@ const LearningPath: React.FC<LearningPathProps> = ({
       finalApprovedUnits = [highestPositionUnit.id];
     }
   } else if (showOptionalAsAvailable) {
-    // PASO 7: El nodo opcional más alto debe estar "available"
-    // Los nodos adyacentes deben estar "completed"
     const optionalNodes = assignedUnits.filter((u) => !u.mandatory);
     const highestOptionalNode =
       optionalNodes.length > 0
@@ -86,12 +82,9 @@ const LearningPath: React.FC<LearningPathProps> = ({
         }
       });
 
-      // Los adyacentes están completados, pero NO incluimos el opcional
-      // Esto permitirá que LessonGrid lo marque como "available"
       finalApprovedUnits = adjacentToApprove;
     }
   } else if (showAllCompletedExceptFirst) {
-    // PASO 8: Todos completados excepto el primero
     const firstLesson =
       assignedUnits.length > 0
         ? assignedUnits.reduce((min, unit) =>

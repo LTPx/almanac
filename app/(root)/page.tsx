@@ -17,7 +17,7 @@ import {
 } from "@/components/tutorial/tutorial-provider";
 import { TutorialTestSystem } from "@/components/tutorial/tutorial-test-system";
 import { createTutorialSteps } from "@/components/tutorial/tutorial-steps";
-import { TutorialNFTMinting } from "@/components/tutorial/tutorial-nft-minting";
+import TutorialNFTMinting from "@/components/tutorial/tutorial-nft-minting";
 
 const ContentLoadingScreen = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -80,7 +80,6 @@ function HomePageContent() {
         )
       },
       ...createTutorialSteps(courseHeaderRef).slice(4, 7),
-      // NUEVO PASO: Tutorial de NFT Minting
       {
         id: "nft-minting",
         title: "Crea tu Medalla NFT",
@@ -94,8 +93,7 @@ function HomePageContent() {
             }}
           />
         )
-      },
-      createTutorialSteps(courseHeaderRef)[7] // El paso final
+      }
     ],
     [nextStep, gamification?.hearts, courseHeaderRef]
   );

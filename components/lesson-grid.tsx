@@ -107,12 +107,9 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
       : null;
 
   const getLessonState = (unit: Node): "completed" | "available" | "locked" => {
-    // En modo tutorial, aplicar lógica especial
     if (isTutorialMode) {
-      // Si está en approvedUnits, está completado
       if (approvedUnits.includes(unit.id)) return "completed";
 
-      // CASO ESPECIAL: Paso 7 - el nodo opcional más alto debe estar "available"
       if (
         showOptionalAsAvailable &&
         highestOptionalNode &&
@@ -121,11 +118,9 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
         return "available";
       }
 
-      // Todo lo demás está bloqueado
       return "locked";
     }
 
-    // Modo normal: usar lógica de adyacencia
     if (approvedUnits.includes(unit.id)) return "completed";
     if (isAdjacentToCompleted(unit)) return "available";
     return "locked";

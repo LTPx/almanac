@@ -46,6 +46,12 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
   const step = steps[currentStep];
   const isFullScreenStep = step?.isFullScreen || false;
 
+  useEffect(() => {
+    if (show && !step) {
+      onComplete();
+    }
+  }, [show, step, onComplete]);
+
   const scrollToTarget = useCallback(
     (element: Element, force: boolean = false) => {
       if (userScrolling.current && !force) return;
@@ -131,7 +137,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
   }, [currentStep, onStepChange, steps]);
 
   useEffect(() => {
-    if (!show || isFullScreenStep) return;
+    if (!show || isFullScreenStep || !step) return;
 
     if (updateIntervalRef.current) {
       clearInterval(updateIntervalRef.current);
@@ -266,7 +272,15 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [currentStep, steps, show, isFullScreenStep, scrollToTarget, scrollToTop]);
+  }, [
+    currentStep,
+    steps,
+    show,
+    isFullScreenStep,
+    step,
+    scrollToTarget,
+    scrollToTop
+  ]);
 
   const handleNext = () => {
     if (isTransitioning) return;
@@ -307,7 +321,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
     onComplete();
   };
 
-  if (!show) return null;
+  if (!show || !step) return null;
 
   if (step?.customContent) {
     return (
@@ -491,7 +505,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
 
 function getTooltipPosition(
   targetRect: DOMRect,
-  position?: string // Hacer el parámetro opcional
+  position?: string
 ): { left: number; top: number } {
   const spacing = 20;
   const tooltipWidth = 384;
@@ -501,7 +515,6 @@ function getTooltipPosition(
   let left = targetRect.left + targetRect.width / 2 - tooltipWidth / 2;
   let top = 0;
 
-  // Usar "bottom" como valor por defecto si position es undefined
   const pos = position || "bottom";
 
   switch (pos) {

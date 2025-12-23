@@ -4,7 +4,6 @@ import React from "react";
 import { Curriculum } from "@/lib/types";
 import { useTutorial } from "./tutorial-provider";
 import LearningPath from "../units-learning";
-import { TUTORIAL_STEP_IDS } from "./tutorial-steps";
 
 interface TutorialLearningPathProps {
   curriculum: Curriculum;
