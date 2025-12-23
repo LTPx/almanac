@@ -2,14 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Loader2,
-  Send,
-  Trash2,
-  BookOpen,
-  ThumbsUp,
-  ThumbsDown
-} from "lucide-react";
+import { Loader2, Send, BookOpen, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 
 interface Message {
@@ -60,7 +53,7 @@ export default function AlmanacTutorPage() {
           setMessages(
             data.messages.map((msg: any) => ({
               role: msg.role === "model" ? "assistant" : msg.role,
-              content: msg.content,
+              content: msg.content
             }))
           );
         }
@@ -186,7 +179,7 @@ export default function AlmanacTutorPage() {
                   </p>
                 ) : (
                   <p className="text-sm text-gray-400">
-                    Your AI tutor powered by your Almanac lessons
+                    Tu tutor de IA basado en tus lecciones de Almanac
                   </p>
                 )}
               </div>
@@ -198,7 +191,7 @@ export default function AlmanacTutorPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => endWithFeedback(true)}
-                    title="This was helpful"
+                    title="Esto fue útil"
                     className="border-neutral-600 hover:bg-neutral-800 hover:text-green-400"
                   >
                     <ThumbsUp className="w-4 h-4" />
@@ -207,7 +200,7 @@ export default function AlmanacTutorPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => endWithFeedback(false)}
-                    title="This wasn't helpful"
+                    title="Esto no fue útil"
                     className="border-neutral-600 hover:bg-neutral-800 hover:text-red-400"
                   >
                     <ThumbsDown className="w-4 h-4" />
@@ -221,8 +214,7 @@ export default function AlmanacTutorPage() {
                 disabled={messages.length === 0}
                 className="border-neutral-600 hover:bg-neutral-800"
               >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Clear
+                Nuevo Chat
               </Button>
             </div>
           </div>
@@ -235,26 +227,26 @@ export default function AlmanacTutorPage() {
               <div className="text-center text-gray-400 mt-20">
                 <BookOpen className="w-16 h-16 mx-auto mb-4 text-purple-500 opacity-50" />
                 <p className="text-lg font-semibold mb-2 text-white">
-                  Welcome to Almanac Tutor!
+                  ¡Bienvenido a Almanac Tutor!
                 </p>
                 <p className="text-sm mb-6">
-                  Start a conversation by asking about any lesson from your
-                  curriculum
+                  Comienza una conversación preguntando sobre cualquier lección
+                  de tu currículum
                 </p>
                 <div className="max-w-md mx-auto space-y-3">
                   <button
                     onClick={() =>
-                      setInput("What topics can you help me learn about?")
+                      setInput("¿Sobre qué temas puedes ayudarme a aprender?")
                     }
                     className="block w-full px-4 py-3 text-sm bg-neutral-700 text-white rounded-xl hover:bg-neutral-600 transition-colors border border-neutral-600"
                   >
-                    What topics can you help me learn about?
+                    ¿Sobre qué temas puedes ayudarme a aprender?
                   </button>
                   <button
-                    onClick={() => setInput("I want to learn something new")}
+                    onClick={() => setInput("Quiero aprender algo nuevo")}
                     className="block w-full px-4 py-3 text-sm bg-neutral-700 text-white rounded-xl hover:bg-neutral-600 transition-colors border border-neutral-600"
                   >
-                    I want to learn something new
+                    Quiero aprender algo nuevo
                   </button>
                 </div>
               </div>
@@ -300,7 +292,7 @@ export default function AlmanacTutorPage() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message..."
+              placeholder="Escribe tu mensaje..."
               disabled={loading}
               className="flex-1 px-5 py-4 bg-neutral-800 border-2 border-neutral-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 disabled:opacity-50 transition-colors"
             />
