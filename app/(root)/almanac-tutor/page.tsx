@@ -24,6 +24,7 @@ export default function AlmanacTutorPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   // const [currentTopic, setCurrentTopic] = useState<string | null>(null);
   const [currentTopicData, setCurrentTopicData] = useState<TopicData | null>(
     null
@@ -41,7 +42,10 @@ export default function AlmanacTutorPage() {
 
   // Cargar sesión activa al montar el componente
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      setInitialLoading(false);
+      return;
+    }
 
     const loadActiveSession = async () => {
       try {
@@ -59,6 +63,8 @@ export default function AlmanacTutorPage() {
         }
       } catch (error) {
         console.error("Error loading active session:", error);
+      } finally {
+        setInitialLoading(false);
       }
     };
 
@@ -140,6 +146,19 @@ export default function AlmanacTutorPage() {
   const endWithFeedback = async (helpful: boolean) => {
     await clearConversation(helpful);
   };
+
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen bg-neutral-900 text-white p-6 pb-20 pt-[80px]">
+        <div className="max-w-4xl mx-auto flex items-center justify-center h-[500px]">
+          <div className="text-center">
+            <Loader2 className="w-12 h-12 animate-spin text-purple-500 mx-auto mb-4" />
+            <p className="text-gray-400">Cargando...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-neutral-900 text-white p-6 pb-20 pt-[80px]">
