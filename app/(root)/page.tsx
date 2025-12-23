@@ -58,6 +58,7 @@ function HomePageContent() {
     completeTutorial,
     setStep,
     nextStep,
+    prevStep,
     resetTutorial
   } = useTutorial();
 
@@ -91,11 +92,14 @@ function HomePageContent() {
             onClose={() => {
               nextStep();
             }}
+            onBack={() => {
+              prevStep();
+            }}
           />
         )
       }
     ],
-    [nextStep, gamification?.hearts, courseHeaderRef]
+    [nextStep, prevStep, gamification?.hearts, courseHeaderRef]
   );
 
   useEffect(() => {

@@ -14,6 +14,7 @@ import { AnimatePresence, motion } from "motion/react";
 
 interface TutorialNFTMintingProps {
   onClose: () => void;
+  onBack?: () => void;
 }
 
 const MOCK_UNITS = [
@@ -155,7 +156,8 @@ const StepIndicator = ({ currentStep }: { currentStep: number }) => (
 );
 
 export default function TutorialNFTMinting({
-  onClose
+  onClose,
+  onBack
 }: TutorialNFTMintingProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedUnitId, setSelectedUnitId] = useState("");
@@ -168,8 +170,8 @@ export default function TutorialNFTMinting({
   const selectedUnit = MOCK_UNITS.find((u) => u.id === selectedUnitId);
 
   const handleBack = () => {
-    if (currentStep === 0) {
-      onClose();
+    if (currentStep === 0 && onBack) {
+      onBack();
     } else if (currentStep > 0) {
       setCurrentStep((prev) => prev - 1);
       if (currentStep === 3) {
