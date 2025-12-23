@@ -28,9 +28,6 @@ export default async function HomeLayout({
   const adminUsers = process.env.ADMIN_USERS_IDS || "";
   const users = adminUsers.split(",");
   const isAdmin = users.includes(user.id);
-  console.log("users: ", users);
-  console.log("user.id: ", user.id);
-  console.log("isAdmin: ", isAdmin);
 
   return (
     <UserProvider user={{ ...user, isPremium, isAdmin, hasWallet }}>

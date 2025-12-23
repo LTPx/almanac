@@ -69,7 +69,6 @@ function Contents() {
     };
 
     loadCurriculumUnits();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCurriculumId, fetchCurriculumWithUnits, unitIdParam]);
 
   if (isLoading) {

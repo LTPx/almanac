@@ -80,7 +80,7 @@ export default function NFTDetailPage() {
 
   useEffect(() => {
     fetchNFTDetail();
-  }, [nftId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [nftId]);
 
   const fetchNFTDetail = async () => {
     try {
@@ -263,6 +263,37 @@ export default function NFTDetailPage() {
                 <p className="text-gray-400 text-sm leading-relaxed">
                   {nft.nftAsset?.collection?.description}
                 </p>
+              </div>
+              <div className="">
+                <p className="font-semibold mb-2">Duración del logro</p>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400 text-sm">
+                      Fecha de inicio
+                    </span>
+                    <span className="text-white text-sm font-medium">
+                      15 Nov 2025
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400 text-sm">
+                      Fecha de finalización
+                    </span>
+                    <span className="text-white text-sm font-medium">
+                      28 Nov 2025
+                    </span>
+                  </div>
+                  <div className="pt-2 mt-2 border-t border-gray-700">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 text-sm">
+                        Tiempo total
+                      </span>
+                      <span className="text-[#32C781] text-sm font-bold">
+                        44 días
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Achievements */}

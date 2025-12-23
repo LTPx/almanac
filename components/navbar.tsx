@@ -8,6 +8,7 @@ import { useUser } from "@/context/UserContext";
 import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Bot } from "lucide-react";
 
 export default function Navbar() {
   const user = useUser();
@@ -36,6 +37,15 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             {user ? (
               <>
+                <Link
+                  href="/almanac-tutor"
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <Button variant="outline">
+                    <Bot className="h-5 w-5" />
+                    Chat
+                  </Button>
+                </Link>
                 {user.isAdmin && (
                   <Link
                     href="/admin"
