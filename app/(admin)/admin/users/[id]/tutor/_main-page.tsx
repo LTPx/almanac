@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -11,10 +11,29 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import { ArrowLeft, MessageSquare, ThumbsUp, ThumbsDown } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpen,
+  MessageSquare,
+  Clock,
+  ThumbsUp,
+  ThumbsDown,
+  TrendingUp,
+  Eye
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
+
+interface TutorStats {
+  totalSessions: number;
+  totalMessages: number;
+  uniqueLessons: number;
+  helpfulSessions: number;
+  unhelpfulSessions: number;
+  unratedSessions: number;
+  helpfulnessRate: number | null;
+}
 
 interface Session {
   id: string;
@@ -36,8 +55,10 @@ interface Session {
 
 export default function UserTutorStatsPage() {
   const params = useParams();
+  const router = useRouter();
   const userId = params.id as string;
 
+  const [stats, setStats] = useState<TutorStats | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +76,7 @@ export default function UserTutorStatsPage() {
       const statsResponse = await fetch(
         `/api/almanac/sessions?userId=${userId}&stats=true`
       );
+      const statsData = await statsResponse.json();
 
       // Fetch sessions
       const sessionsResponse = await fetch(
@@ -63,6 +85,7 @@ export default function UserTutorStatsPage() {
       const sessionsData = await sessionsResponse.json();
 
       if (statsResponse.ok && sessionsResponse.ok) {
+        setStats(statsData.stats);
         setSessions(sessionsData.sessions);
       } else {
         setError("Error loading tutor data");
@@ -73,6 +96,10 @@ export default function UserTutorStatsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const viewSessionDetails = (sessionId: string) => {
+    router.push(`/admin/users/${userId}/tutor/${sessionId}`);
   };
 
   const formatDate = (dateString: string) => {
@@ -130,6 +157,96 @@ export default function UserTutorStatsPage() {
         </div>
       </div>
 
+      {/* Stats Cards */}
+      {stats && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Total Sessions
+                </p>
+                <p className="text-2xl font-bold">{stats.totalSessions}</p>
+              </div>
+              <BookOpen className="h-8 w-8 text-blue-500" />
+            </div>
+          </Card>
+          <Card className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Total Messages
+                </p>
+                <p className="text-2xl font-bold">{stats.totalMessages}</p>
+              </div>
+              <MessageSquare className="h-8 w-8 text-green-500" />
+            </div>
+          </Card>
+          <Card className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Unique Lessons
+                </p>
+                <p className="text-2xl font-bold">{stats.uniqueLessons}</p>
+              </div>
+              <TrendingUp className="h-8 w-8 text-purple-500" />
+            </div>
+          </Card>
+          <Card className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Helpfulness Rate
+                </p>
+                <p className="text-2xl font-bold">
+                  {stats.helpfulnessRate !== null
+                    ? `${stats.helpfulnessRate.toFixed(1)}%`
+                    : "N/A"}
+                </p>
+              </div>
+              <ThumbsUp className="h-8 w-8 text-yellow-500" />
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Feedback Summary */}
+      {stats && (
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold mb-4">Feedback Summary</h3>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-2">
+                <ThumbsUp className="h-5 w-5 text-green-500 mr-2" />
+                <span className="text-2xl font-bold text-green-600">
+                  {stats.helpfulSessions}
+                </span>
+              </div>
+              <p className="text-sm text-gray-500">Helpful</p>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-2">
+                <ThumbsDown className="h-5 w-5 text-red-500 mr-2" />
+                <span className="text-2xl font-bold text-red-600">
+                  {stats.unhelpfulSessions}
+                </span>
+              </div>
+              <p className="text-sm text-gray-500">Not Helpful</p>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-2">
+                <Clock className="h-5 w-5 text-gray-400 mr-2" />
+                <span className="text-2xl font-bold text-gray-600">
+                  {stats.unratedSessions}
+                </span>
+              </div>
+              <p className="text-sm text-gray-500">Unrated</p>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Sessions Table */}
       <Card className="p-4">
         <div className="p-4 border-b">
@@ -145,6 +262,7 @@ export default function UserTutorStatsPage() {
               <TableHead>Started</TableHead>
               <TableHead>Feedback</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -206,6 +324,16 @@ export default function UserTutorStatsPage() {
                     ) : (
                       <Badge variant="outline">Ended</Badge>
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => viewSessionDetails(session.id)}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      View
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
