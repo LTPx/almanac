@@ -80,7 +80,7 @@ export default function NFTDetailPage() {
 
   useEffect(() => {
     fetchNFTDetail();
-  }, [nftId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [nftId]);
 
   const fetchNFTDetail = async () => {
     try {
