@@ -18,6 +18,7 @@ import {
 import { TutorialTestSystem } from "@/components/tutorial/tutorial-test-system";
 import { createTutorialSteps } from "@/components/tutorial/tutorial-steps";
 import TutorialNFTMinting from "@/components/tutorial/tutorial-nft-minting";
+import { TutorialChatDemo } from "@/components/tutorial/tutorial-chat-demo";
 
 const ContentLoadingScreen = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -81,6 +82,24 @@ function HomePageContent() {
         )
       },
       ...createTutorialSteps(courseHeaderRef).slice(4, 7),
+      {
+        id: "chat-demo",
+        title: "Demo del Tutor",
+        description: "Conoce a tu tutor personal",
+        isFullScreen: true,
+        customContent: (
+          <TutorialChatDemo
+            key="tutorial-chat-demo"
+            onClose={() => {
+              nextStep();
+            }}
+            onBack={() => {
+              prevStep();
+            }}
+          />
+        )
+      },
+      ...createTutorialSteps(courseHeaderRef).slice(7, 8),
       {
         id: "nft-minting",
         title: "Crea tu Medalla NFT",

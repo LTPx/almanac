@@ -47,8 +47,7 @@ export function TutorialLearningPath({
           showAllCompletedExceptFirst: false,
           isTutorialMode: true
         };
-
-      case 7:
+      case 9:
         return {
           showAsCompleted: false,
           showOptionalAsAvailable: false,

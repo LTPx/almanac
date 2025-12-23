@@ -1,5 +1,12 @@
 import { ReactNode } from "react";
-import { BookOpen, List, GraduationCap, Target, Award } from "lucide-react";
+import {
+  BookOpen,
+  List,
+  GraduationCap,
+  Target,
+  Award,
+  Bot
+} from "lucide-react";
 
 export interface TutorialStep {
   id: string;
@@ -21,6 +28,7 @@ export const TUTORIAL_STEP_IDS = {
   NFT_MINTING: "nft-minting",
   COMPLETED_UNIT: "completed-unit",
   OPTIONAL_UNIT: "optional-unit",
+  TUTOR_CHAT: "tutor-chat",
   FINAL_UNIT: "final-unit"
 } as const;
 
@@ -70,7 +78,6 @@ export function createTutorialSteps(
       icon: <Target className="w-8 h-8" />,
       position: "bottom"
     },
-
     {
       id: TUTORIAL_STEP_IDS.COMPLETED_UNIT,
       target: "[data-highest-position='true']",
@@ -91,6 +98,18 @@ export function createTutorialSteps(
         "Algunas unidades son obligatorias y otras son opcionales. Las opcionales te permiten practicar más y mejorar tus habilidades, pero no son necesarias para avanzar.",
       icon: <Target className="w-8 h-8" />,
       position: "top",
+      action: () => {
+        courseHeaderRef.current?.closeSelect();
+      }
+    },
+    {
+      id: TUTORIAL_STEP_IDS.TUTOR_CHAT,
+      target: "[data-tutorial-chat='true']",
+      title: "Tu Tutor Personal 🤖",
+      description:
+        "Si tienes preguntas o necesitas ayuda, puedes conversar con tu tutor personal. Escribe y envía tu mensaje para obtener asistencia.",
+      icon: <Bot className="w-8 h-8" />,
+      position: "bottom",
       action: () => {
         courseHeaderRef.current?.closeSelect();
       }
