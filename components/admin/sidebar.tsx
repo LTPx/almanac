@@ -17,7 +17,8 @@ import {
   Sparkles,
   ChevronRight,
   GraduationCap as AcademicIcon,
-  Users
+  Users,
+  Bot
 } from "lucide-react";
 
 interface NavItem {
@@ -51,6 +52,7 @@ const settingsNav: NavItem[] = [
     icon: Settings,
     children: [
       { name: "Generador IA", href: "/admin/ai-generator", icon: Sparkles },
+      { name: "Programación Tutor", href: "/admin/tutor-config", icon: Bot },
       { name: "Subir Contenido", href: "/admin/settings", icon: AcademicIcon }
       // { name: "Corazones", href: "/admin/gamification/hearts", icon: Heart }
     ]

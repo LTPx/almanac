@@ -57,7 +57,6 @@ export default function LearningPathPage({
 
   useEffect(() => {
     fetchLessons();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const renderContent = () => {

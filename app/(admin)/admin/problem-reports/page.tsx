@@ -136,7 +136,6 @@ export default function ProblemReportsPage() {
 
   useEffect(() => {
     fetchReports();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedStatus]);
 
   const filteredReports = reports.filter((report) => {

@@ -72,7 +72,6 @@ export default function UserManagePage() {
   useEffect(() => {
     loadUser();
     loadCurriculums();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const loadUser = async () => {

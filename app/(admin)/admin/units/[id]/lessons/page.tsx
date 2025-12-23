@@ -90,21 +90,20 @@ export default function UnitLessonsPage() {
     }
   };
 
-  useEffect(() => {
-    const loadLessons = async () => {
-      try {
-        const unitsData = await fetchLessons();
-        setLessons(unitsData);
-      } catch (error) {
-        console.error("Error loading lessons:", error);
-        toast.error("Error loading lessons");
-      } finally {
-        // setLoading(false);
-      }
-    };
+  const loadLessons = async () => {
+    try {
+      const unitsData = await fetchLessons();
+      setLessons(unitsData);
+    } catch (error) {
+      console.error("Error loading lessons:", error);
+      toast.error("Error loading lessons");
+    } finally {
+      // setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadLessons();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

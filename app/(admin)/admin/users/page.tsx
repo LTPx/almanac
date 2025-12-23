@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import { Search, Coins, Zap, Eye, Heart } from "lucide-react";
+import { Search, Coins, Zap, Eye, Heart, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface UserResult {
@@ -109,6 +109,10 @@ export default function UsersPage() {
 
   const handleViewUser = (userId: string) => {
     router.push(`/admin/users/${userId}/manage`);
+  };
+
+  const handleViewTutorStats = (userId: string) => {
+    router.push(`/admin/users/${userId}/tutor`);
   };
 
   return (
@@ -210,15 +214,27 @@ export default function UsersPage() {
                     {new Date(user.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleViewUser(user.id)}
-                      className="gap-2"
-                    >
-                      <Eye className="w-4 h-4" />
-                      Ver
-                    </Button>
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleViewUser(user.id)}
+                        className="gap-2"
+                      >
+                        <Eye className="w-4 h-4" />
+                        Ver
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleViewTutorStats(user.id)}
+                        className="gap-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                        title="Ver estadísticas del Almanac Tutor"
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        Tutor
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
