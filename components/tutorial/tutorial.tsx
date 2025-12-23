@@ -328,7 +328,10 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
 
   if (!targetRect) return null;
 
-  const tooltipPosition = getTooltipPosition(targetRect, step.position);
+  const tooltipPosition = getTooltipPosition(
+    targetRect,
+    step?.position || "bottom"
+  );
 
   return (
     <AnimatePresence mode="wait">
@@ -488,7 +491,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
 
 function getTooltipPosition(
   targetRect: DOMRect,
-  position: string = "bottom"
+  position?: string // Hacer el parámetro opcional
 ): { left: number; top: number } {
   const spacing = 20;
   const tooltipWidth = 384;
@@ -498,7 +501,10 @@ function getTooltipPosition(
   let left = targetRect.left + targetRect.width / 2 - tooltipWidth / 2;
   let top = 0;
 
-  switch (position) {
+  // Usar "bottom" como valor por defecto si position es undefined
+  const pos = position || "bottom";
+
+  switch (pos) {
     case "top":
       top = targetRect.top - 220 - topSpacing;
       break;

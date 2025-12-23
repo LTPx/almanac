@@ -18,7 +18,8 @@ export const TUTORIAL_STEP_IDS = {
   REVIEW_UNITS: "review-units",
   UNIT_EXPLANATIONS: "unit-explanations",
   START_TEST: "start-test",
-
+  // Nuevo paso:
+  NFT_MINTING: "nft-minting",
   COMPLETED_UNIT: "completed-unit",
   OPTIONAL_UNIT: "optional-unit",
   FINAL_UNIT: "final-unit"
