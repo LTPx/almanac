@@ -18,6 +18,7 @@ export interface TutorialStep {
   action?: () => void;
   customContent?: ReactNode;
   isFullScreen?: boolean;
+  beforeStepChange?: () => void;
 }
 
 export const TUTORIAL_STEP_IDS = {
@@ -65,6 +66,9 @@ export function createTutorialSteps(
         "Cada unidad tiene explicaciones detalladas que puedes revisar antes de hacer las pruebas. ¡Tómate tu tiempo para aprender!",
       icon: <GraduationCap className="w-8 h-8" />,
       position: "bottom",
+      beforeStepChange: () => {
+        courseHeaderRef.current?.closeSelect();
+      },
       action: () => {
         courseHeaderRef.current?.closeSelect();
       }

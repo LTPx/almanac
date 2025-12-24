@@ -14,6 +14,8 @@ interface TutorialStep {
   action?: () => void;
   customContent?: React.ReactNode;
   isFullScreen?: boolean;
+
+  beforeStepChange?: () => void;
 }
 
 interface TutorialSpotlightProps {
@@ -301,8 +303,14 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
     if (isTransitioning) return;
 
     if (currentStep < steps.length - 1) {
+      const nextStep = steps[currentStep + 1];
+      if (nextStep?.beforeStepChange) {
+        nextStep.beforeStepChange();
+      }
+
       setIsTransitioning(true);
       setFadeOut(true);
+      setTargetRect(null);
       lastScrollTarget.current = null;
 
       setTimeout(() => {
@@ -319,8 +327,27 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
     if (isTransitioning) return;
 
     if (currentStep > 0) {
+      const prevStep = steps[currentStep - 1];
+      if (prevStep?.id === "review-units") {
+      } else {
+        const selectTrigger = document.querySelector(
+          ".course-header-select button"
+        );
+        const selectContent = document.querySelector(
+          "[data-radix-select-content]"
+        );
+
+        if (selectContent && selectTrigger instanceof HTMLElement) {
+          const isOpen = selectContent.getAttribute("data-state") === "open";
+          if (isOpen) {
+            selectTrigger.click();
+          }
+        }
+      }
+
       setIsTransitioning(true);
       setFadeOut(true);
+      setTargetRect(null);
       lastScrollTarget.current = null;
       userScrolling.current = false;
 
@@ -460,7 +487,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
                 </p>
               </motion.div>
 
-              {/* Barra de progreso */}
               <div className="mb-5">
                 <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
                   <motion.div
@@ -474,7 +500,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
                 </div>
               </div>
 
-              {/* Botones y contador alineados */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <motion.button
@@ -499,7 +524,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
                   </motion.button>
                 </div>
 
-                {/* Indicador de paso a la derecha */}
                 <div className="text-sm text-gray-400 font-medium">
                   {currentStep + 1} de {steps.length}
                 </div>
