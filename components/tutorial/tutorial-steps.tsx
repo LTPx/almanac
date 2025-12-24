@@ -59,12 +59,12 @@ export function createTutorialSteps(
     },
     {
       id: TUTORIAL_STEP_IDS.UNIT_EXPLANATIONS,
-      target: "[data-highest-position='true']",
+      target: "[data-tutorial-book='true']",
       title: "Aprende con explicaciones 📖",
       description:
         "Cada unidad tiene explicaciones detalladas que puedes revisar antes de hacer las pruebas. ¡Tómate tu tiempo para aprender!",
       icon: <GraduationCap className="w-8 h-8" />,
-      position: "top",
+      position: "bottom",
       action: () => {
         courseHeaderRef.current?.closeSelect();
       }

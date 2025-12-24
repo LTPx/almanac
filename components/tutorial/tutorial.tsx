@@ -182,7 +182,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
           }
         }
       } else if (stepConfig.id === "unit-explanations") {
-        target = document.querySelector('[data-highest-position="true"]');
+        target = document.querySelector('[data-tutorial-book="true"]');
 
         if (target) {
           const rect = target.getBoundingClientRect();

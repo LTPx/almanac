@@ -236,6 +236,7 @@ export function StepPopover({
                 animate={controls}
                 initial={{ scale: 1, opacity: 1 }}
                 whileTap={{ scale: 0.9 }}
+                data-tutorial-book={isHighestPosition ? "true" : undefined}
               >
                 <BookOpen
                   className={`w-9 h-9 ${getIconColor()} group-hover:opacity-100 transition-opacity drop-shadow-sm`}
