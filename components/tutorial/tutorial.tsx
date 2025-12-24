@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ArrowRight, ArrowLeft } from "lucide-react";
+import { X } from "lucide-react";
 
 interface TutorialStep {
   id: string;
@@ -14,7 +14,6 @@ interface TutorialStep {
   action?: () => void;
   customContent?: React.ReactNode;
   isFullScreen?: boolean;
-
   beforeStepChange?: () => void;
 }
 
@@ -363,6 +362,22 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
     onComplete();
   };
 
+  const handleSpotlightClick = (e: React.MouseEvent) => {
+    if (!targetRect || isTransitioning) return;
+
+    const clickX = e.clientX;
+    const clickY = e.clientY;
+    const isInsideSpotlight =
+      clickX >= targetRect.left - 8 &&
+      clickX <= targetRect.right + 8 &&
+      clickY >= targetRect.top - 8 &&
+      clickY <= targetRect.bottom + 8;
+
+    if (isInsideSpotlight) {
+      handleNext();
+    }
+  };
+
   if (!show || !step) return null;
 
   if (step?.customContent) {
@@ -399,6 +414,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
         className="fixed inset-0 z-[9998]"
+        onClick={handleSpotlightClick}
       >
         <svg className="absolute inset-0 w-full h-full pointer-events-none">
           <defs>
@@ -427,6 +443,20 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
             className="pointer-events-auto"
           />
         </svg>
+
+        <motion.div
+          key={`clickable-area-${currentStep}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="absolute cursor-pointer z-[9999] hover:bg-purple-500/10 transition-colors rounded-xl"
+          style={{
+            left: targetRect.left - 12,
+            top: targetRect.top - 12,
+            width: targetRect.width + 24,
+            height: targetRect.height + 24
+          }}
+          title="Click para continuar"
+        />
 
         <motion.div
           key={`border-${currentStep}`}
@@ -467,6 +497,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
                 left: tooltipPosition.left,
                 top: tooltipPosition.top
               }}
+              onClick={(e) => e.stopPropagation()}
             >
               <button
                 onClick={handleSkip}
