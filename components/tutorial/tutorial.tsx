@@ -36,6 +36,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
   const [showTooltip] = useState(true);
+  const [containerBounds, setContainerBounds] = useState<DOMRect | null>(null);
   const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isInternalChangeRef = useRef(false);
 
@@ -45,6 +46,20 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
 
   const step = steps[currentStep];
   const isFullScreenStep = step?.isFullScreen || false;
+
+  useEffect(() => {
+    const updateContainerBounds = () => {
+      const mainContainer = document.querySelector("main")?.parentElement;
+      if (mainContainer) {
+        setContainerBounds(mainContainer.getBoundingClientRect());
+      }
+    };
+
+    updateContainerBounds();
+    window.addEventListener("resize", updateContainerBounds);
+
+    return () => window.removeEventListener("resize", updateContainerBounds);
+  }, []);
 
   useEffect(() => {
     if (show && !step) {
@@ -344,7 +359,8 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
 
   const tooltipPosition = getTooltipPosition(
     targetRect,
-    step?.position || "bottom"
+    step?.position || "bottom",
+    containerBounds
   );
 
   return (
@@ -505,12 +521,16 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
 
 function getTooltipPosition(
   targetRect: DOMRect,
-  position?: string
+  position?: string,
+  containerBounds?: DOMRect | null
 ): { left: number; top: number } {
   const spacing = 20;
   const tooltipWidth = 384;
   const padding = 16;
   const topSpacing = 70;
+
+  const minX = containerBounds?.left ?? padding;
+  const maxX = containerBounds?.right ?? window.innerWidth - padding;
 
   let left = targetRect.left + targetRect.width / 2 - tooltipWidth / 2;
   let top = 0;
@@ -536,12 +556,11 @@ function getTooltipPosition(
       top = targetRect.bottom + spacing;
   }
 
-  const maxWidth = window.innerWidth;
-  if (left < padding) {
-    left = padding;
+  if (left < minX) {
+    left = minX;
   }
-  if (left + tooltipWidth > maxWidth - padding) {
-    left = maxWidth - tooltipWidth - padding;
+  if (left + tooltipWidth > maxX) {
+    left = maxX - tooltipWidth;
   }
 
   if (top < padding) {
