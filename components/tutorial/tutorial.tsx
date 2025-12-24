@@ -443,7 +443,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
             >
               <button
                 onClick={handleSkip}
-                className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors duration-200"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -452,63 +452,54 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
                 animate={{ opacity: fadeOut ? 0 : 1 }}
                 transition={{ duration: 0.2 }}
               >
-                {step.icon && (
-                  <div className="mb-3 text-purple-600">{step.icon}</div>
-                )}
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
                   {step.title}
                 </h3>
-                <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                <p className="text-gray-500 text-sm leading-relaxed mb-6">
                   {step.description}
                 </p>
               </motion.div>
-              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                <div className="flex gap-1">
-                  {steps.map((_, index) => (
-                    <motion.div
-                      key={index}
-                      initial={false}
-                      animate={{
-                        width: index === currentStep ? 24 : 8,
-                        backgroundColor:
-                          index === currentStep ? "#9333ea" : "#d1d5db"
-                      }}
-                      transition={{
-                        duration: 0.3,
-                        ease: "easeInOut"
-                      }}
-                      className="h-2 rounded-full"
-                    />
-                  ))}
-                </div>
 
-                <div className="flex gap-2">
-                  {currentStep > 0 && (
-                    <motion.button
-                      initial={{ opacity: 0, x: 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 10 }}
-                      transition={{ duration: 0.2 }}
-                      onClick={handlePrev}
-                      disabled={isTransitioning}
-                      className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1 disabled:opacity-50"
-                    >
-                      <ArrowLeft className="w-4 h-4" />
-                      Atrás
-                    </motion.button>
-                  )}
+              {/* Barra de progreso */}
+              <div className="mb-5">
+                <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{
+                      width: `${((currentStep + 1) / steps.length) * 100}%`
+                    }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="h-full bg-purple-600"
+                  />
+                </div>
+              </div>
+
+              {/* Botones y contador alineados */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handlePrev}
+                    disabled={isTransitioning || currentStep === 0}
+                    className="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={handleNext}
                     disabled={isTransitioning}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 flex items-center gap-2 text-sm font-semibold disabled:opacity-50 shadow-md hover:shadow-lg"
+                    className="px-5 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 text-sm font-medium disabled:opacity-50 shadow-md hover:shadow-lg"
                   >
-                    {currentStep === steps.length - 1
-                      ? "¡Empezar!"
-                      : "Siguiente"}
-                    <ArrowRight className="w-4 h-4" />
+                    {currentStep === steps.length - 1 ? "¡Empezar!" : "Next"}
                   </motion.button>
+                </div>
+
+                {/* Indicador de paso a la derecha */}
+                <div className="text-sm text-gray-400 font-medium">
+                  {currentStep + 1} of {steps.length}
                 </div>
               </div>
             </motion.div>
