@@ -33,21 +33,21 @@ export function TutorialLearningPath({
 
   const getTutorialProps = () => {
     switch (currentStep) {
-      case 5:
+      case 6:
         return {
           showAsCompleted: true,
           showOptionalAsAvailable: false,
           showAllCompletedExceptFirst: false,
           isTutorialMode: true
         };
-      case 6:
+      case 7:
         return {
           showAsCompleted: false,
           showOptionalAsAvailable: true,
           showAllCompletedExceptFirst: false,
           isTutorialMode: true
         };
-      case 9:
+      case 10:
         return {
           showAsCompleted: false,
           showOptionalAsAvailable: false,

@@ -19,6 +19,7 @@ import { TutorialTestSystem } from "@/components/tutorial/tutorial-test-system";
 import { createTutorialSteps } from "@/components/tutorial/tutorial-steps";
 import TutorialNFTMinting from "@/components/tutorial/tutorial-nft-minting";
 import { TutorialChatDemo } from "@/components/tutorial/tutorial-chat-demo";
+import { TutorialContentsDemo } from "@/components/tutorial/tutorial-contents";
 
 const ContentLoadingScreen = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -65,7 +66,25 @@ function HomePageContent() {
 
   const tutorialSteps = useMemo(
     () => [
-      ...createTutorialSteps(courseHeaderRef).slice(0, 4),
+      ...createTutorialSteps(courseHeaderRef).slice(0, 3),
+      {
+        id: "contents-demo",
+        title: "Explora los Contenidos",
+        description: "Revisa las explicaciones detalladas",
+        isFullScreen: true,
+        customContent: (
+          <TutorialContentsDemo
+            key="tutorial-contents-demo"
+            onClose={() => {
+              nextStep();
+            }}
+            onBack={() => {
+              prevStep();
+            }}
+          />
+        )
+      },
+      ...createTutorialSteps(courseHeaderRef).slice(3, 4),
       {
         id: "test-demo",
         title: "Práctica Interactiva",
