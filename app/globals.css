@@ -12,9 +12,9 @@
   display: none; 
 }
 
-[data-radix-popper-content-wrapper] {
+/* [data-radix-popper-content-wrapper] {
   z-index: 8888 !important;
-}
+} */
 
 :root {
   --background: oklch(0.2046 0 0);
