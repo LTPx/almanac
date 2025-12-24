@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, ArrowRight, ArrowLeft } from "lucide-react";
 
 interface TutorialStep {
   id: string;
@@ -67,6 +67,24 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       onComplete();
     }
   }, [show, step, onComplete]);
+
+  useEffect(() => {
+    if (step?.id !== "review-units") return;
+
+    const handleCurriculumChange = () => {
+      setTimeout(() => {
+        if (!isTransitioning) {
+          handleNext();
+        }
+      }, 400);
+    };
+
+    window.addEventListener("curriculum-changed", handleCurriculumChange);
+
+    return () => {
+      window.removeEventListener("curriculum-changed", handleCurriculumChange);
+    };
+  }, [step, isTransitioning]);
 
   const scrollToTarget = useCallback(
     (element: Element, force: boolean = false) => {
@@ -365,8 +383,13 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
   const handleSpotlightClick = (e: React.MouseEvent) => {
     if (!targetRect || isTransitioning) return;
 
+    if (step?.id === "review-units") {
+      return;
+    }
+
     const clickX = e.clientX;
     const clickY = e.clientY;
+
     const isInsideSpotlight =
       clickX >= targetRect.left - 8 &&
       clickX <= targetRect.right + 8 &&
@@ -414,7 +437,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
         className="fixed inset-0 z-[9998]"
-        onClick={handleSpotlightClick}
+        onClick={step?.id === "review-units" ? undefined : handleSpotlightClick}
       >
         <svg className="absolute inset-0 w-full h-full pointer-events-none">
           <defs>
@@ -443,20 +466,21 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
             className="pointer-events-auto"
           />
         </svg>
-
-        <motion.div
-          key={`clickable-area-${currentStep}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="absolute cursor-pointer z-[9999] hover:bg-purple-500/10 transition-colors rounded-xl"
-          style={{
-            left: targetRect.left - 12,
-            top: targetRect.top - 12,
-            width: targetRect.width + 24,
-            height: targetRect.height + 24
-          }}
-          title="Click para continuar"
-        />
+        {step?.id !== "review-units" && (
+          <motion.div
+            key={`clickable-area-${currentStep}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute cursor-pointer z-[9999] hover:bg-purple-500/10 transition-colors rounded-xl"
+            style={{
+              left: targetRect.left - 12,
+              top: targetRect.top - 12,
+              width: targetRect.width + 24,
+              height: targetRect.height + 24
+            }}
+            title="Click para continuar"
+          />
+        )}
 
         <motion.div
           key={`border-${currentStep}`}
