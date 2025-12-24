@@ -484,7 +484,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
                     disabled={isTransitioning || currentStep === 0}
                     className="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    Previous
+                    Atras
                   </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.02 }}
@@ -493,13 +493,15 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
                     disabled={isTransitioning}
                     className="px-5 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 text-sm font-medium disabled:opacity-50 shadow-md hover:shadow-lg"
                   >
-                    {currentStep === steps.length - 1 ? "¡Empezar!" : "Next"}
+                    {currentStep === steps.length - 1
+                      ? "¡Empezar!"
+                      : "Siguiente"}
                   </motion.button>
                 </div>
 
                 {/* Indicador de paso a la derecha */}
                 <div className="text-sm text-gray-400 font-medium">
-                  {currentStep + 1} of {steps.length}
+                  {currentStep + 1} de {steps.length}
                 </div>
               </div>
             </motion.div>
