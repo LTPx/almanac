@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { X, ArrowLeft, BookOpen, Loader2, ArrowRight } from "lucide-react";
+import { ArrowLeft, BookOpen, Loader2, ArrowRight } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -14,7 +14,6 @@ import { useCurriculums } from "@/hooks/use-curriculums";
 import { useCurriculumStore } from "@/store/useCurriculumStore";
 import { useUser } from "@/context/UserContext";
 import { Lesson, Unit, Curriculum } from "@/lib/types";
-import { Button } from "../ui/button";
 
 interface TutorialContentsProps {
   onClose: () => void;
@@ -95,52 +94,62 @@ export function TutorialContentsDemo({
 
   return (
     <div className="w-full max-w-[650px] inset-0 z-[9999] bg-neutral-900 flex flex-col overflow-hidden">
-      <div className="px-4 py-4 flex items-center justify-between">
-        <button
-          onClick={onBack}
-          className="text-white hover:text-gray-300 transition-colors"
-        >
-          <ArrowLeft className="w-6 h-6" />
-        </button>
-        <h1 className="text-white text-lg font-bold">Contenidos</h1>
-        <Button
-          onClick={onClose}
-          className="bg-purple-600 hover:bg-purple-700 text-white"
-        >
-          Continuar Tutorial
-          <ArrowRight className="w-4 h-4 ml-2" />
-        </Button>
+      <div className="px-6 py-4 border-b border-neutral-800">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
+          >
+            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-sm font-medium">Atrás</span>
+          </button>
+
+          <h1 className="absolute left-1/2 -translate-x-1/2 text-white text-xl font-bold flex items-center gap-2">
+            Contenidos
+          </h1>
+
+          <button
+            onClick={onClose}
+            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+          >
+            Continuar
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
+
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="mt-[0px] bg-purple-600/20 border-2 border-purple-500/50 rounded-2xl p-4 mb-4"
+        className="mx-6 mt-6 bg-purple-600/20 border border-purple-500/50 rounded-xl p-4"
       >
-        <div className="flex items-start gap-4 max-w-4xl mx-auto">
-          <div className="bg-white/20 rounded-full p-3 backdrop-blur-sm">
-            <BookOpen className="w-6 h-6" />
+        <div className="flex items-start gap-3">
+          <div className="bg-purple-500/30 rounded-lg p-2 backdrop-blur-sm">
+            <BookOpen className="w-5 h-5 text-purple-300" />
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-bold mb-2">Explora el Contenido</h2>
-            <p className="text-white/90 text-sm leading-relaxed">
-              Aquí puedes revisar todas las explicaciones detalladas de cada
-              lección. Haz clic en cualquier tema para ver su contenido
-              completo. ¡Estudia a tu propio ritmo!
+            <h2 className="text-white font-semibold mb-1">
+              Explora el Contenido
+            </h2>
+            <p className="text-white/80 text-sm leading-relaxed">
+              Revisa las explicaciones detalladas de cada lección. Haz clic en
+              cualquier tema para ver su contenido completo.
             </p>
           </div>
         </div>
       </motion.div>
+
       <div className="flex-1 overflow-y-auto px-6 py-6">
         <div className="max-w-4xl mx-auto">
-          <motion.h1
+          <motion.h2
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-[22px] font-bold text-white mb-6"
+            className="text-lg font-bold text-white mb-4"
           >
             Temas
-          </motion.h1>
+          </motion.h2>
 
           {units.map((unit: Unit, unitIndex) => (
             <motion.div
@@ -151,8 +160,10 @@ export function TutorialContentsDemo({
               id={`unit-${unit.id}`}
               className="mb-6 scroll-mt-20"
             >
-              <h2 className="text-xl font-bold text-white mb-3">{unit.name}</h2>
-              <div className="border-2 border-neutral-600 rounded-2xl overflow-hidden">
+              <h3 className="text-base font-semibold text-white mb-3">
+                {unit.name}
+              </h3>
+              <div className="border-2 border-neutral-700 rounded-xl overflow-hidden">
                 <Accordion
                   type="single"
                   collapsible
@@ -164,12 +175,12 @@ export function TutorialContentsDemo({
                     <AccordionItem
                       key={lesson.id}
                       value={`lesson-${lesson.id}`}
-                      className="border-neutral-600 last:border-0"
+                      className="border-neutral-700 last:border-0"
                     >
-                      <AccordionTrigger className="text-white text-base font-semibold px-5 py-5 hover:bg-neutral-750 hover:no-underline">
+                      <AccordionTrigger className="text-white text-sm font-medium px-4 py-4 hover:bg-neutral-800/50 hover:no-underline transition-colors">
                         {lesson.name}
                       </AccordionTrigger>
-                      <AccordionContent className="px-5 pb-5 pt-2 border-t border-neutral-700">
+                      <AccordionContent className="px-4 pb-4 pt-2 border-t border-neutral-800 bg-neutral-900/50">
                         <FormattedTextDisplay text={lesson.description} />
                       </AccordionContent>
                     </AccordionItem>

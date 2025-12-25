@@ -15,7 +15,7 @@ interface TutorialStep {
   customContent?: React.ReactNode;
   isFullScreen?: boolean;
   beforeStepChange?: () => void;
-  hideTooltip?: boolean; // 👈 Nueva propiedad
+  hideTooltip?: boolean;
 }
 
 interface TutorialSpotlightProps {
@@ -48,10 +48,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
   const step = steps[currentStep];
   const isFullScreenStep = step?.isFullScreen || false;
 
-  // 👇 Determinar si mostrar tooltip
   const showTooltip = !step?.hideTooltip;
-
-  // ... resto del código igual hasta el return ...
 
   useEffect(() => {
     const updateContainerBounds = () => {
@@ -73,19 +70,41 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
     }
   }, [show, step, onComplete]);
 
+  useEffect(() => {
+    if (step?.id !== "review-units") return;
+
+    const handleCurriculumChange = () => {
+      setTimeout(() => {
+        if (!isTransitioning) {
+          handleNext();
+        }
+      }, 400);
+    };
+
+    window.addEventListener("curriculum-changed", handleCurriculumChange);
+
+    return () => {
+      window.removeEventListener("curriculum-changed", handleCurriculumChange);
+    };
+  }, [step, isTransitioning]);
+
   const scrollToTarget = useCallback(
     (element: Element, force: boolean = false) => {
       if (userScrolling.current && !force) return;
+
       if (lastScrollTarget.current === element && !force) return;
 
       const rect = element.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
+
       const isInView = rect.top >= 100 && rect.bottom <= viewportHeight - 100;
       if (isInView && !force) return;
 
       lastScrollTarget.current = element;
+
       const absoluteTop = window.pageYOffset + rect.top;
       const middle = absoluteTop - viewportHeight / 2 + rect.height / 2;
+
       const shouldUseInstant =
         force || Math.abs(window.pageYOffset - middle) > viewportHeight;
 
@@ -99,10 +118,12 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
 
   const scrollToTop = useCallback((instant: boolean = false) => {
     lastScrollTarget.current = null;
+
     window.scrollTo({
       top: 0,
       behavior: instant ? "auto" : "smooth"
     });
+
     setTimeout(() => {
       userScrolling.current = false;
     }, 300);
@@ -110,14 +131,20 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
 
   useEffect(() => {
     if (!isInternalChangeRef.current && initialStep !== currentStep) {
+      console.log(
+        `🔄 Sincronizando desde padre: ${currentStep} → ${initialStep}`
+      );
       setCurrentStep(initialStep);
+
       lastScrollTarget.current = null;
     }
+
     isInternalChangeRef.current = false;
   }, [initialStep]);
 
   useEffect(() => {
     if (onStepChange && isInternalChangeRef.current) {
+      console.log(`📌 Notificando cambio al padre: ${currentStep}`);
       onStepChange(currentStep);
     }
 
@@ -125,6 +152,24 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       detail: { stepId: steps[currentStep]?.id, stepIndex: currentStep }
     });
     window.dispatchEvent(event);
+
+    const stepConfig = steps[currentStep];
+
+    if (stepConfig?.id !== "review-units" && stepConfig?.id !== "start-test") {
+      const selectTrigger = document.querySelector(
+        ".course-header-select button"
+      );
+      const selectContent = document.querySelector(
+        "[data-radix-select-content]"
+      );
+
+      if (selectContent && selectTrigger instanceof HTMLElement) {
+        const isOpen = selectContent.getAttribute("data-state") === "open";
+        if (isOpen) {
+          selectTrigger.click();
+        }
+      }
+    }
   }, [currentStep, onStepChange, steps]);
 
   useEffect(() => {
@@ -136,10 +181,14 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
 
     const updateTargetPosition = () => {
       const stepConfig = steps[currentStep];
-      if (!stepConfig?.target || stepConfig.target.trim() === "") return;
+
+      if (!stepConfig?.target || stepConfig.target.trim() === "") {
+        return;
+      }
 
       const shouldScrollToTop =
         stepConfig.id === "review-units" || stepConfig.id === "final-unit";
+
       if (shouldScrollToTop && lastScrollTarget.current !== "top") {
         scrollToTop(true);
         lastScrollTarget.current = "top" as any;
@@ -152,6 +201,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
           document.querySelector("[data-radix-select-content]") ||
           document.querySelector('[data-tutorial-select="true"]') ||
           document.querySelector('[role="listbox"]');
+
         if (target) {
           const rect = target.getBoundingClientRect();
           if (rect.height > 0 && rect.width > 0) {
@@ -160,6 +210,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
         }
       } else if (stepConfig.id === "start-test") {
         target = document.querySelector('[data-tutorial-start-button="true"]');
+
         if (target) {
           const rect = target.getBoundingClientRect();
           if (rect.height > 0 && rect.width > 0) {
@@ -168,6 +219,16 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
         }
       } else if (stepConfig.id === "unit-explanations") {
         target = document.querySelector('[data-tutorial-book="true"]');
+
+        if (target) {
+          const rect = target.getBoundingClientRect();
+          if (rect.height > 0 && rect.width > 0) {
+            setTargetRect(rect);
+          }
+        }
+      } else if (stepConfig.id === "completed-unit") {
+        target = document.querySelector('[data-highest-position-node="true"]');
+
         if (target) {
           const rect = target.getBoundingClientRect();
           if (rect.height > 0 && rect.width > 0) {
@@ -176,6 +237,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
         }
       } else {
         target = document.querySelector(stepConfig.target);
+
         if (target) {
           const rect = target.getBoundingClientRect();
           if (rect.height > 0 && rect.width > 0) {
@@ -190,6 +252,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
     };
 
     setIsTransitioning(true);
+
     if (steps[currentStep]?.action) {
       steps[currentStep].action?.();
     }
@@ -206,13 +269,28 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
       setIsTransitioning(false);
     }, 250);
 
-    const handleResize = () => requestAnimationFrame(updateTargetPosition);
+    if (
+      steps[currentStep]?.id === "review-units" ||
+      steps[currentStep]?.id === "start-test"
+    ) {
+      updateIntervalRef.current = setInterval(updateTargetPosition, 100);
+    }
+
+    const handleResize = () => {
+      requestAnimationFrame(updateTargetPosition);
+    };
+
     const handleScroll = () => {
       userScrolling.current = true;
-      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
+      }
+
       scrollTimeout.current = setTimeout(() => {
         userScrolling.current = false;
       }, 1000);
+
       requestAnimationFrame(updateTargetPosition);
     };
 
@@ -221,8 +299,12 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
 
     return () => {
       clearTimeout(quickUpdate);
-      if (updateIntervalRef.current) clearInterval(updateIntervalRef.current);
-      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+      if (updateIntervalRef.current) {
+        clearInterval(updateIntervalRef.current);
+      }
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
+      }
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll);
     };
@@ -264,6 +346,24 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
     if (isTransitioning) return;
 
     if (currentStep > 0) {
+      const prevStep = steps[currentStep - 1];
+      if (prevStep?.id === "review-units") {
+      } else {
+        const selectTrigger = document.querySelector(
+          ".course-header-select button"
+        );
+        const selectContent = document.querySelector(
+          "[data-radix-select-content]"
+        );
+
+        if (selectContent && selectTrigger instanceof HTMLElement) {
+          const isOpen = selectContent.getAttribute("data-state") === "open";
+          if (isOpen) {
+            selectTrigger.click();
+          }
+        }
+      }
+
       setIsTransitioning(true);
       setFadeOut(true);
       setTargetRect(null);
@@ -284,7 +384,10 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
 
   const handleSpotlightClick = (e: React.MouseEvent) => {
     if (!targetRect || isTransitioning) return;
-    if (step?.id === "review-units") return;
+
+    if (step?.id === "review-units") {
+      return;
+    }
 
     const clickX = e.clientX;
     const clickY = e.clientY;
@@ -368,37 +471,110 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
           />
         </svg>
 
-        {/* Área clickable con hover effect */}
         {step?.id !== "review-units" && (
           <motion.div
             key={`clickable-area-${currentStep}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className={`absolute z-[9999] rounded-xl transition-colors ${
-              showTooltip
-                ? "cursor-pointer hover:bg-purple-500/10"
-                : "cursor-pointer hover:bg-purple-500/20"
-            }`}
+            className="absolute cursor-pointer z-[9999] hover:bg-purple-500/10 transition-colors rounded-xl"
             style={{
               left: targetRect.left - 12,
               top: targetRect.top - 12,
               width: targetRect.width + 24,
-              height: targetRect.height + 24,
-              pointerEvents: showTooltip ? "auto" : "auto"
+              height: targetRect.height + 24
             }}
             title="Click para continuar"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (!isTransitioning) {
-                handleNext();
-              }
-            }}
           />
         )}
 
-        {/* 👇 Borde con animación - más intenso cuando NO hay tooltip */}
+        {!showTooltip && (
+          <motion.div
+            key={`click-here-tooltip-${currentStep}`}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{
+              opacity: fadeOut ? 0 : 1,
+              scale: fadeOut ? 0.9 : 1
+            }}
+            transition={{
+              opacity: { duration: 0.3 },
+              scale: { duration: 0.3 }
+            }}
+            className="absolute z-[10000]"
+            style={{
+              left: targetRect.left + targetRect.width / 2 - 100,
+              top: targetRect.top - 100,
+              transform: "translateX(-50%)"
+            }}
+          >
+            <div className="flex flex-col items-center">
+              <div className="flex items-center gap-3 pointer-events-auto">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePrev();
+                  }}
+                  disabled={currentStep === 0 || isTransitioning}
+                  className="bg-purple-500 hover:bg-purple-600 text-white p-2.5 rounded-full shadow-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-purple-500"
+                  title="Paso anterior"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </motion.button>
+
+                <motion.div
+                  animate={{
+                    y: [-3, 3, -3]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="bg-purple-600 text-white px-5 py-2.5 rounded-xl shadow-2xl font-semibold text-sm flex flex-col items-center gap-1"
+                >
+                  <span>Click aquí</span>
+                  <span className="text-xs text-purple-200 font-medium">
+                    {currentStep + 1} / {steps.length}
+                  </span>
+                </motion.div>
+
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNext();
+                  }}
+                  disabled={isTransitioning}
+                  className="bg-purple-500 hover:bg-purple-600 text-white p-2.5 rounded-full shadow-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  title="Siguiente paso"
+                >
+                  <ArrowRight className="w-4 h-4" />
+                </motion.button>
+              </div>
+
+              <motion.div
+                animate={{
+                  y: [-3, 3, -3]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="w-0 h-0 mt-[-1px] pointer-events-none"
+                style={{
+                  borderLeft: "10px solid transparent",
+                  borderRight: "10px solid transparent",
+                  borderTop: "10px solid rgb(147, 51, 234)"
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+
         {showTooltip ? (
-          // Enfoque normal con tooltip
           <motion.div
             key={`border-${currentStep}`}
             initial={{ opacity: 0, scale: 0.92 }}
@@ -418,9 +594,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
             <div className="w-full h-full border-4 border-purple-500 rounded-xl shadow-2xl shadow-purple-500/50 animate-pulse" />
           </motion.div>
         ) : (
-          // Enfoque INTENSO sin tooltip - SOLO brillo, sin overlay visible
           <>
-            {/* Efecto de brillo intenso */}
             <motion.div
               key={`intense-glow-${currentStep}`}
               className="absolute pointer-events-none z-[9998] rounded-2xl"
@@ -451,7 +625,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
               }}
             />
 
-            {/* Borde brillante sutil animado */}
             <motion.div
               key={`intense-border-${currentStep}`}
               className="absolute pointer-events-none z-[9999] rounded-2xl border-4"
@@ -472,7 +645,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
               }}
             />
 
-            {/* Anillo exterior pulsante */}
             <motion.div
               key={`outer-ring-${currentStep}`}
               className="absolute pointer-events-none z-[9997] rounded-2xl border-2 border-purple-400"
@@ -495,7 +667,6 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
           </>
         )}
 
-        {/* 👇 Solo mostrar tooltip si showTooltip es true */}
         <AnimatePresence mode="wait">
           {showTooltip && (
             <motion.div
@@ -606,7 +777,7 @@ function getTooltipPosition(
 
   switch (pos) {
     case "top":
-      top = targetRect.top - 200 - topSpacing;
+      top = targetRect.top - 190 - topSpacing;
       break;
     case "bottom":
       top = targetRect.bottom + spacing;

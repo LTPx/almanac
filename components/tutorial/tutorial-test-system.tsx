@@ -128,7 +128,6 @@ export function TutorialTestSystem({
 
       setShowResult(true);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentQuestionIndex]
   );
 
