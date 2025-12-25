@@ -777,7 +777,7 @@ function getTooltipPosition(
 
   switch (pos) {
     case "top":
-      top = targetRect.top - 190 - topSpacing;
+      top = targetRect.top - 200 - topSpacing;
       break;
     case "bottom":
       top = targetRect.bottom + spacing;
