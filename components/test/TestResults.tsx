@@ -10,9 +10,14 @@ interface TestResultsProps {
   lessonName: string;
   onReturnToLessons: () => void;
   hearts?: number;
+  isTutorialMode?: boolean;
 }
 
-export function TestResults({ results, onReturnToLessons }: TestResultsProps) {
+export function TestResults({
+  results,
+  onReturnToLessons,
+  isTutorialMode = false
+}: TestResultsProps) {
   const isPassed = results.passed;
 
   const [finishAudio, , finishControls] = useAudio({
@@ -62,7 +67,7 @@ export function TestResults({ results, onReturnToLessons }: TestResultsProps) {
   const accuracyLabel = getAccuracyLabel(accuracyScore);
 
   return (
-    <div className="bg-background min-h-screen lg:p-6 flex flex-col items-center justify-center">
+    <div className="bg-background w-full max-w-[650px] min-h-screen lg:p-6 flex flex-col items-center justify-center">
       <div className="mx-auto flex h-full max-w-lg flex-col items-center justify-center gap-y-4 text-center lg:gap-y-8">
         <h1 className="text-lg font-bold text-[#EFFF0A] lg:text-3xl">
           {isPassed ? <>Completaste la prueba!</> : <>Completaste la prueba!</>}
@@ -90,7 +95,11 @@ export function TestResults({ results, onReturnToLessons }: TestResultsProps) {
               w-full py-8 text-xl font-semibold rounded-2xl shadow-lg
               bg-[#1983DD] hover:bg-[#1666B0] text-white"
         >
-          {isPassed ? "Recibir Experiencia" : "Recibir Experiencia"}
+          {isTutorialMode
+            ? "Continuar"
+            : isPassed
+              ? "Recibir Experiencia"
+              : "Recibir Experiencia"}
         </Button>
       </div>
       {finishAudio}

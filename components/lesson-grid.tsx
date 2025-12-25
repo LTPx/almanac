@@ -11,13 +11,17 @@ interface LessonGridProps {
   approvedUnits: number[];
   hearts: number;
   onStartUnit: (unit: Unit) => void;
+  isTutorialMode?: boolean;
+  showOptionalAsAvailable?: boolean;
 }
 
 export const LessonGrid: React.FC<LessonGridProps> = ({
   units,
   approvedUnits,
   hearts,
-  onStartUnit
+  onStartUnit,
+  isTutorialMode = false,
+  showOptionalAsAvailable = false
 }) => {
   type Node = Unit & { type: "unit"; col: number; row: number };
 
@@ -75,16 +79,6 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     });
   };
 
-  const getLessonState = (unit: Node): "completed" | "available" | "locked" => {
-    if (approvedUnits.includes(unit.id)) return "completed";
-
-    if (isAdjacentToCompleted(unit)) {
-      return "available";
-    }
-
-    return "locked";
-  };
-
   const getLockedColor = (mandatory: boolean) => {
     return mandatory ? "border-[#90D398]" : "border-[#708BB1]";
   };
@@ -95,13 +89,48 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
       : null;
 
   const pathLayout = generatePathLayout();
+  const allNodes = pathLayout.flatMap((rowData) => rowData.nodes);
+
+  const highestPositionNode =
+    allNodes.length > 0
+      ? allNodes.reduce((max, node) =>
+          node.position > max.position ? node : max
+        )
+      : null;
+
+  const optionalNodes = units.filter((u) => !u.mandatory);
+  const highestOptionalNode =
+    optionalNodes.length > 0
+      ? optionalNodes.reduce((max, node) =>
+          node.position > max.position ? node : max
+        )
+      : null;
+
+  const getLessonState = (unit: Node): "completed" | "available" | "locked" => {
+    if (isTutorialMode) {
+      if (approvedUnits.includes(unit.id)) return "completed";
+
+      if (
+        showOptionalAsAvailable &&
+        highestOptionalNode &&
+        unit.id === highestOptionalNode.id
+      ) {
+        return "available";
+      }
+
+      return "locked";
+    }
+
+    if (approvedUnits.includes(unit.id)) return "completed";
+    if (isAdjacentToCompleted(unit)) return "available";
+    return "locked";
+  };
+
   const maxRow =
     pathLayout.length > 0 ? Math.max(...pathLayout.map((r) => r.row)) : 0;
 
   const containerVariants: Variants = {
-    hidden: {
-      opacity: 0
-    },
+    hidden: { opacity: 0 },
     show: {
       opacity: 1,
       transition: {
@@ -112,11 +141,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
   };
 
   const itemVariants: Variants = {
-    hidden: {
-      opacity: 0,
-      y: 30,
-      scale: 0.9
-    },
+    hidden: { opacity: 0, y: 30, scale: 0.9 },
     show: {
       opacity: 1,
       y: 0,
@@ -132,7 +157,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
 
   return (
     <>
-      <div className="max-w-sm mx-auto">
+      <div className="max-w-sm mx-auto lesson-grid">
         {pathLayout.map((rowData, rowIndex) => {
           const isBottomRow = rowData.row === maxRow;
 
@@ -149,6 +174,14 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                 const isCompleted = nodeData
                   ? approvedUnits.includes(nodeData.id)
                   : false;
+                const isHighestPosition =
+                  nodeData && highestPositionNode
+                    ? nodeData.id === highestPositionNode.id
+                    : false;
+                const isOptionalHighest =
+                  nodeData && highestOptionalNode && !nodeData.mandatory
+                    ? nodeData.id === highestOptionalNode.id
+                    : false;
 
                 return (
                   <motion.div
@@ -172,6 +205,8 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                         isFirstMandatory={
                           nodeData.id === firstLesson?.id && nodeData.mandatory
                         }
+                        isHighestPosition={isHighestPosition}
+                        isOptionalHighest={isOptionalHighest}
                         onStartLesson={() => onStartUnit(nodeData)}
                       />
                     ) : (

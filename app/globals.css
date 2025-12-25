@@ -3,6 +3,19 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none; 
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; 
+}
+
+/* [data-radix-popper-content-wrapper] {
+  z-index: 8888 !important;
+} */
+
 :root {
   --background: oklch(0.2046 0 0);
   --foreground: oklch(0.9219 0 0);

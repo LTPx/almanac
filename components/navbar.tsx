@@ -40,6 +40,7 @@ export default function Navbar() {
                 <Link
                   href="/almanac-tutor"
                   className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  data-tutorial-chat="true"
                 >
                   <Button variant="outline">
                     <Bot className="h-5 w-5" />

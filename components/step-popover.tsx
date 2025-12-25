@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { motion, useAnimation } from "framer-motion";
+import { motion, useAnimation, AnimatePresence } from "framer-motion";
 
 interface StepPopoverProps {
   title?: string;
@@ -25,6 +25,8 @@ interface StepPopoverProps {
   isCompleted?: boolean;
   mandatory?: boolean;
   unitId?: number;
+  isHighestPosition?: boolean;
+  isOptionalHighest?: boolean;
 }
 
 export function StepPopover({
@@ -39,7 +41,9 @@ export function StepPopover({
   isFirstMandatory = false,
   isCompleted = false,
   mandatory = false,
-  unitId
+  unitId,
+  isHighestPosition = false,
+  isOptionalHighest = false
 }: StepPopoverProps) {
   const router = useRouter();
   const [isHovered, setIsHovered] = React.useState(false);
@@ -47,12 +51,43 @@ export function StepPopover({
   const controls = useAnimation();
   const loopsCompleted = React.useRef(0);
   const animationCancelled = React.useRef(false);
-  const isHoveredRef = React.useRef(false);
+  const openTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   React.useEffect(() => {
-    isHoveredRef.current = isHovered;
-  }, [isHovered]);
+    const handleTutorialStep = (e: any) => {
+      const { stepId } = e.detail;
 
+      const popoverSteps = {
+        highestPosition: ["unit-explanations", "start-test"],
+        optionalHighest: ["optional-unit"],
+        firstMandatory: ["final-unit"]
+      };
+
+      const shouldBeOpen =
+        (isHighestPosition && popoverSteps.highestPosition.includes(stepId)) ||
+        (isOptionalHighest && popoverSteps.optionalHighest.includes(stepId)) ||
+        (isFirstMandatory && popoverSteps.firstMandatory.includes(stepId));
+
+      if (shouldBeOpen && !isOpen) {
+        if (openTimeoutRef.current) {
+          clearTimeout(openTimeoutRef.current);
+        }
+        openTimeoutRef.current = setTimeout(() => {
+          setIsOpen(true);
+        }, 100);
+      } else if (!shouldBeOpen && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    window.addEventListener("tutorial-step-change", handleTutorialStep);
+    return () => {
+      window.removeEventListener("tutorial-step-change", handleTutorialStep);
+      if (openTimeoutRef.current) {
+        clearTimeout(openTimeoutRef.current);
+      }
+    };
+  }, [isHighestPosition, isOptionalHighest, isFirstMandatory, isOpen]);
   const startPulseAnimation = React.useCallback(async () => {
     while (loopsCompleted.current < 4 && !animationCancelled.current) {
       if (isHovered) break;
@@ -86,11 +121,23 @@ export function StepPopover({
   React.useEffect(() => {
     if (isHovered) {
       controls.stop();
-      controls.start({ scale: 1.2, opacity: 1, transition: { duration: 0.2 } });
-    } else if (isOpen && loopsCompleted.current < 3) {
-      controls.start({ scale: 1, opacity: 1, transition: { duration: 0.2 } });
+      controls.start({
+        scale: 1.2,
+        opacity: 1,
+        transition: {
+          duration: 0.2,
+          ease: "easeOut"
+        }
+      });
     } else if (isOpen) {
-      controls.start({ scale: 1, opacity: 1, transition: { duration: 0.2 } });
+      controls.start({
+        scale: 1,
+        opacity: 1,
+        transition: {
+          duration: 0.2,
+          ease: "easeOut"
+        }
+      });
     }
   }, [isHovered, isOpen, controls]);
 
@@ -148,39 +195,76 @@ export function StepPopover({
     router.push(`/contents?unit=${unitId}`);
   };
 
+  const handleOpenChange = (open: boolean) => {
+    const isTutorialActive = document.querySelector(
+      ".fixed.inset-0.z-\\[9998\\]"
+    );
+    if (
+      !isTutorialActive ||
+      (!isHighestPosition && !isOptionalHighest && !isFirstMandatory)
+    ) {
+      setIsOpen(open);
+    }
+  };
+
   return (
-    <Popover onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className={`${getPopoverClass()} rounded-xl relative`}>
-        <motion.button
-          onClick={handleBookClick}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          className="absolute top-4 right-4 cursor-pointer focus:outline-none group"
-          aria-label="Ver contenidos"
-          animate={controls}
-          initial={{ scale: 1, opacity: 1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <BookOpen
-            className={`w-9 h-9 ${getIconColor()} group-hover:opacity-100 transition-opacity drop-shadow-sm`}
-          />
-        </motion.button>
-        <div className="pr-10">
-          {title && <h3 className="font-bold text-lg">{title}</h3>}
-          {message && <p className="mt-2 line-clamp-4 text-sm">{message}</p>}
-        </div>
-        {buttonText && onButtonClick && (
-          <Button
-            className={`text-[15px] font-bold ${buttonBgColor} h-[60px] w-full focus-visible:ring-0 mt-3 ${getButtonTextColor()} rounded-xl`}
-            onClick={onButtonClick}
-            disabled={isLocked}
+      <AnimatePresence>
+        {isOpen && (
+          <PopoverContent
+            className={`${getPopoverClass()} rounded-xl relative`}
+            asChild
+            forceMount
+            data-highest-position={isHighestPosition ? "true" : undefined}
           >
-            {buttonText}
-          </Button>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              transition={{
+                duration: 0.2,
+                ease: [0.4, 0, 0.2, 1]
+              }}
+            >
+              <motion.button
+                onClick={handleBookClick}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                className="absolute top-4 right-4 cursor-pointer focus:outline-none group"
+                aria-label="Ver contenidos"
+                animate={controls}
+                initial={{ scale: 1, opacity: 1 }}
+                whileTap={{ scale: 0.9 }}
+                data-tutorial-book={isHighestPosition ? "true" : undefined}
+              >
+                <BookOpen
+                  className={`w-9 h-9 ${getIconColor()} group-hover:opacity-100 transition-opacity drop-shadow-sm`}
+                />
+              </motion.button>
+              <div className="pr-10">
+                {title && <h3 className="font-bold text-lg">{title}</h3>}
+                {message && (
+                  <p className="mt-2 line-clamp-4 text-sm">{message}</p>
+                )}
+              </div>
+              {buttonText && onButtonClick && (
+                <Button
+                  data-tutorial-start-button={
+                    isHighestPosition ? "true" : undefined
+                  }
+                  className={`text-[15px] font-bold ${buttonBgColor} h-[60px] w-full focus-visible:ring-0 mt-3 ${getButtonTextColor()} rounded-xl transition-all duration-200`}
+                  onClick={onButtonClick}
+                  disabled={isLocked}
+                >
+                  {buttonText}
+                </Button>
+              )}
+              <PopoverArrow className={`${getArrowClass()} w-4 h-4`} />
+            </motion.div>
+          </PopoverContent>
         )}
-        <PopoverArrow className={`${getArrowClass()} w-4 h-4`} />
-      </PopoverContent>
+      </AnimatePresence>
     </Popover>
   );
 }

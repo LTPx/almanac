@@ -17,6 +17,8 @@ type LessonNodeProps = {
   shouldFloat?: boolean;
   hearts: number;
   isFirstMandatory?: boolean;
+  isHighestPosition?: boolean;
+  isOptionalHighest?: boolean;
   onStartLesson: () => void;
 };
 
@@ -30,6 +32,8 @@ const LessonNode: React.FC<LessonNodeProps> = ({
   shouldFloat = false,
   hearts,
   isFirstMandatory = false,
+  isHighestPosition = false,
+  isOptionalHighest = false,
   onStartLesson
 }) => {
   const { open: openNoHeartsModal } = useNoHeartsModal();
@@ -53,10 +57,6 @@ const LessonNode: React.FC<LessonNodeProps> = ({
         : "bg-[#1983DD] border-[#1983DD]";
     }
     return "";
-  };
-
-  const getIconColor = () => {
-    return "text-white";
   };
 
   const handleStartLesson = () => {
@@ -103,19 +103,24 @@ const LessonNode: React.FC<LessonNodeProps> = ({
             }
       }
       className={`
-        w-full h-full lg:h-16 flex items-center justify-center
-        relative
-        ${getBackgroundColor()}
-        ${
-          isFirstMandatory
-            ? getFirstMandatoryStyle()
-            : state === "locked"
-              ? `${color} border-dashed`
-              : "shadow-lg"
-        }
-        ${isFirstMandatory ? "rounded-t-[2rem] rounded-b-lg" : "rounded-2xl"}
-        border-2 ${state !== "locked" ? "cursor-pointer" : "cursor-not-allowed opacity-75"}
-      `}
+      w-full h-full lg:h-16 flex items-center justify-center
+      relative
+      ${getBackgroundColor()}
+      ${
+        isFirstMandatory
+          ? getFirstMandatoryStyle()
+          : state === "locked"
+            ? `${color} border-dashed`
+            : "shadow-lg"
+      }
+      ${isFirstMandatory ? "rounded-t-[2rem] rounded-b-lg" : "rounded-2xl"}
+      border-2 ${state !== "locked" ? "cursor-pointer" : "cursor-not-allowed opacity-75"}
+    `}
+      data-highest-position-node={
+        isHighestPosition && state === "completed" ? "true" : undefined
+      }
+      data-optional-node={isOptionalHighest ? "true" : undefined}
+      data-first-mandatory={isFirstMandatory ? "true" : undefined}
     >
       <motion.div
         initial={{ scale: 0 }}
@@ -128,7 +133,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
         }}
       >
         {state === "completed" && (
-          <CheckCircle className={`w-7 h-7 ${getIconColor()}`} />
+          <CheckCircle className="w-7 h-7 text-white" />
         )}
         {state === "available" && <BookOpen className="w-7 h-7 text-white" />}
         {state === "locked" && <Lock className="w-6 h-6 text-white" />}
@@ -151,6 +156,8 @@ const LessonNode: React.FC<LessonNodeProps> = ({
         isCompleted={true}
         mandatory={mandatory}
         isFirstMandatory={isFirstMandatory}
+        isHighestPosition={isHighestPosition}
+        isOptionalHighest={isOptionalHighest}
       >
         {nodeContent}
       </StepPopover>
@@ -170,6 +177,8 @@ const LessonNode: React.FC<LessonNodeProps> = ({
         buttonText="CERRADA"
         onButtonClick={() => {}}
         isLocked={true}
+        isHighestPosition={isHighestPosition}
+        isOptionalHighest={isOptionalHighest}
       >
         {nodeContent}
       </StepPopover>
@@ -186,6 +195,8 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       isLocked={false}
       isOptional={!mandatory}
       isFirstMandatory={isFirstMandatory}
+      isHighestPosition={isHighestPosition}
+      isOptionalHighest={isOptionalHighest}
     >
       {nodeContent}
     </StepPopover>

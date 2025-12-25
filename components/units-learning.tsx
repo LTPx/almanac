@@ -11,15 +11,23 @@ type LearningPathProps = {
   userId: string;
   hearts: number;
   onTestComplete?: () => void;
+
+  showAsCompleted?: boolean;
+  showOptionalAsAvailable?: boolean;
+  showAllCompletedExceptFirst?: boolean;
+  isTutorialMode?: boolean;
 };
 
 const LearningPath: React.FC<LearningPathProps> = ({
   curriculum,
   userId,
   hearts,
-  onTestComplete
+  onTestComplete,
+  showAsCompleted = false,
+  showOptionalAsAvailable = false,
+  showAllCompletedExceptFirst = false,
+  isTutorialMode = false
 }) => {
-  console.log(curriculum);
   const [activeUnit, setActiveUnit] = useState<Unit | null>(null);
   const { progress, isLoading, refetch } = useProgress(userId, curriculum.id);
 
@@ -30,6 +38,68 @@ const LearningPath: React.FC<LearningPathProps> = ({
         unit.position !== undefined &&
         unit.position >= 0
     ) || [];
+
+  let finalApprovedUnits = progress.approvedUnits;
+
+  if (showAsCompleted) {
+    const highestPositionUnit =
+      assignedUnits.length > 0
+        ? assignedUnits.reduce((max, unit) =>
+            unit.position > max.position ? unit : max
+          )
+        : null;
+
+    if (highestPositionUnit) {
+      finalApprovedUnits = [highestPositionUnit.id];
+    }
+  } else if (showOptionalAsAvailable) {
+    const optionalNodes = assignedUnits.filter((u) => !u.mandatory);
+    const highestOptionalNode =
+      optionalNodes.length > 0
+        ? optionalNodes.reduce((max, node) =>
+            node.position > max.position ? node : max
+          )
+        : null;
+
+    if (highestOptionalNode) {
+      const optionalRow = Math.floor(highestOptionalNode.position / 5);
+      const optionalCol = highestOptionalNode.position % 5;
+
+      const adjacentToApprove: number[] = [];
+
+      assignedUnits.forEach((unit) => {
+        const unitRow = Math.floor(unit.position / 5);
+        const unitCol = unit.position % 5;
+
+        const rowDiff = Math.abs(unitRow - optionalRow);
+        const colDiff = Math.abs(unitCol - optionalCol);
+
+        if (
+          (rowDiff === 0 && colDiff === 1) ||
+          (rowDiff === 1 && colDiff === 0)
+        ) {
+          adjacentToApprove.push(unit.id);
+        }
+      });
+
+      finalApprovedUnits = adjacentToApprove;
+    }
+  } else if (showAllCompletedExceptFirst) {
+    const firstLesson =
+      assignedUnits.length > 0
+        ? assignedUnits.reduce((min, unit) =>
+            unit.position < min.position ? unit : min
+          )
+        : null;
+
+    if (firstLesson) {
+      const allExceptFirst = assignedUnits
+        .filter((unit) => unit.id !== firstLesson.id)
+        .map((unit) => unit.id);
+
+      finalApprovedUnits = allExceptFirst;
+    }
+  }
 
   const handleCloseTest = () => {
     setActiveUnit(null);
@@ -49,9 +119,11 @@ const LearningPath: React.FC<LearningPathProps> = ({
           ) : (
             <LessonGrid
               units={assignedUnits}
-              approvedUnits={progress.approvedUnits}
+              approvedUnits={finalApprovedUnits}
               onStartUnit={setActiveUnit}
               hearts={hearts}
+              isTutorialMode={isTutorialMode}
+              showOptionalAsAvailable={showOptionalAsAvailable}
             />
           )}
         </div>
@@ -61,7 +133,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
 
   if (activeUnit) {
     return (
-      <div className="fixed inset-0 z-100 flex justify-center items-start bg-black/50">
+      <div className="fixed inset-0 z-[100] flex justify-center items-start bg-black/50">
         <div className="w-full max-w-[650px] bg-white shadow-xl overflow-hidden">
           <TestSystem
             hearts={hearts || 0}
@@ -83,9 +155,11 @@ const LearningPath: React.FC<LearningPathProps> = ({
         ) : (
           <LessonGrid
             units={assignedUnits}
-            approvedUnits={progress.approvedUnits}
+            approvedUnits={finalApprovedUnits}
             onStartUnit={setActiveUnit}
             hearts={hearts}
+            isTutorialMode={isTutorialMode}
+            showOptionalAsAvailable={showOptionalAsAvailable}
           />
         )}
       </div>
