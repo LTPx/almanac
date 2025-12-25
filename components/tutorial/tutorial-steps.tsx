@@ -19,6 +19,7 @@ export interface TutorialStep {
   customContent?: ReactNode;
   isFullScreen?: boolean;
   beforeStepChange?: () => void;
+  hideTooltip?: boolean;
 }
 
 export const TUTORIAL_STEP_IDS = {
@@ -62,10 +63,11 @@ export function createTutorialSteps(
       id: TUTORIAL_STEP_IDS.UNIT_EXPLANATIONS,
       target: "[data-tutorial-book='true']",
       title: "Aprende con explicaciones",
+      hideTooltip: true,
       description:
         "Cada unidad tiene explicaciones detalladas que puedes revisar antes de hacer las pruebas. ¡Tómate tu tiempo para aprender!",
       icon: <GraduationCap className="w-8 h-8" />,
-      position: "bottom",
+      position: "top",
       beforeStepChange: () => {
         courseHeaderRef.current?.closeSelect();
       },
@@ -80,7 +82,7 @@ export function createTutorialSteps(
       description:
         "Cuando estés listo, empieza una prueba. Ahora te mostraremos un ejemplo con los tipos de preguntas que encontrarás.",
       icon: <Target className="w-8 h-8" />,
-      position: "bottom"
+      position: "top"
     },
     {
       id: TUTORIAL_STEP_IDS.COMPLETED_UNIT,
