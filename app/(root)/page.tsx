@@ -57,8 +57,7 @@ function HomePageContent() {
     completeTutorial,
     setStep,
     nextStep,
-    prevStep,
-    resetTutorial
+    prevStep
   } = useTutorial();
 
   const tutorialSteps = useMemo(
