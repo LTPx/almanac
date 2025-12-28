@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { TutorialProvider } from "@/components/tutorial/tutorial-provider";
 
 export default function ClientWrapper({
   children
@@ -16,14 +17,16 @@ export default function ClientWrapper({
     pathname === "/terms";
 
   return (
-    <div
-      className={
-        isAdmin || isNft || isFullWidth
-          ? "w-full min-h-screen"
-          : "relative w-full max-w-[650px] min-h-screen"
-      }
-    >
-      <main className="min-h-screen">{children}</main>
-    </div>
+    <TutorialProvider>
+      <div
+        className={
+          isAdmin || isNft || isFullWidth
+            ? "w-full min-h-screen"
+            : "relative w-full max-w-[650px] min-h-screen"
+        }
+      >
+        <main className="min-h-screen">{children}</main>
+      </div>
+    </TutorialProvider>
   );
 }

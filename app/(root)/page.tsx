@@ -11,10 +11,7 @@ import { useHome } from "@/hooks/useHome";
 import { TutorialSpotlight } from "@/components/tutorial/tutorial";
 import { TutorialLearningPath } from "@/components/tutorial/tutorial-learning-path";
 import LearningPath from "@/components/units-learning";
-import {
-  TutorialProvider,
-  useTutorial
-} from "@/components/tutorial/tutorial-provider";
+import { useTutorial } from "@/components/tutorial/tutorial-provider";
 import { TutorialTestSystem } from "@/components/tutorial/tutorial-test-system";
 import { createTutorialSteps } from "@/components/tutorial/tutorial-steps";
 import TutorialNFTMinting from "@/components/tutorial/tutorial-nft-minting";
@@ -309,9 +306,5 @@ function HomePageContent() {
 }
 
 export default function HomePage() {
-  return (
-    <TutorialProvider>
-      <HomePageContent />
-    </TutorialProvider>
-  );
+  return <HomePageContent />;
 }
