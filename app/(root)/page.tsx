@@ -94,6 +94,9 @@ function HomePageContent() {
             onClose={() => {
               nextStep();
             }}
+            onBack={() => {
+              prevStep();
+            }}
           />
         )
       },
@@ -267,15 +270,6 @@ function HomePageContent() {
         <ContentLoadingScreen />
       ) : selectedCurriculum ? (
         <div className="h-full">
-          {hasCompleted && (
-            <button
-              onClick={resetTutorial}
-              className="fixed bottom-4 right-4 z-[10000] bg-purple-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-purple-700 transition-colors text-sm font-semibold"
-            >
-              Reiniciar Tutorial
-            </button>
-          )}
-
           {isTutorialActive ? (
             <TutorialLearningPath
               key={selectedCurriculum.id}

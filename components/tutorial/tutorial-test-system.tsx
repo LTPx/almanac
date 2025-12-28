@@ -11,6 +11,7 @@ import { TutorialInlineCard } from "./tutorial-overlay";
 interface TutorialTestSystemProps {
   onClose: () => void;
   hearts: number;
+  onBack?: () => void;
 }
 
 const DEMO_QUESTIONS = [
@@ -74,7 +75,8 @@ const TUTORIAL_MESSAGES = [
 
 export function TutorialTestSystem({
   onClose,
-  hearts
+  hearts,
+  onBack
 }: TutorialTestSystemProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showResult, setShowResult] = useState(false);
@@ -84,6 +86,8 @@ export function TutorialTestSystem({
   const [showResults, setShowResults] = useState(false);
   const [showInlineCard, setShowInlineCard] = useState(true);
   const [animationKey, setAnimationKey] = useState(0);
+  const [simulatedHearts, setSimulatedHearts] = useState(hearts);
+  const [justAnsweredCorrect, setJustAnsweredCorrect] = useState(false);
 
   const currentQuestion = DEMO_QUESTIONS[currentQuestionIndex];
   const currentMessage = TUTORIAL_MESSAGES[currentQuestionIndex];
@@ -126,6 +130,13 @@ export function TutorialTestSystem({
         [questionId]: { answer, isCorrect }
       }));
 
+      if (!isCorrect) {
+        setSimulatedHearts((prev) => Math.max(0, prev - 1));
+      } else {
+        setJustAnsweredCorrect(true);
+        setTimeout(() => setJustAnsweredCorrect(false), 1000);
+      }
+
       setShowResult(true);
     },
     [currentQuestionIndex]
@@ -141,6 +152,12 @@ export function TutorialTestSystem({
       setShowResults(true);
     }
   }, [currentQuestionIndex]);
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    }
+  };
 
   const progress = ((currentQuestionIndex + 1) / DEMO_QUESTIONS.length) * 100;
 
@@ -189,11 +206,12 @@ export function TutorialTestSystem({
   return (
     <div className="bg-background w-full max-w-[650px] h-[100dvh] flex flex-col overflow-hidden relative">
       <HeaderBar
-        onClose={onClose}
-        hearts={hearts}
+        onClose={handleBack}
+        hearts={simulatedHearts}
         percentage={progress}
         hasActiveSubscription={false}
-        justAnsweredCorrect={false}
+        justAnsweredCorrect={justAnsweredCorrect}
+        isTutorialMode={true}
       />
 
       <div className="relative flex-1 flex items-center justify-center overflow-y-auto">

@@ -88,12 +88,12 @@ export function TestResults({
         </div>
       </div>
 
-      <div className="pt-[200px] w-full">
+      <div className="pt-[200px] w-full flex justify-center px-6">
         <Button
           onClick={onReturnToLessons}
           className="
-              w-full py-8 text-xl font-semibold rounded-2xl shadow-lg
-              bg-[#1983DD] hover:bg-[#1666B0] text-white"
+            min-w-[280px] max-w-md px-12 py-8 text-xl font-semibold rounded-2xl shadow-lg
+            bg-[#1983DD] hover:bg-[#1666B0] text-white transition-all hover:scale-105"
         >
           {isTutorialMode
             ? "Continuar"

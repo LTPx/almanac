@@ -1,6 +1,6 @@
 "use client";
 
-import { InfinityIcon, X } from "lucide-react";
+import { Infinity, X } from "lucide-react";
 import Image from "next/image";
 import { useExitModal } from "@/store/use-exit-modal";
 import { ExitModal } from "./modals/exit-modal";
@@ -14,6 +14,7 @@ type HeaderProps = {
   hasActiveSubscription: boolean;
   justAnsweredCorrect?: boolean;
   onClose?: () => void;
+  isTutorialMode?: boolean;
 };
 
 export const HeaderBar = ({
@@ -21,7 +22,8 @@ export const HeaderBar = ({
   percentage,
   hasActiveSubscription,
   justAnsweredCorrect = false,
-  onClose
+  onClose,
+  isTutorialMode = false
 }: HeaderProps) => {
   const { open } = useExitModal();
   const [previousHearts, setPreviousHearts] = useState(hearts);
@@ -35,11 +37,19 @@ export const HeaderBar = ({
     setPreviousHearts(hearts);
   }, [hearts, previousHearts]);
 
+  const handleClose = () => {
+    if (isTutorialMode && onClose) {
+      onClose();
+    } else {
+      open();
+    }
+  };
+
   return (
     <>
       <header className="mx-auto flex w-full max-w-[1140px] items-center justify-between gap-x-4 lg:gap-x-7 px-6 lg:px-10 pt-[20px] lg:pt-[50px]">
         <X
-          onClick={open}
+          onClick={handleClose}
           className="cursor-pointer text-slate-500 transition hover:opacity-75"
         />
 
@@ -105,7 +115,7 @@ export const HeaderBar = ({
             transition={{ duration: 0.5 }}
           >
             {hasActiveSubscription ? (
-              <InfinityIcon className="h-6 w-6 shrink-0 stroke-[3]" />
+              <Infinity className="h-6 w-6 shrink-0 stroke-[3]" />
             ) : (
               hearts
             )}
@@ -113,7 +123,7 @@ export const HeaderBar = ({
         </div>
       </header>
 
-      <ExitModal onEndSession={onClose} />
+      {!isTutorialMode && <ExitModal onEndSession={onClose} />}
     </>
   );
 };
