@@ -117,7 +117,7 @@ export default function TutorialNFTMinting({
           >
             <ChevronLeft className="w-6 h-6 text-white" />
           </button>
-          <h1 className="text-xl font-semibold text-white">Minteo de NFT</h1>
+          <h1 className="text-xl font-semibold text-white">Minteo NFT</h1>
           <div className="w-10" />
         </div>
       </div>
