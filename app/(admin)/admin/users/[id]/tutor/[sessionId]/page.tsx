@@ -7,8 +7,8 @@ import {
   ArrowLeft,
   MessageSquare,
   Clock,
-  ThumbsUp,
-  ThumbsDown,
+  // ThumbsUp,
+  // ThumbsDown,
   User,
   Bot
 } from "lucide-react";
@@ -91,18 +91,21 @@ export default function SessionDetailsPage() {
   };
 
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString("en-US", {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
       hour: "2-digit",
       minute: "2-digit"
     });
   };
 
-  const formatDuration = (start: string, end: string | null) => {
-    const startDate = new Date(start);
-    const endDate = end ? new Date(end) : new Date();
-    const diff = Math.floor((endDate.getTime() - startDate.getTime()) / 60000);
-    return `${diff} minutes`;
-  };
+  // const formatDuration = (start: string, end: string | null) => {
+  //   const startDate = new Date(start);
+  //   const endDate = end ? new Date(end) : new Date();
+  //   const diff = Math.floor((endDate.getTime() - startDate.getTime()) / 60000);
+  //   return `${diff} minutes`;
+  // };
 
   if (loading) {
     return (
@@ -184,7 +187,7 @@ export default function SessionDetailsPage() {
       </div>
 
       {/* Session Stats */}
-      <Card className="p-4">
+      {/* <Card className="p-4">
         <h3 className="font-semibold mb-4">Session Statistics</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div>
@@ -230,7 +233,7 @@ export default function SessionDetailsPage() {
             </div>
           </div>
         </div>
-      </Card>
+      </Card> */}
 
       {/* Timeline */}
       <Card className="p-4">
@@ -311,7 +314,7 @@ export default function SessionDetailsPage() {
                     className={`px-4 py-3 rounded-lg ${
                       message.role === "user"
                         ? "bg-blue-100 border border-blue-200 text-black"
-                        : "bg-purple-100 border border-purple-200 text-black"
+                        : "bg-neutral-700 border border-neutral-600 text-gray-100"
                     }`}
                   >
                     <p className="text-sm whitespace-pre-wrap leading-relaxed">

@@ -11,7 +11,13 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import { ArrowLeft, MessageSquare, ThumbsUp, ThumbsDown } from "lucide-react";
+import {
+  ArrowLeft,
+  MessageSquare,
+  ThumbsUp,
+  ThumbsDown,
+  Eye
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
@@ -206,6 +212,14 @@ export default function UserTutorStatsPage() {
                     ) : (
                       <Badge variant="outline">Ended</Badge>
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <Link href={`/admin/users/${userId}/tutor/${session.id}`}>
+                      <Button variant="ghost" size="sm">
+                        <Eye className="h-4 w-4 mr-2" />
+                        View
+                      </Button>
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))
