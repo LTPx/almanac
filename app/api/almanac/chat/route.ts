@@ -6,7 +6,9 @@ import {
   endTutorSession,
   getActiveSession,
   getSessionMessages,
+  getSessionQuestionCount,
 } from "@/lib/tutor-session-service";
+import prisma from "@/lib/prisma";
 
 // In-memory storage for agents (Simulating a session store)
 // En producción, deberías usar Redis, base de datos, o algún sistema de sesiones
@@ -15,7 +17,7 @@ const agents = new Map<string, AlmanacAgent>();
 // Map para asociar userId con sessionId actual
 const userSessions = new Map<string, string>();
 
-// GET: Cargar sesión activa del usuario
+// GET: Cargar sesión activa del usuario y límite de preguntas
 export async function GET(req: NextRequest) {
   try {
     const userId = req.nextUrl.searchParams.get("userId");
@@ -27,15 +29,43 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Obtener usuario y su estado de suscripción
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { subscriptionStatus: true }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    // Calcular límite según plan
+    const isPremium = user.subscriptionStatus === "ACTIVE" || user.subscriptionStatus === "TRIALING";
+    const limit = isPremium ? 25 : 10;
+
     // Buscar sesión activa en la base de datos
     const activeSession = await getActiveSession(userId);
 
     if (!activeSession) {
-      return NextResponse.json({ session: null, messages: [] });
+      return NextResponse.json({
+        session: null,
+        messages: [],
+        questionLimit: {
+          limit,
+          used: 0,
+          remaining: limit,
+          isPremium
+        }
+      });
     }
 
-    // Obtener mensajes de la sesión
+    // Obtener mensajes y contar preguntas de la sesión actual
     const messages = await getSessionMessages(activeSession.id);
+    const questionCount = await getSessionQuestionCount(activeSession.id);
+    const remaining = Math.max(0, limit - questionCount);
 
     return NextResponse.json({
       session: {
@@ -48,6 +78,12 @@ export async function GET(req: NextRequest) {
         role: msg.role,
         content: msg.content,
       })),
+      questionLimit: {
+        limit,
+        used: questionCount,
+        remaining,
+        isPremium
+      }
     });
   } catch (error) {
     console.error("Error loading active session:", error);
@@ -77,6 +113,39 @@ export async function POST(req: NextRequest) {
         { error: "GEMINI_API_KEY not configured" },
         { status: 500 }
       );
+    }
+
+    // Verificar límite de preguntas según plan del usuario
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { subscriptionStatus: true }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    const isPremium = user.subscriptionStatus === "ACTIVE" || user.subscriptionStatus === "TRIALING";
+    const limit = isPremium ? 25 : 10;
+
+    // Verificar límite de la sesión activa (si existe)
+    const activeSession = await getActiveSession(userId);
+    if (activeSession) {
+      const sessionQuestionCount = await getSessionQuestionCount(activeSession.id);
+
+      if (sessionQuestionCount >= limit) {
+        const errorMessage = isPremium
+          ? `Has alcanzado el límite de 25 preguntas por sesión de tu plan Premium. Inicia un nuevo chat para continuar.`
+          : `Has alcanzado el límite de 10 preguntas por sesión del plan gratuito. Actualiza a Premium para obtener 25 preguntas por sesión o inicia un nuevo chat.`;
+
+        return NextResponse.json(
+          { error: errorMessage, limitReached: true, limit, count: sessionQuestionCount },
+          { status: 429 }
+        );
+      }
     }
 
     // Crear o recuperar el agente del usuario

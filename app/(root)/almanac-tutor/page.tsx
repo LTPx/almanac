@@ -4,16 +4,25 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Send, BookOpen, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useUser } from "@/context/UserContext";
+import Link from "next/link";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+  isLimitError?: boolean;
 }
 
 interface TopicData {
   title: string;
   unitName?: string;
   curriculumTitle?: string;
+}
+
+interface QuestionLimit {
+  limit: number;
+  used: number;
+  remaining: number;
+  isPremium: boolean;
 }
 
 export default function AlmanacTutorPage() {
@@ -30,6 +39,9 @@ export default function AlmanacTutorPage() {
     null
   );
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [questionLimit, setQuestionLimit] = useState<QuestionLimit | null>(
+    null
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -51,6 +63,10 @@ export default function AlmanacTutorPage() {
       try {
         const response = await fetch(`/api/almanac/chat?userId=${userId}`);
         const data = await response.json();
+
+        if (data.questionLimit) {
+          setQuestionLimit(data.questionLimit);
+        }
 
         if (data.session && data.messages.length > 0) {
           setSessionId(data.session.id);
@@ -102,12 +118,22 @@ export default function AlmanacTutorPage() {
         // setCurrentTopic(data.currentTopic);
         setCurrentTopicData(data.currentTopicData);
         setSessionId(data.sessionId);
+
+        // Actualizar contador de preguntas
+        if (questionLimit) {
+          setQuestionLimit({
+            ...questionLimit,
+            used: questionLimit.used + 1,
+            remaining: Math.max(0, questionLimit.remaining - 1)
+          });
+        }
       } else {
         setMessages((prev) => [
           ...prev,
           {
             role: "assistant",
-            content: `Error: ${data.error || "Something went wrong"}`
+            content: data.error || "Something went wrong",
+            isLimitError: data.limitReached || false
           }
         ]);
       }
@@ -203,38 +229,40 @@ export default function AlmanacTutorPage() {
                 )}
               </div>
             </div>
-            <div className="flex gap-2">
-              {messages.length > 0 && sessionId && (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => endWithFeedback(true)}
-                    title="Esto fue útil"
-                    className="border-neutral-600 hover:bg-neutral-800 hover:text-green-400"
-                  >
-                    <ThumbsUp className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => endWithFeedback(false)}
-                    title="Esto no fue útil"
-                    className="border-neutral-600 hover:bg-neutral-800 hover:text-red-400"
-                  >
-                    <ThumbsDown className="w-4 h-4" />
-                  </Button>
-                </>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => clearConversation()}
-                disabled={messages.length === 0}
-                className="border-neutral-600 hover:bg-neutral-800"
-              >
-                Nuevo Chat
-              </Button>
+            <div className="flex items-center gap-3">
+              <div className="flex gap-2">
+                {messages.length > 0 && sessionId && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => endWithFeedback(true)}
+                      title="Esto fue útil"
+                      className="border-neutral-600 hover:bg-neutral-800 hover:text-green-400"
+                    >
+                      <ThumbsUp className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => endWithFeedback(false)}
+                      title="Esto no fue útil"
+                      className="border-neutral-600 hover:bg-neutral-800 hover:text-red-400"
+                    >
+                      <ThumbsDown className="w-4 h-4" />
+                    </Button>
+                  </>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => clearConversation()}
+                  disabled={messages.length === 0}
+                  className="border-neutral-600 hover:bg-neutral-800"
+                >
+                  Nuevo Chat
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -282,11 +310,34 @@ export default function AlmanacTutorPage() {
                   className={`max-w-[80%] px-4 py-3 rounded-2xl ${
                     message.role === "user"
                       ? "bg-purple-600 text-white"
-                      : "bg-neutral-700 text-gray-100 border border-neutral-600"
+                      : message.isLimitError
+                        ? "bg-amber-900/50 text-amber-100 border-2 border-amber-600"
+                        : "bg-neutral-700 text-gray-100 border border-neutral-600"
                   }`}
                 >
                   <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                    {message.content}
+                    {message.isLimitError &&
+                    message.content.includes("Premium") ? (
+                      <>
+                        {message.content
+                          .split("Premium")
+                          .map((part, i, arr) => (
+                            <span key={i}>
+                              {part}
+                              {i < arr.length - 1 && (
+                                <Link
+                                  href="/store"
+                                  className="text-amber-300 underline hover:text-amber-200 font-semibold"
+                                >
+                                  Premium
+                                </Link>
+                              )}
+                            </span>
+                          ))}
+                      </>
+                    ) : (
+                      message.content
+                    )}
                   </p>
                 </div>
               </div>
@@ -328,6 +379,27 @@ export default function AlmanacTutorPage() {
             </Button>
           </div>
         </form>
+        {questionLimit && (
+          <div className="text-left mt-3">
+            <p className="text-xs text-gray-500">
+              {questionLimit.isPremium ? "Plan Premium" : "Plan Gratuito"}
+            </p>
+            <div className="flex gap-1 items-baseline">
+              <p
+                className={`text-sm font-semibold ${
+                  questionLimit.remaining <= 2
+                    ? "text-red-400"
+                    : questionLimit.remaining <= 5
+                      ? "text-yellow-400"
+                      : "text-green-400"
+                }`}
+              >
+                {questionLimit.remaining} / {questionLimit.limit}
+              </p>
+              <p className="text-xs text-gray-500">preguntas máximo</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

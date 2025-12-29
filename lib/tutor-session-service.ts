@@ -286,3 +286,15 @@ export async function cleanOldSessions(daysOld: number = 90) {
 
   return result.count;
 }
+
+/**
+ * Obtiene el número de preguntas en una sesión específica
+ */
+export async function getSessionQuestionCount(sessionId: string): Promise<number> {
+  const session = await prisma.tutorSession.findUnique({
+    where: { id: sessionId },
+    select: { userMessages: true }
+  });
+
+  return session?.userMessages || 0;
+}
