@@ -6,11 +6,9 @@ import { TestQuestion } from "./TestQuestion";
 import { TestResults } from "./TestResults";
 import { useTest } from "@/hooks/useTest";
 import { HeaderBar } from "../header-bar";
-// import { NoHeartsTestModal } from "../modals/no-hearts-test-modal";
 import { useNoHeartsTestModal } from "@/store/use-no-hearts-test-modal";
 import { StreakCelebration } from "./StreakCelebration";
 import { HeartBreakAnimation } from "./HeartBreakAnimation";
-
 import type {
   TestData,
   TestResultsInterface as TestResultsType
@@ -36,7 +34,8 @@ type TestState =
   | "review-intro"
   | "reviewing"
   | "results"
-  | "success-celebration";
+  | "success-celebration"
+  | "ad-after-results";
 
 export function TestSystem({
   userId,
@@ -74,7 +73,6 @@ export function TestSystem({
   const user = useUser();
   const isPremium = user?.isPremium || false;
   const showAd = isPremium ? false : true;
-  const [showAdBeforeStart, setShowAdBeforeStart] = useState(showAd);
 
   const [uniqueFailedQuestions, setUniqueFailedQuestions] = useState<
     Set<number>
@@ -182,19 +180,17 @@ export function TestSystem({
   );
 
   useEffect(() => {
-    if (!hasInitialized.current && !showAdBeforeStart) {
+    if (!hasInitialized.current) {
       handleStartTest(unitId);
       hasInitialized.current = true;
     }
-  }, [handleStartTest, unitId, showAdBeforeStart]);
+  }, [handleStartTest, unitId]);
 
-  // Advertencia al recargar página durante el test
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      // Solo mostrar advertencia si el test está activo
       if (state === "testing" || state === "reviewing") {
         e.preventDefault();
-        e.returnValue = ""; // Chrome requiere establecer returnValue
+        e.returnValue = "";
       }
     };
 
@@ -431,6 +427,18 @@ export function TestSystem({
     handleOpenStore();
   }, [handleOpenStore]);
 
+  const handleReturnFromResults = useCallback(() => {
+    if (showAd) {
+      setState("ad-after-results");
+    } else {
+      onClose();
+    }
+  }, [showAd, onClose]);
+
+  const handleAdAfterResultsClose = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
   const progress = currentTest
     ? ((currentQuestionIndex + 1) / currentTest.questions.length) * 100
     : 0;
@@ -514,10 +522,17 @@ export function TestSystem({
               hearts={currentHearts}
               results={results}
               lessonName={currentTest.lesson.name}
-              onReturnToLessons={onClose}
+              onReturnToLessons={handleReturnFromResults}
             />
           </motion.div>
         </AnimatePresence>
+      )}
+
+      {state === "ad-after-results" && (
+        <InterstitialAd
+          onClose={handleAdAfterResultsClose}
+          curriculumId={curriculumId}
+        />
       )}
 
       {showStore && (
@@ -558,13 +573,6 @@ export function TestSystem({
             currentTest.questions[currentQuestionIndex]?.title
           }
           onSubmit={handleReportError}
-        />
-      )}
-
-      {showAdBeforeStart && (
-        <InterstitialAd
-          onClose={() => setShowAdBeforeStart(false)}
-          curriculumId={curriculumId}
         />
       )}
 

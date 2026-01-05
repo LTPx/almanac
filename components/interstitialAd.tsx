@@ -28,7 +28,6 @@ export default function InterstitialAd({
   const [showingGoogleAd, setShowingGoogleAd] = useState(false);
   const [isAdBlocked, setIsAdBlocked] = useState(false);
 
-  // Detectar bloqueador de anuncios
   useEffect(() => {
     const test = document.createElement("script");
     test.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js";
@@ -37,7 +36,6 @@ export default function InterstitialAd({
     document.body.appendChild(test);
   }, []);
 
-  // Obtener ads personalizados de la unidad
   useEffect(() => {
     const fetchAds = async () => {
       try {
@@ -46,14 +44,13 @@ export default function InterstitialAd({
           const data = await response.json();
           setCustomAds(data);
 
-          // Si no hay ads, cerrar inmediatamente
           if (data.length === 0) {
             onClose();
           }
         }
       } catch (error) {
         console.error("Error fetching ads:", error);
-        onClose(); // Cerrar si hay error
+        onClose();
       } finally {
         setLoadingAds(false);
       }
@@ -62,7 +59,6 @@ export default function InterstitialAd({
     fetchAds();
   }, [curriculumId, onClose]);
 
-  // Registrar vista del ad personalizado
   useEffect(() => {
     if (
       customAds.length > 0 &&
@@ -83,7 +79,13 @@ export default function InterstitialAd({
 
       registerView();
     }
-  }, [customAds, currentAdIndex, hasRegisteredView, isVisible, showingGoogleAd]);
+  }, [
+    customAds,
+    currentAdIndex,
+    hasRegisteredView,
+    isVisible,
+    showingGoogleAd
+  ]);
 
   const handleAdClick = async (ad: Ad) => {
     try {
@@ -98,14 +100,11 @@ export default function InterstitialAd({
 
   const handleSkip = () => {
     if (!showingGoogleAd && currentAdIndex < customAds.length - 1) {
-      // Ir al siguiente ad personalizado
       setCurrentAdIndex(currentAdIndex + 1);
       setHasRegisteredView(false);
     } else if (!showingGoogleAd) {
-      // Terminamos los ads personalizados, mostrar Google Ad
       setShowingGoogleAd(true);
     } else {
-      // Ya vimos Google Ad, mostrar el test
       setIsVisible(false);
       onClose();
     }
@@ -115,7 +114,6 @@ export default function InterstitialAd({
 
   const currentAd = customAds[currentAdIndex];
 
-  // Si no hay ads personalizados, mostrar Google Ad directamente
   if (!currentAd && !showingGoogleAd && customAds.length === 0) {
     setShowingGoogleAd(true);
   }
@@ -123,9 +121,7 @@ export default function InterstitialAd({
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/90">
       {showingGoogleAd ? (
-        // Mostrar Google AdSense
         <div className="relative bg-white rounded-2xl shadow-xl p-6 max-w-2xl w-full mx-4">
-          {/* Botón X para saltar */}
           <button
             onClick={handleSkip}
             className="absolute top-4 right-4 z-10 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full p-2 transition-all"
@@ -156,9 +152,7 @@ export default function InterstitialAd({
           </div>
         </div>
       ) : currentAd ? (
-        // Mostrar ads personalizados
         <div className="relative w-full h-full max-w-4xl max-h-[90vh] flex items-center justify-center p-4">
-          {/* Botón X para saltar */}
           <button
             onClick={handleSkip}
             className="absolute top-4 right-4 z-10 bg-white/10 hover:bg-white/20 text-white rounded-full p-3 transition-all backdrop-blur-sm"
@@ -167,7 +161,6 @@ export default function InterstitialAd({
             <X className="w-6 h-6" />
           </button>
 
-          {/* Imagen del anuncio */}
           <div
             className="cursor-pointer w-full h-full flex items-center justify-center"
             onClick={() => handleAdClick(currentAd)}
@@ -179,7 +172,6 @@ export default function InterstitialAd({
             />
           </div>
 
-          {/* Contador de ads */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
             {customAds.map((_, index) => (
               <div
@@ -189,7 +181,7 @@ export default function InterstitialAd({
                 }`}
               />
             ))}
-            {/* Indicador para Google Ad */}
+
             <div className="h-2 w-2 rounded-full bg-white/40" />
           </div>
         </div>
