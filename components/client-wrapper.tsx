@@ -2,6 +2,8 @@
 
 import { usePathname } from "next/navigation";
 import { TutorialProvider } from "@/components/tutorial/tutorial-provider";
+import { useSession } from "@/lib/auth-client";
+import { useLanguagePreference } from "@/hooks/useLanguagePreference";
 
 export default function ClientWrapper({
   children
@@ -15,6 +17,10 @@ export default function ClientWrapper({
     pathname === "/home" ||
     pathname === "/white-paper" ||
     pathname === "/terms";
+
+  // Obtener la sesión del usuario y actualizar preferencia de idioma si es necesario
+  const { data: session } = useSession();
+  useLanguagePreference(session?.user || null);
 
   return (
     <TutorialProvider>

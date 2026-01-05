@@ -35,11 +35,17 @@ export default function SignUpForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const { name, email, password } = values;
 
+    // Detectar el idioma del navegador
+    const browserLanguage = typeof navigator !== 'undefined'
+      ? navigator.language.split('-')[0] // Obtener solo el código del idioma (ej: 'es' de 'es-ES')
+      : 'en'; // Default a inglés si no está disponible
+
     await authClient.signUp.email(
       {
         email,
         password,
-        name
+        name,
+        languagePreference: browserLanguage
       },
       {
         onRequest: () => {
