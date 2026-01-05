@@ -10,12 +10,9 @@ import {
 } from "@/lib/tutor-session-service";
 import prisma from "@/lib/prisma";
 
-// In-memory storage for agents (Simulating a session store)
-// En producción, deberías usar Redis, base de datos, o algún sistema de sesiones
+// In-memory storage for agents (maintains conversation state)
+// En producción, deberías usar Redis para el estado de los agentes
 const agents = new Map<string, AlmanacAgent>();
-
-// Map para asociar userId con sessionId actual
-const userSessions = new Map<string, string>();
 
 // GET: Cargar sesión activa del usuario y límite de preguntas
 export async function GET(req: NextRequest) {
@@ -163,7 +160,6 @@ export async function POST(req: NextRequest) {
         const messages = await getSessionMessages(activeSession.id);
         if (messages.length > 0) {
           newAgent.restoreHistory(messages);
-          userSessions.set(userId, activeSession.id);
         }
       }
 
@@ -187,7 +183,6 @@ export async function POST(req: NextRequest) {
         if (lessonId > 0) {
           // Obtener o crear sesión
           const sessionId = await getOrCreateSession(userId, lessonId);
-          userSessions.set(userId, sessionId);
 
           // Guardar mensaje del usuario
           await addMessageToSession(sessionId, {
@@ -209,6 +204,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Obtener sessionId de la sesión activa
+    const currentSession = await getActiveSession(userId);
+
     return NextResponse.json({
       response,
       currentTopic: agent.getCurrentTopic(),
@@ -219,7 +217,7 @@ export async function POST(req: NextRequest) {
             curriculumTitle: currentTopicData.curriculumTitle
           }
         : null,
-      sessionId: userSessions.get(userId) // Incluir sessionId en la respuesta
+      sessionId: currentSession?.id
     });
   } catch (error: any) {
     console.error("Error in almanac chat:", error);
@@ -263,9 +261,6 @@ export async function DELETE(req: NextRequest) {
         console.error("Error ending session in DB:", dbError);
       }
     }
-
-    // Limpiar del Map en memoria
-    userSessions.delete(userId);
 
     // Limpiar agente en memoria
     if (agents.has(userId)) {
