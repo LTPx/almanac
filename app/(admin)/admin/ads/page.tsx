@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -45,6 +45,7 @@ export default function AdsPage() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAd, setEditingAd] = useState<Ad | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     fetchAds();
@@ -115,6 +116,12 @@ export default function AdsPage() {
     return ((clicks / views) * 100).toFixed(2);
   };
 
+  const handleFormSubmit = () => {
+    if (formRef.current) {
+      formRef.current.requestSubmit();
+    }
+  };
+
   if (loading) {
     return <div>Cargando...</div>;
   }
@@ -135,8 +142,8 @@ export default function AdsPage() {
               Nuevo Anuncio
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
+          <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden p-0">
+            <DialogHeader className="shrink-0 px-6 pt-6 pb-4">
               <DialogTitle>
                 {editingAd ? "Editar Anuncio" : "Nuevo Anuncio"}
               </DialogTitle>
@@ -146,11 +153,26 @@ export default function AdsPage() {
                   : "Crea un nuevo anuncio para una unidad"}
               </DialogDescription>
             </DialogHeader>
-            <AdForm
-              editingAd={editingAd}
-              onSubmit={handleSubmit}
-              onCancel={() => setIsDialogOpen(false)}
-            />
+
+            <div className="flex-1 overflow-y-auto px-6 min-h-0">
+              <AdForm
+                ref={formRef}
+                editingAd={editingAd}
+                onSubmit={handleSubmit}
+              />
+            </div>
+            <div className="shrink-0 flex justify-end gap-2 px-6 py-4 border-t bg-background">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="button" onClick={handleFormSubmit}>
+                {editingAd ? "Actualizar" : "Crear"}
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

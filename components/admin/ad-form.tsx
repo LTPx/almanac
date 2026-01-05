@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect, forwardRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,10 +25,12 @@ interface Ad {
 interface AdFormProps {
   editingAd: Ad | null;
   onSubmit: (data: any) => void;
-  onCancel: () => void;
 }
 
-export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
+export const AdForm = forwardRef<HTMLFormElement, AdFormProps>(function AdForm(
+  { editingAd, onSubmit },
+  ref
+) {
   const [formData, setFormData] = useState({
     curriculumId: "",
     curriculumTitle: "",
@@ -46,13 +47,11 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
   const [showResults, setShowResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Estados para manejo de imagen
+  //
   const [useImageUpload, setUseImageUpload] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
-  const [isUploading, setIsUploading] = useState(false);
 
-  // Cargar datos si estamos editando
   useEffect(() => {
     if (editingAd) {
       setFormData({
@@ -66,14 +65,12 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
         isActive: editingAd.isActive
       });
       setSearchQuery(editingAd.curriculum.title);
-      // No activar modo upload si estamos editando, usar URL por defecto
       setUseImageUpload(false);
       setSelectedFile(null);
       setImagePreview("");
     }
   }, [editingAd]);
 
-  // Buscar curriculums
   useEffect(() => {
     const searchCurriculums = async () => {
       if (searchQuery.trim().length < 3) {
@@ -118,7 +115,6 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      // Crear preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -137,9 +133,7 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
 
     let finalImageUrl = formData.imageUrl;
 
-    // Si se seleccionó un archivo, subirlo primero
     if (useImageUpload && selectedFile) {
-      setIsUploading(true);
       try {
         const uploadFormData = new FormData();
         uploadFormData.append("file", selectedFile);
@@ -153,7 +147,6 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
         if (!response.ok) {
           const error = await response.json();
           alert(error.error || "Error al subir la imagen");
-          setIsUploading(false);
           return;
         }
 
@@ -162,14 +155,10 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
       } catch (error) {
         console.error("Error uploading image:", error);
         alert("Error al subir la imagen");
-        setIsUploading(false);
         return;
-      } finally {
-        setIsUploading(false);
       }
     }
 
-    // Validar que haya una URL de imagen
     if (!finalImageUrl) {
       alert("Por favor proporciona una imagen");
       return;
@@ -182,8 +171,7 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Search de Unidad */}
+    <form ref={ref} onSubmit={handleSubmit} className="space-y-4 pb-4">
       <div className="space-y-2">
         <Label htmlFor="curriculum">Curriculum</Label>
         <div className="relative">
@@ -203,7 +191,6 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
             />
           </div>
 
-          {/* Resultados de búsqueda */}
           {showResults && searchQuery.length >= 2 && (
             <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
               {isSearching ? (
@@ -219,7 +206,6 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
                       <div className="text-gray-500 font-medium">
                         {curriculum.title}
                       </div>
-                      {/* <div className="text-xs text-gray-500">ID: {curriculum.id}</div> */}
                     </li>
                   ))}
                 </ul>
@@ -239,7 +225,6 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
         )}
       </div>
 
-      {/* Título */}
       <div className="space-y-2">
         <Label htmlFor="title">Título</Label>
         <Input
@@ -250,7 +235,6 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
         />
       </div>
 
-      {/* Descripción */}
       <div className="space-y-2">
         <Label htmlFor="description">Descripción</Label>
         <Textarea
@@ -262,11 +246,9 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
         />
       </div>
 
-      {/* Imagen - Toggle entre subir o URL */}
       <div className="space-y-3">
         <Label>Imagen del Anuncio</Label>
 
-        {/* Toggle entre subir imagen o usar URL */}
         <div className="flex gap-2 border rounded-lg p-1 bg-card">
           <button
             type="button"
@@ -277,8 +259,8 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
             }}
             className={`flex-1 py-2 px-3 rounded-md transition-all flex items-center justify-center gap-2 ${
               !useImageUpload
-                ? "bg-green-600 shadow-sm font-medium"
-                : "text-gray-300 hover:text-gray-900"
+                ? "bg-green-600 text-white shadow-sm font-medium"
+                : "text-gray-500 hover:text-gray-900"
             }`}
           >
             <LinkIcon className="w-4 h-4" />
@@ -289,8 +271,8 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
             onClick={() => setUseImageUpload(true)}
             className={`flex-1 py-2 px-3 rounded-md transition-all flex items-center justify-center gap-2 ${
               useImageUpload
-                ? "bg-green-600 shadow-sm font-medium"
-                : "text-gray-300 hover:text-gray-900"
+                ? "bg-green-600 text-white shadow-sm font-medium"
+                : "text-gray-500 hover:text-gray-900"
             }`}
           >
             <Upload className="w-4 h-4" />
@@ -298,7 +280,6 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
           </button>
         </div>
 
-        {/* Input según el modo seleccionado */}
         {useImageUpload ? (
           <div className="space-y-2">
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-gray-400 transition-colors">
@@ -352,7 +333,6 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
           />
         )}
 
-        {/* Preview de URL */}
         {!useImageUpload && formData.imageUrl && (
           <div className="mt-2 border rounded-lg p-2">
             <img
@@ -367,7 +347,6 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
         )}
       </div>
 
-      {/* URL de Destino */}
       <div className="space-y-2">
         <Label htmlFor="targetUrl">URL de Destino</Label>
         <Input
@@ -381,7 +360,6 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
         />
       </div>
 
-      {/* Posición y Estado */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="position">Posición</Label>
@@ -413,25 +391,8 @@ export function AdForm({ editingAd, onSubmit, onCancel }: AdFormProps) {
           </div>
         </div>
       </div>
-
-      {/* Botones */}
-      <div className="flex gap-2 pt-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isUploading}
-        >
-          Cancelar
-        </Button>
-        <Button type="submit" disabled={isUploading}>
-          {isUploading
-            ? "Subiendo imagen..."
-            : editingAd
-              ? "Actualizar"
-              : "Crear"}
-        </Button>
-      </div>
     </form>
   );
-}
+});
+
+AdForm.displayName = "AdForm";
