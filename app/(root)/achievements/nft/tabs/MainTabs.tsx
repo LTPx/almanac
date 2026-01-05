@@ -9,7 +9,7 @@ import { User } from "@/lib/types";
 import { Sparkles } from "lucide-react";
 
 export default function MainTabs({ user }: { user: User }) {
-  const [tab, setTab] = useState("explore");
+  const [tab, setTab] = useState("mis-medallas");
   const { nfts, loading, error, refetch } = useNFTs(user.id);
 
   return (
