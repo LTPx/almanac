@@ -66,7 +66,8 @@ export default function SettingsProfile() {
   const handleFAQ = () => console.log("F.A.Q clicked");
   const handleSupport = () => console.log("Soporte clicked");
 
-  const currentLanguage = session?.user?.languagePreference || "en";
+  const currentLanguage =
+    (session?.user as any)?.languagePreference || "en";
 
   return (
     <div className="min-h-screen text-white">
