@@ -152,24 +152,26 @@ export default function InterstitialAd({
           </div>
         </div>
       ) : currentAd ? (
-        <div className="relative w-full h-full max-w-4xl max-h-[90vh] flex items-center justify-center p-4">
-          <button
-            onClick={handleSkip}
-            className="absolute top-4 right-4 z-10 bg-white/10 hover:bg-white/20 text-white rounded-full p-3 transition-all backdrop-blur-sm"
-            aria-label="Saltar anuncio"
-          >
-            <X className="w-6 h-6" />
-          </button>
+        <div className="relative w-full h-full max-w-4xl flex items-center justify-center p-4">
+          <div className="relative inline-block max-w-full max-h-full">
+            <button
+              onClick={handleSkip}
+              className="absolute top-2 right-2 z-10 bg-white/90 hover:bg-white text-gray-800 rounded-full p-2 transition-all shadow-lg"
+              aria-label="Saltar anuncio"
+            >
+              <X className="w-5 h-5" />
+            </button>
 
-          <div
-            className="cursor-pointer w-full h-full flex items-center justify-center"
-            onClick={() => handleAdClick(currentAd)}
-          >
-            <img
-              src={currentAd.imageUrl}
-              alt={currentAd.title}
-              className="max-w-full max-h-full object-contain rounded-lg"
-            />
+            <div
+              className="cursor-pointer"
+              onClick={() => handleAdClick(currentAd)}
+            >
+              <img
+                src={currentAd.imageUrl}
+                alt={currentAd.title}
+                className="max-w-full max-h-[calc(100vh-8rem)] object-contain rounded-lg"
+              />
+            </div>
           </div>
 
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
