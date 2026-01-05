@@ -2,14 +2,23 @@
 
 // import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useState } from "react";
 import MenuItem from "@/components/menu-item";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 
 export default function SettingsProfile() {
   // const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isUpdatingLanguage, setIsUpdatingLanguage] = useState(false);
+  const { data: session } = useSession();
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -24,6 +33,32 @@ export default function SettingsProfile() {
     }
   };
 
+  const handleLanguageChange = async (language: string) => {
+    setIsUpdatingLanguage(true);
+    try {
+      const response = await fetch("/api/user/language-preference", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ languagePreference: language })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update language preference");
+      }
+
+      toast.success("Language updated successfully");
+      // Recargar la página para aplicar cambios
+      window.location.reload();
+    } catch (error) {
+      toast.error("Failed to update language");
+      console.error("Language update error:", error);
+    } finally {
+      setIsUpdatingLanguage(false);
+    }
+  };
+
   const handlePreferences = () => console.log("Preferencias clicked");
   const handleProfile = () => console.log("Perfil clicked");
   const handleNotifications = () => console.log("Notificaciones clicked");
@@ -31,11 +66,34 @@ export default function SettingsProfile() {
   const handleFAQ = () => console.log("F.A.Q clicked");
   const handleSupport = () => console.log("Soporte clicked");
 
+  const currentLanguage = session?.user?.languagePreference || "en";
+
   return (
     <div className="min-h-screen text-white">
       <SettingsHeader />
       <div className="pb-8">
         <div className="mt-6">
+          <SectionTitle title="Idioma / Language" />
+          <div className="mx-4 px-4 py-3 bg-gray-800/50 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-300">Selecciona tu idioma</span>
+              <Select
+                value={currentLanguage}
+                onValueChange={handleLanguageChange}
+                disabled={isUpdatingLanguage}
+              >
+                <SelectTrigger className="w-[180px] bg-gray-700 border-gray-600">
+                  <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="es">Español</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+        <div className="mt-8">
           <SectionTitle title="Cuenta" />
           <div className="mx-4 overflow-hidden">
             <MenuItem title="Preferencias" onClick={handlePreferences} />

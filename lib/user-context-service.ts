@@ -11,6 +11,7 @@ export async function getUserContext(userId: string): Promise<UserContext> {
       where: { id: userId },
       select: {
         name: true,
+        languagePreference: true,
         userCurriculumProgress: {
           where: { isCompleted: true },
           include: {
