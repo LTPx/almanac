@@ -6,7 +6,7 @@ import {
   endTutorSession,
   getActiveSession,
   getSessionMessages,
-  getSessionQuestionCount,
+  getSessionQuestionCount
 } from "@/lib/tutor-session-service";
 import prisma from "@/lib/prisma";
 
@@ -36,14 +36,13 @@ export async function GET(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Calcular límite según plan
-    const isPremium = user.subscriptionStatus === "ACTIVE" || user.subscriptionStatus === "TRIALING";
+    const isPremium =
+      user.subscriptionStatus === "ACTIVE" ||
+      user.subscriptionStatus === "TRIALING";
     const limit = isPremium ? 25 : 10;
 
     // Buscar sesión activa en la base de datos
@@ -72,11 +71,11 @@ export async function GET(req: NextRequest) {
         id: activeSession.id,
         lessonId: activeSession.lessonId,
         startedAt: activeSession.startedAt,
-        lastActive: activeSession.lastActive,
+        lastActive: activeSession.lastActive
       },
       messages: messages.map((msg) => ({
         role: msg.role,
-        content: msg.content,
+        content: msg.content
       })),
       questionLimit: {
         limit,
@@ -122,19 +121,20 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const isPremium = user.subscriptionStatus === "ACTIVE" || user.subscriptionStatus === "TRIALING";
+    const isPremium =
+      user.subscriptionStatus === "ACTIVE" ||
+      user.subscriptionStatus === "TRIALING";
     const limit = isPremium ? 25 : 10;
 
     // Verificar límite de la sesión activa (si existe)
     const activeSession = await getActiveSession(userId);
     if (activeSession) {
-      const sessionQuestionCount = await getSessionQuestionCount(activeSession.id);
+      const sessionQuestionCount = await getSessionQuestionCount(
+        activeSession.id
+      );
 
       if (sessionQuestionCount >= limit) {
         const errorMessage = isPremium
@@ -142,7 +142,12 @@ export async function POST(req: NextRequest) {
           : `Has alcanzado el límite de 10 preguntas por sesión del plan gratuito. Actualiza a Premium para obtener 25 preguntas por sesión o inicia un nuevo chat.`;
 
         return NextResponse.json(
-          { error: errorMessage, limitReached: true, limit, count: sessionQuestionCount },
+          {
+            error: errorMessage,
+            limitReached: true,
+            limit,
+            count: sessionQuestionCount
+          },
           { status: 429 }
         );
       }
@@ -188,14 +193,14 @@ export async function POST(req: NextRequest) {
           await addMessageToSession(sessionId, {
             role: "user",
             content: message,
-            timestamp: new Date(),
+            timestamp: new Date()
           });
 
           // Guardar respuesta del tutor
           await addMessageToSession(sessionId, {
             role: "model",
             content: response,
-            timestamp: new Date(),
+            timestamp: new Date()
           });
         }
       } catch (trackingError) {
@@ -211,10 +216,10 @@ export async function POST(req: NextRequest) {
         ? {
             title: currentTopicData.title,
             unitName: currentTopicData.unitName,
-            curriculumTitle: currentTopicData.curriculumTitle,
+            curriculumTitle: currentTopicData.curriculumTitle
           }
         : null,
-      sessionId: userSessions.get(userId), // Incluir sessionId en la respuesta
+      sessionId: userSessions.get(userId) // Incluir sessionId en la respuesta
     });
   } catch (error: any) {
     console.error("Error in almanac chat:", error);
@@ -246,27 +251,34 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    // Finalizar sesión en DB si existe
-    const sessionId = userSessions.get(userId);
-    if (sessionId) {
+    // Buscar sesión activa en la base de datos
+    const activeSession = await getActiveSession(userId);
+    if (activeSession) {
       try {
-        await endTutorSession(sessionId, wasHelpful);
-        userSessions.delete(userId);
+        await endTutorSession(activeSession.id, wasHelpful);
+        console.log(
+          `Session ${activeSession.id} ended with feedback: ${wasHelpful}`
+        );
       } catch (dbError) {
         console.error("Error ending session in DB:", dbError);
       }
     }
 
+    // Limpiar del Map en memoria
+    userSessions.delete(userId);
+
     // Limpiar agente en memoria
     if (agents.has(userId)) {
       agents.delete(userId);
-      return NextResponse.json({
-        message: "Session cleared and ended",
-        sessionId,
-      });
     }
 
-    return NextResponse.json({ message: "No active session found" });
+    return NextResponse.json({
+      message: activeSession
+        ? "Session cleared and ended"
+        : "No active session found",
+      sessionId: activeSession?.id,
+      feedbackSaved: activeSession ? true : false
+    });
   } catch (error) {
     console.error("Error deleting session:", error);
     return NextResponse.json(
