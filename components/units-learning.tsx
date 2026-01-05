@@ -42,12 +42,17 @@ const LearningPath: React.FC<LearningPathProps> = ({
   let finalApprovedUnits = progress.approvedUnits;
 
   if (showAsCompleted) {
+    const mandatoryUnits = assignedUnits.filter((u) => u.mandatory);
     const highestPositionUnit =
-      assignedUnits.length > 0
-        ? assignedUnits.reduce((max, unit) =>
+      mandatoryUnits.length > 0
+        ? mandatoryUnits.reduce((max, unit) =>
             unit.position > max.position ? unit : max
           )
-        : null;
+        : assignedUnits.length > 0
+          ? assignedUnits.reduce((max, unit) =>
+              unit.position > max.position ? unit : max
+            )
+          : null;
 
     if (highestPositionUnit) {
       finalApprovedUnits = [highestPositionUnit.id];

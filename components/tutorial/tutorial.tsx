@@ -227,7 +227,9 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
           }
         }
       } else if (stepConfig.id === "completed-unit") {
-        target = document.querySelector('[data-highest-position-node="true"]');
+        target = document.querySelector(
+          '[data-highest-position-mandatory="true"]'
+        );
 
         if (target) {
           const rect = target.getBoundingClientRect();

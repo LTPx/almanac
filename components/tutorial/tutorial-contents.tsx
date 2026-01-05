@@ -150,6 +150,7 @@ export function TutorialContentsDemo({
           >
             Temas
           </motion.h2>
+          <h2 className="text-2xl font-bold mb-4">{curriculum.title}</h2>
 
           {units.map((unit: Unit, unitIndex) => (
             <motion.div

@@ -92,9 +92,10 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
   const pathLayout = generatePathLayout();
   const allNodes = pathLayout.flatMap((rowData) => rowData.nodes);
 
+  const mandatoryNodes = allNodes.filter((node) => node.mandatory);
   const highestPositionNode =
-    allNodes.length > 0
-      ? allNodes.reduce((max, node) =>
+    mandatoryNodes.length > 0
+      ? mandatoryNodes.reduce((max, node) =>
           node.position > max.position ? node : max
         )
       : null;
@@ -175,8 +176,9 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                 const isCompleted = nodeData
                   ? approvedUnits.includes(nodeData.id)
                   : false;
+
                 const isHighestPosition =
-                  nodeData && highestPositionNode
+                  nodeData && highestPositionNode && nodeData.mandatory
                     ? nodeData.id === highestPositionNode.id
                     : false;
                 const isOptionalHighest =

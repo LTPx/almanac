@@ -93,6 +93,7 @@ function Contents() {
     <div className="min-h-screen bg-neutral-900 text-white p-6 pb-20">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-[22px] font-bold mb-6">Temas</h1>
+        <h2 className="text-2xl font-bold mb-6">{curriculum.title}</h2>
         {units.map((unit: Unit) => (
           <div
             key={unit.id}
@@ -126,7 +127,6 @@ function Contents() {
             </div>
           </div>
         ))}
-
         <div className="mt-8">
           <h2 className="text-[22px] font-bold mb-4">Tu Historia</h2>
           <div className="border-2 border-neutral-600 rounded-2xl p-5 mb-4 flex items-center justify-between">
