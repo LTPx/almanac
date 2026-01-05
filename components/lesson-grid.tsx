@@ -51,20 +51,21 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
 
   const isAdjacentToCompleted = (unit: Node): boolean => {
     const pathLayout = generatePathLayout();
-    const maxRow =
-      pathLayout.length > 0 ? Math.max(...pathLayout.map((r) => r.row)) : 0;
-
     const completedNodes = pathLayout
       .flatMap((rowData) => rowData.nodes)
       .filter((node) => approvedUnits.includes(node.id));
 
     if (completedNodes.length === 0) {
-      const firstLesson = units
-        .filter((u) => {
-          const { row } = getRowCol(u.position);
-          return row === maxRow;
-        })
-        .reduce((min, u) => (u.position < min.position ? u : min), units[0]);
+      const mandatoryUnits = units.filter((u) => u.mandatory);
+      const firstLesson =
+        mandatoryUnits.length > 0
+          ? mandatoryUnits.reduce((max, u) =>
+              u.position > max.position ? u : max
+            )
+          : units.reduce(
+              (max, u) => (u.position > max.position ? u : max),
+              units[0]
+            );
 
       return unit.id === firstLesson?.id;
     }
