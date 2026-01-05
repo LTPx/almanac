@@ -8,6 +8,7 @@ import {
   getSessionMessages,
   getSessionQuestionCount
 } from "@/lib/tutor-session-service";
+import { getUserContext } from "@/lib/user-context-service";
 import prisma from "@/lib/prisma";
 
 // In-memory storage for agents (maintains conversation state)
@@ -152,7 +153,9 @@ export async function POST(req: NextRequest) {
 
     // Crear o recuperar el agente del usuario
     if (!agents.has(userId)) {
-      const newAgent = new AlmanacAgent(apiKey);
+      // Obtener contexto del usuario para personalización
+      const userContext = await getUserContext(userId);
+      const newAgent = new AlmanacAgent(apiKey, userContext);
 
       // Intentar restaurar historial desde sesión activa
       const activeSession = await getActiveSession(userId);

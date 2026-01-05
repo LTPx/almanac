@@ -12,6 +12,19 @@ interface ChatMessage {
   parts: { text: string }[];
 }
 
+export interface UserContext {
+  name?: string;
+  completedCurriculums?: Array<{
+    title: string;
+    completedAt: Date;
+  }>;
+  completedUnits?: Array<{
+    title: string;
+    curriculumTitle: string;
+  }>;
+  totalExperience?: number;
+}
+
 // --- THE AGENT CLASS ---
 export class AlmanacAgent {
   private chatHistory: ChatMessage[];
@@ -19,13 +32,15 @@ export class AlmanacAgent {
   private genAI: GoogleGenerativeAI;
   private availableTopics: Map<string, AlmanacTopicData> | null;
   private tutorConfig: TutorConfigData | null;
+  private userContext: UserContext | null;
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, userContext?: UserContext) {
     this.chatHistory = [];
     this.currentTopicId = null;
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.availableTopics = null;
     this.tutorConfig = null;
+    this.userContext = userContext || null;
   }
 
   // Lazy loading de la configuración del tutor desde la DB
@@ -50,6 +65,37 @@ export class AlmanacAgent {
       .slice(-6) // Look at last 3 turns
       .map((msg) => `${msg.role.toUpperCase()}: ${msg.parts[0].text}`)
       .join("\n");
+  }
+
+  // Helper to format user context for personalization
+  private getUserContextText(): string {
+    if (!this.userContext) return "";
+
+    const parts: string[] = [];
+
+    if (this.userContext.name) {
+      parts.push(`STUDENT NAME: ${this.userContext.name}`);
+    }
+
+    if (this.userContext.totalExperience) {
+      parts.push(`TOTAL EXPERIENCE POINTS: ${this.userContext.totalExperience}`);
+    }
+
+    if (this.userContext.completedCurriculums && this.userContext.completedCurriculums.length > 0) {
+      const curriculums = this.userContext.completedCurriculums
+        .map(c => c.title)
+        .join(", ");
+      parts.push(`COMPLETED CURRICULUMS: ${curriculums}`);
+    }
+
+    if (this.userContext.completedUnits && this.userContext.completedUnits.length > 0) {
+      const units = this.userContext.completedUnits
+        .map(u => `${u.title} (${u.curriculumTitle})`)
+        .join(", ");
+      parts.push(`COMPLETED UNITS: ${units}`);
+    }
+
+    return parts.length > 0 ? `\n\nSTUDENT CONTEXT:\n${parts.join("\n")}` : "";
   }
 
   // --- STEP A: THE ROUTER ---
@@ -150,6 +196,7 @@ export class AlmanacAgent {
 
       SOURCE MATERIAL:
       ${topicData.content}
+      ${this.getUserContextText()}
     `;
 
     // We instantiate a new model every time so we can inject the specific System Instruction
