@@ -42,6 +42,7 @@ export default function AlmanacTutorPage() {
   const [questionLimit, setQuestionLimit] = useState<QuestionLimit | null>(
     null
   );
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -164,13 +165,22 @@ export default function AlmanacTutorPage() {
       // setCurrentTopic(null);
       setCurrentTopicData(null);
       setSessionId(null);
+      setShowFeedbackModal(false);
     } catch (error) {
       console.error("Error clearing conversation:", error);
     }
   };
 
-  const endWithFeedback = async (helpful: boolean) => {
-    await clearConversation(helpful);
+  const handleNewChatClick = () => {
+    if (messages.length > 0 && sessionId) {
+      setShowFeedbackModal(true);
+    } else {
+      clearConversation();
+    }
+  };
+
+  const handleFeedback = async (wasHelpful?: boolean) => {
+    await clearConversation(wasHelpful);
   };
 
   if (initialLoading) {
@@ -231,32 +241,10 @@ export default function AlmanacTutorPage() {
             </div>
             <div className="flex items-center gap-3">
               <div className="flex gap-2">
-                {messages.length > 0 && sessionId && (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => endWithFeedback(true)}
-                      title="Esto fue útil"
-                      className="border-neutral-600 hover:bg-neutral-800 hover:text-green-400"
-                    >
-                      <ThumbsUp className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => endWithFeedback(false)}
-                      title="Esto no fue útil"
-                      className="border-neutral-600 hover:bg-neutral-800 hover:text-red-400"
-                    >
-                      <ThumbsDown className="w-4 h-4" />
-                    </Button>
-                  </>
-                )}
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => clearConversation()}
+                  onClick={handleNewChatClick}
                   disabled={messages.length === 0}
                   className="border-neutral-600 hover:bg-neutral-800"
                 >
@@ -397,6 +385,46 @@ export default function AlmanacTutorPage() {
                 {questionLimit.remaining} / {questionLimit.limit}
               </p>
               <p className="text-xs text-gray-500">preguntas máximo</p>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Feedback */}
+        {showFeedbackModal && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div className="bg-neutral-800 rounded-2xl p-6 max-w-md w-full border-2 border-neutral-600">
+              <h3 className="text-xl font-bold mb-4 text-white">
+                ¿Cómo fue tu experiencia?
+              </h3>
+              <p className="text-gray-400 mb-6 text-sm">
+                Tu feedback nos ayuda a mejorar el tutor
+              </p>
+
+              <div className="flex flex-col gap-3">
+                <Button
+                  onClick={() => handleFeedback(true)}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
+                >
+                  <ThumbsUp className="w-5 h-5" />
+                  Fue útil
+                </Button>
+
+                <Button
+                  onClick={() => handleFeedback(false)}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
+                >
+                  <ThumbsDown className="w-5 h-5" />
+                  No fue útil
+                </Button>
+
+                <Button
+                  onClick={() => handleFeedback()}
+                  variant="outline"
+                  className="w-full border-neutral-600 hover:bg-neutral-700 text-gray-300 py-4 rounded-xl transition-colors"
+                >
+                  Omitir
+                </Button>
+              </div>
             </div>
           </div>
         )}
