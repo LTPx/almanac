@@ -5,27 +5,27 @@ import React from "react";
 import { Button } from "./ui/button";
 import Logo from "./logo";
 import { useUser } from "@/context/UserContext";
-import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
-import { toast } from "sonner";
+// import { authClient } from "@/lib/auth-client";
+// import { useState } from "react";
+// import { toast } from "sonner";
 import { Bot } from "lucide-react";
 
 export default function Navbar() {
   const user = useUser();
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignOut = async () => {
-    setIsLoading(true);
-    try {
-      await authClient.signOut();
-      toast.success("Signed out successfully");
-      window.location.href = "/sign-in";
-    } catch (error) {
-      setIsLoading(false);
-      toast.error("Failed to sign out");
-      console.error("Sign out error:", error);
-    }
-  };
+  // const handleSignOut = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     await authClient.signOut();
+  //     toast.success("Signed out successfully");
+  //     window.location.href = "/sign-in";
+  //   } catch (error) {
+  //     setIsLoading(false);
+  //     toast.error("Failed to sign out");
+  //     console.error("Sign out error:", error);
+  //   }
+  // };
 
   return (
     <header className="sticky top-0 z-100 flex justify-center">
@@ -55,13 +55,13 @@ export default function Navbar() {
                     <Button variant="outline">Dashboard</Button>
                   </Link>
                 )}
-                <Button
+                {/* <Button
                   variant="default"
                   onClick={handleSignOut}
                   disabled={isLoading}
                 >
                   {isLoading ? "Signing out..." : "Logout"}
-                </Button>
+                </Button> */}
               </>
             ) : (
               <>
