@@ -27,6 +27,7 @@ export default function InterstitialAd({
   const [hasRegisteredView, setHasRegisteredView] = useState(false);
   const [showingGoogleAd, setShowingGoogleAd] = useState(false);
   const [isAdBlocked, setIsAdBlocked] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(10);
 
   useEffect(() => {
     const test = document.createElement("script");
@@ -86,6 +87,27 @@ export default function InterstitialAd({
     isVisible,
     showingGoogleAd
   ]);
+
+  // Timer countdown effect
+  useEffect(() => {
+    if (!showingGoogleAd && customAds.length > 0 && isVisible) {
+      setTimeRemaining(10);
+
+      const timer = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            // Auto-avanzar al siguiente anuncio cuando llegue a 0
+            handleSkip();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [currentAdIndex, showingGoogleAd, customAds.length, isVisible]);
 
   const handleAdClick = async (ad: Ad) => {
     try {
@@ -161,6 +183,12 @@ export default function InterstitialAd({
             >
               <X className="w-5 h-5" />
             </button>
+
+            {timeRemaining > 0 && (
+              <div className="absolute bottom-2 right-2 z-10 bg-black/70 text-white rounded-full px-3 py-1.5 text-sm font-semibold shadow-lg">
+                {timeRemaining} {timeRemaining === 1 ? "segundo" : "segundos"}
+              </div>
+            )}
 
             <div
               className="cursor-pointer"
