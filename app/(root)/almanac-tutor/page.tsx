@@ -10,6 +10,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   isLimitError?: boolean;
+  isTyping?: boolean;
 }
 
 interface TopicData {
@@ -25,16 +26,39 @@ interface QuestionLimit {
   isPremium: boolean;
 }
 
+function TypingMessage({ content }: { content: string }) {
+  const [displayedContent, setDisplayedContent] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (currentIndex < content.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedContent((prev) => prev + content[currentIndex]);
+        setCurrentIndex((prev) => prev + 1);
+      }, 20);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [currentIndex, content]);
+
+  return (
+    <p className="text-sm whitespace-pre-wrap leading-relaxed">
+      {displayedContent}
+      {currentIndex < content.length && (
+        <span className="inline-block w-[2px] h-4 bg-purple-400 ml-1 animate-pulse" />
+      )}
+    </p>
+  );
+}
+
 export default function AlmanacTutorPage() {
   const user = useUser();
   const userId = user?.id || "";
-  console.log(userId);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  // const [currentTopic, setCurrentTopic] = useState<string | null>(null);
   const [currentTopicData, setCurrentTopicData] = useState<TopicData | null>(
     null
   );
@@ -53,7 +77,6 @@ export default function AlmanacTutorPage() {
     scrollToBottom();
   }, [messages]);
 
-  // Cargar sesión activa al montar el componente
   useEffect(() => {
     if (!userId) {
       setInitialLoading(false);
@@ -74,7 +97,8 @@ export default function AlmanacTutorPage() {
           setMessages(
             data.messages.map((msg: any) => ({
               role: msg.role === "model" ? "assistant" : msg.role,
-              content: msg.content
+              content: msg.content,
+              isTyping: false
             }))
           );
         }
@@ -88,8 +112,7 @@ export default function AlmanacTutorPage() {
     loadActiveSession();
   }, [userId]);
 
-  const sendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const sendMessage = async () => {
     if (!input.trim() || loading || !userId) return;
 
     const userMessage = input.trim();
@@ -114,13 +137,15 @@ export default function AlmanacTutorPage() {
       if (response.ok) {
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: data.response }
+          {
+            role: "assistant",
+            content: data.response,
+            isTyping: true
+          }
         ]);
-        // setCurrentTopic(data.currentTopic);
         setCurrentTopicData(data.currentTopicData);
         setSessionId(data.sessionId);
 
-        // Actualizar contador de preguntas
         if (questionLimit) {
           setQuestionLimit({
             ...questionLimit,
@@ -134,7 +159,8 @@ export default function AlmanacTutorPage() {
           {
             role: "assistant",
             content: data.error || "Something went wrong",
-            isLimitError: data.limitReached || false
+            isLimitError: data.limitReached || false,
+            isTyping: false
           }
         ]);
       }
@@ -144,11 +170,19 @@ export default function AlmanacTutorPage() {
         ...prev,
         {
           role: "assistant",
-          content: "Error: Could not connect to the server"
+          content: "Error: Could not connect to the server",
+          isTyping: false
         }
       ]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
     }
   };
 
@@ -162,7 +196,6 @@ export default function AlmanacTutorPage() {
         body: JSON.stringify({ userId, wasHelpful })
       });
       setMessages([]);
-      // setCurrentTopic(null);
       setCurrentTopicData(null);
       setSessionId(null);
       setShowFeedbackModal(false);
@@ -303,30 +336,34 @@ export default function AlmanacTutorPage() {
                         : "bg-neutral-700 text-gray-100 border border-neutral-600"
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                    {message.isLimitError &&
-                    message.content.includes("Premium") ? (
-                      <>
-                        {message.content
-                          .split("Premium")
-                          .map((part, i, arr) => (
-                            <span key={i}>
-                              {part}
-                              {i < arr.length - 1 && (
-                                <Link
-                                  href="/store"
-                                  className="text-amber-300 underline hover:text-amber-200 font-semibold"
-                                >
-                                  Premium
-                                </Link>
-                              )}
-                            </span>
-                          ))}
-                      </>
-                    ) : (
-                      message.content
-                    )}
-                  </p>
+                  {message.role === "assistant" && message.isTyping ? (
+                    <TypingMessage content={message.content} />
+                  ) : (
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                      {message.isLimitError &&
+                      message.content.includes("Premium") ? (
+                        <>
+                          {message.content
+                            .split("Premium")
+                            .map((part, i, arr) => (
+                              <span key={i}>
+                                {part}
+                                {i < arr.length - 1 && (
+                                  <Link
+                                    href="/store"
+                                    className="text-amber-300 underline hover:text-amber-200 font-semibold"
+                                  >
+                                    Premium
+                                  </Link>
+                                )}
+                              </span>
+                            ))}
+                        </>
+                      ) : (
+                        message.content
+                      )}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
@@ -344,29 +381,28 @@ export default function AlmanacTutorPage() {
         </div>
 
         {/* Input */}
-        <form onSubmit={sendMessage}>
-          <div className="flex gap-3">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Escribe tu mensaje..."
-              disabled={loading}
-              className="flex-1 px-5 py-4 bg-neutral-800 border-2 border-neutral-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 disabled:opacity-50 transition-colors"
-            />
-            <Button
-              type="submit"
-              disabled={loading || !input.trim()}
-              className="px-6 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Send className="w-5 h-5" />
-              )}
-            </Button>
-          </div>
-        </form>
+        <div className="flex gap-3">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Escribe tu mensaje..."
+            disabled={loading}
+            className="flex-1 px-5 py-4 bg-neutral-800 border-2 border-neutral-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 disabled:opacity-50 transition-colors"
+          />
+          <Button
+            onClick={sendMessage}
+            disabled={loading || !input.trim()}
+            className="px-6 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Send className="w-5 h-5" />
+            )}
+          </Button>
+        </div>
         {questionLimit && (
           <div className="text-left mt-3">
             <p className="text-xs text-gray-500">
