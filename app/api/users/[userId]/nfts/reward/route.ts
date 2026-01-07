@@ -59,7 +59,16 @@ export async function GET(
       (collection) => collection.nftAssets
     );
 
-    return NextResponse.json({ curriculums, collections, nftsAvailable });
+    // Filtrar colecciones que no tienen nftAssets disponibles
+    const collectionsWithAssets = collections.filter(
+      (collection) => collection.nftAssets.length > 0
+    );
+
+    return NextResponse.json({
+      curriculums,
+      collections: collectionsWithAssets,
+      nftsAvailable
+    });
   } catch (error) {
     console.error("Error fetching completed curriculums:", error);
     return NextResponse.json(
