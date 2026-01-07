@@ -1,10 +1,10 @@
 "use client";
 
-// import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { authClient, useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import MenuItem from "@/components/menu-item";
 import {
   Select,
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 
 export default function SettingsProfile() {
-  // const router = useRouter();
+  const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isUpdatingLanguage, setIsUpdatingLanguage] = useState(false);
   const { data: session } = useSession();
@@ -62,33 +62,38 @@ export default function SettingsProfile() {
   const handlePreferences = () => console.log("Preferencias clicked");
   const handleProfile = () => console.log("Perfil clicked");
   const handleNotifications = () => console.log("Notificaciones clicked");
-  const handlePrivacy = () => console.log("Ajustes de privacidad clicked");
+  const handlePrivacy = () => router.push("/profile/settings/privacy");
   const handleFAQ = () => console.log("F.A.Q clicked");
   const handleSupport = () => console.log("Soporte clicked");
 
-  const currentLanguage =
-    (session?.user as any)?.languagePreference || "en";
+  const currentLanguage = (session?.user as any)?.languagePreference || "en";
 
   return (
-    <div className="min-h-screen text-white">
+    <div className="min-h-screen text-white pb-[60px]">
       <SettingsHeader />
       <div className="pb-8">
         <div className="mt-6">
           <SectionTitle title="Idioma / Language" />
-          <div className="mx-4 px-4 py-3 bg-gray-800/50 rounded-lg">
+          <div className="mx-4 px-4 py-3 bg-gray-800/50 rounded-lg border border-gray-700">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-300">Selecciona tu idioma</span>
+              <span className="text-sm text-gray-300">
+                Selecciona tu idioma
+              </span>
               <Select
                 value={currentLanguage}
                 onValueChange={handleLanguageChange}
                 disabled={isUpdatingLanguage}
               >
-                <SelectTrigger className="w-[180px] bg-gray-700 border-gray-600">
+                <SelectTrigger className="w-[180px] bg-gray-700 border-gray-600 text-white">
                   <SelectValue placeholder="Select language" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="es">Español</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
+                <SelectContent className="bg-gray-800 border-gray-700">
+                  <SelectItem value="es" className="text-white">
+                    Español
+                  </SelectItem>
+                  <SelectItem value="en" className="text-white">
+                    English
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

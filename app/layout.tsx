@@ -4,7 +4,7 @@ import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "@/components/ui/sonner";
 import ClientWrapper from "@/components/client-wrapper";
-import CookieSettingsButton from "@/components/cookie-settings-button";
+// import CookieSettingsButton from "@/components/cookie-settings-button";
 import GDPRBanner from "@/components/gdpr-banner";
 import Script from "next/script";
 
@@ -69,7 +69,7 @@ export default function RootLayout({
         <NextTopLoader showSpinner={false} height={6} color="#000000" />
         <Toaster richColors position="top-right" />
         <GDPRBanner />
-        <CookieSettingsButton />
+        {/* <CookieSettingsButton /> */}
         <ClientWrapper>{children}</ClientWrapper>
       </body>
     </html>
