@@ -84,7 +84,7 @@ function TypingMessage({ content }: { content: string }) {
       const timeout = setTimeout(() => {
         setDisplayedContent((prev) => prev + content[currentIndex]);
         setCurrentIndex((prev) => prev + 1);
-      }, 20);
+      }, 10);
 
       return () => clearTimeout(timeout);
     }
