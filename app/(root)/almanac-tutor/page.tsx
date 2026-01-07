@@ -267,7 +267,7 @@ export default function AlmanacTutorPage() {
 
   if (initialLoading) {
     return (
-      <div className="min-h-screen bg-neutral-900 text-white p-6 pb-20 pt-[80px]">
+      <div className="min-h-screen bg-neutral-900 text-white p-3 sm:p-6 pb-20 pt-[30px] lg:pt-[80px]">
         <div className="max-w-4xl mx-auto flex items-center justify-center h-[500px]">
           <div className="text-center">
             <Loader2 className="w-12 h-12 animate-spin text-purple-500 mx-auto mb-4" />
@@ -279,19 +279,21 @@ export default function AlmanacTutorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-900 text-white p-6 pb-20 pt-[80px]">
+    <div className="min-h-screen bg-neutral-900 text-white p-3 sm:p-6 pb-20 pt-[30px] lg:pt-[30px]">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-white" />
+        <div className="mb-4 sm:mb-6">
+          <div className="flex items-start sm:items-center justify-between mb-4 gap-3">
+            <div className="flex items-start sm:items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+                <BookOpen className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
               </div>
-              <div>
-                <h1 className="text-[22px] font-bold">Almanac Tutor</h1>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-lg sm:text-[22px] font-bold truncate">
+                  Almanac Tutor
+                </h1>
                 {currentTopicData ? (
-                  <p className="text-sm text-gray-400">
+                  <p className="text-xs sm:text-sm text-gray-400 break-words">
                     {currentTopicData.curriculumTitle && (
                       <span className="text-blue-400">
                         {currentTopicData.curriculumTitle}
@@ -315,53 +317,52 @@ export default function AlmanacTutorPage() {
                     </span>
                   </p>
                 ) : (
-                  <p className="text-sm text-gray-400">
+                  <p className="text-xs sm:text-sm text-gray-400">
                     Tu tutor de IA basado en tus lecciones de Almanac
                   </p>
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleNewChatClick}
-                  disabled={messages.length === 0}
-                  className="border-neutral-600 hover:bg-neutral-800"
-                >
-                  Nuevo Chat
-                </Button>
-              </div>
+            <div className="flex items-center flex-shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNewChatClick}
+                disabled={messages.length === 0}
+                className="border-neutral-600 hover:bg-neutral-800 text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2"
+              >
+                <span className="hidden sm:inline">Nuevo Chat</span>
+                <span className="sm:hidden">Nuevo</span>
+              </Button>
             </div>
           </div>
         </div>
 
         {/* Messages Container */}
-        <div className="border-2 border-neutral-600 rounded-2xl bg-neutral-800 overflow-hidden mb-4">
-          <div className="h-[500px] overflow-y-auto p-6">
+        <div className="border-2 border-neutral-600 rounded-xl sm:rounded-2xl bg-neutral-800 overflow-hidden mb-3 sm:mb-4">
+          <div className="h-[400px] sm:h-[500px] overflow-y-auto p-3 sm:p-6">
             {messages.length === 0 && (
-              <div className="text-center text-gray-400 mt-20">
-                <BookOpen className="w-16 h-16 mx-auto mb-4 text-purple-500 opacity-50" />
-                <p className="text-lg font-semibold mb-2 text-white">
+              <div className="text-center text-gray-400 mt-10 sm:mt-20 px-2">
+                <BookOpen className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 text-purple-500 opacity-50" />
+                <p className="text-base sm:text-lg font-semibold mb-2 text-white">
                   ¡Bienvenido a Almanac Tutor!
                 </p>
-                <p className="text-sm mb-6">
+                <p className="text-xs sm:text-sm mb-4 sm:mb-6">
                   Comienza una conversación preguntando sobre cualquier lección
                   de tu currículum
                 </p>
-                <div className="max-w-md mx-auto space-y-3">
+                <div className="max-w-md mx-auto space-y-2 sm:space-y-3">
                   <button
                     onClick={() =>
                       setInput("¿Sobre qué temas puedes ayudarme a aprender?")
                     }
-                    className="block w-full px-4 py-3 text-sm bg-neutral-700 text-white rounded-xl hover:bg-neutral-600 transition-colors border border-neutral-600"
+                    className="block w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm bg-neutral-700 text-white rounded-lg sm:rounded-xl hover:bg-neutral-600 transition-colors border border-neutral-600"
                   >
                     ¿Sobre qué temas puedes ayudarme a aprender?
                   </button>
                   <button
                     onClick={() => setInput("Quiero aprender algo nuevo")}
-                    className="block w-full px-4 py-3 text-sm bg-neutral-700 text-white rounded-xl hover:bg-neutral-600 transition-colors border border-neutral-600"
+                    className="block w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm bg-neutral-700 text-white rounded-lg sm:rounded-xl hover:bg-neutral-600 transition-colors border border-neutral-600"
                   >
                     Quiero aprender algo nuevo
                   </button>
@@ -372,12 +373,12 @@ export default function AlmanacTutorPage() {
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`mb-4 flex ${
+                className={`mb-3 sm:mb-4 flex ${
                   message.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
                 <div
-                  className={`max-w-[80%] px-4 py-3 rounded-2xl ${
+                  className={`max-w-[85%] sm:max-w-[80%] px-3 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl ${
                     message.role === "user"
                       ? "bg-purple-600 text-white"
                       : message.isLimitError
@@ -388,7 +389,7 @@ export default function AlmanacTutorPage() {
                   {message.role === "assistant" && message.isTyping ? (
                     <TypingMessage content={message.content} />
                   ) : (
-                    <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                    <p className="text-xs sm:text-sm whitespace-pre-wrap leading-relaxed break-words">
                       {message.isLimitError &&
                       message.content.includes("Premium") ? (
                         <>
@@ -418,9 +419,9 @@ export default function AlmanacTutorPage() {
             ))}
 
             {loading && (
-              <div className="flex justify-start mb-4">
-                <div className="bg-neutral-700 border border-neutral-600 px-4 py-3 rounded-2xl">
-                  <Loader2 className="w-5 h-5 animate-spin text-purple-500" />
+              <div className="flex justify-start mb-3 sm:mb-4">
+                <div className="bg-neutral-700 border border-neutral-600 px-3 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl">
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-purple-500" />
                 </div>
               </div>
             )}
@@ -430,7 +431,7 @@ export default function AlmanacTutorPage() {
         </div>
 
         {/* Input */}
-        <div className="flex gap-3">
+        <div className="flex gap-2 sm:gap-3">
           <input
             type="text"
             value={input}
@@ -438,28 +439,28 @@ export default function AlmanacTutorPage() {
             onKeyPress={handleKeyPress}
             placeholder="Escribe tu mensaje..."
             disabled={loading}
-            className="flex-1 px-5 py-4 bg-neutral-800 border-2 border-neutral-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 disabled:opacity-50 transition-colors"
+            className="flex-1 px-3 sm:px-5 py-3 sm:py-4 text-sm sm:text-base bg-neutral-800 border-2 border-neutral-600 rounded-lg sm:rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 disabled:opacity-50 transition-colors"
           />
           <Button
             onClick={sendMessage}
             disabled={loading || !input.trim()}
-            className="px-6 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 sm:px-6 py-3 sm:py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg sm:rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-shrink-0"
           >
             {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
             ) : (
-              <Send className="w-5 h-5" />
+              <Send className="w-4 h-4 sm:w-5 sm:h-5" />
             )}
           </Button>
         </div>
         {questionLimit && (
-          <div className="text-left mt-3">
-            <p className="text-xs text-gray-500">
+          <div className="text-left mt-2 sm:mt-3 px-1">
+            <p className="text-[10px] sm:text-xs text-gray-500">
               {questionLimit.isPremium ? "Plan Premium" : "Plan Gratuito"}
             </p>
             <div className="flex gap-1 items-baseline">
               <p
-                className={`text-sm font-semibold ${
+                className={`text-xs sm:text-sm font-semibold ${
                   questionLimit.remaining <= 2
                     ? "text-red-400"
                     : questionLimit.remaining <= 5
@@ -469,7 +470,9 @@ export default function AlmanacTutorPage() {
               >
                 {questionLimit.remaining} / {questionLimit.limit}
               </p>
-              <p className="text-xs text-gray-500">preguntas máximo</p>
+              <p className="text-[10px] sm:text-xs text-gray-500">
+                preguntas máximo
+              </p>
             </div>
           </div>
         )}
@@ -477,35 +480,35 @@ export default function AlmanacTutorPage() {
         {/* Modal de Feedback */}
         {showFeedbackModal && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-            <div className="bg-neutral-800 rounded-2xl p-6 max-w-md w-full border-2 border-neutral-600">
-              <h3 className="text-xl font-bold mb-4 text-white">
+            <div className="bg-neutral-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 max-w-md w-full border-2 border-neutral-600">
+              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-white">
                 ¿Cómo fue tu experiencia?
               </h3>
-              <p className="text-gray-400 mb-6 text-sm">
+              <p className="text-gray-400 mb-4 sm:mb-6 text-xs sm:text-sm">
                 Tu feedback nos ayuda a mejorar el tutor
               </p>
 
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2 sm:gap-3">
                 <Button
                   onClick={() => handleFeedback(true)}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-3 sm:py-4 rounded-lg sm:rounded-xl flex items-center justify-center gap-2 transition-colors text-sm sm:text-base"
                 >
-                  <ThumbsUp className="w-5 h-5" />
+                  <ThumbsUp className="w-4 h-4 sm:w-5 sm:h-5" />
                   Fue útil
                 </Button>
 
                 <Button
                   onClick={() => handleFeedback(false)}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white py-3 sm:py-4 rounded-lg sm:rounded-xl flex items-center justify-center gap-2 transition-colors text-sm sm:text-base"
                 >
-                  <ThumbsDown className="w-5 h-5" />
+                  <ThumbsDown className="w-4 h-4 sm:w-5 sm:h-5" />
                   No fue útil
                 </Button>
 
                 <Button
                   onClick={() => handleFeedback()}
                   variant="outline"
-                  className="w-full border-neutral-600 hover:bg-neutral-700 text-gray-300 py-4 rounded-xl transition-colors"
+                  className="w-full border-neutral-600 hover:bg-neutral-700 text-gray-300 py-3 sm:py-4 rounded-lg sm:rounded-xl transition-colors text-sm sm:text-base"
                 >
                   Omitir
                 </Button>

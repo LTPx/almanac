@@ -104,9 +104,9 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
       <div
         className={`w-full max-w-[650px] sticky top-0 z-50 bg-white border-b border-gray-200 px-4 py-4 shadow-sm ${className}`}
       >
-        <div className="flex items-center justify-between mx-auto">
+        <div className="flex items-center justify-between gap-2 sm:gap-3 mx-auto">
           <motion.div
-            className="w-64 course-header-select"
+            className="flex-1 min-w-0 max-w-xs sm:max-w-sm md:max-w-64 course-header-select"
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
@@ -118,9 +118,11 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
             >
               <SelectTrigger className="w-full text-black">
                 <SelectValue placeholder="Selecciona una unidad...">
-                  {selectedCurriculum
-                    ? selectedCurriculum.title
-                    : "Selecciona una unidad..."}
+                  <span className="truncate block">
+                    {selectedCurriculum
+                      ? selectedCurriculum.title
+                      : "Selecciona una unidad..."}
+                  </span>
                 </SelectValue>
               </SelectTrigger>
               <SelectContent
@@ -133,7 +135,7 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
                     value={curriculum.id.toString()}
                   >
                     <div className="flex items-center justify-between w-full">
-                      <span>{curriculum.title}</span>
+                      <span className="truncate">{curriculum.title}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -141,7 +143,8 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
             </Select>
           </motion.div>
 
-          <div className="flex items-center gap-4 ml-4">
+          {/* Contadores con flex-shrink-0 */}
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             <AnimatePresence mode="wait">
               <motion.div
                 key={`zaps-${zaps}`}
@@ -164,15 +167,18 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
                 }}
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-50 cursor-pointer hover:bg-purple-100 transition-colors zaps-counter"
+                className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg bg-purple-50 cursor-pointer hover:bg-purple-100 transition-colors zaps-counter"
               >
-                <Link href="/store" className="flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-purple-500 fill-current" />
+                <Link
+                  href="/store"
+                  className="flex items-center gap-1.5 sm:gap-2"
+                >
+                  <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 fill-current flex-shrink-0" />
                   {isPremium ? (
                     <motion.span
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      className="text-xl font-bold text-purple-600"
+                      className="text-lg sm:text-xl font-bold text-purple-600"
                     >
                       ∞
                     </motion.span>
@@ -183,7 +189,7 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
                       animate={{ y: 0, opacity: 1 }}
                       exit={{ y: 10, opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="text-sm font-medium text-purple-600"
+                      className="text-xs sm:text-sm font-medium text-purple-600"
                     >
                       {zaps}
                     </motion.span>
@@ -209,7 +215,7 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
                 onClick={
                   lives === 0 && !isPremium ? handleHeartClick : undefined
                 }
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors hearts-counter ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg transition-colors hearts-counter ${
                   lives <= 2
                     ? "bg-red-100 hover:bg-red-200"
                     : "bg-red-50 hover:bg-red-100"
@@ -230,7 +236,7 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
                   }}
                 >
                   <Heart
-                    className={`w-5 h-5 fill-current ${
+                    className={`w-4 h-4 sm:w-5 sm:h-5 fill-current flex-shrink-0 ${
                       lives <= 2 ? "text-red-600" : "text-red-500"
                     }`}
                   />
@@ -239,7 +245,7 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
                   <motion.span
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="text-xl font-bold text-red-600"
+                    className="text-lg sm:text-xl font-bold text-red-600"
                   >
                     ∞
                   </motion.span>
@@ -250,7 +256,7 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: 10, opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className={`text-sm font-medium ${
+                    className={`text-xs sm:text-sm font-medium ${
                       lives <= 2 ? "text-red-700 font-bold" : "text-red-600"
                     }`}
                   >
