@@ -78,7 +78,9 @@ export async function POST(
       .filter((r) => r.completedAt)
       .sort((a, b) => b.completedAt!.getTime() - a.completedAt!.getTime());
 
-    const endDate = completedRecords[0]?.completedAt || userProgressRecords[userProgressRecords.length - 1]?.createdAt;
+    const endDate =
+      completedRecords[0]?.completedAt ||
+      userProgressRecords[userProgressRecords.length - 1]?.createdAt;
 
     // 3) Crear metadatos del NFT con descripción personalizada
     const courseName = userCurriculumToken.curriculum.title;
@@ -113,7 +115,9 @@ export async function POST(
       userCurriculumToken,
       mintResult,
       metadata,
-      nftImageId
+      nftImageId,
+      startDate,
+      endDate
     });
 
     // 5) Spend zaps
@@ -210,7 +214,9 @@ async function saveNFTToDatabase({
   userCurriculumToken,
   mintResult,
   metadata,
-  nftImageId
+  nftImageId,
+  startDate,
+  endDate
 }: {
   userId: string;
   curriculumId: string;
@@ -218,6 +224,8 @@ async function saveNFTToDatabase({
   mintResult: any;
   metadata: any;
   nftImageId: number;
+  startDate: Date | undefined;
+  endDate: Date | undefined;
 }) {
   const now = new Date();
 
@@ -244,7 +252,9 @@ async function saveNFTToDatabase({
         transactionHash: mintResult.transactionHash,
         metadataUri: mintResult.metadataUri ?? JSON.stringify(metadata),
         mintedAt: now,
-        nftAssetId: nftImageId
+        nftAssetId: nftImageId,
+        curriculumStartedAt: startDate,
+        curriculumFinishedAt: endDate
       }
     });
   });

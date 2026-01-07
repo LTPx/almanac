@@ -380,16 +380,18 @@ model ZapTransaction {
 
 //BLOCKCHAIN
 model EducationalNFT {
-  id              String     @id @default(cuid())
-  tokenId         String
-  userId          String
-  contractAddress String
-  transactionHash String?
-  metadataUri     String
-  mintedAt        DateTime   @default(now())
-  user            User       @relation(fields: [userId], references: [id])
-  curriculum      Curriculum @relation(fields: [curriculumId], references: [id])
-  curriculumId    String
+  id                   String     @id @default(cuid())
+  tokenId              String
+  userId               String
+  contractAddress      String
+  transactionHash      String?
+  metadataUri          String
+  mintedAt             DateTime   @default(now())
+  user                 User       @relation(fields: [userId], references: [id])
+  curriculum           Curriculum @relation(fields: [curriculumId], references: [id])
+  curriculumId         String
+  curriculumStartedAt  DateTime?
+  curriculumFinishedAt DateTime?
 
   // relationships
   nftAsset     NFTAsset?      @relation(fields: [nftAssetId], references: [id])
