@@ -21,7 +21,7 @@ export function MultipleChoiceQuestion({
   hasAnswered
 }: Props) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 sm:space-y-3">
       {question.answers.map((answer) => {
         const isSelected = selected === answer.id.toString();
         const shouldShowCorrect = showResult && isSelected && isCorrect;
@@ -41,15 +41,16 @@ export function MultipleChoiceQuestion({
                 if (!hasAnswered) setSelected(answer.id.toString());
               }}
               disabled={hasAnswered}
-              whileTap={{ scale: 1.1 }}
+              whileTap={{ scale: 1.05 }}
               className={`
-      w-full p-4 text-left rounded-2xl border-2 transition-all shadow-md
-      ${isSelected && !showResult ? "bg-[#1983DD] border-[#1983DD] text-white" : ""}
-      ${!isSelected && !showResult ? "text-gray-300 hover:border-[#1983DD]" : ""}
-      ${shouldShowCorrect ? "bg-[#32C781] border-[#32C781] text-white shadow-[0_0_20px_#32C781]" : ""}
-      ${shouldShowIncorrect ? "bg-red-500 border-red-500 text-white shadow-[0_0_20px_red]" : ""}
-      ${hasAnswered ? "cursor-not-allowed" : "cursor-pointer"}
-    `}
+                w-full p-3 sm:p-4 text-left rounded-xl sm:rounded-2xl border-2 transition-all shadow-md text-sm sm:text-base
+                ${isSelected && !showResult ? "bg-[#1983DD] border-[#1983DD] text-white" : ""}
+                ${!isSelected && !showResult ? "text-gray-300 hover:border-[#1983DD]" : ""}
+                ${shouldShowCorrect ? "bg-[#32C781] border-[#32C781] text-white shadow-[0_0_20px_#32C781]" : ""}
+                ${shouldShowIncorrect ? "bg-red-500 border-red-500 text-white shadow-[0_0_20px_red]" : ""}
+                ${hasAnswered ? "cursor-not-allowed" : "cursor-pointer"}
+                break-words leading-relaxed
+              `}
             >
               {answer.text}
             </motion.button>

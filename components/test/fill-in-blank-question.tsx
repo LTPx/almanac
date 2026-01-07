@@ -42,7 +42,7 @@ export function FillInBlankQuestion({
         onChange={(e) => setSelected(e.target.value)}
         disabled={hasAnswered}
         placeholder="Escribe tu respuesta..."
-        className={`w-full p-4 rounded-2xl border-2 transition-all shadow-md ${resultClasses}`}
+        className={`w-full p-3 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all shadow-md text-sm sm:text-base ${resultClasses}`}
       />
     </motion.div>
   );

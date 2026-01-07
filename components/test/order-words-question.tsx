@@ -15,7 +15,6 @@ interface Props {
 
 export function OrderWordsQuestion({
   question,
-  // selected,
   setSelected,
   hasAnswered,
   showResult,
@@ -34,7 +33,7 @@ export function OrderWordsQuestion({
   useEffect(() => {
     setSlots(Array(totalSlots).fill(null));
     setAvailableWords([...question.content.words]);
-  }, [question.content.words]);
+  }, [question.content.words, totalSlots]);
 
   useEffect(() => {
     setSelected(JSON.stringify(slots));
@@ -108,14 +107,14 @@ export function OrderWordsQuestion({
         : "border-b-2 border-white";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <DragDropContext onDragEnd={handleOnDragEnd}>
         <motion.div
           animate={
             showResult && !isCorrect ? { x: [-8, 8, -6, 6, -4, 4, 0] } : {}
           }
           transition={{ duration: 0.4 }}
-          className="flex gap-2 flex-wrap mb-8"
+          className="flex gap-1.5 sm:gap-2 flex-wrap mb-6 sm:mb-8"
         >
           {slots.map((word, index) => (
             <Droppable droppableId={`slot-${index}`} key={`slot-${index}`}>
@@ -124,7 +123,7 @@ export function OrderWordsQuestion({
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   className={`
-                    min-w-[90px] min-h-[50px] flex items-center justify-center rounded-lg transition-all
+                    min-w-[70px] sm:min-w-[90px] min-h-[40px] sm:min-h-[50px] flex items-center justify-center rounded-lg transition-all text-sm sm:text-base
                     ${slotFeedback}
                     ${snapshot.isDraggingOver ? "border-blue-400 bg-blue-500/10" : ""}
                   `}
@@ -141,7 +140,7 @@ export function OrderWordsQuestion({
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           className={`
-                            px-3 py-2 rounded-2xl text-white select-none font-medium shadow-md
+                            px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-white select-none font-medium shadow-md text-xs sm:text-sm
                             ${snapshot.isDragging ? "scale-110 shadow-lg" : ""}
                           `}
                         >
@@ -163,8 +162,8 @@ export function OrderWordsQuestion({
               ref={provided.innerRef}
               {...provided.droppableProps}
               className={`
-                flex flex-wrap gap-2 p-4 border-2 rounded-2xl min-h-[80px]
-                ${snapshot.isDraggingOver ? "" : ""}
+                flex flex-wrap gap-1.5 sm:gap-2 p-3 sm:p-4 border-2 rounded-xl sm:rounded-2xl min-h-[60px] sm:min-h-[80px]
+                ${snapshot.isDraggingOver ? "bg-blue-500/5" : ""}
               `}
             >
               {availableWords.map((word, index) => (
@@ -180,7 +179,7 @@ export function OrderWordsQuestion({
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
                       className={`
-                        px-3 py-2 rounded-2xl text-white select-none font-medium shadow-md
+                        px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-white select-none font-medium shadow-md text-xs sm:text-sm
                         ${snapshot.isDragging ? "scale-110 shadow-lg" : ""}
                       `}
                     >

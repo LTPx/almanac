@@ -149,67 +149,101 @@ export function TestQuestion({
   };
 
   return (
-    <div className="flex-1 h-full py-[50px]">
-      <div className="flex h-full items-center justify-center">
-        <div className="flex h-full flex-col justify-between w-full max-w-[650px] gap-y-2 px-6">
-          <div>
-            <div className="mb-5 flex flex-col items-center gap-4">
-              <h1 className="text-center text-lg font-bold text-white lg:text-start lg:text-3xl flex-1">
-                {question.title}
-              </h1>
-            </div>
-            <div className="mb-6">{renderQuestionType()}</div>
-
-            {onReportError && (
-              <div className="flex justify-end mt-4">
-                <button
-                  onClick={onReportError}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-400 hover:text-orange-500 hover:bg-orange-500/10 rounded-lg transition-all duration-200"
-                >
-                  <Flag className="w-4 h-4" />
-                  <span>Reportar un problema</span>
-                </button>
-              </div>
-            )}
+    <div className="flex-1 h-full flex flex-col overflow-hidden">
+      <div className="flex-1 overflow-y-auto py-6 sm:py-8 md:py-12">
+        <div className="w-full max-w-[650px] mx-auto px-4 sm:px-6">
+          <div className="mb-4 sm:mb-6">
+            <h1 className="text-start text-base sm:text-lg lg:text-2xl xl:text-3xl font-bold text-white leading-tight">
+              {question.title}
+            </h1>
           </div>
-          <div>
-            {showResult && (
-              <div className="space-y-4">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                  className="flex items-center gap-2"
+
+          <div className="mb-4 sm:mb-6">{renderQuestionType()}</div>
+
+          {onReportError && !showResult && (
+            <div className="flex justify-end">
+              <button
+                onClick={onReportError}
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-400 hover:text-orange-500 hover:bg-orange-500/10 rounded-lg transition-all duration-200"
+              >
+                <Flag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Reportar un problema</span>
+                <span className="sm:hidden">Reportar</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex-shrink-0 w-full border-t border-gray-800 bg-background">
+        <div className="w-full max-w-[650px] mx-auto px-4 sm:px-6 py-4 sm:py-5 space-y-3 sm:space-y-4">
+          {showResult && (
+            <div className="space-y-2 sm:space-y-3">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                className="flex items-center gap-2"
+              >
+                {isCorrect ? (
+                  <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-[#32C781] flex-shrink-0" />
+                ) : (
+                  <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-500 flex-shrink-0" />
+                )}
+                <span
+                  className={`font-medium text-sm sm:text-base ${isCorrect ? "text-[#32C781]" : "text-red-500"}`}
                 >
-                  {isCorrect ? (
-                    <CheckCircle className="w-6 h-6 text-[#32C781]" />
-                  ) : (
-                    <XCircle className="w-6 h-6 text-red-500" />
-                  )}
-                  <span
-                    className={`font-medium ${isCorrect ? "text-[#32C781]" : "text-red-500"}`}
-                  >
-                    {isCorrect ? "¡Correcto!" : "Incorrecto"}
-                  </span>
+                  {isCorrect ? "¡Correcto!" : "Incorrecto"}
+                </span>
+              </motion.div>
+
+              {!isCorrect && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.3 }}
+                  className="bg-red-500/10 border border-red-500/50 rounded-lg p-3 max-h-[150px] overflow-y-auto"
+                >
+                  <div className="flex items-start gap-2">
+                    <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 mt-0.5 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm font-semibold text-red-400 mb-1">
+                        Respuesta correcta:
+                      </p>
+                      <p className="text-white font-medium text-sm sm:text-base break-words">
+                        {getCorrectAnswer()}
+                      </p>
+                      {question.content.explanation && (
+                        <p className="text-gray-300 text-xs sm:text-sm mt-2 break-words">
+                          {question.content.explanation}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </motion.div>
-                {!isCorrect && (
+              )}
+
+              {isCorrect &&
+                question.type === "FILL_IN_BLANK" &&
+                selected.trim().toLowerCase() !==
+                  getCorrectAnswer().trim().toLowerCase() && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2, duration: 0.3 }}
-                    className="bg-red-500/10 border border-red-500/50 rounded-lg p-4"
+                    className="bg-[#32C781]/10 border border-[#32C781]/50 rounded-lg p-3 max-h-[150px] overflow-y-auto"
                   >
                     <div className="flex items-start gap-2">
-                      <XCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-semibold text-red-400 mb-1">
-                          Respuesta correcta:
+                      <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-[#32C781] mt-0.5 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-white mb-1 text-sm sm:text-base">
+                          Revisa la ortografía correcta
                         </p>
-                        <p className="text-white font-medium">
+                        <p className="text-white text-xs sm:text-sm break-words">
                           {getCorrectAnswer()}
                         </p>
                         {question.content.explanation && (
-                          <p className="text-gray-300 text-sm mt-2">
+                          <p className="text-gray-300 text-xs sm:text-sm mt-2 break-words">
                             {question.content.explanation}
                           </p>
                         )}
@@ -217,85 +251,58 @@ export function TestQuestion({
                     </div>
                   </motion.div>
                 )}
-                {isCorrect &&
-                  question.type === "FILL_IN_BLANK" &&
-                  selected.trim().toLowerCase() !==
-                    getCorrectAnswer().trim().toLowerCase() && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2, duration: 0.3 }}
-                      className="bg-[#32C781]/10 border border-[#32C781]/50 rounded-lg p-4"
-                    >
-                      <div className="flex items-start gap-2">
-                        <CheckCircle className="w-5 h-5 text-[#32C781] mt-0.5 flex-shrink-0" />
-                        <div>
-                          <p className="text-medium text-white mb-1">
-                            Revisa la ortografía correcta
-                          </p>
-                          <p className="text-white text-sm">
-                            {getCorrectAnswer()}
-                          </p>
-                          {question.content.explanation && (
-                            <p className="text-gray-300 text-sm mt-2">
-                              {question.content.explanation}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-              </div>
-            )}
-            {!hasAnswered && (
+            </div>
+          )}
+
+          {!hasAnswered && (
+            <Button
+              onClick={handleSubmitAnswer}
+              disabled={
+                !selected ||
+                (question.type === "ORDER_WORDS" &&
+                  (() => {
+                    const slots = JSON.parse(selected || "[]");
+                    const usedWords = slots.filter(
+                      (s: string | null) => s !== null
+                    ).length;
+                    const requiredWords = question.content.correctOrder.length;
+                    return usedWords < requiredWords;
+                  })())
+              }
+              className="
+                w-full py-5 sm:py-6 md:py-8 text-base sm:text-lg md:text-xl font-semibold rounded-xl sm:rounded-2xl shadow-lg
+                bg-[#32C781] hover:bg-[#28a36a] text-white disabled:opacity-50 disabled:cursor-not-allowed
+              "
+            >
+              {question.type === "FILL_IN_BLANK"
+                ? "Enviar Respuesta"
+                : "Check Answer →"}
+            </Button>
+          )}
+
+          {hasAnswered && showResult && (
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 15 }}
+            >
               <Button
-                onClick={handleSubmitAnswer}
-                disabled={
-                  !selected ||
-                  (question.type === "ORDER_WORDS" &&
-                    (() => {
-                      const slots = JSON.parse(selected || "[]");
-                      const usedWords = slots.filter(
-                        (s: string | null) => s !== null
-                      ).length;
-                      const requiredWords =
-                        question.content.correctOrder.length;
-                      return usedWords < requiredWords;
-                    })())
-                }
-                className="
-                  w-full py-8 text-xl font-semibold rounded-2xl shadow-lg
-                  bg-[#32C781] hover:bg-[#28a36a] text-white
-                "
+                onClick={onNext}
+                className={`
+                  w-full text-white py-5 sm:py-6 md:py-8 text-base sm:text-lg md:text-xl font-medium rounded-xl sm:rounded-2xl shadow-md
+                  ${isCorrect ? "bg-[#32C781] hover:bg-[#28a36a]" : "bg-red-500 hover:bg-red-600"}
+                `}
+                disabled={isDisabled}
               >
-                {question.type === "FILL_IN_BLANK"
-                  ? "Enviar Respuesta"
-                  : "Check Answer →"}
+                Continuar →
               </Button>
-            )}
-            {hasAnswered && showResult && (
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 300, damping: 15 }}
-              >
-                <Button
-                  onClick={onNext}
-                  className={`
-                    mt-6 w-full text-white py-8 text-xl font-medium rounded-2xl shadow-md
-                    ${isCorrect ? "bg-[#32C781] hover:bg-[#28a36a]" : "bg-red-500 hover:bg-red-600"}
-                  `}
-                  disabled={isDisabled}
-                >
-                  Continuar →
-                </Button>
-              </motion.div>
-            )}
-            {correctAudio}
-            {incorrectAudio}
-          </div>
+            </motion.div>
+          )}
         </div>
       </div>
+
+      {correctAudio}
+      {incorrectAudio}
     </div>
   );
 }
