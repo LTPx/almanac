@@ -151,6 +151,7 @@ export default function UserTutorStatsPage() {
               <TableHead>Started</TableHead>
               <TableHead>Feedback</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -215,7 +216,7 @@ export default function UserTutorStatsPage() {
                   </TableCell>
                   <TableCell>
                     <Link href={`/admin/users/${userId}/tutor/${session.id}`}>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="outline" size="sm">
                         <Eye className="h-4 w-4 mr-2" />
                         View
                       </Button>
