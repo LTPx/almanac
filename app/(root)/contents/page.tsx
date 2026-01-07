@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Accordion,
   AccordionContent,
@@ -16,37 +16,56 @@ import { useUser } from "@/context/UserContext";
 
 function Contents() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const unitIdParam = searchParams?.get("unit");
+  const curriculumIdParam = searchParams?.get("curriculumid");
   const user = useUser();
   const userId = user?.id || "";
-  const { selectedCurriculumId } = useCurriculumStore();
-  const {
-    fetchCurriculumWithUnits,
-    isLoading,
-    fetchCurriculumWithUnitsUserMetrics
-  } = useCurriculums();
+  const { selectedCurriculumId, setSelectedCurriculumId } =
+    useCurriculumStore();
+  const { isLoading, fetchCurriculumWithUnitsUserMetrics } = useCurriculums();
   const [curriculum, setCurriculum] = useState<Curriculum | null>(null);
   const [units, setUnits] = useState<Unit[]>([]);
   const [stats, setStats] = useState<{ totalAnswerErrors: number } | null>(
     null
   );
   const [openAccordion, setOpenAccordion] = useState<string>("");
+  const hasScrolledRef = useRef(false);
+
+  // Sincronizar curriculumId desde URL al store si existe
+  useEffect(() => {
+    if (curriculumIdParam && curriculumIdParam !== selectedCurriculumId) {
+      setSelectedCurriculumId(curriculumIdParam);
+    }
+  }, [curriculumIdParam, selectedCurriculumId, setSelectedCurriculumId]);
 
   useEffect(() => {
     const loadCurriculumUnits = async () => {
       if (!selectedCurriculumId) return;
 
-      const data = await fetchCurriculumWithUnitsUserMetrics(
-        selectedCurriculumId,
-        userId
-      );
+      try {
+        const data = await fetchCurriculumWithUnitsUserMetrics(
+          selectedCurriculumId,
+          userId
+        );
 
-      if (data) {
+        if (!data) return;
+
         const { curriculum, units, stats } = data;
         setCurriculum(curriculum);
         setUnits(units);
         setStats(stats);
+
+        // Actualizar URL con los parámetros actuales
+        const params = new URLSearchParams();
+        params.set("curriculumid", selectedCurriculumId);
         if (unitIdParam) {
+          params.set("unit", unitIdParam);
+        }
+        router.replace(`/contents?${params.toString()}`, { scroll: false });
+
+        // Scroll a la unidad si se especifica en la URL
+        if (unitIdParam && !hasScrolledRef.current) {
           const unitId = parseInt(unitIdParam);
           const targetUnit = data.units?.find((u: Unit) => u.id === unitId);
 
@@ -57,19 +76,33 @@ function Contents() {
           ) {
             const firstLesson = targetUnit.lessons[0];
             setOpenAccordion(`lesson-${firstLesson.id}`);
+
+            // Aumentar el delay para asegurar que el accordion se renderice
             setTimeout(() => {
               const element = document.getElementById(`unit-${unitId}`);
               if (element) {
-                element.scrollIntoView({ behavior: "smooth", block: "start" });
+                element.scrollIntoView({
+                  behavior: "smooth",
+                  block: "start"
+                });
+                hasScrolledRef.current = true;
               }
-            }, 100);
+            }, 300);
           }
         }
+      } catch (error) {
+        console.error("Error loading curriculum units:", error);
       }
     };
 
     loadCurriculumUnits();
-  }, [selectedCurriculumId, fetchCurriculumWithUnits, unitIdParam]);
+  }, [
+    selectedCurriculumId,
+    fetchCurriculumWithUnitsUserMetrics,
+    unitIdParam,
+    userId,
+    router
+  ]);
 
   if (isLoading) {
     return (
