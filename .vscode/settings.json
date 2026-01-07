@@ -1,10 +1,5 @@
 {
-  "cSpell.words": [
-    "Minteado",
-    "nfts",
-    "Thirdweb",
-    "uuid"
-  ],
+  "cSpell.words": ["curriculumid", "Minteado", "nfts", "Thirdweb", "uuid"],
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
   },

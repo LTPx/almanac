@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import {
   AlmanacTopicData,
   getAvailableTopics,
-  getTopicById,
+  getTopicById
 } from "./almanac-db-service";
 import { getTutorConfig, TutorConfigData } from "./tutor-config-service";
 
@@ -84,37 +84,58 @@ export class AlmanacAgent {
     }
 
     if (this.userContext.totalExperience) {
-      parts.push(`TOTAL EXPERIENCE POINTS: ${this.userContext.totalExperience}`);
+      parts.push(
+        `TOTAL EXPERIENCE POINTS: ${this.userContext.totalExperience}`
+      );
     }
 
-    if (this.userContext.completedCurriculums && this.userContext.completedCurriculums.length > 0) {
+    if (
+      this.userContext.completedCurriculums &&
+      this.userContext.completedCurriculums.length > 0
+    ) {
       const curriculums = this.userContext.completedCurriculums
-        .map(c => c.title)
+        .map((c) => c.title)
         .join(", ");
       parts.push(`COMPLETED CURRICULUMS: ${curriculums}`);
     }
 
-    if (this.userContext.completedUnits && this.userContext.completedUnits.length > 0) {
+    if (
+      this.userContext.completedUnits &&
+      this.userContext.completedUnits.length > 0
+    ) {
       const units = this.userContext.completedUnits
-        .map(u => `${u.title} (${u.curriculumTitle})`)
+        .map((u) => `${u.title} (${u.curriculumTitle})`)
         .join(", ");
       parts.push(`COMPLETED UNITS: ${units}`);
     }
 
     // Add available units with link generation instructions
-    if (this.userContext.availableUnits && this.userContext.availableUnits.length > 0) {
+    if (
+      this.userContext.availableUnits &&
+      this.userContext.availableUnits.length > 0
+    ) {
       parts.push("\n\n--- IMPORTANT: UNIT LINKING INSTRUCTIONS ---");
-      parts.push("When you mention ANY unit in your response, you MUST include a clickable markdown link.");
-      parts.push("NEVER use placeholder text like 'link_to_...' - ALWAYS use the EXACT URL format shown below.");
+      parts.push(
+        "When you mention ANY unit in your response, you MUST include a clickable markdown link."
+      );
+      parts.push(
+        "NEVER use placeholder text like 'link_to_...' - ALWAYS use the EXACT URL format shown below."
+      );
       parts.push("\nExample of CORRECT format:");
-      parts.push('[Unidad 1: Mamíferos](/contents?curriculumid=abc123&unit=5)');
+      parts.push("[Unidad 1: Mamíferos](/contents?curriculumid=abc123&unit=5)");
       parts.push("\nExample of INCORRECT format (DO NOT USE):");
-      parts.push('[Unidad 1: Mamíferos](link_to_Unidad_1_Mamíferos) ❌');
-      parts.push("\n\nAVAILABLE UNITS - Copy the EXACT link shown for each unit:");
-      this.userContext.availableUnits.forEach(unit => {
-        parts.push(`• ${unit.name}: [${unit.name}](/contents?curriculumid=${unit.curriculumId}&unit=${unit.id})`);
+      parts.push("[Unidad 1: Mamíferos](link_to_Unidad_1_Mamíferos) ❌");
+      parts.push(
+        "\n\nAVAILABLE UNITS - Copy the EXACT link shown for each unit:"
+      );
+      this.userContext.availableUnits.forEach((unit) => {
+        parts.push(
+          `• ${unit.name}: [${unit.name}](/contents?curriculumid=${unit.curriculumId}&unit=${unit.id})`
+        );
       });
-      parts.push("\nREMEMBER: Copy the link EXACTLY as shown above, including the curriculumid and unit parameters!");
+      parts.push(
+        "\nREMEMBER: Copy the link EXACTLY as shown above, including the curriculumid and unit parameters!"
+      );
     }
 
     return parts.length > 0 ? `\n\nSTUDENT CONTEXT:\n${parts.join("\n")}` : "";
@@ -155,7 +176,7 @@ export class AlmanacAgent {
     const model = this.genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
       systemInstruction: routerInstruction,
-      generationConfig: { responseMimeType: "application/json" },
+      generationConfig: { responseMimeType: "application/json" }
     });
 
     const prompt = `
@@ -177,10 +198,14 @@ export class AlmanacAgent {
 
       // Si es un error de Gemini (429, 500, etc), propagarlo
       if (e.status === 429) {
-        throw new Error("⚠️ Rate limit exceeded. Please wait a moment and try again.");
+        throw new Error(
+          "⚠️ Rate limit exceeded. Please wait a moment and try again."
+        );
       }
       if (e.status >= 500) {
-        throw new Error("⚠️ Gemini service is temporarily unavailable. Please try again later.");
+        throw new Error(
+          "⚠️ Gemini service is temporarily unavailable. Please try again later."
+        );
       }
       if (e.message?.includes("API key")) {
         throw new Error("⚠️ API configuration error. Please contact support.");
@@ -224,17 +249,19 @@ export class AlmanacAgent {
     // We instantiate a new model every time so we can inject the specific System Instruction
     const model = this.genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
-      systemInstruction: tutorInstruction,
+      systemInstruction: tutorInstruction
     });
 
     // We send the full history to the model so it has context
     const fullConversation = [
       ...this.chatHistory,
-      { role: "user" as const, parts: [{ text: userInput }] },
+      { role: "user" as const, parts: [{ text: userInput }] }
     ];
 
     try {
-      const result = await model.generateContent({ contents: fullConversation });
+      const result = await model.generateContent({
+        contents: fullConversation
+      });
       const responseText = result.response.text();
       return responseText;
     } catch (e: any) {
@@ -242,17 +269,23 @@ export class AlmanacAgent {
 
       // Propagar errores de Gemini con mensajes claros
       if (e.status === 429) {
-        throw new Error("⚠️ Too many requests. Please wait a moment before asking another question.");
+        throw new Error(
+          "⚠️ Too many requests. Please wait a moment before asking another question."
+        );
       }
       if (e.status >= 500) {
-        throw new Error("⚠️ AI service is temporarily unavailable. Please try again in a few moments.");
+        throw new Error(
+          "⚠️ AI service is temporarily unavailable. Please try again in a few moments."
+        );
       }
       if (e.message?.includes("API key")) {
         throw new Error("⚠️ API configuration error. Please contact support.");
       }
 
       // Error genérico
-      throw new Error("⚠️ An error occurred while generating the response. Please try again.");
+      throw new Error(
+        "⚠️ An error occurred while generating the response. Please try again."
+      );
     }
   }
 
@@ -279,9 +312,10 @@ export class AlmanacAgent {
         .map((t) => t.title)
         .join(", ");
 
-      const fallback = topics.size > 0
-        ? `I'm your Almanac Tutor! I can help you learn about: ${topicNames}${topics.size > 5 ? ", and more" : ""}. What would you like to learn about?`
-        : "I'm your Almanac Tutor! However, there are no topics available in the database yet. Please ask an administrator to add some lessons.";
+      const fallback =
+        topics.size > 0
+          ? `I'm your Almanac Tutor! I can help you learn about: ${topicNames}${topics.size > 5 ? ", and more" : ""}. What would you like to learn about?`
+          : "I'm your Almanac Tutor! However, there are no topics available in the database yet. Please ask an administrator to add some lessons.";
 
       this.chatHistory.push({ role: "user", parts: [{ text: userInput }] });
       this.chatHistory.push({ role: "model", parts: [{ text: fallback }] });
@@ -303,10 +337,12 @@ export class AlmanacAgent {
     return this.chatHistory;
   }
 
-  restoreHistory(messages: Array<{ role: "user" | "model"; content: string }>): void {
+  restoreHistory(
+    messages: Array<{ role: "user" | "model"; content: string }>
+  ): void {
     this.chatHistory = messages.map((msg) => ({
       role: msg.role,
-      parts: [{ text: msg.content }],
+      parts: [{ text: msg.content }]
     }));
   }
 
