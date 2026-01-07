@@ -81,6 +81,8 @@ export async function GET(
       ownerName: nft.user.name || "Unknown",
       ownerEmail: nft.user.email,
       mintedAt: nft.mintedAt.toISOString(),
+      curriculumStartedAt: nft.curriculumStartedAt,
+      curriculumFinishedAt: nft.curriculumFinishedAt,
       curriculum: {
         id: nft.curriculum.id,
         title: nft.curriculum.title,

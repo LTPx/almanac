@@ -30,6 +30,8 @@ interface NFTDetail {
   owner: string;
   ownerName?: string;
   mintedAt: string;
+  curriculumStartedAt?: Date;
+  curriculumFinishedAt?: Date;
   curriculum?: {
     id: string;
     title: string;
@@ -143,7 +145,7 @@ export default function NFTDetailPage() {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | Date) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("es-ES", {
       year: "numeric",
@@ -272,7 +274,9 @@ export default function NFTDetailPage() {
                       Fecha de inicio
                     </span>
                     <span className="text-white text-sm font-medium">
-                      15 Nov 2025
+                      {nft.curriculumStartedAt
+                        ? formatDate(nft.curriculumStartedAt)
+                        : "N/A"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
@@ -280,7 +284,9 @@ export default function NFTDetailPage() {
                       Fecha de finalización
                     </span>
                     <span className="text-white text-sm font-medium">
-                      28 Nov 2025
+                      {nft.curriculumFinishedAt
+                        ? formatDate(nft.curriculumFinishedAt)
+                        : "N/A"}
                     </span>
                   </div>
                   <div className="pt-2 mt-2 border-t border-gray-700">
