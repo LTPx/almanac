@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ChevronLeft, ChevronDown, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { useUser } from "@/context/UserContext";
+import { getExplorerUrl } from "@/lib/utils";
 
 // interface NFTMetadata {
 //   name: string;
@@ -143,6 +144,25 @@ export default function NFTDetailPage() {
   const formatAddress = (address: string) => {
     if (!address) return "";
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const calculateDaysDuration = (
+    startDate: Date | string | null | undefined,
+    endDate: Date | string | null | undefined
+  ): number | null => {
+    if (!startDate || !endDate) return null;
+
+    const start =
+      typeof startDate === "string" ? new Date(startDate) : startDate;
+    const end = typeof endDate === "string" ? new Date(endDate) : endDate;
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return null;
+
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    return diffDays;
   };
 
   const formatDate = (dateString: string | Date) => {
@@ -295,7 +315,15 @@ export default function NFTDetailPage() {
                         Tiempo total
                       </span>
                       <span className="text-[#32C781] text-sm font-bold">
-                        44 días
+                        {(() => {
+                          const days = calculateDaysDuration(
+                            nft.curriculumStartedAt,
+                            nft.curriculumFinishedAt
+                          );
+                          return days !== null
+                            ? `${days} ${days === 1 ? "día" : "días"}`
+                            : "N/A";
+                        })()}
                       </span>
                     </div>
                   </div>
@@ -374,9 +402,14 @@ export default function NFTDetailPage() {
             <div className="mt-3 space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-400">Contract address</span>
-                <span className="text-blue-400">
+                <a
+                  href={getExplorerUrl(nft.contractAddress, nft.tokenId)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 underline cursor-pointer"
+                >
                   {formatAddress(nft.contractAddress)}
-                </span>
+                </a>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Token ID</span>
