@@ -352,7 +352,6 @@ const renderMessageWithLinks = (content: string) => {
         <a
           key={`link-${keyCounter++}`}
           href={match[2]}
-          target="_blank"
           rel="noopener noreferrer"
           className="text-blue-400 underline hover:text-blue-300"
         >
