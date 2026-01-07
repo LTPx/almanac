@@ -23,6 +23,12 @@ export interface UserContext {
     curriculumTitle: string;
   }>;
   totalExperience?: number;
+  availableUnits?: Array<{
+    id: number;
+    name: string;
+    curriculumId: string;
+    curriculumTitle: string;
+  }>;
 }
 
 // --- THE AGENT CLASS ---
@@ -93,6 +99,22 @@ export class AlmanacAgent {
         .map(u => `${u.title} (${u.curriculumTitle})`)
         .join(", ");
       parts.push(`COMPLETED UNITS: ${units}`);
+    }
+
+    // Add available units with link generation instructions
+    if (this.userContext.availableUnits && this.userContext.availableUnits.length > 0) {
+      parts.push("\n\n--- IMPORTANT: UNIT LINKING INSTRUCTIONS ---");
+      parts.push("When you mention ANY unit in your response, you MUST include a clickable markdown link.");
+      parts.push("NEVER use placeholder text like 'link_to_...' - ALWAYS use the EXACT URL format shown below.");
+      parts.push("\nExample of CORRECT format:");
+      parts.push('[Unidad 1: Mamíferos](/contents?curriculumid=abc123&unit=5)');
+      parts.push("\nExample of INCORRECT format (DO NOT USE):");
+      parts.push('[Unidad 1: Mamíferos](link_to_Unidad_1_Mamíferos) ❌');
+      parts.push("\n\nAVAILABLE UNITS - Copy the EXACT link shown for each unit:");
+      this.userContext.availableUnits.forEach(unit => {
+        parts.push(`• ${unit.name}: [${unit.name}](/contents?curriculumid=${unit.curriculumId}&unit=${unit.id})`);
+      });
+      parts.push("\nREMEMBER: Copy the link EXACTLY as shown above, including the curriculumid and unit parameters!");
     }
 
     return parts.length > 0 ? `\n\nSTUDENT CONTEXT:\n${parts.join("\n")}` : "";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, JSX } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Send, BookOpen, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useUser } from "@/context/UserContext";
@@ -26,6 +26,44 @@ interface QuestionLimit {
   isPremium: boolean;
 }
 
+// Helper function to render markdown links as HTML
+const renderMessageWithLinks = (content: string) => {
+  // Regex to match markdown links: [text](url)
+  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  const parts: (string | JSX.Element)[] = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = linkRegex.exec(content)) !== null) {
+    // Add text before the link
+    if (match.index > lastIndex) {
+      parts.push(content.substring(lastIndex, match.index));
+    }
+
+    // Add the link
+    parts.push(
+      <a
+        key={match.index}
+        href={match[2]}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-400 underline hover:text-blue-300"
+      >
+        {match[1]}
+      </a>
+    );
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add remaining text
+  if (lastIndex < content.length) {
+    parts.push(content.substring(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : content;
+};
+
 function TypingMessage({ content }: { content: string }) {
   const [displayedContent, setDisplayedContent] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -43,7 +81,7 @@ function TypingMessage({ content }: { content: string }) {
 
   return (
     <p className="text-sm whitespace-pre-wrap leading-relaxed">
-      {displayedContent}
+      {renderMessageWithLinks(displayedContent)}
       {currentIndex < content.length && (
         <span className="inline-block w-[2px] h-4 bg-purple-400 ml-1 animate-pulse" />
       )}
@@ -360,7 +398,7 @@ export default function AlmanacTutorPage() {
                             ))}
                         </>
                       ) : (
-                        message.content
+                        renderMessageWithLinks(message.content)
                       )}
                     </p>
                   )}
