@@ -331,32 +331,43 @@ export default function SessionDetailsPage() {
   );
 }
 
-// Helper function to render markdown links as HTML
+// Helper function to render markdown links and bold text as HTML
 const renderMessageWithLinks = (content: string) => {
-  // Regex to match markdown links: [text](url)
-  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  // Regex to match markdown links [text](url) OR bold text **text**
+  const markdownRegex = /\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*/g;
   const parts: (string | JSX.Element)[] = [];
   let lastIndex = 0;
   let match;
+  let keyCounter = 0;
 
-  while ((match = linkRegex.exec(content)) !== null) {
-    // Add text before the link
+  while ((match = markdownRegex.exec(content)) !== null) {
+    // Add text before the match
     if (match.index > lastIndex) {
       parts.push(content.substring(lastIndex, match.index));
     }
 
-    // Add the link
-    parts.push(
-      <a
-        key={match.index}
-        href={match[2]}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-blue-400 underline hover:text-blue-300"
-      >
-        {match[1]}
-      </a>
-    );
+    // Check if it's a link [text](url) - groups 1 and 2 will be defined
+    if (match[1] && match[2]) {
+      parts.push(
+        <a
+          key={`link-${keyCounter++}`}
+          href={match[2]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-400 underline hover:text-blue-300"
+        >
+          {match[1]}
+        </a>
+      );
+    }
+    // Otherwise it's bold text **text** - group 3 will be defined
+    else if (match[3]) {
+      parts.push(
+        <strong key={`bold-${keyCounter++}`} className="font-bold">
+          {match[3]}
+        </strong>
+      );
+    }
 
     lastIndex = match.index + match[0].length;
   }
