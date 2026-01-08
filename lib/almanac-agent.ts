@@ -5,6 +5,7 @@ import {
   getTopicById
 } from "./almanac-db-service";
 import { getTutorConfig, TutorConfigData } from "./tutor-config-service";
+import dayjs from "dayjs";
 
 // --- TYPES ---
 interface ChatMessage {
@@ -14,6 +15,7 @@ interface ChatMessage {
 
 export interface UserContext {
   name?: string;
+  dateOfBirth?: Date | string;
   completedCurriculums?: Array<{
     title: string;
     completedAt: Date;
@@ -81,6 +83,17 @@ export class AlmanacAgent {
 
     if (this.userContext.name) {
       parts.push(`STUDENT NAME: ${this.userContext.name}`);
+    }
+
+    // Calculate and add age if dateOfBirth is available
+    if (this.userContext.dateOfBirth) {
+      const birthDate = dayjs(this.userContext.dateOfBirth);
+      const today = dayjs();
+      const age = today.diff(birthDate, "year");
+      if (age > 0 && age < 150) {
+        // Sanity check
+        parts.push(`STUDENT AGE: ${age} years old`);
+      }
     }
 
     if (this.userContext.totalExperience) {
