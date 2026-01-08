@@ -76,61 +76,111 @@ export default function NFTsPage() {
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [deleteNFTId, setDeleteNFTId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
+  const [loading, setLoading] = useState(false);
 
-  const fetchNftAssets = async () => {
-    const response = await fetch("/api/nft-assets");
+  // Estados de paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalNFTs, setTotalNFTs] = useState(0);
+  const limit = 20;
+
+  const fetchNftAssets = async (page: number = 1) => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString()
+    });
+
+    if (selectedRarity !== "all") {
+      params.append("rarity", selectedRarity);
+    }
+
+    if (selectedStatus !== "all") {
+      params.append("isUsed", selectedStatus === "used" ? "true" : "false");
+    }
+
+    const response = await fetch(`/api/nft-assets?${params}`);
     if (!response.ok) {
-      throw new Error("Failed to fetch lessons");
+      throw new Error("Failed to fetch NFT assets");
     }
     return response.json();
   };
 
+  // Filtrar por búsqueda local (nombre y metadata)
   const filteredNFTs = nfts.filter((nft) => {
+    if (!searchTerm) return true;
     const matchesSearch =
       nft.id.toString().includes(searchTerm) ||
+      nft.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       nft.metadataUri?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRarity =
-      selectedRarity === "all" || nft.rarity === selectedRarity;
-    const matchesStatus =
-      selectedStatus === "all" ||
-      (selectedStatus === "used" && nft.isUsed) ||
-      (selectedStatus === "available" && !nft.isUsed);
-    return matchesSearch && matchesRarity && matchesStatus;
+    return matchesSearch;
   });
 
-  const handleDeleteNFT = (id: number) => {
-    setNfts(nfts.filter((nft) => nft.id !== id));
-    setDeleteNFTId(null);
+  const handleDeleteNFT = async (id: number) => {
+    try {
+      const response = await fetch(`/api/nft-assets/${id}`, {
+        method: "DELETE"
+      });
+
+      if (response.ok) {
+        toast.success("NFT eliminado exitosamente");
+        loadNFTs(currentPage);
+      } else {
+        toast.error("Error al eliminar NFT");
+      }
+    } catch (error) {
+      console.error("Error al eliminar NFT:", error);
+      toast.error("Error al eliminar NFT");
+    } finally {
+      setDeleteNFTId(null);
+    }
   };
 
-  const stats = {
-    total: nfts.length,
-    used: nfts.filter((n) => n.isUsed).length,
-    available: nfts.filter((n) => !n.isUsed).length,
+  const [stats, setStats] = useState({
+    total: 0,
+    used: 0,
+    available: 0,
     byRarity: {
-      COMMON: nfts.filter((n) => n.rarity === "NORMAL").length,
-      RARE: nfts.filter((n) => n.rarity === "RARE").length,
-      EPIC: nfts.filter((n) => n.rarity === "EPIC").length,
-      LEGENDARY: nfts.filter((n) => n.rarity === "UNIQUE").length
+      COMMON: 0,
+      RARE: 0,
+      EPIC: 0,
+      LEGENDARY: 0
+    }
+  });
+
+  const loadNFTs = async (page: number = 1) => {
+    setLoading(true);
+    try {
+      const response: NFTAssetsResponse = await fetchNftAssets(page);
+      const { nftAssets, pagination } = response;
+      setNfts(nftAssets);
+      setCurrentPage(pagination.page);
+      setTotalPages(pagination.totalPages);
+      setTotalNFTs(pagination.total);
+
+      // Calcular stats
+      const statsData = {
+        total: pagination.total,
+        used: nftAssets.filter((n) => n.isUsed).length,
+        available: nftAssets.filter((n) => !n.isUsed).length,
+        byRarity: {
+          COMMON: nftAssets.filter((n) => n.rarity === "NORMAL").length,
+          RARE: nftAssets.filter((n) => n.rarity === "RARE").length,
+          EPIC: nftAssets.filter((n) => n.rarity === "EPIC").length,
+          LEGENDARY: nftAssets.filter((n) => n.rarity === "UNIQUE").length
+        }
+      };
+      setStats(statsData);
+    } catch (error) {
+      console.error("Error loading NFT assets:", error);
+      toast.error("Error loading NFT assets");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    const loadAssets = async () => {
-      try {
-        const response: NFTAssetsResponse = await fetchNftAssets();
-        const { nftAssets } = response;
-        setNfts(nftAssets);
-      } catch (error) {
-        console.error("Error loading lessons:", error);
-        toast.error("Error loading lessons");
-      } finally {
-        // setLoading(false);
-      }
-    };
-
-    loadAssets();
-  }, []);
+    loadNFTs(1);
+  }, [selectedRarity, selectedStatus]);
 
   return (
     <div className="space-y-6 bg-background text-foreground min-h-screen p-6">
@@ -638,6 +688,36 @@ export default function NFTsPage() {
               )}
           </CardContent>
         </Card>
+      )}
+
+      {/* Paginación */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4">
+          <p className="text-sm text-muted-foreground">
+            Mostrando {filteredNFTs.length} de {totalNFTs} NFTs
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => loadNFTs(currentPage - 1)}
+              disabled={currentPage === 1 || loading}
+            >
+              Anterior
+            </Button>
+            <span className="text-sm">
+              Página {currentPage} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => loadNFTs(currentPage + 1)}
+              disabled={currentPage === totalPages || loading}
+            >
+              Siguiente
+            </Button>
+          </div>
+        </div>
       )}
 
       {/* Dialog de confirmación para eliminar */}
