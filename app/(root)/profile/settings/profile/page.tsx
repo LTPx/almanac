@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
@@ -12,24 +12,27 @@ export default function ProfileEditPage() {
   const { data: session } = useSession();
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Parse date of birth
-  const userDateOfBirth = (session?.user as any)?.dateOfBirth
-    ? new Date((session?.user as any)?.dateOfBirth)
-    : null;
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [day, setDay] = useState("");
+  const [month, setMonth] = useState("");
+  const [year, setYear] = useState("");
 
-  const [name, setName] = useState((session?.user as any)?.name || "");
-  const [email, setEmail] = useState((session?.user as any)?.email || "");
-  const [day, setDay] = useState(
-    userDateOfBirth ? userDateOfBirth.getDate().toString().padStart(2, "0") : ""
-  );
-  const [month, setMonth] = useState(
-    userDateOfBirth
-      ? (userDateOfBirth.getMonth() + 1).toString().padStart(2, "0")
-      : ""
-  );
-  const [year, setYear] = useState(
-    userDateOfBirth ? userDateOfBirth.getFullYear().toString() : ""
-  );
+  // Update states when session loads
+  useEffect(() => {
+    if (session?.user) {
+      const user = session.user as any;
+      setName(user.name || "");
+      setEmail(user.email || "");
+
+      if (user.dateOfBirth) {
+        const dateOfBirth = new Date(user.dateOfBirth);
+        setDay(dateOfBirth.getDate().toString().padStart(2, "0"));
+        setMonth((dateOfBirth.getMonth() + 1).toString().padStart(2, "0"));
+        setYear(dateOfBirth.getFullYear().toString());
+      }
+    }
+  }, [session]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

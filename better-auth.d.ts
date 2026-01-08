@@ -5,5 +5,6 @@ declare module "better-auth/types" {
     subscriptionStatus?: string;
     walletAddress?: string | null;
     languagePreference?: string | null;
+    dateOfBirth?: Date | null;
   }
 }
