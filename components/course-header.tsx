@@ -85,6 +85,8 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
         navigator.vibrate(10);
       }
       onUnitChange(value);
+      const event = new CustomEvent("curriculum-selected");
+      window.dispatchEvent(event);
     };
 
     const handleHeartClick = () => {

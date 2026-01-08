@@ -73,18 +73,21 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
   useEffect(() => {
     if (step?.id !== "review-units") return;
 
-    const handleCurriculumChange = () => {
+    const handleCurriculumSelected = () => {
       setTimeout(() => {
         if (!isTransitioning) {
           handleNext();
         }
-      }, 400);
+      }, 2500);
     };
 
-    window.addEventListener("curriculum-changed", handleCurriculumChange);
+    window.addEventListener("curriculum-selected", handleCurriculumSelected);
 
     return () => {
-      window.removeEventListener("curriculum-changed", handleCurriculumChange);
+      window.removeEventListener(
+        "curriculum-selected",
+        handleCurriculumSelected
+      );
     };
   }, [step, isTransitioning]);
 
