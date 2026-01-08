@@ -6,6 +6,12 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
 export default function ProfileEditPage() {
   const router = useRouter();
@@ -26,10 +32,11 @@ export default function ProfileEditPage() {
       setEmail(user.email || "");
 
       if (user.dateOfBirth) {
-        const dateOfBirth = new Date(user.dateOfBirth);
-        setDay(dateOfBirth.getDate().toString().padStart(2, "0"));
-        setMonth((dateOfBirth.getMonth() + 1).toString().padStart(2, "0"));
-        setYear(dateOfBirth.getFullYear().toString());
+        // Parse as UTC to avoid timezone issues
+        const dateOfBirth = dayjs.utc(user.dateOfBirth);
+        setDay(dateOfBirth.format("DD"));
+        setMonth(dateOfBirth.format("MM"));
+        setYear(dateOfBirth.format("YYYY"));
       }
     }
   }, [session]);
@@ -41,27 +48,30 @@ export default function ProfileEditPage() {
     let dateOfBirth = null;
     if (day && month && year) {
       if (day.length !== 2 || month.length !== 2 || year.length !== 4) {
-        toast.error("Invalid date format");
+        toast.error("Formato de fecha inválido");
         return;
       }
 
-      const dayNum = parseInt(day);
-      const monthNum = parseInt(month);
-      const yearNum = parseInt(year);
+      // Crear y validar fecha con dayjs
+      const dateString = `${year}-${month}-${day}`;
+      const date = dayjs(dateString, "YYYY-MM-DD", true);
 
-      if (
-        dayNum < 1 ||
-        dayNum > 31 ||
-        monthNum < 1 ||
-        monthNum > 12 ||
-        yearNum < 1900 ||
-        yearNum > new Date().getFullYear()
-      ) {
-        toast.error("Invalid date");
+      if (!date.isValid()) {
+        toast.error("Fecha inválida");
         return;
       }
 
-      dateOfBirth = `${year}-${month}-${day}`;
+      if (date.isAfter(dayjs())) {
+        toast.error("La fecha de nacimiento no puede ser futura");
+        return;
+      }
+
+      if (date.isBefore(dayjs("1900-01-01"))) {
+        toast.error("La fecha de nacimiento es demasiado antigua");
+        return;
+      }
+
+      dateOfBirth = date.format("YYYY-MM-DD");
     }
 
     setIsUpdating(true);
