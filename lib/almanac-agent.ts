@@ -231,24 +231,30 @@ export class AlmanacAgent {
 
   // --- STEP B: THE TUTOR ---
   private async generateTutorResponse(userInput: string): Promise<string> {
-    if (!this.currentTopicId) {
-      throw new Error("No topic selected");
-    }
-
-    // Obtener el topic actual desde la DB
-    const topicData = await getTopicById(this.currentTopicId);
     const config = await this.getConfig();
+    let tutorInstruction = "";
 
-    if (!topicData) {
-      throw new Error("Topic not found in database");
-    }
+    if (!this.currentTopicId) {
+      tutorInstruction = `
+      ${config.tutorInstructions}
 
-    const displayName = topicData.curriculumTitle
-      ? `${topicData.curriculumTitle} - ${topicData.title}`
-      : topicData.title;
+      CURRENT TOPIC: none
 
-    // Usar instrucciones personalizables desde la DB
-    const tutorInstruction = `
+      SOURCE MATERIAL:
+      ${this.getUserContextText()}
+    `;
+    } else {
+      const topicData = await getTopicById(this.currentTopicId);
+
+      if (!topicData) {
+        throw new Error("Topic not found in database");
+      }
+
+      const displayName = topicData.curriculumTitle
+        ? `${topicData.curriculumTitle} - ${topicData.title}`
+        : topicData.title;
+
+      tutorInstruction = `
       ${config.tutorInstructions}
 
       CURRENT TOPIC: ${displayName}
@@ -258,6 +264,7 @@ export class AlmanacAgent {
       ${topicData.content}
       ${this.getUserContextText()}
     `;
+    }
 
     // We instantiate a new model every time so we can inject the specific System Instruction
     const model = this.genAI.getGenerativeModel({
@@ -317,28 +324,10 @@ export class AlmanacAgent {
       }
     }
 
-    // 3. Handle "No Topic Selected" Case
-    if (!this.currentTopicId) {
-      // Generar una lista de topics disponibles para mostrar al usuario
-      const topicNames = Array.from(topics.values())
-        .slice(0, 5) // Mostrar solo los primeros 5
-        .map((t) => t.title)
-        .join(", ");
-
-      const fallback =
-        topics.size > 0
-          ? `I'm your Almanac Tutor! I can help you learn about: ${topicNames}${topics.size > 5 ? ", and more" : ""}. What would you like to learn about?`
-          : "I'm your Almanac Tutor! However, there are no topics available in the database yet. Please ask an administrator to add some lessons.";
-
-      this.chatHistory.push({ role: "user", parts: [{ text: userInput }] });
-      this.chatHistory.push({ role: "model", parts: [{ text: fallback }] });
-      return fallback;
-    }
-
-    // 4. Generate Answer
+    // 3. Generate Answer
     const responseText = await this.generateTutorResponse(userInput);
 
-    // 5. Update History
+    // 4. Update History
     this.chatHistory.push({ role: "user", parts: [{ text: userInput }] });
     this.chatHistory.push({ role: "model", parts: [{ text: responseText }] });
 
