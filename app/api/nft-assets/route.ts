@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const rarity = searchParams.get("rarity");
     const isUsed = searchParams.get("isUsed");
+    const collectionId = searchParams.get("collectionId");
     const limit = searchParams.get("limit");
     const page = searchParams.get("page") || "1";
 
@@ -25,6 +26,10 @@ export async function GET(request: NextRequest) {
 
     if (isUsed !== null && isUsed !== "all") {
       where.isUsed = isUsed === "true";
+    }
+
+    if (collectionId && collectionId !== "all") {
+      where.collectionId = collectionId;
     }
 
     const pageNumber = parseInt(page);

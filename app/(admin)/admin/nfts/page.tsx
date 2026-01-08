@@ -69,11 +69,19 @@ const rarityConfig = {
   }
 };
 
+interface Collection {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 export default function NFTsPage() {
   const [nfts, setNfts] = useState<NFTAsset[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRarity, setSelectedRarity] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [selectedCollection, setSelectedCollection] = useState<string>("all");
   const [deleteNFTId, setDeleteNFTId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
   const [loading, setLoading] = useState(false);
@@ -98,11 +106,29 @@ export default function NFTsPage() {
       params.append("isUsed", selectedStatus === "used" ? "true" : "false");
     }
 
+    if (selectedCollection !== "all") {
+      params.append("collectionId", selectedCollection);
+    }
+
     const response = await fetch(`/api/nft-assets?${params}`);
     if (!response.ok) {
       throw new Error("Failed to fetch NFT assets");
     }
     return response.json();
+  };
+
+  const fetchCollections = async () => {
+    try {
+      const response = await fetch("/api/collections");
+      if (!response.ok) {
+        throw new Error("Failed to fetch collections");
+      }
+      const data = await response.json();
+      setCollections(data.collections);
+    } catch (error) {
+      console.error("Error loading collections:", error);
+      toast.error("Error loading collections");
+    }
   };
 
   // Filtrar por búsqueda local (nombre y metadata)
@@ -179,8 +205,12 @@ export default function NFTsPage() {
   };
 
   useEffect(() => {
+    fetchCollections();
+  }, []);
+
+  useEffect(() => {
     loadNFTs(1);
-  }, [selectedRarity, selectedStatus]);
+  }, [selectedRarity, selectedStatus, selectedCollection]);
 
   return (
     <div className="space-y-6 bg-background text-foreground min-h-screen p-6">
@@ -328,6 +358,24 @@ export default function NFTsPage() {
                   <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="available">No Minted</SelectItem>
                   <SelectItem value="used">Minted</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-48">
+              <Select
+                value={selectedCollection}
+                onValueChange={setSelectedCollection}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Colección" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las colecciones</SelectItem>
+                  {collections.map((collection) => (
+                    <SelectItem key={collection.id} value={collection.id}>
+                      {collection.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
