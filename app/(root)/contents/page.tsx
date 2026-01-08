@@ -32,7 +32,6 @@ function Contents() {
   const [openAccordion, setOpenAccordion] = useState<string>("");
   const hasScrolledRef = useRef(false);
 
-  // Sincronizar curriculumId desde URL al store si existe
   useEffect(() => {
     if (curriculumIdParam && curriculumIdParam !== selectedCurriculumId) {
       setSelectedCurriculumId(curriculumIdParam);
@@ -56,7 +55,6 @@ function Contents() {
         setUnits(units);
         setStats(stats);
 
-        // Actualizar URL con los parámetros actuales
         const params = new URLSearchParams();
         params.set("curriculumid", selectedCurriculumId);
         if (unitIdParam) {
@@ -64,7 +62,6 @@ function Contents() {
         }
         router.replace(`/contents?${params.toString()}`, { scroll: false });
 
-        // Scroll a la unidad si se especifica en la URL
         if (unitIdParam && !hasScrolledRef.current) {
           const unitId = parseInt(unitIdParam);
           const targetUnit = data.units?.find((u: Unit) => u.id === unitId);
@@ -77,12 +74,11 @@ function Contents() {
             const firstLesson = targetUnit.lessons[0];
             setOpenAccordion(`lesson-${firstLesson.id}`);
 
-            // Aumentar el delay para asegurar que el accordion se renderice
             setTimeout(() => {
               const element = document.getElementById(`unit-${unitId}`);
               if (element) {
                 element.scrollIntoView({
-                  behavior: "smooth",
+                  behavior: "auto",
                   block: "start"
                 });
                 hasScrolledRef.current = true;
