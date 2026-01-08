@@ -121,6 +121,32 @@ export default function AlmanacTutorPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const loadActiveSession = async () => {
+    try {
+      const response = await fetch(`/api/almanac/chat?userId=${userId}`);
+      const data = await response.json();
+
+      if (data.questionLimit) {
+        setQuestionLimit(data.questionLimit);
+      }
+
+      if (data.session && data.messages.length > 0) {
+        setSessionId(data.session.id);
+        setMessages(
+          data.messages.map((msg: any) => ({
+            role: msg.role === "model" ? "assistant" : msg.role,
+            content: msg.content,
+            isTyping: false
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("Error loading active session:", error);
+    } finally {
+      setInitialLoading(false);
+    }
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -130,32 +156,6 @@ export default function AlmanacTutorPage() {
       setInitialLoading(false);
       return;
     }
-
-    const loadActiveSession = async () => {
-      try {
-        const response = await fetch(`/api/almanac/chat?userId=${userId}`);
-        const data = await response.json();
-
-        if (data.questionLimit) {
-          setQuestionLimit(data.questionLimit);
-        }
-
-        if (data.session && data.messages.length > 0) {
-          setSessionId(data.session.id);
-          setMessages(
-            data.messages.map((msg: any) => ({
-              role: msg.role === "model" ? "assistant" : msg.role,
-              content: msg.content,
-              isTyping: false
-            }))
-          );
-        }
-      } catch (error) {
-        console.error("Error loading active session:", error);
-      } finally {
-        setInitialLoading(false);
-      }
-    };
 
     loadActiveSession();
   }, [userId]);
@@ -247,6 +247,7 @@ export default function AlmanacTutorPage() {
       setCurrentTopicData(null);
       setSessionId(null);
       setShowFeedbackModal(false);
+      loadActiveSession();
     } catch (error) {
       console.error("Error clearing conversation:", error);
     }
