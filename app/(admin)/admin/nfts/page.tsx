@@ -19,8 +19,18 @@ import {
   Sparkles,
   CheckCircle,
   ExternalLink,
-  ChevronsLeftRightEllipsis
+  ChevronsLeftRightEllipsis,
+  LayoutGrid,
+  Table as TableIcon
 } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,6 +75,7 @@ export default function NFTsPage() {
   const [selectedRarity, setSelectedRarity] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [deleteNFTId, setDeleteNFTId] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<"grid" | "table">("table");
 
   const fetchNftAssets = async () => {
     const response = await fetch("/api/nft-assets");
@@ -131,6 +142,26 @@ export default function NFTsPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <div className="flex gap-1 border rounded-md p-1">
+            <Button
+              variant={viewMode === "grid" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("grid")}
+              className="gap-2"
+            >
+              <LayoutGrid className="w-4 h-4" />
+              Grid
+            </Button>
+            <Button
+              variant={viewMode === "table" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("table")}
+              className="gap-2"
+            >
+              <TableIcon className="w-4 h-4" />
+              Tabla
+            </Button>
+          </div>
           <Link href="/admin/collections/new">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
@@ -254,159 +285,334 @@ export default function NFTsPage() {
         </CardContent>
       </Card>
 
-      {/* Grid de NFTs */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {filteredNFTs.map((nft) => {
-          const rarityInfo =
-            rarityConfig[nft.rarity as keyof typeof rarityConfig];
-          return (
-            <Card
-              key={nft.id}
-              className="overflow-hidden hover:shadow-lg transition-shadow"
-            >
-              <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200">
-                <img
-                  src={nft.imageUrl}
-                  alt={`NFT #${nft.educationalNFT ? nft.educationalNFT.tokenId : "-"}`}
-                  className={`w-full h-full object-cover ${nft.isUsed && "backdrop-blur-md"}`}
-                />
-                <div className="absolute top-2 right-2">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        className="h-8 w-8 bg-white/90 hover:bg-white"
-                      >
-                        <MoreHorizontal className="h-4 w-4" color="black" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild disabled={!nft.isUsed}>
-                        <Link
-                          href={`/nft/${nft.educationalNFT?.id}`}
-                          target="_blank"
+      {/* Vista de Grid */}
+      {viewMode === "grid" && (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filteredNFTs.map((nft) => {
+            const rarityInfo =
+              rarityConfig[nft.rarity as keyof typeof rarityConfig];
+            return (
+              <Card
+                key={nft.id}
+                className="overflow-hidden hover:shadow-lg transition-shadow"
+              >
+                <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200">
+                  <img
+                    src={nft.imageUrl}
+                    alt={`NFT #${nft.educationalNFT ? nft.educationalNFT.tokenId : "-"}`}
+                    className={`w-full h-full object-cover ${nft.isUsed && "backdrop-blur-md"}`}
+                  />
+                  <div className="absolute top-2 right-2">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          className="h-8 w-8 bg-white/90 hover:bg-white"
                         >
-                          <Eye className="mr-2 h-4 w-4" />
-                          Link Público
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild disabled={nft.isUsed}>
-                        <Link href={`/admin/nfts/${nft.id}/edit`}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Editar
-                        </Link>
-                      </DropdownMenuItem>
-                      {nft.metadataUri && (
-                        <DropdownMenuItem
-                          onClick={() => window.open(nft.metadataUri, "_blank")}
-                        >
-                          <ExternalLink className="mr-2 h-4 w-4" />
-                          Ver metadata
+                          <MoreHorizontal className="h-4 w-4" color="black" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild disabled={!nft.isUsed}>
+                          <Link
+                            href={`/nft/${nft.educationalNFT?.id}`}
+                            target="_blank"
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Link Público
+                          </Link>
                         </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => setDeleteNFTId(nft.id)}
-                        disabled={nft.isUsed}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Eliminar
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                <div className="absolute top-2 left-2">
-                  <Badge className={rarityInfo.color}>
-                    <span className="mr-1">{rarityInfo.icon}</span>
-                    {rarityInfo.label}
-                  </Badge>
-                </div>
-                {nft.isUsed && nft.educationalNFT && (
-                  <div className="absolute bottom-2 left-2">
-                    <Badge
-                      variant="secondary"
-                      className="bg-gray-800/80 text-white"
-                    >
-                      <Link
-                        href={
-                          nft.educationalNFT
-                            ? getExplorerUrl(
-                                nft.educationalNFT?.contractAddress,
-                                nft.educationalNFT?.tokenId
-                              )
-                            : "#"
-                        }
-                        target="_blank"
-                        className="flex gap-1"
-                      >
-                        <ChevronsLeftRightEllipsis className="h-4 w-4" />
-                        View Transaction
-                      </Link>
+                        <DropdownMenuItem asChild disabled={nft.isUsed}>
+                          <Link href={`/admin/nfts/${nft.id}/edit`}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Editar
+                          </Link>
+                        </DropdownMenuItem>
+                        {nft.metadataUri && (
+                          <DropdownMenuItem
+                            onClick={() =>
+                              window.open(nft.metadataUri, "_blank")
+                            }
+                          >
+                            <ExternalLink className="mr-2 h-4 w-4" />
+                            Ver metadata
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => setDeleteNFTId(nft.id)}
+                          disabled={nft.isUsed}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Eliminar
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <div className="absolute top-2 left-2">
+                    <Badge className={rarityInfo.color}>
+                      <span className="mr-1">{rarityInfo.icon}</span>
+                      {rarityInfo.label}
                     </Badge>
                   </div>
-                )}
-              </div>
-
-              <CardContent className="p-4">
-                <div className="space-y-2">
-                  <div>
-                    <h3 className="font-semibold text-md">
-                      {nft.name || "No name"}
-                    </h3>
-                    <Link
-                      href={`/admin/collections/${nft.collectionId || ""}/edit`}
-                    >
-                      <h3 className="text-sm mt-1 text-muted-foreground">
-                        {nft.collection?.name || "No collection"}
-                      </h3>
-                    </Link>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Badge
-                      variant={nft.educationalNFT ? "default" : "secondary"}
-                      className={
-                        nft.educationalNFT
-                          ? "bg-gray-700 text-primary-foreground"
-                          : "border-gray-50 text-gray-200"
-                      }
-                    >
-                      {nft.educationalNFT
-                        ? `NFT #${nft.educationalNFT.tokenId}`
-                        : "NO MINTED"}
-                    </Badge>
-
-                    {nft.isUsed ? (
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <></>
-                    )}
-                  </div>
-
-                  <div className="text-xs text-muted-foreground space-y-1">
-                    <p>
-                      Created: {new Date(nft.createdAt).toLocaleDateString()}
-                    </p>
-                    {nft.isUsed && nft.usedAt && (
-                      <p>Minted: {new Date(nft.usedAt).toLocaleDateString()}</p>
-                    )}
-                  </div>
-                  {nft.metadataUri && (
-                    <p
-                      className="text-xs text-muted-foreground truncate"
-                      title={nft.metadataUri}
-                    >
-                      {nft.metadataUri}
-                    </p>
+                  {nft.isUsed && nft.educationalNFT && (
+                    <div className="absolute bottom-2 left-2">
+                      <Badge
+                        variant="secondary"
+                        className="bg-gray-800/80 text-white"
+                      >
+                        <Link
+                          href={
+                            nft.educationalNFT
+                              ? getExplorerUrl(
+                                  nft.educationalNFT?.contractAddress,
+                                  nft.educationalNFT?.tokenId
+                                )
+                              : "#"
+                          }
+                          target="_blank"
+                          className="flex gap-1"
+                        >
+                          <ChevronsLeftRightEllipsis className="h-4 w-4" />
+                          View Transaction
+                        </Link>
+                      </Badge>
+                    </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
 
-      {filteredNFTs.length === 0 && (
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <div>
+                      <h3 className="font-semibold text-md">
+                        {nft.name || "No name"}
+                      </h3>
+                      <Link
+                        href={`/admin/collections/${nft.collectionId || ""}/edit`}
+                      >
+                        <h3 className="text-sm mt-1 text-muted-foreground">
+                          {nft.collection?.name || "No collection"}
+                        </h3>
+                      </Link>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Badge
+                        variant={nft.educationalNFT ? "default" : "secondary"}
+                        className={
+                          nft.educationalNFT
+                            ? "bg-gray-700 text-primary-foreground"
+                            : "border-gray-50 text-gray-200"
+                        }
+                      >
+                        {nft.educationalNFT
+                          ? `NFT #${nft.educationalNFT.tokenId}`
+                          : "NO MINTED"}
+                      </Badge>
+
+                      {nft.isUsed ? (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <></>
+                      )}
+                    </div>
+
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <p>
+                        Created: {new Date(nft.createdAt).toLocaleDateString()}
+                      </p>
+                      {nft.isUsed && nft.usedAt && (
+                        <p>
+                          Minted: {new Date(nft.usedAt).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                    {nft.metadataUri && (
+                      <p
+                        className="text-xs text-muted-foreground truncate"
+                        title={nft.metadataUri}
+                      >
+                        {nft.metadataUri}
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Vista de Tabla */}
+      {viewMode === "table" && (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Vista</TableHead>
+                <TableHead>NFT Asset</TableHead>
+                <TableHead>Colección</TableHead>
+                <TableHead className="text-center">Rareza</TableHead>
+                <TableHead className="text-center">Estado</TableHead>
+                <TableHead className="text-center">Token ID</TableHead>
+                <TableHead className="text-center">Creado</TableHead>
+                <TableHead className="text-center">Minted</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredNFTs.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center py-8">
+                    <div className="flex flex-col items-center gap-2">
+                      <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                      <p className="text-muted-foreground">
+                        No se encontraron NFTs
+                      </p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredNFTs.map((nft) => {
+                  const rarityInfo =
+                    rarityConfig[nft.rarity as keyof typeof rarityConfig];
+                  return (
+                    <TableRow key={nft.id}>
+                      <TableCell>
+                        <div className="w-16 h-16 relative rounded overflow-hidden">
+                          <img
+                            src={nft.imageUrl}
+                            alt={`NFT #${nft.educationalNFT ? nft.educationalNFT.tokenId : "-"}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <div>
+                          <p className="font-semibold">
+                            {nft.name || "No name"}
+                          </p>
+                          {nft.metadataUri && (
+                            <p className="text-xs text-muted-foreground truncate max-w-xs">
+                              {nft.metadataUri}
+                            </p>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Link
+                          href={`/admin/collections/${nft.collectionId || ""}/edit`}
+                          className="text-sm text-muted-foreground hover:underline"
+                        >
+                          {nft.collection?.name || "No collection"}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge className={rarityInfo.color}>
+                          <span className="mr-1">{rarityInfo.icon}</span>
+                          {rarityInfo.label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {nft.isUsed ? (
+                          <Badge
+                            variant="default"
+                            className="gap-1 bg-green-600"
+                          >
+                            <CheckCircle className="w-3 h-3" />
+                            Minted
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="gap-1">
+                            Disponible
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {nft.educationalNFT ? (
+                          <Link
+                            href={getExplorerUrl(
+                              nft.educationalNFT.contractAddress,
+                              nft.educationalNFT.tokenId
+                            )}
+                            target="_blank"
+                            className="text-blue-600 hover:underline"
+                          >
+                            #{nft.educationalNFT.tokenId}
+                          </Link>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center text-sm text-muted-foreground">
+                        {new Date(nft.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-center text-sm text-muted-foreground">
+                        {nft.isUsed && nft.usedAt
+                          ? new Date(nft.usedAt).toLocaleDateString()
+                          : "-"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-2 justify-end">
+                          {nft.isUsed && (
+                            <Button variant="ghost" size="sm" asChild>
+                              <Link
+                                href={`/nft/${nft.educationalNFT?.id}`}
+                                target="_blank"
+                                className="gap-2"
+                              >
+                                <Eye className="w-4 h-4" />
+                                Ver
+                              </Link>
+                            </Button>
+                          )}
+                          {!nft.isUsed && (
+                            <Button variant="ghost" size="sm" asChild>
+                              <Link
+                                href={`/admin/nfts/${nft.id}/edit`}
+                                className="gap-2"
+                              >
+                                <Edit className="w-4 h-4" />
+                                Editar
+                              </Link>
+                            </Button>
+                          )}
+                          {nft.metadataUri && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                window.open(nft.metadataUri, "_blank")
+                              }
+                              className="gap-2"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                              Metadata
+                            </Button>
+                          )}
+                          {!nft.isUsed && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDeleteNFTId(nft.id)}
+                              className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              Eliminar
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {viewMode === "grid" && filteredNFTs.length === 0 && (
         <Card>
           <CardContent className="text-center py-12">
             <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
