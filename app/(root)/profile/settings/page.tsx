@@ -60,7 +60,7 @@ export default function SettingsProfile() {
   };
 
   const handlePreferences = () => console.log("Preferencias clicked");
-  const handleProfile = () => console.log("Perfil clicked");
+  const handleProfile = () => router.push("/profile/settings/profile");
   const handleNotifications = () => console.log("Notificaciones clicked");
   const handlePrivacy = () => router.push("/profile/settings/privacy");
   const handleFAQ = () => console.log("F.A.Q clicked");
