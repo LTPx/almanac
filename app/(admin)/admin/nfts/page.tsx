@@ -141,9 +141,9 @@ export default function NFTsPage() {
     return matchesSearch;
   });
 
-  const handleDeleteNFT = async (id: number) => {
+  const handleDeleteNFT = async (assetId: number) => {
     try {
-      const response = await fetch(`/api/nft-assets/${id}`, {
+      const response = await fetch(`/api/nft-assets/${assetId}`, {
         method: "DELETE"
       });
 
