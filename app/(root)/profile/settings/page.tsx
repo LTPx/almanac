@@ -130,19 +130,23 @@ export default function SettingsProfile() {
   );
 }
 
-const SettingsHeader = () => (
-  <div className="flex items-center justify-between p-4 border-b border-gray-700">
-    <h1 className="text-xl font-semibold text-white text-center flex-1">
-      Configuración
-    </h1>
-    <Button
-      variant="ghost"
-      className="text-blue-400 hover:text-blue-300 hover:bg-transparent p-0 h-auto font-medium"
-    >
-      OK
-    </Button>
-  </div>
-);
+const SettingsHeader = () => {
+  const router = useRouter();
+  return (
+    <div className="flex items-center justify-between p-4 border-b border-gray-700">
+      <h1 className="text-xl font-semibold text-white text-center flex-1">
+        Configuración
+      </h1>
+      <Button
+        variant="ghost"
+        className="text-blue-400 hover:text-blue-300 hover:bg-transparent p-0 h-auto font-medium"
+        onClick={() => router.push("/profile")}
+      >
+        OK
+      </Button>
+    </div>
+  );
+};
 
 const SectionTitle = ({ title }: { title: string }) => (
   <div className="px-4 py-2">
