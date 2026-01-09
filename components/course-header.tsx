@@ -128,7 +128,7 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
                 </SelectValue>
               </SelectTrigger>
               <SelectContent
-                className="bg-white text-black z-[9999] tutorial-select-content"
+                className="bg-white text-black z-[9999] tutorial-select-content max-h-[200px] sm:max-h-[250px] overflow-y-auto"
                 data-tutorial-select="true"
               >
                 {curriculums.map((curriculum) => (
