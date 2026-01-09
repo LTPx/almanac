@@ -272,11 +272,10 @@ export default function AlmanacTutorPage() {
   }
 
   return (
-    <div className="h-screen bg-neutral-900 text-white flex flex-col lg:pb-[60px]">
+    <div className="h-screen bg-neutral-900 text-white lg:min-h-screen lg:h-auto flex flex-col lg:block pb-[80px] lg:pb-[60px]">
       <div className="flex-none p-3 sm:p-6 pt-[30px] lg:pt-[30px]">
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-4 sm:mb-6">
+          <div className="mb-2 sm:mb-4 lg:mb-6">
             <div className="flex items-start sm:items-center justify-between mb-4 gap-3">
               <div className="flex items-start sm:items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
@@ -334,11 +333,10 @@ export default function AlmanacTutorPage() {
         </div>
       </div>
 
-      {/* Messages Container - Flex grow para ocupar espacio disponible */}
-      <div className="flex-1 overflow-hidden px-3 sm:px-6">
-        <div className="max-w-4xl mx-auto h-full">
-          <div className="border-2 border-neutral-600 rounded-xl sm:rounded-2xl bg-neutral-800 overflow-hidden h-full flex flex-col">
-            <div className="flex-1 overflow-y-auto p-3 sm:p-6">
+      <div className="flex-1 overflow-hidden px-3 sm:px-6 lg:flex-none lg:overflow-visible">
+        <div className="max-w-4xl mx-auto h-full lg:h-auto">
+          <div className="border-2 border-neutral-600 rounded-xl sm:rounded-2xl bg-neutral-800 overflow-hidden h-full lg:h-auto lg:mb-3 sm:lg:mb-4">
+            <div className="h-full lg:h-[400px] sm:lg:h-[500px] overflow-y-auto p-3 sm:p-6">
               {messages.length === 0 && (
                 <div className="text-center text-gray-400 mt-10 sm:mt-20 px-2">
                   <BookOpen className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 text-purple-500 opacity-50" />
@@ -430,10 +428,9 @@ export default function AlmanacTutorPage() {
         </div>
       </div>
 
-      {/* Input fijo en la parte inferior */}
-      <div className="flex-none p-3 sm:p-6 pb-20 sm:pb-6 bg-neutral-900">
+      <div className="flex-none bg-neutral-900 p-3 sm:p-6 pb-20 sm:pb-6 border-t-2 border-neutral-800 lg:border-t-0 lg:pb-0">
         <div className="max-w-4xl mx-auto">
-          <div className="flex gap-2 sm:gap-3 mb-2">
+          <div className="flex gap-2 sm:gap-3">
             <input
               type="text"
               value={input}
@@ -457,7 +454,7 @@ export default function AlmanacTutorPage() {
           </div>
 
           {questionLimit && (
-            <div className="text-left px-1">
+            <div className="text-left mt-2 sm:mt-3 px-1">
               <p className="text-[10px] sm:text-xs text-gray-500">
                 {questionLimit.isPremium ? "Plan Premium" : "Plan Gratuito"}
               </p>
@@ -481,8 +478,6 @@ export default function AlmanacTutorPage() {
           )}
         </div>
       </div>
-
-      {/* Modal de Feedback */}
       {showFeedbackModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-neutral-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 max-w-md w-full border-2 border-neutral-600">
