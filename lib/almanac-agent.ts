@@ -2,7 +2,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import {
   AlmanacTopicData,
   getAvailableTopics,
-  getTopicById
+  getTopicById,
+  getTopicByCurriculumId
 } from "./almanac-db-service";
 import { getTutorConfig, TutorConfigData } from "./tutor-config-service";
 import dayjs from "dayjs";
@@ -253,7 +254,13 @@ export class AlmanacAgent {
       ${this.getUserContextText()}
     `;
     } else {
-      const topicData = await getTopicById(this.currentTopicId);
+      // Detectar si es un curriculum ID o un lesson ID
+      // Los curriculum IDs son cuid() mientras que los lesson IDs tienen formato "lesson_X"
+      const isCurriculumId = !this.currentTopicId.startsWith("lesson_");
+
+      const topicData = isCurriculumId
+        ? await getTopicByCurriculumId(this.currentTopicId)
+        : await getTopicById(this.currentTopicId);
 
       if (!topicData) {
         throw new Error("Topic not found in database");
@@ -328,7 +335,9 @@ export class AlmanacAgent {
     // 2. Logic: Handle "Sticky" Topics
     if (detectedTopic && detectedTopic !== "null") {
       // Validar que el topic existe en el Master Catalog
-      const trackExists = masterCatalog.some((track) => track.id === detectedTopic);
+      const trackExists = masterCatalog.some(
+        (track) => track.id === detectedTopic
+      );
 
       if (trackExists) {
         this.currentTopicId = detectedTopic;
@@ -367,7 +376,13 @@ export class AlmanacAgent {
 
   async getCurrentTopicData(): Promise<AlmanacTopicData | null> {
     if (!this.currentTopicId) return null;
-    return await getTopicById(this.currentTopicId);
+
+    // Detectar si es un curriculum ID o un lesson ID
+    const isCurriculumId = !this.currentTopicId.startsWith("lesson_");
+
+    return isCurriculumId
+      ? await getTopicByCurriculumId(this.currentTopicId)
+      : await getTopicById(this.currentTopicId);
   }
 
   // Método para refrescar los topics (útil si se agregan nuevos durante la sesión)

@@ -139,6 +139,103 @@ export async function getTopicById(
 }
 
 /**
+ * Obtiene los datos del topic basado en un curriculum ID
+ * Combina todas las lecciones activas del curriculum en un solo tema
+ */
+export async function getTopicByCurriculumId(
+  curriculumId: string
+): Promise<AlmanacTopicData | null> {
+  const curriculum = await prisma.curriculum.findFirst({
+    where: {
+      id: curriculumId,
+      isActive: true
+    },
+    include: {
+      units: {
+        where: {
+          isActive: true
+        },
+        include: {
+          lessons: {
+            where: {
+              isActive: true
+            },
+            include: {
+              facts: {
+                orderBy: {
+                  createdAt: "asc"
+                }
+              },
+              learningObjectives: true
+            },
+            orderBy: {
+              createdAt: "asc"
+            }
+          }
+        },
+        orderBy: {
+          createdAt: "asc"
+        }
+      }
+    }
+  });
+
+  if (!curriculum) {
+    return null;
+  }
+
+  // Combinar todas las lecciones del curriculum
+  const allLessons = curriculum.units.flatMap((unit) =>
+    unit.lessons.map(lesson => ({ ...lesson, unitName: unit.name }))
+  );
+
+  if (allLessons.length === 0) {
+    return null;
+  }
+
+  // Generar descripción combinando los learning objectives de todas las lecciones
+  const allObjectives = allLessons.flatMap((lesson) =>
+    lesson.learningObjectives.map((obj) => obj.text)
+  );
+  const description =
+    allObjectives.length > 0
+      ? allObjectives.slice(0, 3).join(", ") + (allObjectives.length > 3 ? "..." : "")
+      : curriculum.title;
+
+  // Generar contenido combinando todos los facts de todas las lecciones
+  const allContent: string[] = [];
+
+  for (const lesson of allLessons) {
+    allContent.push(`\n## ${lesson.name} (${lesson.unitName})\n`);
+
+    if (lesson.facts.length > 0) {
+      const facts = lesson.facts
+        .map((fact) => {
+          const prefix = fact.core ? "🔑 CORE FACT:" : "📚 Fact:";
+          return `${prefix} ${fact.text}`;
+        })
+        .join("\n\n");
+      allContent.push(facts);
+    } else if (lesson.description) {
+      allContent.push(lesson.description);
+    }
+  }
+
+  const content = allContent.length > 0
+    ? allContent.join("\n")
+    : "No content available for this curriculum.";
+
+  return {
+    id: curriculumId,
+    title: curriculum.title,
+    description: description.substring(0, 200),
+    content: content,
+    unitName: curriculum.units.length > 0 ? `${curriculum.units.length} units` : undefined,
+    curriculumTitle: curriculum.title
+  };
+}
+
+/**
  * Busca temas por palabras clave en el título o descripción
  */
 export async function searchTopics(query: string): Promise<AlmanacTopicData[]> {
