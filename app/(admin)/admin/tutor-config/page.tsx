@@ -169,7 +169,12 @@ export default function TutorConfigPage() {
   };
 
   const handleAddTrack = () => {
-    setMasterCatalog([...masterCatalog, { id: "", title: "", desc: "" }]);
+    const newTrack = { id: "", title: "", desc: "" };
+    const newIndex = masterCatalog.length;
+    setMasterCatalog([...masterCatalog, newTrack]);
+    // Activar modo de edición para la nueva fila
+    setEditingIndex(newIndex);
+    setEditingTrack(newTrack);
   };
 
   const handleAddCurriculumAsTrack = (curriculum: Curriculum) => {
@@ -199,16 +204,6 @@ export default function TutorConfigPage() {
 
   const handleRemoveTrack = (index: number) => {
     setMasterCatalog(masterCatalog.filter((_, i) => i !== index));
-  };
-
-  const handleUpdateTrack = (
-    index: number,
-    field: keyof MasterCatalogTrack,
-    value: string
-  ) => {
-    const updated = [...masterCatalog];
-    updated[index] = { ...updated[index], [field]: value };
-    setMasterCatalog(updated);
   };
 
   const handleStartEdit = (index: number) => {
@@ -353,6 +348,10 @@ export default function TutorConfigPage() {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button onClick={handleAddTrack} size="sm" variant="outline">
+              <Plus className="h-4 w-4" />
+              Add Custom
+            </Button>
             <Button
               onClick={() => {
                 setShowCurriculumSelector(true);
@@ -361,13 +360,9 @@ export default function TutorConfigPage() {
                 }
               }}
               size="sm"
-              variant="outline"
             >
-              Add from Curriculum
-            </Button>
-            <Button onClick={handleAddTrack} size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Custom
+              <Plus className="h-4 w-4" />
+              Add Curriculum
             </Button>
           </div>
         </div>
