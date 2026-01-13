@@ -170,16 +170,22 @@ export default function SessionDetailsPage() {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Lesson:</span>
-              <span className="font-medium">{session.lesson.name}</span>
+              <span className="font-medium">
+                {session.lesson ? session.lesson.name : "No lesson"}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Unit:</span>
-              <span className="font-medium">{session.lesson.unitName}</span>
+              <span className="font-medium">
+                {session.lesson ? session.lesson.unitName : "No unit"}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Curriculum:</span>
               <span className="font-medium">
-                {session.lesson.curriculumTitle}
+                {session.lesson
+                  ? session.lesson.curriculumTitle
+                  : "No curriculum"}
               </span>
             </div>
           </div>

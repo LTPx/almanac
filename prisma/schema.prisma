@@ -652,8 +652,8 @@ model TutorSession {
   id         String    @id @default(cuid())
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
-  lesson     Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  lessonId   Int
+  lesson     Lesson?   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId   Int?
   messages   Json // Historial completo de mensajes
   startedAt  DateTime  @default(now())
   lastActive DateTime  @default(now())

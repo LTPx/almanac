@@ -6,7 +6,8 @@ import {
   endTutorSession,
   getActiveSession,
   getSessionMessages,
-  getSessionQuestionCount
+  getSessionQuestionCount,
+  updateSessionLesson
 } from "@/lib/tutor-session-service";
 import { getUserContext } from "@/lib/user-context-service";
 import prisma from "@/lib/prisma";
@@ -174,37 +175,47 @@ export async function POST(req: NextRequest) {
     // Procesar el mensaje
     const response = await agent.chat(message);
     const currentTopicData = await agent.getCurrentTopicData();
+    const currentTopic = agent.getCurrentTopic();
 
-    // Tracking: Guardar en base de datos
-    if (currentTopicData) {
-      try {
+    // Tracking: Guardar en base de datos SIEMPRE (incluso sin topic específico)
+    try {
+      let sessionId: string;
+
+      // Determinar si el topic es una lección o no
+      const isLessonTopic = currentTopic?.startsWith("lesson_");
+
+      if (isLessonTopic && currentTopic) {
         // Extraer lessonId del topic ID (formato: "lesson_42")
-        const lessonId = parseInt(
-          agent.getCurrentTopic()?.replace("lesson_", "") || "0"
-        );
+        const lessonId = parseInt(currentTopic.replace("lesson_", ""));
 
         if (lessonId > 0) {
-          // Obtener o crear sesión
-          const sessionId = await getOrCreateSession(userId, lessonId);
-
-          // Guardar mensaje del usuario
-          await addMessageToSession(sessionId, {
-            role: "user",
-            content: message,
-            timestamp: new Date()
-          });
-
-          // Guardar respuesta del tutor
-          await addMessageToSession(sessionId, {
-            role: "model",
-            content: response,
-            timestamp: new Date()
-          });
+          // Obtener o crear sesión con lessonId
+          sessionId = await getOrCreateSession(userId, lessonId);
+        } else {
+          // Sesión general si no se puede parsear el lessonId
+          sessionId = await getOrCreateSession(userId, null);
         }
-      } catch (trackingError) {
-        // No fallar la request si el tracking falla
-        console.error("Error saving conversation to DB:", trackingError);
+      } else {
+        // Sesión general (sin lección específica o con curriculum)
+        sessionId = await getOrCreateSession(userId, null);
       }
+
+      // Guardar mensaje del usuario
+      await addMessageToSession(sessionId, {
+        role: "user",
+        content: message,
+        timestamp: new Date()
+      });
+
+      // Guardar respuesta del tutor
+      await addMessageToSession(sessionId, {
+        role: "model",
+        content: response,
+        timestamp: new Date()
+      });
+    } catch (trackingError) {
+      // No fallar la request si el tracking falla
+      console.error("Error saving conversation to DB:", trackingError);
     }
 
     // Obtener sessionId de la sesión activa

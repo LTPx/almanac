@@ -184,16 +184,6 @@ export class AlmanacAgent {
       ${topicListString}
     `;
 
-    // Usar modelo y temperatura configurables
-    const model = this.genAI.getGenerativeModel({
-      model: config.routerModel || "gemini-2.0-flash",
-      systemInstruction: routerInstruction,
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: config.routerTemperature ?? 0.1
-      }
-    });
-
     // Incluir el contexto actual en el STATE block
     const currentContext = this.currentTopicId
       ? `CURRENT_TOPIC_ID: "${this.currentTopicId}"`
@@ -210,6 +200,17 @@ export class AlmanacAgent {
 
       Return strictly JSON: { "topic_id": "string_id_or_null" }
     `;
+
+    const model = this.genAI.getGenerativeModel({
+      model: config.routerModel || "gemini-2.0-flash",
+      systemInstruction: routerInstruction,
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: config.routerTemperature ?? 0.1
+      }
+    });
+
+    console.log("prompt to router:", prompt);
 
     try {
       const result = await model.generateContent(prompt);
@@ -281,6 +282,8 @@ export class AlmanacAgent {
       ${this.getUserContextText()}
     `;
     }
+
+    console.log("tutorInstruction:", tutorInstruction);
 
     // We instantiate a new model every time so we can inject the specific System Instruction
     const model = this.genAI.getGenerativeModel({

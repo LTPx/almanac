@@ -17,12 +17,12 @@ export interface SessionMetrics {
  */
 export async function createTutorSession(
   userId: string,
-  lessonId: number
+  lessonId?: number | null
 ): Promise<string> {
   const session = await prisma.tutorSession.create({
     data: {
       userId,
-      lessonId,
+      lessonId: lessonId ?? undefined,
       messages: [],
       messageCount: 0,
       userMessages: 0,
@@ -85,13 +85,13 @@ export async function endTutorSession(
  */
 export async function getOrCreateSession(
   userId: string,
-  lessonId: number
+  lessonId?: number | null
 ): Promise<string> {
-  // Buscar sesión activa (sin endedAt) del usuario para esta lección
+  // Buscar sesión activa (sin endedAt) del usuario
   const activeSession = await prisma.tutorSession.findFirst({
     where: {
       userId,
-      lessonId,
+      lessonId: lessonId ?? null,
       endedAt: null
     },
     orderBy: {
@@ -105,6 +105,33 @@ export async function getOrCreateSession(
 
   // Si no existe, crear nueva sesión
   return await createTutorSession(userId, lessonId);
+}
+
+/**
+ * Obtiene o crea una sesión general del usuario (sin lección específica)
+ * Útil para conversaciones que aún no están asociadas a una lección
+ */
+export async function getOrCreateGeneralSession(
+  userId: string
+): Promise<string> {
+  return getOrCreateSession(userId, null);
+}
+
+/**
+ * Actualiza el lessonId de una sesión existente
+ * Útil cuando el usuario selecciona una lección durante la conversación
+ */
+export async function updateSessionLesson(
+  sessionId: string,
+  lessonId: number
+): Promise<void> {
+  await prisma.tutorSession.update({
+    where: { id: sessionId },
+    data: {
+      lessonId,
+      lastActive: new Date()
+    }
+  });
 }
 
 /**
@@ -199,7 +226,9 @@ export async function getUserTutorStats(userId: string) {
 
   const totalSessions = sessions.length;
   const totalMessages = sessions.reduce((sum, s) => sum + s.messageCount, 0);
-  const uniqueLessons = new Set(sessions.map((s) => s.lessonId)).size;
+  const uniqueLessons = new Set(
+    sessions.map((s) => s.lessonId).filter((id) => id !== null)
+  ).size;
   const helpfulSessions = sessions.filter((s) => s.wasHelpful === true).length;
   const unhelpfulSessions = sessions.filter(
     (s) => s.wasHelpful === false
@@ -226,6 +255,11 @@ export async function getUserTutorStats(userId: string) {
 export async function getPopularLessons(limit: number = 10) {
   const lessons = await prisma.tutorSession.groupBy({
     by: ["lessonId"],
+    where: {
+      lessonId: {
+        not: null
+      }
+    },
     _count: {
       id: true
     },
@@ -237,11 +271,16 @@ export async function getPopularLessons(limit: number = 10) {
     take: limit
   });
 
+  // Filtrar nulls y obtener solo IDs válidos
+  const validLessonIds = lessons
+    .map((l) => l.lessonId)
+    .filter((id): id is number => id !== null);
+
   // Obtener detalles de las lecciones
   const lessonDetails = await prisma.lesson.findMany({
     where: {
       id: {
-        in: lessons.map((l) => l.lessonId)
+        in: validLessonIds
       }
     },
     include: {

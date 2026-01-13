@@ -44,12 +44,12 @@ export async function GET(req: NextRequest) {
     // Formatear las sesiones para la respuesta
     const formattedSessions = sessions.map((session) => ({
       id: session.id,
-      lesson: {
+      lesson: session.lesson ? {
         id: session.lessonId,
         name: session.lesson.name,
         unitName: session.lesson.unit.name,
         curriculumTitle: session.lesson.unit.curriculum?.title,
-      },
+      } : null,
       messageCount: session.messageCount,
       userMessages: session.userMessages,
       tutorMessages: session.tutorMessages,

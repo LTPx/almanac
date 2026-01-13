@@ -39,12 +39,12 @@ export async function GET(
     const response = {
       id: session.id,
       user: session.user,
-      lesson: {
+      lesson: session.lesson ? {
         id: session.lessonId,
         name: session.lesson.name,
         unitName: session.lesson.unit.name,
         curriculumTitle: session.lesson.unit.curriculum?.title
-      },
+      } : null,
       messages: session.messages,
       messageCount: session.messageCount,
       userMessages: session.userMessages,

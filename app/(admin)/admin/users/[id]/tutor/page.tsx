@@ -165,12 +165,16 @@ export default function UserTutorStatsPage() {
               sessions.map((session) => (
                 <TableRow key={session.id}>
                   <TableCell className="font-medium">
-                    {session.lesson.name}
+                    {session.lesson ? session.lesson.name : "No lesson"}
                   </TableCell>
                   <TableCell className="text-sm text-gray-500">
-                    <div>{session.lesson.unitName}</div>
+                    <div>
+                      {session.lesson ? session.lesson.unitName : "No unit"}
+                    </div>
                     <div className="text-xs text-gray-400">
-                      {session.lesson.curriculumTitle}
+                      {session.lesson
+                        ? session.lesson.curriculumTitle
+                        : "No curriculum"}
                     </div>
                   </TableCell>
                   <TableCell>
