@@ -102,11 +102,11 @@ export function OrderWordsQuestion({
   const shouldShowCorrect = showResult && isCorrect;
   const shouldShowIncorrect = showResult && !isCorrect;
 
-  const slotStyles = shouldShowCorrect
-    ? "bg-[#1A1A1A] border-[#32C781] shadow-[0_0_20px_rgba(50,199,129,0.4)]"
-    : shouldShowIncorrect
-      ? "bg-[#1A1A1A] border-[#FFB040] shadow-[0_0_20px_rgba(255,176,64,0.4)]"
-      : "bg-[#1A1A1A] border-[rgba(255,255,255,0.1)]";
+  // const slotStyles = shouldShowCorrect
+  //   ? "bg-[#1A1A1A] border-[#32C781] shadow-[0_0_20px_rgba(50,199,129,0.4)]"
+  //   : shouldShowIncorrect
+  //     ? "bg-[#1A1A1A] border-[#FFB040] shadow-[0_0_20px_rgba(255,176,64,0.4)]"
+  //     : "bg-[#1A1A1A] border-[rgba(255,255,255,0.1)]";
 
   return (
     <div className="space-y-4 sm:space-y-6">
