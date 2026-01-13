@@ -159,7 +159,7 @@ export default function TutorConfigPage() {
     try {
       const response = await fetch("/api/admin/curriculums");
       const data = await response.json();
-      setCurriculums(data);
+      setCurriculums(data.data);
     } catch (error) {
       console.error("Error fetching curriculums:", error);
       toast.error("Failed to load curriculums");
