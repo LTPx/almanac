@@ -1,4 +1,5 @@
 import prisma from "./prisma";
+import { Prisma } from "@prisma/client";
 
 export interface MasterCatalogTrack {
   id: string;
@@ -15,64 +16,7 @@ export interface TutorConfigData {
   updatedAt: Date;
 }
 
-// Define el Master Catalog con los 11 tracks siempre disponibles
-const DEFAULT_MASTER_CATALOG: MasterCatalogTrack[] = [
-  {
-    id: "track_1_math",
-    title: "The Source Code",
-    desc: "Math, Logic, Probability, Algorithms, Number Theory"
-  },
-  {
-    id: "track_2_physics",
-    title: "The Building Blocks",
-    desc: "Physics, Chemistry, Energy, Matter, Atoms, Forces"
-  },
-  {
-    id: "track_3_biology",
-    title: "The Bio-Machine",
-    desc: "General Biology, Health, DNA, Evolution, Body Systems"
-  },
-  {
-    id: "track_4_language",
-    title: "The Interface",
-    desc: "Language, Art, Culture, Storytelling, Communication"
-  },
-  {
-    id: "track_5_astronomy",
-    title: "The Stage",
-    desc: "Astronomy, Space, Geography, Earth Science, Maps"
-  },
-  {
-    id: "track_6_history",
-    title: "The Operating System",
-    desc: "History, Civics, Justice, Laws, Economics, Democracy (Global/Theoretical context)"
-  },
-  {
-    id: "track_7_engineering",
-    title: "The Workshop",
-    desc: "Engineering, Design Thinking, Creativity, Structures, Problem Solving"
-  },
-  {
-    id: "ccse_spain",
-    title: "CCSE (Ciudadanía)",
-    desc: "Specific preparation for the Spanish Citizenship Test. Spanish Constitution, government, symbols, and culture specifically for the exam."
-  },
-  {
-    id: "efp_finance",
-    title: "EFP Finance",
-    desc: "European Financial Planning certification, technical finance standards, banking regulations."
-  },
-  {
-    id: "personal_finance_v2",
-    title: "Personal Finance v2",
-    desc: "Everyday money management, budgeting, investing, debt, and financial literacy for individuals."
-  },
-  {
-    id: "know_your_brain",
-    title: "Know Your Brain",
-    desc: "Deep dive into Neuroscience, brain architecture (amygdala, cortex), and psychology. (Distinct from general biology)."
-  }
-];
+const DEFAULT_MASTER_CATALOG: MasterCatalogTrack[] = [];
 
 const DEFAULT_ROUTER_INSTRUCTIONS = `You are the Intent Router for the Almanac educational app.
 
@@ -116,8 +60,9 @@ export async function getTutorConfig(): Promise<TutorConfigData> {
         id: "default",
         routerInstructions: DEFAULT_ROUTER_INSTRUCTIONS,
         tutorInstructions: DEFAULT_TUTOR_INSTRUCTIONS,
-        masterCatalog: DEFAULT_MASTER_CATALOG,
-        routerModel: "gemini-2.0-flash",
+        masterCatalog:
+          DEFAULT_MASTER_CATALOG as unknown as Prisma.InputJsonValue,
+        routerModel: "gemini-2.5-flash",
         routerTemperature: 0.1
       }
     });
@@ -126,7 +71,7 @@ export async function getTutorConfig(): Promise<TutorConfigData> {
   return {
     routerInstructions: config.routerInstructions,
     tutorInstructions: config.tutorInstructions,
-    masterCatalog: config.masterCatalog as MasterCatalogTrack[],
+    masterCatalog: config.masterCatalog as unknown as MasterCatalogTrack[],
     routerModel: config.routerModel,
     routerTemperature: config.routerTemperature,
     updatedAt: config.updatedAt
@@ -143,16 +88,33 @@ export async function updateTutorConfig(data: {
   routerModel?: string;
   routerTemperature?: number;
 }): Promise<TutorConfigData> {
+  const updateData: Prisma.TutorConfigUpdateInput = {
+    ...(data.routerInstructions !== undefined && {
+      routerInstructions: data.routerInstructions
+    }),
+    ...(data.tutorInstructions !== undefined && {
+      tutorInstructions: data.tutorInstructions
+    }),
+    ...(data.masterCatalog !== undefined && {
+      masterCatalog: data.masterCatalog as unknown as Prisma.InputJsonValue
+    }),
+    ...(data.routerModel !== undefined && { routerModel: data.routerModel }),
+    ...(data.routerTemperature !== undefined && {
+      routerTemperature: data.routerTemperature
+    })
+  };
+
   const config = await prisma.tutorConfig.upsert({
     where: { id: "default" },
-    update: data,
+    update: updateData,
     create: {
       id: "default",
       routerInstructions:
         data.routerInstructions ?? DEFAULT_ROUTER_INSTRUCTIONS,
       tutorInstructions: data.tutorInstructions ?? DEFAULT_TUTOR_INSTRUCTIONS,
-      masterCatalog: data.masterCatalog ?? DEFAULT_MASTER_CATALOG,
-      routerModel: data.routerModel ?? "gemini-2.0-flash",
+      masterCatalog: (data.masterCatalog ??
+        DEFAULT_MASTER_CATALOG) as unknown as Prisma.InputJsonValue,
+      routerModel: data.routerModel ?? "gemini-2.5-flash",
       routerTemperature: data.routerTemperature ?? 0.1
     }
   });
@@ -160,7 +122,7 @@ export async function updateTutorConfig(data: {
   return {
     routerInstructions: config.routerInstructions,
     tutorInstructions: config.tutorInstructions,
-    masterCatalog: config.masterCatalog as MasterCatalogTrack[],
+    masterCatalog: config.masterCatalog as unknown as MasterCatalogTrack[],
     routerModel: config.routerModel,
     routerTemperature: config.routerTemperature,
     updatedAt: config.updatedAt
@@ -175,7 +137,7 @@ export async function resetTutorConfig(): Promise<TutorConfigData> {
     routerInstructions: DEFAULT_ROUTER_INSTRUCTIONS,
     tutorInstructions: DEFAULT_TUTOR_INSTRUCTIONS,
     masterCatalog: DEFAULT_MASTER_CATALOG,
-    routerModel: "gemini-2.0-flash",
+    routerModel: "gemini-2.5-flash",
     routerTemperature: 0.1
   });
 }
