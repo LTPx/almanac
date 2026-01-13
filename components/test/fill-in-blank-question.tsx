@@ -17,22 +17,14 @@ export function FillInBlankQuestion({
   showResult,
   isCorrect
 }: Props) {
-  let resultClasses = "";
-  if (showResult && isCorrect) {
-    resultClasses =
-      "bg-[#32C781] border-[#32C781] text-white placeholder-white shadow-[0_0_20px_#32C781]";
-  } else if (showResult && !isCorrect) {
-    resultClasses =
-      "bg-red-500 border-red-500 text-white placeholder-white shadow-[0_0_20px_red]";
-  } else {
-    resultClasses = "text-white placeholder-gray-400 focus:border-[#1983DD]";
-  }
+  const shouldShowCorrect = showResult && isCorrect;
+  const shouldShowIncorrect = showResult && !isCorrect;
 
   return (
     <motion.div
       animate={{
-        x: showResult && !isCorrect ? [-8, 8, -6, 6, -4, 4, 0] : 0,
-        scale: showResult && isCorrect ? [1, 1.05, 1] : 1
+        x: shouldShowIncorrect ? [-8, 8, -6, 6, -4, 4, 0] : 0,
+        scale: shouldShowCorrect ? [1, 1.05, 1] : 1
       }}
       transition={{ duration: 0.4 }}
     >
@@ -42,7 +34,14 @@ export function FillInBlankQuestion({
         onChange={(e) => setSelected(e.target.value)}
         disabled={hasAnswered}
         placeholder="Escribe tu respuesta..."
-        className={`w-full p-3 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all shadow-md text-sm sm:text-base ${resultClasses}`}
+        className={`
+          w-full p-3 sm:p-4 rounded-2xl border transition-all
+          font-serif font-light text-base sm:text-[16px] leading-relaxed
+          ${!showResult ? "bg-[#1A1A1A] border-[rgba(255,255,255,0.1)] text-[#E0E0E0] placeholder-gray-500 hover:border-[rgba(25,131,221,0.5)] focus:border-[#1983DD] focus:shadow-[0_0_15px_rgba(25,131,221,0.3)] focus:outline-none" : ""}
+          ${shouldShowCorrect ? "bg-[#1A1A1A] border-[#32C781] text-[#E0E0E0] shadow-[0_0_20px_rgba(50,199,129,0.4)]" : ""}
+          ${shouldShowIncorrect ? "bg-[#1A1A1A] border-red-500 text-[#E0E0E0] shadow-[0_0_20px_rgba(239,68,68,0.4)]" : ""}
+          ${hasAnswered ? "cursor-not-allowed" : "cursor-text"}
+        `}
       />
     </motion.div>
   );

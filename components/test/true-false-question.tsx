@@ -21,7 +21,7 @@ export function TrueFalseQuestion({
   hasAnswered
 }: Props) {
   return (
-    <div className="space-y-2 sm:space-y-3">
+    <div className="space-y-3 sm:space-y-4">
       {question.answers.map((answer) => {
         const isSelected = selected === answer.id.toString();
         const shouldShowCorrect = showResult && isSelected && isCorrect;
@@ -43,13 +43,30 @@ export function TrueFalseQuestion({
               disabled={hasAnswered}
               whileTap={{ scale: 1.05 }}
               className={`
-                w-full p-3 sm:p-4 text-left rounded-xl sm:rounded-2xl border-2 transition-all shadow-md text-sm sm:text-base
-                ${isSelected && !showResult ? "bg-[#1983DD] border-[#1983DD] text-white" : ""}
-                ${!isSelected && !showResult ? "text-gray-300 hover:border-[#1983DD]" : ""}
-                ${shouldShowCorrect ? "bg-[#32C781] border-[#32C781] text-white shadow-[0_0_20px_#32C781]" : ""}
-                ${shouldShowIncorrect ? "bg-red-500 border-red-500 text-white shadow-[0_0_20px_red]" : ""}
+                w-full p-3 sm:p-4 text-left rounded-2xl border transition-all
+                font-serif
+                ${
+                  isSelected && !showResult
+                    ? "bg-[#1A1A1A] border-[#1983DD] text-[#E0E0E0] shadow-[0_0_15px_rgba(25,131,221,0.3)]"
+                    : ""
+                }
+                ${
+                  !isSelected && !showResult
+                    ? "bg-[#1A1A1A] border-[rgba(255,255,255,0.1)] text-[#E0E0E0] hover:border-[rgba(25,131,221,0.5)]"
+                    : ""
+                }
+                ${
+                  shouldShowCorrect
+                    ? "bg-[#1A1A1A] border-[#32C781] text-[#E0E0E0] shadow-[0_0_20px_rgba(50,199,129,0.4)]"
+                    : ""
+                }
+                ${
+                  shouldShowIncorrect
+                    ? "bg-[#1A1A1A] border-red-500 text-[#E0E0E0] shadow-[0_0_20px_rgba(239,68,68,0.4)]"
+                    : ""
+                }
                 ${hasAnswered ? "cursor-not-allowed" : "cursor-pointer"}
-                break-words leading-relaxed
+                break-words leading-relaxed text-base sm:text-[16px] font-light
               `}
             >
               {answer.text}
