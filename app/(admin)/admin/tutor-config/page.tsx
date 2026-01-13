@@ -10,7 +10,10 @@ import {
   Save,
   AlertCircle,
   Plus,
-  Trash2
+  Trash2,
+  Pencil,
+  Check,
+  X
 } from "lucide-react";
 import {
   Select,
@@ -58,6 +61,10 @@ export default function TutorConfigPage() {
   const [curriculums, setCurriculums] = useState<Curriculum[]>([]);
   const [loadingCurriculums, setLoadingCurriculums] = useState(false);
   const [showCurriculumSelector, setShowCurriculumSelector] = useState(false);
+
+  // Inline editing state
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingTrack, setEditingTrack] = useState<MasterCatalogTrack | null>(null);
 
   useEffect(() => {
     fetchConfig();
@@ -191,6 +198,32 @@ export default function TutorConfigPage() {
     const updated = [...masterCatalog];
     updated[index] = { ...updated[index], [field]: value };
     setMasterCatalog(updated);
+  };
+
+  const handleStartEdit = (index: number) => {
+    setEditingIndex(index);
+    setEditingTrack({ ...masterCatalog[index] });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingIndex(null);
+    setEditingTrack(null);
+  };
+
+  const handleSaveEdit = (index: number) => {
+    if (editingTrack) {
+      const updated = [...masterCatalog];
+      updated[index] = editingTrack;
+      setMasterCatalog(updated);
+    }
+    setEditingIndex(null);
+    setEditingTrack(null);
+  };
+
+  const handleEditFieldChange = (field: keyof MasterCatalogTrack, value: string) => {
+    if (editingTrack) {
+      setEditingTrack({ ...editingTrack, [field]: value });
+    }
   };
 
   const handleReset = async () => {
@@ -371,79 +404,119 @@ export default function TutorConfigPage() {
           </Card>
         )}
 
-        <div className="space-y-4">
-          {masterCatalog.map((track, index) => (
-            <Card key={index} className="p-4 bg-muted/50">
-              <div className="flex items-start gap-4">
-                <div className="flex-1 space-y-3">
-                  <div>
-                    <Label
-                      htmlFor={`track-id-${index}`}
-                      className="text-xs font-medium mb-1 block"
-                    >
-                      Track ID
-                    </Label>
-                    <Input
-                      id={`track-id-${index}`}
-                      value={track.id}
-                      onChange={(e) =>
-                        handleUpdateTrack(index, "id", e.target.value)
-                      }
-                      placeholder="e.g., track_1_math"
-                      className="font-mono text-sm"
-                    />
-                  </div>
-                  <div>
-                    <Label
-                      htmlFor={`track-title-${index}`}
-                      className="text-xs font-medium mb-1 block"
-                    >
-                      Title
-                    </Label>
-                    <Input
-                      id={`track-title-${index}`}
-                      value={track.title}
-                      onChange={(e) =>
-                        handleUpdateTrack(index, "title", e.target.value)
-                      }
-                      placeholder="e.g., The Source Code"
-                    />
-                  </div>
-                  <div>
-                    <Label
-                      htmlFor={`track-desc-${index}`}
-                      className="text-xs font-medium mb-1 block"
-                    >
-                      Description / Keywords
-                    </Label>
-                    <Input
-                      id={`track-desc-${index}`}
-                      value={track.desc}
-                      onChange={(e) =>
-                        handleUpdateTrack(index, "desc", e.target.value)
-                      }
-                      placeholder="e.g., Math, Logic, Probability, Algorithms"
-                    />
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRemoveTrack(index)}
-                  className="text-destructive hover:text-destructive mt-6"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </Card>
-          ))}
+        {masterCatalog.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground border rounded-lg">
+            <p className="mb-2">No tracks defined.</p>
+            <p className="text-sm">Click "Add Custom" or "Add from Curriculum" to create one.</p>
+          </div>
+        ) : (
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-muted">
+                <tr>
+                  <th className="text-left p-3 font-medium text-sm w-[25%]">Track ID</th>
+                  <th className="text-left p-3 font-medium text-sm w-[25%]">Title</th>
+                  <th className="text-left p-3 font-medium text-sm w-[40%]">Keywords</th>
+                  <th className="text-right p-3 font-medium text-sm w-[10%]">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {masterCatalog.map((track, index) => {
+                  const isEditing = editingIndex === index;
+                  const displayTrack = isEditing && editingTrack ? editingTrack : track;
 
-          {masterCatalog.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              No tracks defined. Click "Add Track" to create one.
-            </div>
-          )}
-        </div>
+                  return (
+                    <tr key={index} className="hover:bg-muted/50">
+                      <td className="p-3">
+                        {isEditing ? (
+                          <Input
+                            value={displayTrack.id}
+                            onChange={(e) => handleEditFieldChange("id", e.target.value)}
+                            placeholder="e.g., track_1_math"
+                            className="font-mono text-sm h-8"
+                          />
+                        ) : (
+                          <span className="font-mono text-sm text-muted-foreground">
+                            {track.id}
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        {isEditing ? (
+                          <Input
+                            value={displayTrack.title}
+                            onChange={(e) => handleEditFieldChange("title", e.target.value)}
+                            placeholder="e.g., The Source Code"
+                            className="text-sm h-8"
+                          />
+                        ) : (
+                          <span className="font-medium">{track.title}</span>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        {isEditing ? (
+                          <Input
+                            value={displayTrack.desc}
+                            onChange={(e) => handleEditFieldChange("desc", e.target.value)}
+                            placeholder="e.g., Math, Logic, Probability"
+                            className="text-sm h-8"
+                          />
+                        ) : (
+                          <span className="text-sm text-muted-foreground line-clamp-2">
+                            {track.desc}
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        <div className="flex items-center justify-end gap-1">
+                          {isEditing ? (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleSaveEdit(index)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Check className="h-4 w-4 text-green-600" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleCancelEdit}
+                                className="h-8 w-8 p-0"
+                              >
+                                <X className="h-4 w-4 text-muted-foreground" />
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleStartEdit(index)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveTrack(index)}
+                                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Card>
 
       {/* Router Instructions */}
