@@ -156,44 +156,53 @@ export class AlmanacAgent {
 
   // --- STEP A: THE ROUTER ---
   private async routeTopic(userInput: string): Promise<string | null> {
-    const topics = await this.getTopics();
     const config = await this.getConfig();
 
-    if (topics.size === 0) {
-      console.warn("⚠️ No active topics found in database");
+    // Usar el Master Catalog de la configuración
+    const masterCatalog = config.masterCatalog || [];
+
+    if (masterCatalog.length === 0) {
+      console.warn("⚠️ No tracks found in Master Catalog");
       return null;
     }
 
-    // Crear la lista de topics disponibles para el router
-    const topicList = Array.from(topics.entries())
-      .map(([id, topic]) => {
-        // Crear un ID más legible combinando el nombre del curriculum y lesson
-        const displayName = topic.curriculumTitle
-          ? `${topic.curriculumTitle} - ${topic.title}`
-          : topic.title;
-        return `${id}: ${displayName} (${topic.description.substring(0, 100)})`;
-      })
+    // Crear la lista de topics desde el Master Catalog
+    // Formato: - ID: "track_id" | COURSE: "Title" | KEYWORDS: Description
+    const topicListString = masterCatalog
+      .map(
+        (track) =>
+          `- ID: "${track.id}" | COURSE: "${track.title}" | KEYWORDS: ${track.desc}`
+      )
       .join("\n");
 
-    // Usar instrucciones personalizables desde la DB
+    // Usar instrucciones personalizables desde la DB con el Master Catalog
     const routerInstruction = `
       ${config.routerInstructions}
 
-      AVAILABLE TOPICS:
-      ${topicList}
-
-      CURRENT TOPIC: ${this.currentTopicId || "null"}
+      AVAILABLE COURSES (Use ONLY these IDs):
+      ${topicListString}
     `;
 
-    // Initialize Router Model (Flash is fast/cheap)
+    // Usar modelo y temperatura configurables
     const model = this.genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+      model: config.routerModel || "gemini-2.0-flash",
       systemInstruction: routerInstruction,
-      generationConfig: { responseMimeType: "application/json" }
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: config.routerTemperature ?? 0.1
+      }
     });
 
+    // Incluir el contexto actual en el STATE block
+    const currentContext = this.currentTopicId
+      ? `CURRENT_TOPIC_ID: "${this.currentTopicId}"`
+      : "CURRENT_TOPIC_ID: None";
+
     const prompt = `
-      HISTORY:
+      STATE:
+      ${currentContext}
+
+      CONVERSATION HISTORY:
       ${this.getHistoryText()}
 
       LATEST INPUT: "${userInput}"
@@ -313,14 +322,18 @@ export class AlmanacAgent {
   async chat(userInput: string): Promise<string> {
     // 1. Route
     const detectedTopic = await this.routeTopic(userInput);
-    const topics = await this.getTopics();
+    const config = await this.getConfig();
+    const masterCatalog = config.masterCatalog || [];
 
     // 2. Logic: Handle "Sticky" Topics
     if (detectedTopic && detectedTopic !== "null") {
-      if (topics.has(detectedTopic)) {
+      // Validar que el topic existe en el Master Catalog
+      const trackExists = masterCatalog.some((track) => track.id === detectedTopic);
+
+      if (trackExists) {
         this.currentTopicId = detectedTopic;
       } else {
-        console.warn(`Topic ${detectedTopic} not found in topics map`);
+        console.warn(`Topic ${detectedTopic} not found in Master Catalog`);
       }
     }
 

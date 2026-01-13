@@ -674,6 +674,9 @@ model TutorConfig {
   id                 String   @id @default("default") // Solo una fila
   routerInstructions String
   tutorInstructions  String
+  masterCatalog      Json     // Array de los 11 tracks del Master Catalog
+  routerModel        String   @default("gemini-2.0-flash") // Modelo para el router
+  routerTemperature  Float    @default(0.1) // Temperatura del router (0.0-1.0)
   updatedAt          DateTime @updatedAt
   createdAt          DateTime @default(now())
 
