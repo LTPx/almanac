@@ -24,6 +24,15 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle
+} from "@/components/ui/drawer";
 
 interface MasterCatalogTrack {
   id: string;
@@ -64,7 +73,9 @@ export default function TutorConfigPage() {
 
   // Inline editing state
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editingTrack, setEditingTrack] = useState<MasterCatalogTrack | null>(null);
+  const [editingTrack, setEditingTrack] = useState<MasterCatalogTrack | null>(
+    null
+  );
 
   useEffect(() => {
     fetchConfig();
@@ -220,7 +231,10 @@ export default function TutorConfigPage() {
     setEditingTrack(null);
   };
 
-  const handleEditFieldChange = (field: keyof MasterCatalogTrack, value: string) => {
+  const handleEditFieldChange = (
+    field: keyof MasterCatalogTrack,
+    value: string
+  ) => {
     if (editingTrack) {
       setEditingTrack({ ...editingTrack, [field]: value });
     }
@@ -341,15 +355,15 @@ export default function TutorConfigPage() {
           <div className="flex gap-2">
             <Button
               onClick={() => {
-                setShowCurriculumSelector(!showCurriculumSelector);
-                if (!showCurriculumSelector && curriculums.length === 0) {
+                setShowCurriculumSelector(true);
+                if (curriculums.length === 0) {
                   fetchCurriculums();
                 }
               }}
               size="sm"
               variant="outline"
             >
-              {showCurriculumSelector ? "Hide" : "Add from Curriculum"}
+              Add from Curriculum
             </Button>
             <Button onClick={handleAddTrack} size="sm">
               <Plus className="mr-2 h-4 w-4" />
@@ -358,72 +372,121 @@ export default function TutorConfigPage() {
           </div>
         </div>
 
-        {/* Curriculum Selector */}
-        {showCurriculumSelector && (
-          <Card className="p-4 mb-4 bg-card">
-            <h3 className="font-semibold mb-3 text-sm">
-              Select Curriculum to Add
-            </h3>
-            {loadingCurriculums ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-              </div>
-            ) : curriculums.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                No active curriculums found in database
-              </p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {curriculums.map((curriculum) => {
-                  const isInCatalog = masterCatalog.some(
-                    (track) => track.id === curriculum.id
-                  );
-                  return (
-                    <Button
-                      key={curriculum.id}
-                      onClick={() => handleAddCurriculumAsTrack(curriculum)}
-                      disabled={isInCatalog}
-                      variant={isInCatalog ? "secondary" : "outline"}
-                      className={`${isInCatalog ? "bg-purple-500 text-white" : ""} justify-start h-auto py-2 px-3`}
-                      size="sm"
-                    >
-                      <div className="flex flex-col items-start text-left w-full">
-                        <span className="font-medium text-sm">
-                          {curriculum.title}
-                        </span>
-                        <span className="text-xs">
-                          {curriculum.units.length} units
-                          {isInCatalog && " (Already added)"}
-                        </span>
-                      </div>
-                    </Button>
-                  );
-                })}
-              </div>
-            )}
-          </Card>
-        )}
+        {/* Curriculum Selector Drawer */}
+        <Drawer
+          open={showCurriculumSelector}
+          onOpenChange={setShowCurriculumSelector}
+          direction="right"
+        >
+          <DrawerContent className="h-screen top-0 right-0 left-auto mt-0 w-[500px] rounded-none">
+            <DrawerHeader>
+              <DrawerTitle>Add Curriculum to Catalog</DrawerTitle>
+              <DrawerDescription>
+                Select a curriculum to add to the Master Catalog. Keywords will
+                be generated automatically from the curriculum units.
+              </DrawerDescription>
+            </DrawerHeader>
+
+            <div className="flex-1 overflow-y-auto p-4">
+              {loadingCurriculums ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : curriculums.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-sm text-muted-foreground">
+                    No active curriculums found in database
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {curriculums.map((curriculum) => {
+                    const isInCatalog = masterCatalog.some(
+                      (track) => track.id === curriculum.id
+                    );
+                    return (
+                      <Card
+                        key={curriculum.id}
+                        className={`p-4 transition-colors ${
+                          isInCatalog
+                            ? "bg-green-800 dark:bg-green-950 border-green-300 dark:border-green-700 cursor-not-allowed"
+                            : "cursor-pointer hover:bg-purple-800 dark:hover:bg-purple-950 hover:border-purple-300 dark:hover:border-purple-700"
+                        }`}
+                        onClick={() => {
+                          if (!isInCatalog) {
+                            handleAddCurriculumAsTrack(curriculum);
+                            setShowCurriculumSelector(false);
+                          }
+                        }}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-sm mb-1">
+                              {curriculum.title}
+                            </h4>
+                            <p className="text-xs text-muted-foreground">
+                              {curriculum.units.length} units
+                            </p>
+                            {curriculum.units.length > 0 && (
+                              <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                                {curriculum.units.map((u) => u.name).join(", ")}
+                              </p>
+                            )}
+                          </div>
+                          {isInCatalog && (
+                            <div className="ml-4 flex-shrink-0">
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-600 text-white">
+                                Added
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <DrawerFooter>
+              <DrawerClose asChild>
+                <Button variant="outline">Close</Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
 
         {masterCatalog.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground border rounded-lg">
             <p className="mb-2">No tracks defined.</p>
-            <p className="text-sm">Click "Add Custom" or "Add from Curriculum" to create one.</p>
+            <p className="text-sm">
+              Click "Add Custom" or "Add from Curriculum" to create one.
+            </p>
           </div>
         ) : (
           <div className="border rounded-lg overflow-hidden">
             <table className="w-full">
               <thead className="bg-muted">
                 <tr>
-                  <th className="text-left p-3 font-medium text-sm w-[25%]">Track ID</th>
-                  <th className="text-left p-3 font-medium text-sm w-[25%]">Title</th>
-                  <th className="text-left p-3 font-medium text-sm w-[40%]">Keywords</th>
-                  <th className="text-right p-3 font-medium text-sm w-[10%]">Actions</th>
+                  <th className="text-left p-3 font-medium text-sm w-[25%]">
+                    Track ID
+                  </th>
+                  <th className="text-left p-3 font-medium text-sm w-[25%]">
+                    Title
+                  </th>
+                  <th className="text-left p-3 font-medium text-sm w-[40%]">
+                    Keywords
+                  </th>
+                  <th className="text-right p-3 font-medium text-sm w-[10%]">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {masterCatalog.map((track, index) => {
                   const isEditing = editingIndex === index;
-                  const displayTrack = isEditing && editingTrack ? editingTrack : track;
+                  const displayTrack =
+                    isEditing && editingTrack ? editingTrack : track;
 
                   return (
                     <tr key={index} className="hover:bg-muted/50">
@@ -431,7 +494,9 @@ export default function TutorConfigPage() {
                         {isEditing ? (
                           <Input
                             value={displayTrack.id}
-                            onChange={(e) => handleEditFieldChange("id", e.target.value)}
+                            onChange={(e) =>
+                              handleEditFieldChange("id", e.target.value)
+                            }
                             placeholder="e.g., track_1_math"
                             className="font-mono text-sm h-8"
                           />
@@ -445,7 +510,9 @@ export default function TutorConfigPage() {
                         {isEditing ? (
                           <Input
                             value={displayTrack.title}
-                            onChange={(e) => handleEditFieldChange("title", e.target.value)}
+                            onChange={(e) =>
+                              handleEditFieldChange("title", e.target.value)
+                            }
                             placeholder="e.g., The Source Code"
                             className="text-sm h-8"
                           />
@@ -457,7 +524,9 @@ export default function TutorConfigPage() {
                         {isEditing ? (
                           <Input
                             value={displayTrack.desc}
-                            onChange={(e) => handleEditFieldChange("desc", e.target.value)}
+                            onChange={(e) =>
+                              handleEditFieldChange("desc", e.target.value)
+                            }
                             placeholder="e.g., Math, Logic, Probability"
                             className="text-sm h-8"
                           />
