@@ -128,8 +128,8 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     return "locked";
   };
 
-  const maxRow =
-    pathLayout.length > 0 ? Math.max(...pathLayout.map((r) => r.row)) : 0;
+  // const maxRow =
+  //   pathLayout.length > 0 ? Math.max(...pathLayout.map((r) => r.row)) : 0;
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -161,7 +161,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     <>
       <div className="max-w-sm mx-auto lesson-grid">
         {pathLayout.map((rowData, rowIndex) => {
-          const isBottomRow = rowData.row === maxRow;
+          // const isBottomRow = rowData.row === maxRow;
 
           return (
             <motion.div
@@ -173,9 +173,9 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
             >
               {Array.from({ length: 5 }, (_, col) => {
                 const nodeData = rowData.nodes.find((n) => n.col === col);
-                const isCompleted = nodeData
-                  ? approvedUnits.includes(nodeData.id)
-                  : false;
+                // const isCompleted = nodeData
+                //   ? approvedUnits.includes(nodeData.id)
+                //   : false;
 
                 const isHighestPosition =
                   nodeData && highestPositionNode && nodeData.mandatory
@@ -185,6 +185,10 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                   nodeData && highestOptionalNode && !nodeData.mandatory
                     ? nodeData.id === highestOptionalNode.id
                     : false;
+                const lessonState = nodeData
+                  ? getLessonState(nodeData)
+                  : "locked";
+                const shouldFloat = lessonState === "available";
 
                 return (
                   <motion.div
@@ -198,13 +202,11 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                         unitId={nodeData.id}
                         name={nodeData.name}
                         description={nodeData.description}
-                        state={getLessonState(nodeData)}
+                        state={lessonState}
                         color={getLockedColor(nodeData.mandatory)}
                         mandatory={nodeData.mandatory}
                         hearts={hearts}
-                        shouldFloat={
-                          isBottomRow && nodeData.mandatory && !isCompleted
-                        }
+                        shouldFloat={shouldFloat}
                         isFirstMandatory={
                           nodeData.id === firstLesson?.id && nodeData.mandatory
                         }
