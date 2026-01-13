@@ -467,7 +467,7 @@ export default function TutorConfigPage() {
                     Track ID
                   </th>
                   <th className="text-left p-3 font-medium text-sm w-[25%]">
-                    Title
+                    Course
                   </th>
                   <th className="text-left p-3 font-medium text-sm w-[40%]">
                     Keywords
