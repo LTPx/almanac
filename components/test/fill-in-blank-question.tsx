@@ -39,7 +39,7 @@ export function FillInBlankQuestion({
           font-serif font-light text-base sm:text-[16px] leading-relaxed
           ${!showResult ? "bg-[#1A1A1A] border-[rgba(255,255,255,0.1)] text-[#E0E0E0] placeholder-gray-500 hover:border-[rgba(25,131,221,0.5)] focus:border-[#1983DD] focus:shadow-[0_0_15px_rgba(25,131,221,0.3)] focus:outline-none" : ""}
           ${shouldShowCorrect ? "bg-[#1A1A1A] border-[#32C781] text-[#E0E0E0] shadow-[0_0_20px_rgba(50,199,129,0.4)]" : ""}
-          ${shouldShowIncorrect ? "bg-[#1A1A1A] border-red-500 text-[#E0E0E0] shadow-[0_0_20px_rgba(239,68,68,0.4)]" : ""}
+          ${shouldShowIncorrect ? "bg-[#1A1A1A] border-[#FFB040] text-[#E0E0E0] shadow-[0_0_20px_rgba(255,176,64,0.4)]" : ""}
           ${hasAnswered ? "cursor-not-allowed" : "cursor-text"}
         `}
       />

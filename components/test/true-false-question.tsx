@@ -62,7 +62,7 @@ export function TrueFalseQuestion({
                 }
                 ${
                   shouldShowIncorrect
-                    ? "bg-[#1A1A1A] border-red-500 text-[#E0E0E0] shadow-[0_0_20px_rgba(239,68,68,0.4)]"
+                    ? "bg-[#1A1A1A] border-[#FFB040] text-[#E0E0E0] shadow-[0_0_20px_rgba(255,176,64,0.4)]"
                     : ""
                 }
                 ${hasAnswered ? "cursor-not-allowed" : "cursor-pointer"}

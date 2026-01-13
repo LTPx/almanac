@@ -188,10 +188,10 @@ export function TestQuestion({
                 {isCorrect ? (
                   <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-[#32C781] flex-shrink-0" />
                 ) : (
-                  <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-500 flex-shrink-0" />
+                  <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-[#FFB040] flex-shrink-0" />
                 )}
                 <span
-                  className={`font-medium text-sm sm:text-base ${isCorrect ? "text-[#32C781]" : "text-red-500"}`}
+                  className={`font-medium text-sm sm:text-base ${isCorrect ? "text-[#32C781]" : "text-[#FFB040]"}`}
                 >
                   {isCorrect ? "¡Correcto!" : "Incorrecto"}
                 </span>
@@ -202,12 +202,12 @@ export function TestQuestion({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.3 }}
-                  className="bg-red-500/10 border border-red-500/50 rounded-lg p-3 max-h-[150px] overflow-y-auto"
+                  className="bg-[#FFB040]/10 border border-[#FFB040]/50 rounded-lg p-3 max-h-[150px] overflow-y-auto"
                 >
                   <div className="flex items-start gap-2">
-                    <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 mt-0.5 flex-shrink-0" />
+                    <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-[#FFB040] mt-0.5 flex-shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-xs sm:text-sm font-semibold text-red-400 mb-1">
+                      <p className="text-xs sm:text-sm font-semibold text-[#FFB040] mb-1">
                         Respuesta correcta:
                       </p>
                       <p className="text-white font-medium text-sm sm:text-base break-words">
@@ -290,7 +290,7 @@ export function TestQuestion({
                 onClick={onNext}
                 className={`
                   w-full text-white py-5 sm:py-6 md:py-8 text-base sm:text-lg md:text-xl font-medium rounded-xl sm:rounded-2xl shadow-md
-                  ${isCorrect ? "bg-[#32C781] hover:bg-[#28a36a]" : "bg-red-500 hover:bg-red-600"}
+                  ${isCorrect ? "bg-[#32C781] hover:bg-[#28a36a]" : "bg-[#FFB040] hover:bg-[#e09a2f]"}
                 `}
                 disabled={isDisabled}
               >

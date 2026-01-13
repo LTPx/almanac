@@ -99,19 +99,25 @@ export function OrderWordsQuestion({
     }
   };
 
-  const slotFeedback =
-    showResult && isCorrect
-      ? "bg-[#32C781] border-[#32C781] text-white"
-      : showResult && !isCorrect
-        ? "bg-red-500 border-red-500 text-white"
-        : "border-b-2 border-white";
+  const shouldShowCorrect = showResult && isCorrect;
+  const shouldShowIncorrect = showResult && !isCorrect;
+
+  const slotStyles = shouldShowCorrect
+    ? "bg-[#1A1A1A] border-[#32C781] shadow-[0_0_20px_rgba(50,199,129,0.4)]"
+    : shouldShowIncorrect
+      ? "bg-[#1A1A1A] border-[#FFB040] shadow-[0_0_20px_rgba(255,176,64,0.4)]"
+      : "bg-[#1A1A1A] border-[rgba(255,255,255,0.1)]";
 
   return (
     <div className="space-y-4 sm:space-y-6">
       <DragDropContext onDragEnd={handleOnDragEnd}>
         <motion.div
           animate={
-            showResult && !isCorrect ? { x: [-8, 8, -6, 6, -4, 4, 0] } : {}
+            shouldShowIncorrect
+              ? { x: [-8, 8, -6, 6, -4, 4, 0], scale: 1 }
+              : shouldShowCorrect
+                ? { scale: [1, 1.05, 1] }
+                : {}
           }
           transition={{ duration: 0.4 }}
           className="flex gap-1.5 sm:gap-2 flex-wrap mb-6 sm:mb-8"
@@ -123,9 +129,13 @@ export function OrderWordsQuestion({
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   className={`
-                    min-w-[70px] sm:min-w-[90px] min-h-[40px] sm:min-h-[50px] flex items-center justify-center rounded-lg transition-all text-sm sm:text-base
-                    ${slotFeedback}
-                    ${snapshot.isDraggingOver ? "border-blue-400 bg-blue-500/10" : ""}
+                    min-w-[70px] sm:min-w-[90px] min-h-[40px] sm:min-h-[50px] 
+                    flex items-center justify-center transition-all
+                    font-serif text-sm sm:text-base
+                    ${shouldShowCorrect ? "border-b-2 border-[#32C781]" : ""}
+                    ${shouldShowIncorrect ? "border-b-2 border-[#FFB040]" : ""}
+                    ${!showResult ? "border-b-2 border-white" : ""}
+                    ${snapshot.isDraggingOver && !hasAnswered ? "border-b-2 border-[#1983DD] bg-[#1983DD]/10" : ""}
                   `}
                 >
                   {word && (
@@ -140,8 +150,10 @@ export function OrderWordsQuestion({
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           className={`
-                            px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-white select-none font-medium shadow-md text-xs sm:text-sm
-                            ${snapshot.isDragging ? "scale-110 shadow-lg" : ""}
+                            px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-[#E0E0E0] 
+                            select-none font-medium font-serif text-xs sm:text-sm
+                            ${snapshot.isDragging ? "scale-110 opacity-80" : ""}
+                            ${hasAnswered ? "cursor-not-allowed" : "cursor-grab active:cursor-grabbing"}
                           `}
                         >
                           {word}
@@ -162,8 +174,10 @@ export function OrderWordsQuestion({
               ref={provided.innerRef}
               {...provided.droppableProps}
               className={`
-                flex flex-wrap gap-1.5 sm:gap-2 p-3 sm:p-4 border-2 rounded-xl sm:rounded-2xl min-h-[60px] sm:min-h-[80px]
-                ${snapshot.isDraggingOver ? "bg-blue-500/5" : ""}
+                flex flex-wrap gap-1.5 sm:gap-2 p-3 sm:p-4 border-2 rounded-2xl 
+                min-h-[60px] sm:min-h-[80px] transition-all
+                bg-[#1A1A1A] border-[rgba(255,255,255,0.1)]
+                ${snapshot.isDraggingOver && !hasAnswered ? "border-[#1983DD] bg-[#1983DD]/5 shadow-[0_0_15px_rgba(25,131,221,0.2)]" : ""}
               `}
             >
               {availableWords.map((word, index) => (
@@ -179,8 +193,13 @@ export function OrderWordsQuestion({
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
                       className={`
-                        px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-white select-none font-medium shadow-md text-xs sm:text-sm
-                        ${snapshot.isDragging ? "scale-110 shadow-lg" : ""}
+                        px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-[#1A1A1A] 
+                        border border-[rgba(255,255,255,0.2)] text-[#E0E0E0]
+                        select-none font-medium font-serif text-xs sm:text-sm
+                        transition-all
+                        ${!hasAnswered ? "hover:border-[#1983DD] hover:bg-[#1983DD]/10" : ""}
+                        ${snapshot.isDragging ? "scale-110 border-[#1983DD] shadow-lg opacity-80" : ""}
+                        ${hasAnswered ? "cursor-not-allowed opacity-60" : "cursor-grab active:cursor-grabbing"}
                       `}
                     >
                       {word}
