@@ -6,8 +6,7 @@ import {
   endTutorSession,
   getActiveSession,
   getSessionMessages,
-  getSessionQuestionCount,
-  updateSessionLesson
+  getSessionQuestionCount
 } from "@/lib/tutor-session-service";
 import { getUserContext } from "@/lib/user-context-service";
 import prisma from "@/lib/prisma";
