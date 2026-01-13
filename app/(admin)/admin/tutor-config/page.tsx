@@ -598,21 +598,6 @@ export default function TutorConfigPage() {
         />
       </Card>
 
-      {/* Tutor Instructions */}
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-2">Tutor Instructions</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Controls how the tutor responds to students (teaching style,
-          constraints, etc.)
-        </p>
-        <textarea
-          value={tutorInstructions}
-          onChange={(e) => setTutorInstructions(e.target.value)}
-          className="w-full min-h-[300px] p-4 rounded-lg border bg-background font-mono text-sm"
-          placeholder="Enter tutor instructions..."
-        />
-      </Card>
-
       {/* Router Configuration */}
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-2">Router Configuration</h2>
@@ -668,6 +653,21 @@ export default function TutorConfigPage() {
             </p>
           </div>
         </div>
+      </Card>
+
+      {/* Tutor Instructions */}
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-2">Tutor Instructions</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Controls how the tutor responds to students (teaching style,
+          constraints, etc.)
+        </p>
+        <textarea
+          value={tutorInstructions}
+          onChange={(e) => setTutorInstructions(e.target.value)}
+          className="w-full min-h-[300px] p-4 rounded-lg border bg-background font-mono text-sm"
+          placeholder="Enter tutor instructions..."
+        />
       </Card>
 
       {/* Save Button (Bottom) */}
