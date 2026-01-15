@@ -122,6 +122,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       data-highest-position-mandatory={isHighestPosition ? "true" : undefined}
       data-optional-node={isOptionalHighest ? "true" : undefined}
       data-first-mandatory={isFirstMandatory ? "true" : undefined}
+      data-available-node={state === "available" ? "true" : undefined}
     >
       <motion.div
         initial={{ scale: 0 }}

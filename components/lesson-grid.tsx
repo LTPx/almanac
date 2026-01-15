@@ -9,6 +9,7 @@ import {
   LessonStateInfo,
   useLessonStatesStore
 } from "@/hooks/use-lessonsStates";
+import { useScrollToAvailableNode } from "@/hooks/use-scroll-lesson";
 
 interface LessonGridProps {
   units: Unit[];
@@ -30,6 +31,13 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
   curriculumId
 }) => {
   const { setLessonStates } = useLessonStatesStore();
+
+  useScrollToAvailableNode([units, approvedUnits], {
+    enabled: !isTutorialMode,
+    delay: 600,
+    behavior: "smooth",
+    block: "center"
+  });
 
   type Node = Unit & { type: "unit"; col: number; row: number };
 
@@ -194,6 +202,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
               initial="hidden"
               animate="show"
               className="grid grid-cols-5 gap-3 lg:gap-6 mb-6 lg:mb-6"
+              data-row={rowIndex}
             >
               {Array.from({ length: 5 }, (_, col) => {
                 const nodeData = rowData.nodes.find((n) => n.col === col);

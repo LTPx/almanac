@@ -60,7 +60,7 @@ export function TutorialLearningPath({
           showAsCompleted: false,
           showOptionalAsAvailable: false,
           showAllCompletedExceptFirst: false,
-          isTutorialMode: false
+          isTutorialMode: true
         };
     }
   };
