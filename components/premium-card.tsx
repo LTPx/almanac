@@ -121,8 +121,103 @@ export default function PremiumCard({
     }
   };
 
+  // Detectar si es trial interno (sin suscripción de Stripe)
+  const isInternalTrial =
+    subscription?.isTrialing && !subscription?.subscription?.platform;
+
   // Si tiene suscripción premium (activa o en trial)
   if (subscription?.isPremium) {
+    // Trial interno: mostrar CTA para suscribirse
+    if (isInternalTrial) {
+      return (
+        <Card className="bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-700 border-none text-white overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+
+          <CardContent className="p-6 relative z-10">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="bg-white/20 rounded-full p-2 backdrop-blur-sm">
+                  <Crown
+                    className="w-6 h-6 text-white"
+                    color="#fbbf24"
+                    fill="#fbbf24"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold flex items-center gap-2">
+                    Prueba Gratuita
+                    <CheckCircle2 className="w-5 h-5" />
+                  </h3>
+                  <p className="text-sm text-white/80">
+                    Disfruta de todos los beneficios premium
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Información del trial */}
+            <div className="space-y-3 mb-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 flex items-center gap-2">
+                <Clock className="w-5 h-5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">
+                    {subscription.daysLeft}{" "}
+                    {subscription.daysLeft === 1 ? "día" : "días"} restantes de
+                    prueba
+                  </p>
+                  {subscription.subscriptionTrialEnd && (
+                    <p className="text-xs text-white/70">
+                      Termina el{" "}
+                      {new Date(
+                        subscription.subscriptionTrialEnd
+                      ).toLocaleDateString("es-ES", {
+                        day: "numeric",
+                        month: "long"
+                      })}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Beneficios activos */}
+              <div className="grid grid-cols-2 gap-2 mt-3">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
+                  <CheckCircle2 className="w-4 h-4 mx-auto mb-1" />
+                  <p className="text-xs font-medium">Vidas ilimitadas</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
+                  <CheckCircle2 className="w-4 h-4 mx-auto mb-1" />
+                  <p className="text-xs font-medium">Sin anuncios</p>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA para suscribirse */}
+            <div className="space-y-2">
+              <Button
+                onClick={handleSubscribe}
+                disabled={isLoading}
+                className="w-full bg-white text-cyan-700 hover:bg-white/90 font-semibold"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Procesando...
+                  </>
+                ) : (
+                  "SUSCRIBIRTE PARA CONTINUAR"
+                )}
+              </Button>
+              <p className="text-xs text-white/80 text-center">
+                $1/mes despues de tu prueba. Cancela cuando quieras.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    // Trial o suscripción de Stripe
     return (
       <Card className="bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-700 border-none text-white overflow-hidden relative">
         {/* Efecto de brillo */}

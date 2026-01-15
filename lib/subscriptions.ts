@@ -38,7 +38,15 @@ export async function checkUserSubscription(
 
   let daysLeft: number | undefined;
 
-  if (user.subscriptionCurrentPeriodEnd) {
+  // Calcular días restantes basado en el contexto
+  if (isTrialing && user.subscriptionTrialEnd) {
+    // Trial interno (sin Stripe) o trial de Stripe
+    const now = new Date();
+    const endDate = new Date(user.subscriptionTrialEnd);
+    const diffTime = endDate.getTime() - now.getTime();
+    daysLeft = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  } else if (user.subscriptionCurrentPeriodEnd) {
+    // Suscripción activa
     const now = new Date();
     const endDate = new Date(user.subscriptionCurrentPeriodEnd);
     const diffTime = endDate.getTime() - now.getTime();
@@ -297,6 +305,7 @@ export async function getSubscriptionStats(userId: string) {
 
 /**
  * Verificar si el trial ha expirado y actualizar status si es necesario
+ * Funciona tanto para trial interno como para trial de Stripe
  */
 export async function checkAndUpdateTrialStatus(userId: string) {
   const user = await prisma.user.findUnique({
@@ -304,35 +313,53 @@ export async function checkAndUpdateTrialStatus(userId: string) {
     include: { subscription: true }
   });
 
-  if (!user?.subscription) {
+  if (!user) {
     return false;
   }
 
   const now = new Date();
-  const subscription = user.subscription;
 
-  // Si está en trial y el trial expiró
+  // Verificar trial interno (sin suscripción de Stripe)
   if (
-    subscription.status === "TRIALING" &&
-    subscription.trialEnd &&
-    now > new Date(subscription.trialEnd)
+    user.subscriptionStatus === "TRIALING" &&
+    user.subscriptionTrialEnd &&
+    now > new Date(user.subscriptionTrialEnd)
   ) {
-    // Actualizar a FREE (el webhook de Stripe normalmente hace esto, pero por si acaso)
+    // Trial interno expirado
     await prisma.user.update({
       where: { id: userId },
       data: {
         subscriptionStatus: "FREE"
       }
     });
-
-    await prisma.subscription.update({
-      where: { userId: user.id },
-      data: {
-        status: "FREE"
-      }
-    });
-
     return true; // Trial expirado
+  }
+
+  // Verificar trial de Stripe (con suscripción)
+  if (user.subscription) {
+    const subscription = user.subscription;
+    if (
+      subscription.status === "TRIALING" &&
+      subscription.trialEnd &&
+      now > new Date(subscription.trialEnd)
+    ) {
+      // Trial de Stripe expirado (el webhook normalmente hace esto, pero por si acaso)
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          subscriptionStatus: "FREE"
+        }
+      });
+
+      await prisma.subscription.update({
+        where: { userId: user.id },
+        data: {
+          status: "FREE"
+        }
+      });
+
+      return true; // Trial expirado
+    }
   }
 
   return false; // Trial aún activo o no en trial

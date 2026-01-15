@@ -2,6 +2,8 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "./prisma";
 
+const TRIAL_DAYS = 7;
+
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql"
@@ -20,6 +22,24 @@ export const auth = betterAuth({
     window: 60, // time window in seconds
     max: 10
   },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          // Configurar trial automático de 7 días para usuarios nuevos
+          const trialEnd = new Date();
+          trialEnd.setDate(trialEnd.getDate() + TRIAL_DAYS);
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              subscriptionTrialEnd: trialEnd,
+              subscriptionCurrentPeriodEnd: trialEnd
+            }
+          });
+        }
+      }
+    }
+  },
   user: {
     additionalFields: {
       hearts: {
@@ -35,7 +55,7 @@ export const auth = betterAuth({
       subscriptionStatus: {
         type: "string",
         required: false,
-        defaultValue: "FREE"
+        defaultValue: "TRIALING"
       },
       walletAddress: {
         type: "string",

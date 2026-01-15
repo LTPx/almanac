@@ -44,7 +44,20 @@ export async function POST(req: Request) {
       }
     }
 
-    // Crear sesión de checkout con trial de 7 días
+    // Calcular días restantes del trial interno (si aplica)
+    let trialDays: number | undefined;
+    if (
+      user.subscriptionStatus === "TRIALING" &&
+      user.subscriptionTrialEnd
+    ) {
+      const now = new Date();
+      const trialEnd = new Date(user.subscriptionTrialEnd);
+      const diffTime = trialEnd.getTime() - now.getTime();
+      const remainingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      trialDays = remainingDays > 0 ? remainingDays : undefined;
+    }
+
+    // Crear sesión de checkout
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: customerId,
@@ -56,7 +69,8 @@ export async function POST(req: Request) {
         }
       ],
       subscription_data: {
-        trial_period_days: 7, // 7 días gratis
+        // Usar días restantes del trial interno, o undefined si ya expiró
+        trial_period_days: trialDays,
         metadata: {
           userId: userId
         }
