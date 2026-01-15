@@ -62,25 +62,6 @@ export async function getUserContext(userId: string): Promise<UserContext> {
     );
     const totalExperience = curriculumExp + unitExp;
 
-    // Obtener todas las unidades disponibles (activas y publicadas)
-    const availableUnits = await prisma.unit.findMany({
-      where: {
-        isActive: true
-      },
-      select: {
-        id: true,
-        name: true,
-        curriculum: {
-          select: {
-            id: true,
-            title: true
-          }
-        }
-      },
-      orderBy: [{ curriculum: { title: "asc" } }],
-      take: 20 // Limitar a 20 unidades para no saturar el prompt
-    });
-
     return {
       name: user.name || undefined,
       dateOfBirth: user.dateOfBirth || undefined,
@@ -93,13 +74,7 @@ export async function getUserContext(userId: string): Promise<UserContext> {
         title: up.unit.name,
         curriculumTitle: up.unit.curriculum?.title || ""
       })),
-      totalExperience: totalExperience > 0 ? totalExperience : undefined,
-      availableUnits: availableUnits.map((unit) => ({
-        id: unit.id,
-        name: unit.name,
-        curriculumId: unit.curriculum?.id || "",
-        curriculumTitle: unit.curriculum?.title || ""
-      }))
+      totalExperience: totalExperience > 0 ? totalExperience : undefined
     };
   } catch (error) {
     console.error("Error fetching user context:", error);
