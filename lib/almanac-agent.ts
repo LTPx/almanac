@@ -156,8 +156,14 @@ export class AlmanacAgent {
     const routerInstruction = `
       ${config.routerInstructions}
 
-      AVAILABLE COURSES (Use ONLY these IDs and not create links):
+      AVAILABLE COURSES (Use ONLY these IDs):
       ${topicListString}
+
+      CRITICAL RULE:
+      - You MUST reference or return links ONLY if they appear in AVAILABLE COURSES.
+      - If a course or link is NOT listed in AVAILABLE COURSES, DO NOT reference it.
+      - DO NOT generate, infer, guess, or fabricate course IDs or URLs.
+      - If no valid course applies, respond without links.
     `;
 
     // Incluir el contexto actual en el STATE block
@@ -252,8 +258,14 @@ export class AlmanacAgent {
       SOURCE MATERIAL:
       ${this.getUserContextText()}
 
-      AVAILABLE COURSES (Use ONLY these IDs and not create links):
+      AVAILABLE COURSES (Use ONLY these IDs):
       ${topicListString}
+
+      CRITICAL RULE:
+      - You MUST reference or return links ONLY if they appear in AVAILABLE COURSES.
+      - If a course or link is NOT listed in AVAILABLE COURSES, DO NOT reference it.
+      - DO NOT generate, infer, guess, or fabricate course IDs or URLs.
+      - If no valid course applies, respond without links.
     `;
     } else {
       // Detectar si es un curriculum ID o un lesson ID
@@ -281,6 +293,12 @@ export class AlmanacAgent {
       SOURCE MATERIAL:
       ${topicData.content}
       ${this.getUserContextText()}
+
+      CRITICAL CONSTRAINTS:
+      - You MAY return links ONLY if they appear EXACTLY in SOURCE MATERIAL.
+      - Links MUST be copied verbatim from SOURCE MATERIAL (no edits, no normalization).
+      - DO NOT generate, infer, guess, or fabricate links or URLs.
+      - If SOURCE MATERIAL contains no links, respond with no links.
     `;
     }
     console.log(
