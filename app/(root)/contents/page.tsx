@@ -182,6 +182,7 @@ function Contents() {
   const handleCloseTest = () => {
     setActiveTest(null);
     refetchGamification();
+    router.push("/");
   };
 
   if (isLoading) {
