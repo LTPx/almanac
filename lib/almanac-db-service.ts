@@ -186,7 +186,7 @@ export async function getTopicByCurriculumId(
 
   // Combinar todas las lecciones del curriculum
   const allLessons = curriculum.units.flatMap((unit) =>
-    unit.lessons.map(lesson => ({ ...lesson, unitName: unit.name }))
+    unit.lessons.map((lesson) => ({ ...lesson, unitName: unit.name }))
   );
 
   if (allLessons.length === 0) {
@@ -199,14 +199,17 @@ export async function getTopicByCurriculumId(
   );
   const description =
     allObjectives.length > 0
-      ? allObjectives.slice(0, 3).join(", ") + (allObjectives.length > 3 ? "..." : "")
+      ? allObjectives.slice(0, 3).join(", ") +
+        (allObjectives.length > 3 ? "..." : "")
       : curriculum.title;
 
   // Generar contenido combinando todos los facts de todas las lecciones
   const allContent: string[] = [];
 
   for (const lesson of allLessons) {
-    allContent.push(`\n## ${lesson.name} (${lesson.unitName})\n`);
+    allContent.push(
+      `\n## ${lesson.name} (${lesson.unitName} [${lesson.unitName}](${process.env.NEXT_PUBLIC_APP_URL}/contents?curriculumid=${curriculum.id}&unit=${lesson.unitId})\n`
+    );
 
     if (lesson.facts.length > 0) {
       const facts = lesson.facts
@@ -221,16 +224,20 @@ export async function getTopicByCurriculumId(
     }
   }
 
-  const content = allContent.length > 0
-    ? allContent.join("\n")
-    : "No content available for this curriculum.";
+  const content =
+    allContent.length > 0
+      ? allContent.join("\n")
+      : "No content available for this curriculum.";
 
   return {
     id: curriculumId,
     title: curriculum.title,
     description: description.substring(0, 200),
     content: content,
-    unitName: curriculum.units.length > 0 ? `${curriculum.units.length} units` : undefined,
+    unitName:
+      curriculum.units.length > 0
+        ? `${curriculum.units.length} units`
+        : undefined,
     curriculumTitle: curriculum.title
   };
 }

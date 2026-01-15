@@ -185,7 +185,7 @@ export class AlmanacAgent {
     const routerInstruction = `
       ${config.routerInstructions}
 
-      AVAILABLE COURSES (Use ONLY these IDs):
+      AVAILABLE COURSES (Use ONLY these IDs and not create links):
       ${topicListString}
     `;
 
@@ -281,7 +281,7 @@ export class AlmanacAgent {
       SOURCE MATERIAL:
       ${this.getUserContextText()}
 
-      AVAILABLE COURSES (Use ONLY these IDs):
+      AVAILABLE COURSES (Use ONLY these IDs and not create links):
       ${topicListString}
     `;
     } else {
