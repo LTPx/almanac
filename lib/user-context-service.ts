@@ -84,6 +84,7 @@ export async function getUserContext(userId: string): Promise<UserContext> {
     return {
       name: user.name || undefined,
       dateOfBirth: user.dateOfBirth || undefined,
+      languagePreference: user.languagePreference || "en",
       completedCurriculums: user.userCurriculumProgress.map((cp) => ({
         title: cp.curriculum.title,
         completedAt: cp.completedAt || new Date()

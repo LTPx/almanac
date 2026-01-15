@@ -17,6 +17,7 @@ interface ChatMessage {
 export interface UserContext {
   name?: string;
   dateOfBirth?: Date | string;
+  languagePreference?: string;
   completedCurriculums?: Array<{
     title: string;
     completedAt: Date;
@@ -97,11 +98,15 @@ export class AlmanacAgent {
       }
     }
 
-    if (this.userContext.totalExperience) {
-      parts.push(
-        `TOTAL EXPERIENCE POINTS: ${this.userContext.totalExperience}`
-      );
+    if (this.userContext.languagePreference) {
+      parts.push(`STUDENT LANGUAGE: ${this.userContext.languagePreference}`);
     }
+
+    // if (this.userContext.totalExperience) {
+    //   parts.push(
+    //     `TOTAL EXPERIENCE POINTS: ${this.userContext.totalExperience}`
+    //   );
+    // }
 
     if (
       this.userContext.completedCurriculums &&
@@ -124,33 +129,33 @@ export class AlmanacAgent {
     }
 
     // Add available units with link generation instructions
-    if (
-      this.userContext.availableUnits &&
-      this.userContext.availableUnits.length > 0
-    ) {
-      parts.push("\n\n--- IMPORTANT: UNIT LINKING INSTRUCTIONS ---");
-      parts.push(
-        "When you mention ANY unit in your response, you MUST include a clickable markdown link."
-      );
-      parts.push(
-        "NEVER use placeholder text like 'link_to_...' - ALWAYS use the EXACT URL format shown below."
-      );
-      parts.push("\nExample of CORRECT format:");
-      parts.push("[Unidad 1: Mamíferos](/contents?curriculumid=abc123&unit=5)");
-      parts.push("\nExample of INCORRECT format (DO NOT USE):");
-      parts.push("[Unidad 1: Mamíferos](link_to_Unidad_1_Mamíferos) ❌");
-      parts.push(
-        "\n\nAVAILABLE UNITS - Copy the EXACT link shown for each unit:"
-      );
-      this.userContext.availableUnits.forEach((unit) => {
-        parts.push(
-          `• ${unit.name}: [${unit.name}](/contents?curriculumid=${unit.curriculumId}&unit=${unit.id})`
-        );
-      });
-      parts.push(
-        "\nREMEMBER: Copy the link EXACTLY as shown above, including the curriculumid and unit parameters!"
-      );
-    }
+    // if (
+    //   this.userContext.availableUnits &&
+    //   this.userContext.availableUnits.length > 0
+    // ) {
+    //   parts.push("\n\n--- IMPORTANT: UNIT LINKING INSTRUCTIONS ---");
+    //   parts.push(
+    //     "When you mention ANY unit in your response, you MUST include a clickable markdown link."
+    //   );
+    //   parts.push(
+    //     "NEVER use placeholder text like 'link_to_...' - ALWAYS use the EXACT URL format shown below."
+    //   );
+    //   parts.push("\nExample of CORRECT format:");
+    //   parts.push("[Unidad 1: Mamíferos](/contents?curriculumid=abc123&unit=5)");
+    //   parts.push("\nExample of INCORRECT format (DO NOT USE):");
+    //   parts.push("[Unidad 1: Mamíferos](link_to_Unidad_1_Mamíferos) ❌");
+    //   parts.push(
+    //     "\n\nAVAILABLE UNITS - Copy the EXACT link shown for each unit:"
+    //   );
+    //   this.userContext.availableUnits.forEach((unit) => {
+    //     parts.push(
+    //       `• ${unit.name}: [${unit.name}](/contents?curriculumid=${unit.curriculumId}&unit=${unit.id})`
+    //     );
+    //   });
+    //   parts.push(
+    //     "\nREMEMBER: Copy the link EXACTLY as shown above, including the curriculumid and unit parameters!"
+    //   );
+    // }
 
     return parts.length > 0 ? `\n\nSTUDENT CONTEXT:\n${parts.join("\n")}` : "";
   }
@@ -210,7 +215,13 @@ export class AlmanacAgent {
       }
     });
 
-    console.log("prompt to router:", prompt);
+    console.log(
+      ":::::::::::::::::::::::::::::::::::::::::::::::::::::prompt to router:::::::::::::::::::::::::::::::::::::::::::::::::::::"
+    );
+    console.log(prompt);
+    console.log(
+      ":::::::::::::::::::::::::::::::::::::::::::::::::::::prompt to router:::::::::::::::::::::::::::::::::::::::::::::::::::::"
+    );
 
     try {
       const result = await model.generateContent(prompt);
@@ -282,9 +293,13 @@ export class AlmanacAgent {
       ${this.getUserContextText()}
     `;
     }
-
-    console.log("tutorInstruction:", tutorInstruction);
-
+    console.log(
+      ":::::::::::::::::::::::::::::::::::::::::::::::::::::tutor instructions:::::::::::::::::::::::::::::::::::::::::::::::::::::"
+    );
+    console.log(tutorInstruction);
+    console.log(
+      ":::::::::::::::::::::::::::::::::::::::::::::::::::::tutor instructions:::::::::::::::::::::::::::::::::::::::::::::::::::::"
+    );
     // We instantiate a new model every time so we can inject the specific System Instruction
     const model = this.genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
