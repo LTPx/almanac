@@ -13,7 +13,7 @@ import { Lesson, Unit, Curriculum } from "@/lib/types";
 import { FormattedTextDisplay } from "@/components/formatted-text-display";
 import { useCurriculumStore } from "@/store/useCurriculumStore";
 import { useUser } from "@/context/UserContext";
-import { CheckCircle, BookOpen, Lock, RotateCcw, Play } from "lucide-react";
+import { Lock, RotateCcw, Play } from "lucide-react";
 import { TestSystem } from "@/components/test/TestSystem";
 import { useHome } from "@/hooks/useHome";
 import { useLessonStatesStore } from "@/hooks/use-lessonsStates";
@@ -116,43 +116,10 @@ function Contents() {
     return getLessonState(selectedCurriculumId, unitId);
   };
 
-  const renderStateTag = (unitId: number) => {
-    const lessonState = getUnitState(unitId);
-
-    if (!lessonState) {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-600 text-gray-300">
-          <Lock className="w-3.5 h-3.5" />
-          Sin datos
-        </span>
-      );
-    }
-
-    switch (lessonState.state) {
-      case "completed":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-600 text-white">
-            <CheckCircle className="w-3.5 h-3.5" />
-            Completada
-          </span>
-        );
-      case "available":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white">
-            <BookOpen className="w-3.5 h-3.5" />
-            Disponible
-          </span>
-        );
-      case "locked":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-600 text-gray-300">
-            <Lock className="w-3.5 h-3.5" />
-            Bloqueada
-          </span>
-        );
-      default:
-        return null;
-    }
+  const isUnitOpen = (unit: Unit) => {
+    return unit.lessons?.some(
+      (lesson) => openAccordion === `lesson-${lesson.id}`
+    );
   };
 
   const renderActionButton = (unitId: number, unitName: string) => {
@@ -163,9 +130,9 @@ function Contents() {
       return (
         <button
           disabled
-          className="w-full mt-4 px-4 py-3 rounded-xl font-bold text-sm bg-gray-600 text-gray-400 cursor-not-allowed flex items-center justify-center gap-2"
+          className="px-3 py-1.5 rounded-md text-xs font-semibold bg-neutral-800 text-gray-400 cursor-not-allowed flex items-center gap-1.5 border border-neutral-700"
         >
-          <Lock className="w-4 h-4" />
+          <Lock className="w-3 h-3" />
           Sin datos
         </button>
       );
@@ -176,10 +143,10 @@ function Contents() {
         return (
           <button
             onClick={() => setActiveTest({ unitId, unitName })}
-            className="w-full mt-4 px-4 py-3 rounded-xl font-bold text-sm bg-green-600 hover:bg-green-700 text-white transition-colors flex items-center justify-center gap-2"
+            className="px-3 py-1.5 rounded-md text-xs font-semibold bg-neutral-800 hover:bg-neutral-700 text-white transition-colors flex items-center gap-1.5 border border-neutral-600"
           >
-            <RotateCcw className="w-4 h-4" />
-            Volver a Intentar
+            <RotateCcw className="w-3 h-3" />
+            Reintentar
           </button>
         );
       case "available":
@@ -187,13 +154,13 @@ function Contents() {
           <button
             onClick={() => setActiveTest({ unitId, unitName })}
             disabled={hearts === 0}
-            className={`w-full mt-4 px-4 py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 border ${
               hearts === 0
-                ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 text-white"
+                ? "bg-neutral-800 text-gray-400 cursor-not-allowed border-neutral-700"
+                : "bg-neutral-800 hover:bg-neutral-700 text-white border-neutral-600"
             }`}
           >
-            <Play className="w-4 h-4" />
+            <Play className="w-3 h-3" />
             {hearts === 0 ? "Sin Corazones" : "Empezar"}
           </button>
         );
@@ -201,9 +168,9 @@ function Contents() {
         return (
           <button
             disabled
-            className="w-full mt-4 px-4 py-3 rounded-xl font-bold text-sm bg-gray-700 text-gray-400 cursor-not-allowed flex items-center justify-center gap-2"
+            className="px-3 py-1.5 rounded-md text-xs font-semibold bg-neutral-800 text-gray-400 cursor-not-allowed flex items-center gap-1.5 border border-neutral-700"
           >
-            <Lock className="w-4 h-4" />
+            <Lock className="w-3 h-3" />
             Bloqueada
           </button>
         );
@@ -262,9 +229,9 @@ function Contents() {
             id={`unit-${unit.id}`}
             className="mb-6 scroll-mt-20"
           >
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3 gap-3">
               <h2 className="text-xl font-bold">{unit.name}</h2>
-              {renderStateTag(unit.id)}
+              {isUnitOpen(unit) && renderActionButton(unit.id, unit.name)}
             </div>
             <div className="border-2 border-neutral-600 rounded-2xl overflow-hidden">
               <Accordion
@@ -285,7 +252,6 @@ function Contents() {
                     </AccordionTrigger>
                     <AccordionContent className="px-5 pb-5 pt-2 border-t border-neutral-700">
                       <FormattedTextDisplay text={lesson.description} />
-                      {renderActionButton(unit.id, unit.name)}
                     </AccordionContent>
                   </AccordionItem>
                 ))}
