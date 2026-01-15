@@ -23,6 +23,7 @@ export default function ImportContentPage() {
   const [deleting, setDeleting] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [editorMode, setEditorMode] = useState<"upload" | "editor">("upload");
+  const [isDragging, setIsDragging] = useState(false);
 
   const {
     jsonData,
@@ -36,8 +37,7 @@ export default function ImportContentPage() {
 
   const stats = getStats();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
+  const processFile = (selectedFile: File) => {
     if (selectedFile && selectedFile.type === "application/json") {
       setFile(selectedFile);
       setResult(null);
@@ -57,7 +57,42 @@ export default function ImportContentPage() {
       reader.readAsText(selectedFile);
     } else {
       alert("Por favor selecciona un archivo JSON válido");
-      if (e.target) e.target.value = "";
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      processFile(selectedFile);
+    }
+    if (e.target) e.target.value = "";
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const droppedFile = e.dataTransfer.files?.[0];
+    if (droppedFile) {
+      processFile(droppedFile);
     }
   };
 
@@ -317,7 +352,17 @@ export default function ImportContentPage() {
               <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Seleccionar archivo JSON
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+              <div
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                  isDragging
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300 hover:border-blue-400"
+                }`}
+              >
                 <input
                   id="file-input"
                   type="file"
@@ -329,9 +374,17 @@ export default function ImportContentPage() {
                   htmlFor="file-input"
                   className="cursor-pointer flex flex-col items-center"
                 >
-                  <Upload className="w-12 h-12 text-gray-400 mb-3" />
+                  <Upload
+                    className={`w-12 h-12 mb-3 transition-colors ${
+                      isDragging ? "text-blue-500" : "text-gray-400"
+                    }`}
+                  />
                   <span className="text-sm font-medium text-muted-foreground">
-                    {file ? file.name : "Haz clic para seleccionar un archivo"}
+                    {file
+                      ? file.name
+                      : isDragging
+                        ? "Suelta el archivo aquí"
+                        : "Arrastra un archivo o haz clic para seleccionar"}
                   </span>
                   <span className="text-xs text-gray-500 mt-1">
                     JSON únicamente
