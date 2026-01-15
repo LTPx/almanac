@@ -13,6 +13,10 @@ import { Lesson, Unit, Curriculum } from "@/lib/types";
 import { FormattedTextDisplay } from "@/components/formatted-text-display";
 import { useCurriculumStore } from "@/store/useCurriculumStore";
 import { useUser } from "@/context/UserContext";
+import { CheckCircle, BookOpen, Lock, RotateCcw, Play } from "lucide-react";
+import { TestSystem } from "@/components/test/TestSystem";
+import { useHome } from "@/hooks/useHome";
+import { useLessonStatesStore } from "@/hooks/use-lessonsStates";
 
 function Contents() {
   const searchParams = useSearchParams();
@@ -24,12 +28,19 @@ function Contents() {
   const { selectedCurriculumId, setSelectedCurriculumId } =
     useCurriculumStore();
   const { isLoading, fetchCurriculumWithUnitsUserMetrics } = useCurriculums();
+  const { getLessonState } = useLessonStatesStore();
+  const { gamification, refetch: refetchGamification } = useHome(userId);
+
   const [curriculum, setCurriculum] = useState<Curriculum | null>(null);
   const [units, setUnits] = useState<Unit[]>([]);
   const [stats, setStats] = useState<{ totalAnswerErrors: number } | null>(
     null
   );
   const [openAccordion, setOpenAccordion] = useState<string>("");
+  const [activeTest, setActiveTest] = useState<{
+    unitId: number;
+    unitName: string;
+  } | null>(null);
   const hasScrolledRef = useRef(false);
 
   useEffect(() => {
@@ -100,6 +111,112 @@ function Contents() {
     router
   ]);
 
+  const getUnitState = (unitId: number) => {
+    if (!selectedCurriculumId) return null;
+    return getLessonState(selectedCurriculumId, unitId);
+  };
+
+  const renderStateTag = (unitId: number) => {
+    const lessonState = getUnitState(unitId);
+
+    if (!lessonState) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-600 text-gray-300">
+          <Lock className="w-3.5 h-3.5" />
+          Sin datos
+        </span>
+      );
+    }
+
+    switch (lessonState.state) {
+      case "completed":
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-600 text-white">
+            <CheckCircle className="w-3.5 h-3.5" />
+            Completada
+          </span>
+        );
+      case "available":
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white">
+            <BookOpen className="w-3.5 h-3.5" />
+            Disponible
+          </span>
+        );
+      case "locked":
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-600 text-gray-300">
+            <Lock className="w-3.5 h-3.5" />
+            Bloqueada
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const renderActionButton = (unitId: number, unitName: string) => {
+    const lessonState = getUnitState(unitId);
+    const hearts = gamification?.hearts ?? 0;
+
+    if (!lessonState) {
+      return (
+        <button
+          disabled
+          className="w-full mt-4 px-4 py-3 rounded-xl font-bold text-sm bg-gray-600 text-gray-400 cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          <Lock className="w-4 h-4" />
+          Sin datos
+        </button>
+      );
+    }
+
+    switch (lessonState.state) {
+      case "completed":
+        return (
+          <button
+            onClick={() => setActiveTest({ unitId, unitName })}
+            className="w-full mt-4 px-4 py-3 rounded-xl font-bold text-sm bg-green-600 hover:bg-green-700 text-white transition-colors flex items-center justify-center gap-2"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Volver a Intentar
+          </button>
+        );
+      case "available":
+        return (
+          <button
+            onClick={() => setActiveTest({ unitId, unitName })}
+            disabled={hearts === 0}
+            className={`w-full mt-4 px-4 py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${
+              hearts === 0
+                ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
+            }`}
+          >
+            <Play className="w-4 h-4" />
+            {hearts === 0 ? "Sin Corazones" : "Empezar"}
+          </button>
+        );
+      case "locked":
+        return (
+          <button
+            disabled
+            className="w-full mt-4 px-4 py-3 rounded-xl font-bold text-sm bg-gray-700 text-gray-400 cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            <Lock className="w-4 h-4" />
+            Bloqueada
+          </button>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const handleCloseTest = () => {
+    setActiveTest(null);
+    refetchGamification();
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-neutral-900 text-white flex items-center justify-center">
@@ -118,6 +235,22 @@ function Contents() {
     );
   }
 
+  if (activeTest) {
+    return (
+      <div className="fixed inset-0 z-[100] flex justify-center items-start bg-black/50">
+        <div className="w-full max-w-[650px] bg-white shadow-xl overflow-hidden">
+          <TestSystem
+            hearts={gamification?.hearts ?? 0}
+            userId={userId}
+            unitId={activeTest.unitId}
+            curriculumId={selectedCurriculumId}
+            onClose={handleCloseTest}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-neutral-900 text-white p-6 pb-20">
       <div className="max-w-4xl mx-auto">
@@ -129,7 +262,10 @@ function Contents() {
             id={`unit-${unit.id}`}
             className="mb-6 scroll-mt-20"
           >
-            <h2 className="text-xl font-bold mb-3">{unit.name}</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xl font-bold">{unit.name}</h2>
+              {renderStateTag(unit.id)}
+            </div>
             <div className="border-2 border-neutral-600 rounded-2xl overflow-hidden">
               <Accordion
                 type="single"
@@ -149,6 +285,7 @@ function Contents() {
                     </AccordionTrigger>
                     <AccordionContent className="px-5 pb-5 pt-2 border-t border-neutral-700">
                       <FormattedTextDisplay text={lesson.description} />
+                      {renderActionButton(unit.id, unit.name)}
                     </AccordionContent>
                   </AccordionItem>
                 ))}

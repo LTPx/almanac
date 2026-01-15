@@ -11,7 +11,6 @@ type LearningPathProps = {
   userId: string;
   hearts: number;
   onTestComplete?: () => void;
-
   showAsCompleted?: boolean;
   showOptionalAsAvailable?: boolean;
   showAllCompletedExceptFirst?: boolean;
@@ -129,6 +128,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
               hearts={hearts}
               isTutorialMode={isTutorialMode}
               showOptionalAsAvailable={showOptionalAsAvailable}
+              curriculumId={curriculum.id}
             />
           )}
         </div>
@@ -165,6 +165,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
             hearts={hearts}
             isTutorialMode={isTutorialMode}
             showOptionalAsAvailable={showOptionalAsAvailable}
+            curriculumId={curriculum.id}
           />
         )}
       </div>

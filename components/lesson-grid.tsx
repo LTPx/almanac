@@ -1,10 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { motion, Variants } from "framer-motion";
 import { Unit } from "@/lib/types";
 import LessonNode from "./lesson-node";
 import { NoHeartsModal } from "./modals/hearts-modal";
+import {
+  LessonStateInfo,
+  useLessonStatesStore
+} from "@/hooks/use-lessonsStates";
 
 interface LessonGridProps {
   units: Unit[];
@@ -13,6 +17,7 @@ interface LessonGridProps {
   onStartUnit: (unit: Unit) => void;
   isTutorialMode?: boolean;
   showOptionalAsAvailable?: boolean;
+  curriculumId: string | number;
 }
 
 export const LessonGrid: React.FC<LessonGridProps> = ({
@@ -21,8 +26,11 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
   hearts,
   onStartUnit,
   isTutorialMode = false,
-  showOptionalAsAvailable = false
+  showOptionalAsAvailable = false,
+  curriculumId
 }) => {
+  const { setLessonStates } = useLessonStatesStore();
+
   type Node = Unit & { type: "unit"; col: number; row: number };
 
   const getRowCol = (position: number) => {
@@ -128,8 +136,26 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     return "locked";
   };
 
-  // const maxRow =
-  //   pathLayout.length > 0 ? Math.max(...pathLayout.map((r) => r.row)) : 0;
+  useEffect(() => {
+    const lessonStatesInfo: LessonStateInfo[] = allNodes.map((node) => ({
+      unitId: node.id,
+      name: node.name,
+      state: getLessonState(node),
+      position: node.position,
+      mandatory: node.mandatory,
+      isFirstMandatory: node.id === firstLesson?.id && node.mandatory,
+      isHighestPosition: highestPositionNode?.id === node.id,
+      isOptionalHighest: highestOptionalNode?.id === node.id
+    }));
+
+    setLessonStates(curriculumId, lessonStatesInfo);
+  }, [
+    units,
+    approvedUnits,
+    curriculumId,
+    isTutorialMode,
+    showOptionalAsAvailable
+  ]);
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -161,8 +187,6 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     <>
       <div className="max-w-sm mx-auto lesson-grid">
         {pathLayout.map((rowData, rowIndex) => {
-          // const isBottomRow = rowData.row === maxRow;
-
           return (
             <motion.div
               key={rowIndex}
@@ -173,9 +197,6 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
             >
               {Array.from({ length: 5 }, (_, col) => {
                 const nodeData = rowData.nodes.find((n) => n.col === col);
-                // const isCompleted = nodeData
-                //   ? approvedUnits.includes(nodeData.id)
-                //   : false;
 
                 const isHighestPosition =
                   nodeData && highestPositionNode && nodeData.mandatory
