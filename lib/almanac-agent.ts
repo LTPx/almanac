@@ -216,6 +216,14 @@ export class AlmanacAgent {
     });
 
     console.log(
+      ":::::::::::::::::::::::::::::::::::::::::::::::::::::routerInstruction:::::::::::::::::::::::::::::::::::::::::::::::::::::"
+    );
+    console.log(routerInstruction);
+    console.log(
+      ":::::::::::::::::::::::::::::::::::::::::::::::::::::routerInstruction:::::::::::::::::::::::::::::::::::::::::::::::::::::"
+    );
+
+    console.log(
       ":::::::::::::::::::::::::::::::::::::::::::::::::::::prompt to router:::::::::::::::::::::::::::::::::::::::::::::::::::::"
     );
     console.log(prompt);
@@ -256,6 +264,14 @@ export class AlmanacAgent {
     const config = await this.getConfig();
     let tutorInstruction = "";
 
+    const masterCatalog = config.masterCatalog || [];
+    const topicListString = masterCatalog
+      .map(
+        (track) =>
+          `- ID: "${track.id}" | COURSE: "${track.title}" | KEYWORDS: ${track.desc}`
+      )
+      .join("\n");
+
     if (!this.currentTopicId) {
       tutorInstruction = `
       ${config.tutorInstructions}
@@ -264,6 +280,9 @@ export class AlmanacAgent {
 
       SOURCE MATERIAL:
       ${this.getUserContextText()}
+
+      AVAILABLE COURSES (Use ONLY these IDs):
+      ${topicListString}
     `;
     } else {
       // Detectar si es un curriculum ID o un lesson ID
