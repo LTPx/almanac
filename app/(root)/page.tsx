@@ -17,6 +17,7 @@ import { createTutorialSteps } from "@/components/tutorial/tutorial-steps";
 import TutorialNFTMinting from "@/components/tutorial/tutorial-nft-minting";
 import { TutorialChatDemo } from "@/components/tutorial/tutorial-chat-demo";
 import { TutorialContentsDemo } from "@/components/tutorial/tutorial-contents";
+import ChatTutorBar from "@/components/tutor-bar-chat";
 
 const ContentLoadingScreen = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -245,7 +246,6 @@ function HomePageContent() {
           initialStep={currentStep}
         />
       )}
-
       <CourseHeader
         ref={courseHeaderRef}
         curriculums={curriculums}
@@ -256,7 +256,7 @@ function HomePageContent() {
         isPremium={isPremium}
         preventSelectClose={isTutorialActive && currentStep === 1}
       />
-
+      <ChatTutorBar curriculumTitle={selectedCurriculum?.title} />
       {error && (
         <div className="px-6 py-4">
           <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 text-red-700 dark:text-red-400 px-4 py-3 rounded">

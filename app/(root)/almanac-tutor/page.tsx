@@ -153,6 +153,79 @@ export default function AlmanacTutorPage() {
     loadActiveSession();
   }, [userId]);
 
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const question = searchParams.get("q");
+
+    if (
+      question &&
+      userId &&
+      !loading &&
+      messages.length === 0 &&
+      !initialLoading
+    ) {
+      setInput(question);
+
+      const userMessage = question.trim();
+      setMessages([{ role: "user", content: userMessage }]);
+      setLoading(true);
+      fetch("/api/almanac/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          userId,
+          message: userMessage
+        })
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.response) {
+            setMessages((prev) => [
+              ...prev,
+              {
+                role: "assistant",
+                content: data.response,
+                isTyping: true
+              }
+            ]);
+            setCurrentTopicData(data.currentTopicData);
+            setSessionId(data.sessionId);
+
+            if (questionLimit) {
+              setQuestionLimit({
+                ...questionLimit,
+                used: questionLimit.used + 1,
+                remaining: Math.max(0, questionLimit.remaining - 1)
+              });
+            }
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant",
+              content: "Error: Could not connect to the server",
+              isTyping: false
+            }
+          ]);
+        })
+        .finally(() => {
+          setLoading(false);
+          window.history.replaceState({}, "", "/almanac-tutor");
+        });
+    }
+  }, [userId, initialLoading, messages.length]);
+
+  useEffect(() => {
+    if (input && window.location.search.includes("q=")) {
+      window.history.replaceState({}, "", "/almanac-tutor");
+    }
+  }, [input]);
+
   const sendMessage = async () => {
     if (!input.trim() || loading || !userId) return;
 
