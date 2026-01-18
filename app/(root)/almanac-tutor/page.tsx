@@ -109,6 +109,7 @@ export default function AlmanacTutorPage() {
   );
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const processedQueryRef = useRef<string | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -153,6 +154,7 @@ export default function AlmanacTutorPage() {
     loadActiveSession();
   }, [userId]);
 
+  // Procesar query de URL
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const question = searchParams.get("q");
@@ -161,14 +163,15 @@ export default function AlmanacTutorPage() {
       question &&
       userId &&
       !loading &&
-      messages.length === 0 &&
-      !initialLoading
+      !initialLoading &&
+      question !== processedQueryRef.current
     ) {
-      setInput(question);
+      processedQueryRef.current = question;
 
       const userMessage = question.trim();
-      setMessages([{ role: "user", content: userMessage }]);
+      setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
       setLoading(true);
+
       fetch("/api/almanac/chat", {
         method: "POST",
         headers: {
@@ -218,7 +221,7 @@ export default function AlmanacTutorPage() {
           window.history.replaceState({}, "", "/almanac-tutor");
         });
     }
-  }, [userId, initialLoading, messages.length]);
+  }, [userId, initialLoading, loading]);
 
   useEffect(() => {
     if (input && window.location.search.includes("q=")) {
@@ -313,6 +316,7 @@ export default function AlmanacTutorPage() {
       setCurrentTopicData(null);
       setSessionId(null);
       setShowFeedbackModal(false);
+      processedQueryRef.current = null;
       loadActiveSession();
     } catch (error) {
       console.error("Error clearing conversation:", error);
