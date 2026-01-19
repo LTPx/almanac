@@ -11,5 +11,5 @@ export const MAX_ADS_PER_DAY = 10; // Máximo de anuncios por día
 //Mint
 export const MINT_NFT_ZAPS = 400; // Zaps necesarios para mintear
 export const HOURS_PER_HEART = 5;
-export const ZAPS_PER_UNIT_COMPLETE = 100;
+export const ZAPS_PER_UNIT_COMPLETE = 400;
 export const TOKENS_PER_UNIT_COMPLETE = 1;

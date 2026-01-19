@@ -344,8 +344,6 @@ export async function dailyHeartResetCronJob() {
 export function calculateXP(data: TestResult): number {
   const { questions, attempts, correct, incorrect, timeSec, xpMax } = data;
 
-  console.log("test result data:", data);
-
   const totalAnswers = correct + incorrect;
   if (totalAnswers === 0) return 0;
 
@@ -369,7 +367,6 @@ export function calculateXP(data: TestResult): number {
 
   // 4. Final XP formula (no decimals)
   const xp = xpMax * (0.7 * accuracy + 0.2 * speedBonus + 0.1 * retryFactor);
-  console.log("XP calculated:", xp);
 
   return Math.round(xp); // no decimals
 }
