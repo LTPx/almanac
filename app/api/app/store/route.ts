@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getUserSubscriptionInfo } from "@/lib/subscriptions";
-import { ZAP_TO_HEART_RATE, MAX_HEARTS } from "@/lib/constants/gamification";
+import {
+  ZAPS_PER_HEART_PURCHASE,
+  MAX_HEARTS
+} from "@/lib/constants/gamification";
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,7 +31,7 @@ export async function GET(request: NextRequest) {
     }
 
     const maxHeartsPurchasable = Math.min(
-      Math.floor(user.zapTokens / ZAP_TO_HEART_RATE),
+      Math.floor(user.zapTokens / ZAPS_PER_HEART_PURCHASE),
       MAX_HEARTS - user.hearts
     );
 
@@ -40,9 +43,9 @@ export async function GET(request: NextRequest) {
         currentZaps: user.zapTokens,
         currentHearts: user.hearts,
         maxHearts: MAX_HEARTS,
-        exchangeRate: `${ZAP_TO_HEART_RATE} ZAPs = 1 Corazón`,
+        exchangeRate: `${ZAPS_PER_HEART_PURCHASE} ZAPs = 1 Corazón`,
         canPurchase: maxHeartsPurchasable,
-        zapCostForOne: ZAP_TO_HEART_RATE
+        zapCostForOne: ZAPS_PER_HEART_PURCHASE
       }
     });
   } catch (error) {

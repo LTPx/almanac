@@ -1,12 +1,12 @@
-import prisma from "./prisma";
+import {
+  HOURS_PER_HEART,
+  MAX_HEARTS,
+  TOKENS_PER_UNIT_COMPLETE,
+  ZAPS_PER_HEART_PURCHASE,
+  ZAPS_PER_UNIT_COMPLETE
+} from "./constants/gamification";
 
-const GAME_CONFIG = {
-  MAX_HEARTS: 5,
-  HOURS_PER_HEART: 5,
-  ZAPS_PER_UNIT_COMPLETE: 100,
-  ZAPS_PER_HEART_PURCHASE: 10,
-  TOKENS_PER_UNIT_COMPLETE: 1
-};
+import prisma from "./prisma";
 
 type TestResult = {
   questions: number;
@@ -27,7 +27,7 @@ export async function resetHeartsByHours(userId: string) {
   if (!user) throw new Error("User not found");
 
   // Si ya tiene el máximo de corazones, no hacer nada
-  if (user.hearts >= GAME_CONFIG.MAX_HEARTS) {
+  if (user.hearts >= MAX_HEARTS) {
     return false;
   }
 
@@ -37,16 +37,11 @@ export async function resetHeartsByHours(userId: string) {
     (now.getTime() - lastReset.getTime()) / (60 * 60 * 1000);
 
   // Calcular cuántos corazones se deben regenerar
-  const heartsToRegenerate = Math.floor(
-    hoursSinceLastReset / GAME_CONFIG.HOURS_PER_HEART
-  );
+  const heartsToRegenerate = Math.floor(hoursSinceLastReset / HOURS_PER_HEART);
 
   if (heartsToRegenerate > 0) {
     // Calcular los nuevos corazones sin exceder el máximo
-    const newHearts = Math.min(
-      user.hearts + heartsToRegenerate,
-      GAME_CONFIG.MAX_HEARTS
-    );
+    const newHearts = Math.min(user.hearts + heartsToRegenerate, MAX_HEARTS);
 
     const actualHeartsAdded = newHearts - user.hearts;
 
@@ -87,11 +82,11 @@ export async function resetDailyHearts(userId: string) {
   const lastReset = new Date(user.lastHeartReset);
   const shouldReset = now.getTime() - lastReset.getTime() > 24 * 60 * 60 * 1000; // 24 horas
 
-  if (shouldReset && user.hearts < GAME_CONFIG.MAX_HEARTS) {
+  if (shouldReset && user.hearts < MAX_HEARTS) {
     await prisma.user.update({
       where: { id: userId },
       data: {
-        hearts: GAME_CONFIG.MAX_HEARTS,
+        hearts: MAX_HEARTS,
         lastHeartReset: now
       }
     });
@@ -101,7 +96,7 @@ export async function resetDailyHearts(userId: string) {
       data: {
         userId,
         type: "DAILY_RESET",
-        amount: GAME_CONFIG.MAX_HEARTS - user.hearts,
+        amount: MAX_HEARTS - user.hearts,
         reason: "Reseteo diario de corazones"
       }
     });
@@ -150,9 +145,9 @@ export async function purchaseHeartWithZaps(userId: string) {
   });
 
   if (!user) throw new Error("User not found");
-  if (user.hearts >= GAME_CONFIG.MAX_HEARTS)
+  if (user.hearts >= MAX_HEARTS)
     throw new Error("Ya tienes el máximo de corazones");
-  if (user.zapTokens < GAME_CONFIG.ZAPS_PER_HEART_PURCHASE)
+  if (user.zapTokens < ZAPS_PER_HEART_PURCHASE)
     throw new Error("No tienes suficientes ZAPs");
 
   // Actualizar usuario
@@ -160,7 +155,7 @@ export async function purchaseHeartWithZaps(userId: string) {
     where: { id: userId },
     data: {
       hearts: { increment: 1 },
-      zapTokens: { decrement: GAME_CONFIG.ZAPS_PER_HEART_PURCHASE }
+      zapTokens: { decrement: ZAPS_PER_HEART_PURCHASE }
     }
   });
 
@@ -178,7 +173,7 @@ export async function purchaseHeartWithZaps(userId: string) {
       data: {
         userId,
         type: "HEART_PURCHASE",
-        amount: -GAME_CONFIG.ZAPS_PER_HEART_PURCHASE,
+        amount: -ZAPS_PER_HEART_PURCHASE,
         reason: "ZAPs gastados en comprar corazón"
       }
     })
@@ -186,7 +181,7 @@ export async function purchaseHeartWithZaps(userId: string) {
 
   return {
     hearts: user.hearts + 1,
-    zapTokens: user.zapTokens - GAME_CONFIG.ZAPS_PER_HEART_PURCHASE
+    zapTokens: user.zapTokens - ZAPS_PER_HEART_PURCHASE
   };
 }
 
@@ -210,7 +205,7 @@ export async function completeCurriculum(userId: string, curriculumId: string) {
       const user = await tx.user.update({
         where: { id: userId },
         data: {
-          zapTokens: { increment: GAME_CONFIG.ZAPS_PER_UNIT_COMPLETE },
+          zapTokens: { increment: ZAPS_PER_UNIT_COMPLETE },
           totalCurriculumsCompleted: { increment: 1 }
         }
       });
@@ -221,13 +216,13 @@ export async function completeCurriculum(userId: string, curriculumId: string) {
           userId_curriculumId: { userId, curriculumId }
         },
         update: {
-          quantity: { increment: GAME_CONFIG.TOKENS_PER_UNIT_COMPLETE },
+          quantity: { increment: TOKENS_PER_UNIT_COMPLETE },
           updatedAt: new Date()
         },
         create: {
           userId,
           curriculumId,
-          quantity: GAME_CONFIG.TOKENS_PER_UNIT_COMPLETE
+          quantity: TOKENS_PER_UNIT_COMPLETE
         }
       });
 
@@ -253,7 +248,7 @@ export async function completeCurriculum(userId: string, curriculumId: string) {
         data: {
           userId,
           type: "UNIT_COMPLETED",
-          amount: GAME_CONFIG.ZAPS_PER_UNIT_COMPLETE,
+          amount: ZAPS_PER_UNIT_COMPLETE,
           reason: "ZAPs ganados por completar curriculum",
           relatedCurriculumId: curriculumId
         }
@@ -298,19 +293,17 @@ export async function getUserGamificationStats(userId: string) {
   const hoursSinceReset =
     (now.getTime() - new Date(user.lastHeartReset).getTime()) /
     (1000 * 60 * 60);
-  const needsHeartReset =
-    hoursSinceReset >= 24 && user.hearts < GAME_CONFIG.MAX_HEARTS;
+  const needsHeartReset = hoursSinceReset >= 24 && user.hearts < MAX_HEARTS;
 
   return {
     hearts: user.hearts,
-    maxHearts: GAME_CONFIG.MAX_HEARTS,
+    maxHearts: MAX_HEARTS,
     zapTokens: user.zapTokens,
     totalCurriculumsCompleted: user.totalCurriculumsCompleted,
     userCurriculumTokens: user.userCurriculumTokens,
     needsHeartReset,
     canPurchaseHeart:
-      user.zapTokens >= GAME_CONFIG.ZAPS_PER_HEART_PURCHASE &&
-      user.hearts < GAME_CONFIG.MAX_HEARTS
+      user.zapTokens >= ZAPS_PER_HEART_PURCHASE && user.hearts < MAX_HEARTS
   };
 }
 
@@ -323,7 +316,7 @@ export async function dailyHeartResetCronJob() {
     where: {
       AND: [
         { lastHeartReset: { lt: twentyFourHoursAgo } },
-        { hearts: { lt: GAME_CONFIG.MAX_HEARTS } }
+        { hearts: { lt: MAX_HEARTS } }
       ]
     },
     select: { id: true, hearts: true }

@@ -11,7 +11,7 @@ import type {
   StoreContentProps,
   SubscriptionData
 } from "@/lib/types";
-import { ZAP_TO_HEART_RATE } from "@/lib/constants/gamification";
+import { ZAPS_PER_HEART_PURCHASE } from "@/lib/constants/gamification";
 
 export default function StoreContent({
   onBack,
@@ -149,7 +149,7 @@ export default function StoreContent({
       setIsPurchasing(false);
     }
   };
-  const totalZapCost = heartQuantity * ZAP_TO_HEART_RATE;
+  const totalZapCost = heartQuantity * ZAPS_PER_HEART_PURCHASE;
 
   if (isLoading) {
     return (
