@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getUserSubscriptionInfo } from "@/lib/subscriptions";
+import { resetHeartsByHours } from "@/lib/gamification";
 import {
   ZAPS_PER_HEART_PURCHASE,
   MAX_HEARTS
@@ -14,6 +15,9 @@ export async function GET(request: NextRequest) {
     if (!userId) {
       return NextResponse.json({ error: "userId not found" }, { status: 400 });
     }
+
+    // Regenerar corazones si corresponde
+    await resetHeartsByHours(userId);
 
     const user = await prisma.user.findUnique({
       where: { id: userId },

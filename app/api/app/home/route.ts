@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserGamificationStats } from "@/lib/gamification";
+import {
+  getUserGamificationStats,
+  resetHeartsByHours
+} from "@/lib/gamification";
 import { checkPremiumFeature } from "@/lib/subscriptions";
 
 export async function GET(request: NextRequest) {
@@ -9,6 +12,9 @@ export async function GET(request: NextRequest) {
   if (!userId) {
     return NextResponse.json({ error: "No userId found" }, { status: 404 });
   }
+
+  // Regenerar corazones si corresponde
+  await resetHeartsByHours(userId);
 
   const stats = await getUserGamificationStats(userId);
   const isPremium = await checkPremiumFeature(userId);
