@@ -6,6 +6,7 @@ import {
   getAvailableNFTImage,
   getRandomRarity
 } from "@/lib/nft-service";
+import { MINT_NFT_ZAPS } from "@/lib/constants/gamification";
 
 const CONTRACT_ADDRESS = process.env.THIRDWEB_CONTRACT_ADDRESS!;
 
@@ -125,7 +126,7 @@ export async function POST(
       data: {
         userId,
         type: "ADMIN_ADJUSTMENT",
-        amount: -100,
+        amount: -MINT_NFT_ZAPS,
         reason: "ZAPs gastados en mintear NFT"
       }
     });
