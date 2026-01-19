@@ -14,10 +14,12 @@ import {
 
 export default function PremiumCard({
   userId,
-  subscription
+  subscription,
+  testAttemptId
 }: {
   userId: string;
   subscription?: SubscriptionData | null;
+  testAttemptId?: number;
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -30,7 +32,7 @@ export default function PremiumCard({
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ userId })
+        body: JSON.stringify({ userId, testAttemptId })
       });
 
       const data = await response.json();

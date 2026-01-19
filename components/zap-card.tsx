@@ -9,6 +9,7 @@ interface ZapCardProps {
   icon: React.ReactNode;
   priceId: string;
   userId: string;
+  testAttemptId?: number;
 }
 
 export default function ZapCard({
@@ -16,7 +17,8 @@ export default function ZapCard({
   price,
   icon,
   priceId,
-  userId
+  userId,
+  testAttemptId
 }: ZapCardProps) {
   async function handleClick() {
     const res = await fetch("/api/payments/stripe/checkout", {
@@ -25,7 +27,8 @@ export default function ZapCard({
       body: JSON.stringify({
         priceId,
         userId,
-        packageId: "zaps_".concat(`${amount}`)
+        packageId: "zaps_".concat(`${amount}`),
+        testAttemptId
       })
     });
 

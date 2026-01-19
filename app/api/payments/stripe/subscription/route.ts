@@ -6,7 +6,7 @@ const SUBSCRIPTION_ID = process.env.STRIPE_PRICE_ID_SUBSCRIPTION!;
 
 export async function POST(req: Request) {
   try {
-    const { userId } = await req.json();
+    const { userId, testAttemptId } = await req.json();
 
     const user = await prisma.user.findUnique({
       where: { id: userId }
@@ -57,6 +57,10 @@ export async function POST(req: Request) {
       trialDays = remainingDays > 0 ? remainingDays : undefined;
     }
 
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const testParam = testAttemptId ? `&testAttemptId=${testAttemptId}` : "";
+    const cancelTestParam = testAttemptId ? `?testAttemptId=${testAttemptId}` : "";
+
     // Crear sesión de checkout
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -78,8 +82,8 @@ export async function POST(req: Request) {
       metadata: {
         userId: userId
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/payments/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/store`,
+      success_url: `${baseUrl}/payments/success?session_id={CHECKOUT_SESSION_ID}${testParam}`,
+      cancel_url: `${baseUrl}/store${cancelTestParam}`,
       allow_promotion_codes: true,
       billing_address_collection: "auto"
     });

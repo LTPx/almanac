@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { useUser } from "@/context/UserContext";
 import { Curriculum } from "@/lib/types";
 import CourseHeader, { CourseHeaderRef } from "@/components/course-header";
@@ -31,6 +32,11 @@ const ContentLoadingScreen = () => (
 );
 
 function HomePageContent() {
+  const searchParams = useSearchParams();
+  const resumeTestAttemptId = searchParams.get("resumeTest");
+
+  console.log("🏠 Page - resumeTest param:", resumeTestAttemptId);
+
   const [curriculums, setCurriculums] = useState<Curriculum[]>([]);
   const [selectedCurriculum, setSelectedCurriculum] =
     useState<Curriculum | null>(null);
@@ -284,6 +290,7 @@ function HomePageContent() {
               curriculum={selectedCurriculum}
               userId={userId}
               onTestComplete={handleTestComplete}
+              resumeTestAttemptId={resumeTestAttemptId ? Number(resumeTestAttemptId) : undefined}
             />
           )}
         </div>

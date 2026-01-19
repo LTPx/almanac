@@ -287,6 +287,7 @@ model TestAttempt {
   isCompleted    Boolean      @default(false)
   startedAt      DateTime     @default(now())
   completedAt    DateTime?
+  questionOrder  Json?
   answers        TestAnswer[]
 
   heartTransactions HeartTransaction[]

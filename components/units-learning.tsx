@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { LessonGrid } from "./lesson-grid";
 import { TestSystem } from "./test/TestSystem";
 import { Curriculum, Unit } from "@/lib/types";
@@ -15,6 +15,7 @@ type LearningPathProps = {
   showOptionalAsAvailable?: boolean;
   showAllCompletedExceptFirst?: boolean;
   isTutorialMode?: boolean;
+  resumeTestAttemptId?: number;
 };
 
 const LearningPath: React.FC<LearningPathProps> = ({
@@ -25,10 +26,42 @@ const LearningPath: React.FC<LearningPathProps> = ({
   showAsCompleted = false,
   showOptionalAsAvailable = false,
   showAllCompletedExceptFirst = false,
-  isTutorialMode = false
+  isTutorialMode = false,
+  resumeTestAttemptId
 }) => {
   const [activeUnit, setActiveUnit] = useState<Unit | null>(null);
+  const [resumeTestId, setResumeTestId] = useState<number | undefined>(resumeTestAttemptId);
   const { progress, isLoading, refetch } = useProgress(userId, curriculum.id);
+  const hasCheckedResume = useRef(false);
+
+  // Cuando hay resumeTestAttemptId, obtener el unitId del test y activar esa unidad
+  useEffect(() => {
+    console.log("🔄 Resume effect - resumeTestAttemptId:", resumeTestAttemptId, "hasChecked:", hasCheckedResume.current, "isLoading:", isLoading);
+    if (resumeTestAttemptId && !hasCheckedResume.current && !isLoading) {
+      hasCheckedResume.current = true;
+      console.log("📡 Fetching resume data for testAttemptId:", resumeTestAttemptId);
+      fetch(`/api/test/resume?testAttemptId=${resumeTestAttemptId}&userId=${userId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("📥 Resume API response:", data);
+          if (data.lesson?.id) {
+            console.log("🔍 Looking for unit with id:", data.lesson.id, "in units:", curriculum.units?.map(u => u.id));
+            const unitToResume = curriculum.units?.find((u) => u.id === data.lesson.id);
+            if (unitToResume) {
+              console.log("✅ Found unit to resume:", unitToResume.name);
+              setActiveUnit(unitToResume);
+            } else {
+              console.log("❌ Unit not found in curriculum");
+            }
+          } else {
+            console.log("❌ No lesson id in response:", data);
+          }
+        })
+        .catch((err) => {
+          console.error("❌ Resume fetch error:", err);
+        });
+    }
+  }, [resumeTestAttemptId, userId, curriculum.units, isLoading]);
 
   const assignedUnits =
     curriculum.units?.filter(
@@ -107,6 +140,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
 
   const handleCloseTest = () => {
     setActiveUnit(null);
+    setResumeTestId(undefined);
     refetch();
     if (onTestComplete) {
       onTestComplete();
@@ -146,6 +180,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
             unitId={activeUnit.id}
             curriculumId={curriculum.id}
             onClose={handleCloseTest}
+            resumeTestAttemptId={resumeTestId}
           />
         </div>
       </div>

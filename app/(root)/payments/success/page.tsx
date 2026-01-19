@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+
 export default function SuccessPage() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
+  const testAttemptId = searchParams.get("testAttemptId");
 
   const textTokens =
     "Gracias por tu compra. Tus tokens estarán disponibles en tu cuenta en unos momentos.";
@@ -22,12 +24,21 @@ export default function SuccessPage() {
         {sessionId ? textSubscription : textTokens}
       </p>
 
-      <Link
-        href="/"
-        className="px-6 py-3 bg-purple-600 rounded-lg text-white hover:bg-purple-700 transition"
-      >
-        Volver al inicio
-      </Link>
+      {testAttemptId ? (
+        <Link
+          href={`/?resumeTest=${testAttemptId}`}
+          className="px-6 py-3 bg-green-600 rounded-lg text-white hover:bg-green-700 transition font-semibold"
+        >
+          Volver al examen
+        </Link>
+      ) : (
+        <Link
+          href="/"
+          className="px-6 py-3 bg-purple-600 rounded-lg text-white hover:bg-purple-700 transition"
+        >
+          Volver al inicio
+        </Link>
+      )}
     </div>
   );
 }

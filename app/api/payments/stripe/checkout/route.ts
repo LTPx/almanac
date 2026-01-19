@@ -4,7 +4,7 @@ import stripe from "@/lib/stripe";
 
 export async function POST(req: Request) {
   try {
-    const { priceId, userId, packageId } = await req.json();
+    const { priceId, userId, packageId, testAttemptId } = await req.json();
 
     const user = await prisma.user.findUnique({
       where: { id: userId }
@@ -17,12 +17,15 @@ export async function POST(req: Request) {
       );
     }
 
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const testParam = testAttemptId ? `?testAttemptId=${testAttemptId}` : "";
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: user.email || undefined,
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/payments/success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/store`,
+      success_url: `${baseUrl}/payments/success${testParam}`,
+      cancel_url: `${baseUrl}/store${testParam}`,
       client_reference_id: userId,
       metadata: {
         userId,

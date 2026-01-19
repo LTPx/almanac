@@ -182,6 +182,7 @@ export interface StoreContentProps {
   onHeartsUpdate?: (hearts: number) => void;
   title?: string;
   backButtonVariant?: "icon" | "button";
+  testAttemptId?: number;
 }
 
 export interface ZapPackage {

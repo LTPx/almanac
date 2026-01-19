@@ -27,6 +27,7 @@ interface TestSystemProps {
   onClose: () => void;
   hearts: number;
   onHeartsChange?: (hearts: number) => void;
+  resumeTestAttemptId?: number;
 }
 
 type TestState =
@@ -43,7 +44,8 @@ export function TestSystem({
   curriculumId,
   onClose,
   hearts: initialHearts,
-  onHeartsChange
+  onHeartsChange,
+  resumeTestAttemptId
 }: TestSystemProps) {
   console.log("curriculumId ts: ", curriculumId);
   const [state, setState] = useState<TestState>("testing");
@@ -78,7 +80,7 @@ export function TestSystem({
     Set<number>
   >(new Set());
 
-  const { error, startTest, submitAnswer, completeTest } = useTest();
+  const { error, startTest, submitAnswer, completeTest, resumeTest } = useTest();
   const hasInitialized = useRef(false);
   const modalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isCompletingTestRef = useRef(false);
@@ -181,10 +183,30 @@ export function TestSystem({
 
   useEffect(() => {
     if (!hasInitialized.current) {
-      handleStartTest(unitId);
+      if (resumeTestAttemptId) {
+        // Resumir test existente
+        resumeTest(resumeTestAttemptId, userId).then((data) => {
+          if (data) {
+            setCurrentTest(data);
+            setCurrentQuestionIndex(data.currentQuestionIndex);
+            setAnswers(data.previousAnswers);
+            setQuestionStartTime(Date.now());
+            setState("testing");
+            setFirstPassQuestionCount(data.questions.length);
+            // Calcular failedQuestions desde previousAnswers
+            const failed = Object.entries(data.previousAnswers)
+              .filter(([, val]) => !val.isCorrect)
+              .map(([key]) => parseInt(key));
+            setFailedQuestions(failed);
+            setUniqueFailedQuestions(new Set(failed));
+          }
+        });
+      } else {
+        handleStartTest(unitId);
+      }
       hasInitialized.current = true;
     }
-  }, [handleStartTest, unitId]);
+  }, [handleStartTest, unitId, resumeTestAttemptId, resumeTest, userId]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -557,6 +579,7 @@ export function TestSystem({
                     onHeartsChange(newHearts);
                   }
                 }}
+                testAttemptId={currentTest?.testAttemptId}
               />
             </div>
           </motion.div>

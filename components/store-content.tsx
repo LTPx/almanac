@@ -18,7 +18,8 @@ export default function StoreContent({
   showBackButton = true,
   onHeartsUpdate,
   title = "Tienda",
-  backButtonVariant = "icon"
+  backButtonVariant = "icon",
+  testAttemptId
 }: StoreContentProps) {
   const user = useUser();
   const [zapTokens, setZapTokens] = useState<number | null>(null);
@@ -238,7 +239,7 @@ export default function StoreContent({
       )}
 
       <div className="p-3 pb-[60px] space-y-4 sm:space-y-6">
-        <PremiumCard userId={userId} subscription={subscription} />
+        <PremiumCard userId={userId} subscription={subscription} testAttemptId={testAttemptId} />
         {!subscription?.isPremium && (
           <>
             <div className="space-y-3 sm:space-y-4">
@@ -264,12 +265,14 @@ export default function StoreContent({
                   }
                   priceId="price_1SU91cRLp1UNwcaHjg3WnhKv"
                   userId={userId}
+                  testAttemptId={testAttemptId}
                 />
                 <ZapCard
                   amount={3000}
                   price="€9.99"
                   priceId="price_1SUFJWRLp1UNwcaHoFumkLr0"
                   userId={userId}
+                  testAttemptId={testAttemptId}
                   icon={
                     <div className="flex">
                       <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-purple-500 -mr-2" />
@@ -282,6 +285,7 @@ export default function StoreContent({
                   price="€19.99"
                   priceId="price_1SU91cRLp1UNwcaHjg3WnhKv"
                   userId={userId}
+                  testAttemptId={testAttemptId}
                   icon={
                     <div className="grid grid-cols-2 gap-1">
                       <Zap className="w-7 h-7 sm:w-8 sm:h-8 text-purple-500" />

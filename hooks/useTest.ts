@@ -90,11 +90,39 @@ export function useTest() {
     }
   };
 
+  const resumeTest = async (
+    testAttemptId: number,
+    userId: string
+  ): Promise<(TestData & { currentQuestionIndex: number; previousAnswers: Record<number, { answer: string; isCorrect: boolean }> }) | null> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `/api/test/resume?testAttemptId=${testAttemptId}&userId=${userId}`
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al resumir el test");
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error desconocido");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     isLoading,
     error,
     startTest,
     submitAnswer,
-    completeTest
+    completeTest,
+    resumeTest
   };
 }

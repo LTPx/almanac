@@ -95,6 +95,13 @@ export async function POST(request: NextRequest) {
       }))
     );
 
+    // Guardar el orden de las preguntas para poder resumir el test
+    const questionOrder = questionsForClient.map((q) => q.id);
+    await prisma.testAttempt.update({
+      where: { id: testAttempt.id },
+      data: { questionOrder }
+    });
+
     return NextResponse.json({
       testAttemptId: testAttempt.id,
       lesson: {
