@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-const ZAP_TO_HEART_RATE = 10; // 10 ZAPs = 1 corazón
+const ZAP_TO_HEART_RATE = 40; // 10 ZAPs = 1 corazón
 const MAX_HEARTS = 5; // Máximo de corazones permitidos
 
 export async function POST(request: NextRequest) {

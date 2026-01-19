@@ -11,6 +11,7 @@ import type {
   StoreContentProps,
   SubscriptionData
 } from "@/lib/types";
+const ZAP_TO_HEART_RATE = 40;
 
 export default function StoreContent({
   onBack,
@@ -148,8 +149,7 @@ export default function StoreContent({
       setIsPurchasing(false);
     }
   };
-
-  const totalZapCost = heartQuantity * 10;
+  const totalZapCost = heartQuantity * ZAP_TO_HEART_RATE;
 
   if (isLoading) {
     return (
