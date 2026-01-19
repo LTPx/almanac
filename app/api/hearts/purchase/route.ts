@@ -1,9 +1,7 @@
 // app/api/hearts/purchase/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-
-const ZAP_TO_HEART_RATE = 40; // 10 ZAPs = 1 corazón
-const MAX_HEARTS = 5; // Máximo de corazones permitidos
+import { ZAP_TO_HEART_RATE, MAX_HEARTS } from "@/lib/constants/gamification";
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,0 +1,8 @@
+// Hearts
+export const MAX_HEARTS = 5;
+export const ZAP_TO_HEART_RATE = 40; // 40 ZAPs = 1 corazón
+
+// Ads
+export const ZAP_REWARD = 20; // Zaps otorgados por ver un anuncio
+export const AD_COOLDOWN_MINUTES = 0; // Tiempo de espera entre anuncios
+export const AD_DURATION_SECONDS = 5; // Duración del anuncio en segundos

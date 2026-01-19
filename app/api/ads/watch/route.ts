@@ -1,10 +1,11 @@
 // app/api/ads/watch/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-
-const ZAP_REWARD = 20; // Zaps otorgados por ver un anuncio
-const AD_COOLDOWN_MINUTES = 0; // Tiempo de espera entre anuncios (30 minutos)
-const AD_DURATION_SECONDS = 5; // Duración del anuncio en segundos
+import {
+  ZAP_REWARD,
+  AD_COOLDOWN_MINUTES,
+  AD_DURATION_SECONDS
+} from "@/lib/constants/gamification";
 
 // POST - Iniciar visualización de anuncio
 export async function POST(request: NextRequest) {

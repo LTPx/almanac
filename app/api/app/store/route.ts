@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getUserSubscriptionInfo } from "@/lib/subscriptions";
-
-const ZAP_TO_HEART_RATE = 40;
-const MAX_HEARTS = 5;
+import { ZAP_TO_HEART_RATE, MAX_HEARTS } from "@/lib/constants/gamification";
 
 export async function GET(request: NextRequest) {
   try {

@@ -11,7 +11,7 @@ import type {
   StoreContentProps,
   SubscriptionData
 } from "@/lib/types";
-const ZAP_TO_HEART_RATE = 40;
+import { ZAP_TO_HEART_RATE } from "@/lib/constants/gamification";
 
 export default function StoreContent({
   onBack,
