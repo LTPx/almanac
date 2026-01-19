@@ -4,8 +4,32 @@ import prisma from "@/lib/prisma";
 import {
   ZAP_REWARD,
   AD_COOLDOWN_MINUTES,
-  AD_DURATION_SECONDS
+  AD_DURATION_SECONDS,
+  MAX_ADS_PER_DAY
 } from "@/lib/constants/gamification";
+
+// Helper: Obtener inicio del día actual (UTC)
+function getStartOfDay(): Date {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+}
+
+// Helper: Contar anuncios vistos hoy
+async function getAdsWatchedToday(userId: string): Promise<number> {
+  const startOfDay = getStartOfDay();
+
+  const count = await prisma.zapTransaction.count({
+    where: {
+      userId,
+      type: "AD_REWARD",
+      createdAt: {
+        gte: startOfDay
+      }
+    }
+  });
+
+  return count;
+}
 
 // POST - Iniciar visualización de anuncio
 export async function POST(request: NextRequest) {
@@ -84,7 +108,15 @@ export async function GET(request: NextRequest) {
     let canWatchAd = true;
     let nextAvailableAt = null;
 
-    if (lastAdWatch) {
+    // Verificar límite diario
+    const adsWatchedToday = await getAdsWatchedToday(userId);
+    const adsRemaining = Math.max(0, MAX_ADS_PER_DAY - adsWatchedToday);
+
+    if (adsWatchedToday >= MAX_ADS_PER_DAY) {
+      canWatchAd = false;
+    }
+
+    if (lastAdWatch && canWatchAd) {
       const cooldownEndTime = new Date(
         lastAdWatch.createdAt.getTime() + AD_COOLDOWN_MINUTES * 60 * 1000
       );
@@ -104,7 +136,10 @@ export async function GET(request: NextRequest) {
       cooldownMinutes: AD_COOLDOWN_MINUTES,
       timeUntilNextAd: nextAvailableAt
         ? Math.ceil((nextAvailableAt.getTime() - now.getTime()) / 1000)
-        : 0
+        : 0,
+      adsWatchedToday,
+      adsRemaining,
+      maxAdsPerDay: MAX_ADS_PER_DAY
     });
   } catch (error) {
     console.error("Error obteniendo información de anuncios:", error);
@@ -117,6 +152,14 @@ export async function GET(request: NextRequest) {
 
 // Función auxiliar: Iniciar visualización de anuncio
 async function handleAdStart(userId: string) {
+  // Verificar límite diario primero
+  const adsWatchedToday = await getAdsWatchedToday(userId);
+  if (adsWatchedToday >= MAX_ADS_PER_DAY) {
+    throw new Error(
+      `Has alcanzado el límite de ${MAX_ADS_PER_DAY} anuncios por día`
+    );
+  }
+
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
