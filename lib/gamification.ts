@@ -1,9 +1,9 @@
 import {
-  HOURS_PER_HEART,
+  HOURS_TO_GIVE_HEART,
   MAX_HEARTS,
   TOKENS_PER_UNIT_COMPLETE,
   ZAPS_PER_HEART_PURCHASE,
-  ZAPS_PER_UNIT_COMPLETE
+  ZAPS_PER_CURRICULUM_COMPLETED
 } from "./constants/gamification";
 
 import prisma from "./prisma";
@@ -37,7 +37,9 @@ export async function resetHeartsByHours(userId: string) {
     (now.getTime() - lastReset.getTime()) / (60 * 60 * 1000);
 
   // Calcular cuántos corazones se deben regenerar
-  const heartsToRegenerate = Math.floor(hoursSinceLastReset / HOURS_PER_HEART);
+  const heartsToRegenerate = Math.floor(
+    hoursSinceLastReset / HOURS_TO_GIVE_HEART
+  );
 
   if (heartsToRegenerate > 0) {
     // Calcular los nuevos corazones sin exceder el máximo
@@ -205,7 +207,7 @@ export async function completeCurriculum(userId: string, curriculumId: string) {
       const user = await tx.user.update({
         where: { id: userId },
         data: {
-          zapTokens: { increment: ZAPS_PER_UNIT_COMPLETE },
+          zapTokens: { increment: ZAPS_PER_CURRICULUM_COMPLETED },
           totalCurriculumsCompleted: { increment: 1 }
         }
       });
@@ -248,7 +250,7 @@ export async function completeCurriculum(userId: string, curriculumId: string) {
         data: {
           userId,
           type: "UNIT_COMPLETED",
-          amount: ZAPS_PER_UNIT_COMPLETE,
+          amount: ZAPS_PER_CURRICULUM_COMPLETED,
           reason: "ZAPs ganados por completar curriculum",
           relatedCurriculumId: curriculumId
         }
