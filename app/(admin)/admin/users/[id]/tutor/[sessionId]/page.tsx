@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, JSX } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
+import { renderMessageWithLinks } from "@/lib/render-markdown";
 
 interface Message {
   role: "user" | "model";
@@ -336,51 +337,3 @@ export default function SessionDetailsPage() {
     </div>
   );
 }
-
-// Helper function to render markdown links and bold text as HTML
-const renderMessageWithLinks = (content: string) => {
-  // Regex to match markdown links [text](url) OR bold text **text**
-  const markdownRegex = /\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*/g;
-  const parts: (string | JSX.Element)[] = [];
-  let lastIndex = 0;
-  let match;
-  let keyCounter = 0;
-
-  while ((match = markdownRegex.exec(content)) !== null) {
-    // Add text before the match
-    if (match.index > lastIndex) {
-      parts.push(content.substring(lastIndex, match.index));
-    }
-
-    // Check if it's a link [text](url) - groups 1 and 2 will be defined
-    if (match[1] && match[2]) {
-      parts.push(
-        <a
-          key={`link-${keyCounter++}`}
-          href={match[2]}
-          rel="noopener noreferrer"
-          className="text-blue-400 underline hover:text-blue-300"
-        >
-          {match[1]}
-        </a>
-      );
-    }
-    // Otherwise it's bold text **text** - group 3 will be defined
-    else if (match[3]) {
-      parts.push(
-        <strong key={`bold-${keyCounter++}`} className="font-bold">
-          {match[3]}
-        </strong>
-      );
-    }
-
-    lastIndex = match.index + match[0].length;
-  }
-
-  // Add remaining text
-  if (lastIndex < content.length) {
-    parts.push(content.substring(lastIndex));
-  }
-
-  return parts.length > 0 ? parts : content;
-};

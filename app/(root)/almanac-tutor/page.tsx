@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect, JSX } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Send, BookOpen, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 import Link from "next/link";
+import { renderMessageWithLinks } from "@/lib/render-markdown";
 
 interface Message {
   role: "user" | "assistant";
@@ -25,47 +26,6 @@ interface QuestionLimit {
   remaining: number;
   isPremium: boolean;
 }
-
-const renderMessageWithLinks = (content: string) => {
-  const markdownRegex = /\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*/g;
-  const parts: (string | JSX.Element)[] = [];
-  let lastIndex = 0;
-  let match;
-  let keyCounter = 0;
-
-  while ((match = markdownRegex.exec(content)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push(content.substring(lastIndex, match.index));
-    }
-
-    if (match[1] && match[2]) {
-      parts.push(
-        <a
-          key={`link-${keyCounter++}`}
-          href={match[2]}
-          rel="noopener noreferrer"
-          className="text-blue-400 underline hover:text-blue-300"
-        >
-          {match[1]}
-        </a>
-      );
-    } else if (match[3]) {
-      parts.push(
-        <strong key={`bold-${keyCounter++}`} className="font-bold">
-          {match[3]}
-        </strong>
-      );
-    }
-
-    lastIndex = match.index + match[0].length;
-  }
-
-  if (lastIndex < content.length) {
-    parts.push(content.substring(lastIndex));
-  }
-
-  return parts.length > 0 ? parts : content;
-};
 
 function TypingMessage({ content }: { content: string }) {
   const [displayedContent, setDisplayedContent] = useState("");
