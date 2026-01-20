@@ -195,7 +195,7 @@ export class AlmanacAgent {
     console.log(
       ":::::::::::::::::::::::::::::::::::::::::::::::::::::routerInstruction:::::::::::::::::::::::::::::::::::::::::::::::::::::"
     );
-    console.log(routerInstruction);
+    // console.log(routerInstruction);
     console.log(
       ":::::::::::::::::::::::::::::::::::::::::::::::::::::routerInstruction:::::::::::::::::::::::::::::::::::::::::::::::::::::"
     );
@@ -262,10 +262,7 @@ export class AlmanacAgent {
       ${topicListString}
 
       CRITICAL RULE:
-      - You MUST reference or return links ONLY if they appear in AVAILABLE COURSES.
-      - If a course or link is NOT listed in AVAILABLE COURSES, DO NOT reference it.
-      - DO NOT generate, infer, guess, or fabricate course IDs or URLs.
-      - If no valid course applies, respond without links.
+      - NOT RETURN LINKS
     `;
     } else {
       // Detectar si es un curriculum ID o un lesson ID
@@ -304,7 +301,7 @@ export class AlmanacAgent {
     console.log(
       ":::::::::::::::::::::::::::::::::::::::::::::::::::::tutor instructions:::::::::::::::::::::::::::::::::::::::::::::::::::::"
     );
-    console.log(tutorInstruction);
+    // console.log(tutorInstruction);
     console.log(
       ":::::::::::::::::::::::::::::::::::::::::::::::::::::tutor instructions:::::::::::::::::::::::::::::::::::::::::::::::::::::"
     );
