@@ -38,10 +38,7 @@ export default function TutorialNFTMinting({
   ];
 
   const handleMint = async () => {
-    // Mostrar animación inicial por un momento breve
     setShowInitialAnimation(true);
-
-    // Después de la animación, ir directo a revealed
     setTimeout(() => {
       setShowInitialAnimation(false);
       setStep("revealed");
@@ -127,25 +124,8 @@ export default function TutorialNFTMinting({
                 isFlipped={isFlipped}
                 onReveal={handleReveal}
                 nft={MOCK_MINTED_NFT}
+                onClose={onClose}
               />
-            )}
-
-            {isFlipped && step === "revealed" && (
-              <div
-                className="w-full max-w-sm space-y-4 z-[10001] relative"
-                style={{
-                  opacity: 0,
-                  transform: "translateY(20px)",
-                  animation: "fadeInUp 0.4s ease-out 0.8s forwards"
-                }}
-              >
-                <button
-                  className="w-full bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors"
-                  onClick={onClose}
-                >
-                  Empezar
-                </button>
-              </div>
             )}
           </div>
         )}
