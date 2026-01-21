@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react";
-import { BookOpen, Sparkles, ChevronLeft } from "lucide-react";
-import { AlmanacSlot, FloatingCard } from "./almanac-componets";
+import { Sparkles, ChevronLeft } from "lucide-react";
+import { AlmanacSlot } from "./almanac-componets";
 import { FloatingParticles } from "./animation-components";
-import { MintingAnimation, MintingLoader, NFTCard } from "./minting-components";
+import { MintingAnimation, NFTCard } from "./minting-components";
 import { MOCK_MINTED_NFT } from "./mock-data";
 
 interface TutorialNFTMintingProps {
@@ -10,7 +10,7 @@ interface TutorialNFTMintingProps {
   onBack?: () => void;
 }
 
-type Step = "almanac" | "ready-to-mint" | "minting" | "revealed";
+type Step = "ready-to-mint" | "revealed";
 
 interface AlmanacSlotData {
   id: number;
@@ -21,15 +21,10 @@ export default function TutorialNFTMinting({
   onClose,
   onBack
 }: TutorialNFTMintingProps) {
-  const [step, setStep] = useState<Step>("almanac");
+  const [step, setStep] = useState<Step>("ready-to-mint");
   const [isFlipped, setIsFlipped] = useState(false);
   const [showInitialAnimation, setShowInitialAnimation] = useState(false);
-  const [showFloatingCard, setShowFloatingCard] = useState(true);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [cardPosition, setCardPosition] = useState({ x: 0, y: 0 });
-  const [cardPlaced, setCardPlaced] = useState(false);
 
-  const floatingCardRef = useRef<HTMLDivElement>(null!);
   const position4Ref = useRef<HTMLDivElement>(null!);
 
   const earnedItem = { id: 4, name: "Verbs: Level 1", icon: "V1" };
@@ -37,54 +32,20 @@ export default function TutorialNFTMinting({
     { id: 1, filled: true },
     { id: 2, filled: true },
     { id: 3, filled: true },
-    { id: 4, filled: false },
+    { id: 4, filled: true }, // Este es el recién completado
     { id: 5, filled: false },
     { id: 6, filled: false }
   ];
 
-  const handleCollect = () => {
-    if (isAnimating || !showFloatingCard) return;
-
-    const emptyPosition = almanacSlots.find((pos) => !pos.filled);
-
-    if (emptyPosition && floatingCardRef.current && position4Ref.current) {
-      setIsAnimating(true);
-
-      const floatingRect = floatingCardRef.current.getBoundingClientRect();
-      const targetRect = position4Ref.current.getBoundingClientRect();
-
-      const deltaX =
-        targetRect.left -
-        floatingRect.left +
-        (targetRect.width - floatingRect.width) / 2;
-      const deltaY =
-        targetRect.top -
-        floatingRect.top +
-        (targetRect.height - floatingRect.height) / 2;
-
-      setCardPosition({ x: 0, y: 0 });
-
-      setTimeout(() => setCardPosition({ x: deltaX, y: deltaY }), 50);
-
-      setTimeout(() => {
-        setCardPlaced(true);
-        setShowFloatingCard(false);
-        setTimeout(() => {
-          setIsAnimating(false);
-          setStep("ready-to-mint");
-        }, 100);
-      }, 1200);
-    }
-  };
-
   const handleMint = async () => {
-    setStep("minting");
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    // Mostrar animación inicial por un momento breve
     setShowInitialAnimation(true);
+
+    // Después de la animación, ir directo a revealed
     setTimeout(() => {
       setShowInitialAnimation(false);
       setStep("revealed");
-    }, 2500);
+    }, 1500);
   };
 
   const handleReveal = () => {
@@ -92,15 +53,9 @@ export default function TutorialNFTMinting({
   };
 
   const handleBack = () => {
-    if (step === "almanac" && onBack) {
+    if (step === "ready-to-mint" && onBack) {
       onBack();
-    } else if (step === "ready-to-mint") {
-      setStep("almanac");
-      setShowFloatingCard(true);
-      setIsAnimating(false);
-      setCardPosition({ x: 0, y: 0 });
-      setCardPlaced(false);
-    } else if (step === "revealed" || step === "minting") {
+    } else if (step === "revealed") {
       setStep("ready-to-mint");
       setIsFlipped(false);
       setShowInitialAnimation(false);
@@ -123,7 +78,7 @@ export default function TutorialNFTMinting({
       </div>
 
       <div className="px-4 py-8 max-w-2xl mx-auto pb-24">
-        {(step === "almanac" || step === "ready-to-mint") && (
+        {step === "ready-to-mint" && (
           <div className="flex flex-col items-center justify-center min-h-[70vh] bg-[#0a0a0a] text-white relative overflow-hidden rounded-xl p-6">
             <div className="absolute inset-0 bg-gradient-radial from-[#32c781]/20 via-[#0a0a0a] to-[#0a0a0a] z-0" />
 
@@ -143,57 +98,29 @@ export default function TutorialNFTMinting({
                     key={slot.id}
                     slot={slot}
                     earnedItem={earnedItem}
-                    cardPlaced={cardPlaced}
                     step={step}
-                    showFloatingCard={showFloatingCard}
                     positionRef={position4Ref}
                   />
                 ))}
               </div>
-
-              {showFloatingCard && (
-                <FloatingCard
-                  cardRef={floatingCardRef}
-                  cardPosition={cardPosition}
-                  isAnimating={isAnimating}
-                />
-              )}
             </div>
 
             <div className="z-20 h-20 flex items-center justify-center w-full">
-              {step === "almanac" && !isAnimating && (
-                <button
-                  onClick={handleCollect}
-                  className="bg-[#32c781] hover:bg-[#2ab871] text-white font-bold py-4 px-12 rounded-full shadow-lg text-lg flex items-center gap-2 transition-transform active:scale-95"
-                >
-                  Agregar al Almanaque <BookOpen size={20} />
-                </button>
-              )}
-
-              {isAnimating && (
-                <p className="text-[#32c781] animate-pulse font-mono">
-                  Procesando...
-                </p>
-              )}
-
-              {step === "ready-to-mint" && !showFloatingCard && (
-                <button
-                  onClick={handleMint}
-                  className="bg-gradient-to-r from-[#32c781] to-[#1983DD] text-white font-bold py-4 px-12 rounded-xl shadow-xl text-lg flex items-center gap-2 ring-4 ring-[#32c781]/20 animate-[scaleIn_0.3s_ease-out]"
-                >
-                  <Sparkles size={20} /> Mintear Token NFT
-                </button>
-              )}
+              <button
+                onClick={handleMint}
+                className="bg-gradient-to-r from-[#32c781] to-[#1983DD] text-white font-bold py-4 px-12 rounded-xl shadow-xl text-lg flex items-center gap-2 ring-4 ring-[#32c781]/20 animate-[scaleIn_0.3s_ease-out]"
+              >
+                <Sparkles size={20} /> Mintear Token NFT
+              </button>
             </div>
           </div>
         )}
 
-        {(step === "minting" || step === "revealed") && (
+        {(showInitialAnimation || step === "revealed") && (
           <div className="space-y-6 flex flex-col items-center relative">
             <FloatingParticles />
 
             {showInitialAnimation && <MintingAnimation />}
-            {step === "minting" && !showInitialAnimation && <MintingLoader />}
 
             {step === "revealed" && (
               <NFTCard
@@ -212,18 +139,11 @@ export default function TutorialNFTMinting({
                   animation: "fadeInUp 0.4s ease-out 0.8s forwards"
                 }}
               >
-                <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
-                  <p className="text-green-300 text-sm">
-                    🎉 <strong>¡Felicitaciones!</strong> Has completado el
-                    tutorial de minteo de NFT. Ahora sabes cómo convertir tus
-                    logros en certificados digitales permanentes.
-                  </p>
-                </div>
                 <button
                   className="w-full bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors"
                   onClick={onClose}
                 >
-                  Finalizar Tutorial
+                  Empezar
                 </button>
               </div>
             )}
