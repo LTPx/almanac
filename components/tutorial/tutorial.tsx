@@ -50,6 +50,15 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
 
   const showTooltip = !step?.hideTooltip;
 
+  const isFinalUnitStep = step?.id === "final-unit";
+
+  const getNextButtonText = () => {
+    if (isFinalUnitStep) {
+      return "Obtener token";
+    }
+    return currentStep === steps.length - 1 ? "¡Empezar!" : "Siguiente";
+  };
+
   useEffect(() => {
     const updateContainerBounds = () => {
       const mainContainer = document.querySelector("main")?.parentElement;
@@ -744,9 +753,7 @@ export const TutorialSpotlight: React.FC<TutorialSpotlightProps> = ({
                     disabled={isTransitioning}
                     className="px-5 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 text-sm font-medium disabled:opacity-50 shadow-md hover:shadow-lg"
                   >
-                    {currentStep === steps.length - 1
-                      ? "¡Empezar!"
-                      : "Siguiente"}
+                    {getNextButtonText()}
                   </motion.button>
                 </div>
 
