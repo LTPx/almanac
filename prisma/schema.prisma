@@ -24,6 +24,7 @@ model User {
   // Educational relationships
   userCurriculumProgress UserCurriculumProgress[]
   testAttempts           TestAttempt[]
+  finalTestAttempts      FinalTestAttempt[]
   streaks                UserStreak[]
   userUnitProgress       UserUnitProgress[]
 
@@ -130,6 +131,9 @@ model Curriculum {
 
   educationalNFTs EducationalNFT[]
 
+  // Final Test
+  finalTest FinalTest?
+
   // Ads
   ads Ad[]
 }
@@ -223,10 +227,12 @@ model Question {
   updatedAt DateTime     @updatedAt
   content   Json
 
-  answers        Answer[]
-  testAnswers    TestAnswer[]
-  citations      Citation[]
-  problemReports ProblemReport[]
+  answers            Answer[]
+  testAnswers        TestAnswer[]
+  citations          Citation[]
+  problemReports     ProblemReport[]
+  finalTestQuestions FinalTestQuestion[]
+  finalTestAnswers   FinalTestAnswer[]
 
   @@map("question")
 }
@@ -309,6 +315,73 @@ model TestAnswer {
   @@map("test_answer")
 }
 
+model FinalTest {
+  id             Int        @id @default(autoincrement())
+  curriculum     Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  curriculumId   String     @unique // Un test final por curriculum
+  title          String?
+  description    String?
+  passingScore   Float      @default(70) // Porcentaje mínimo para aprobar
+  totalQuestions Int        @default(10) // Número de preguntas en el test
+  isActive       Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  // Relaciones
+  questions FinalTestQuestion[]
+  attempts  FinalTestAttempt[]
+
+  @@map("final_test")
+}
+
+model FinalTestQuestion {
+  id          Int       @id @default(autoincrement())
+  finalTest   FinalTest @relation(fields: [finalTestId], references: [id], onDelete: Cascade)
+  finalTestId Int
+  question    Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId  Int
+  order       Int // Orden de la pregunta en el test final
+  createdAt   DateTime  @default(now())
+
+  @@unique([finalTestId, questionId]) // Una pregunta solo puede estar una vez en el test
+  @@map("final_test_question")
+}
+
+model FinalTestAttempt {
+  id             Int               @id @default(autoincrement())
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  finalTest      FinalTest         @relation(fields: [finalTestId], references: [id], onDelete: Cascade)
+  finalTestId    Int
+  score          Float
+  totalQuestions Int
+  correctAnswers Int
+  isPassed       Boolean           @default(false) // Si aprobó el test final
+  isCompleted    Boolean           @default(false)
+  startedAt      DateTime          @default(now())
+  completedAt    DateTime?
+  questionOrder  Json? // Orden aleatorio de preguntas si aplica
+  answers        FinalTestAnswer[]
+
+  heartTransactions HeartTransaction[]
+
+  @@map("final_test_attempt")
+}
+
+model FinalTestAnswer {
+  id                 Int              @id @default(autoincrement())
+  finalTestAttempt   FinalTestAttempt @relation(fields: [finalTestAttemptId], references: [id], onDelete: Cascade)
+  finalTestAttemptId Int
+  question           Question         @relation(fields: [questionId], references: [id])
+  questionId         Int
+  userAnswer         String // Respuesta del usuario
+  isCorrect          Boolean
+  timeSpent          Int? // Tiempo en segundos
+  createdAt          DateTime         @default(now())
+
+  @@map("final_test_answer")
+}
+
 model ProblemReport {
   id          Int                 @id @default(autoincrement())
   question    Question            @relation(fields: [questionId], references: [id], onDelete: Cascade)
@@ -353,15 +426,17 @@ model UserCurriculumToken {
 }
 
 model HeartTransaction {
-  id                   Int                  @id @default(autoincrement())
-  user                 User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId               String
-  type                 HeartTransactionType
-  amount               Int // Amount + or -
-  reason               String?
-  relatedTestAttemptId Int?
-  relatedTestAttempt   TestAttempt?         @relation(fields: [relatedTestAttemptId], references: [id])
-  createdAt            DateTime             @default(now())
+  id                        Int                  @id @default(autoincrement())
+  user                      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                    String
+  type                      HeartTransactionType
+  amount                    Int // Amount + or -
+  reason                    String?
+  relatedTestAttemptId      Int?
+  relatedTestAttempt        TestAttempt?         @relation(fields: [relatedTestAttemptId], references: [id])
+  relatedFinalTestAttemptId Int?
+  relatedFinalTestAttempt   FinalTestAttempt?    @relation(fields: [relatedFinalTestAttemptId], references: [id])
+  createdAt                 DateTime             @default(now())
 
   @@map("heart_transaction")
 }
@@ -675,7 +750,7 @@ model TutorConfig {
   id                 String   @id @default("default") // Solo una fila
   routerInstructions String
   tutorInstructions  String
-  masterCatalog      Json     // Array de los 11 tracks del Master Catalog
+  masterCatalog      Json // Array de los 11 tracks del Master Catalog
   routerModel        String   @default("gemini-2.0-flash") // Modelo para el router
   routerTemperature  Float    @default(0.1) // Temperatura del router (0.0-1.0)
   updatedAt          DateTime @updatedAt
