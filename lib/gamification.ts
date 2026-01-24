@@ -121,9 +121,13 @@ export async function reduceHeartsForFailedTest(
   if (!user) throw new Error("User not found");
   if (user.hearts <= 0) throw new Error("No hay corazones disponibles");
 
+  // Actualizar corazones y reiniciar el contador de regeneración
   await prisma.user.update({
     where: { id: userId },
-    data: { hearts: { decrement: 1 } }
+    data: {
+      hearts: { decrement: 1 },
+      lastHeartReset: new Date()
+    }
   });
 
   // Registrar transacción
