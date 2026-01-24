@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import stripe from "@/lib/stripe";
 
-const SUBSCRIPTION_ID = process.env.STRIPE_PRICE_ID_SUBSCRIPTION!;
+const SUBSCRIPTION_TRIAL_ID = process.env.STRIPE_PRICE_ID_TRIAL_SUBSCRIPTION!;
+const SUBSCRIPTION_PREMIUM_ID =
+  process.env.STRIPE_PRICE_ID_PREMIUM_SUBSCRIPTION!;
 
 export async function POST(req: Request) {
   try {
@@ -44,9 +46,17 @@ export async function POST(req: Request) {
       }
     }
 
-    // Calcular días restantes del trial interno (si aplica)
+    // Determinar si el usuario ya usó el trial
+    const hasUsedTrial =
+      user.subscriptionTrialEnd !== null ||
+      ["CANCELED", "EXPIRED", "PAST_DUE", "UNPAID", "PAUSED"].includes(
+        user.subscriptionStatus
+      );
+
+    // Calcular días restantes del trial interno (si aplica y no ha usado trial)
     let trialDays: number | undefined;
     if (
+      !hasUsedTrial &&
       user.subscriptionStatus === "TRIALING" &&
       user.subscriptionTrialEnd
     ) {
@@ -57,9 +67,16 @@ export async function POST(req: Request) {
       trialDays = remainingDays > 0 ? remainingDays : undefined;
     }
 
+    // Usar precio premium si ya usó trial, sino usar trial
+    const priceId = hasUsedTrial
+      ? SUBSCRIPTION_PREMIUM_ID
+      : SUBSCRIPTION_TRIAL_ID;
+
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
     const testParam = testAttemptId ? `&testAttemptId=${testAttemptId}` : "";
-    const cancelTestParam = testAttemptId ? `?testAttemptId=${testAttemptId}` : "";
+    const cancelTestParam = testAttemptId
+      ? `?testAttemptId=${testAttemptId}`
+      : "";
 
     // Crear sesión de checkout
     const session = await stripe.checkout.sessions.create({
@@ -68,13 +85,13 @@ export async function POST(req: Request) {
       customer_email: !customerId ? user.email : undefined,
       line_items: [
         {
-          price: SUBSCRIPTION_ID,
+          price: priceId,
           quantity: 1
         }
       ],
       subscription_data: {
-        // Usar días restantes del trial interno, o undefined si ya expiró
-        trial_period_days: trialDays,
+        // Solo incluir trial si no ha usado trial antes
+        ...(hasUsedTrial ? {} : { trial_period_days: trialDays }),
         metadata: {
           userId: userId
         }
