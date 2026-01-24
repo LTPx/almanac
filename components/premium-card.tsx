@@ -127,6 +127,13 @@ export default function PremiumCard({
   const isInternalTrial =
     subscription?.isTrialing && !subscription?.subscription?.platform;
 
+  // Detectar si ya usó el trial
+  const hasUsedTrial =
+    subscription?.subscriptionTrialEnd !== null ||
+    ["CANCELED", "EXPIRED", "PAST_DUE", "UNPAID", "PAUSED"].includes(
+      subscription?.subscriptionStatus || ""
+    );
+
   // Si tiene suscripción premium (activa o en trial)
   if (subscription?.isPremium) {
     // Trial interno: mostrar CTA para suscribirse
@@ -371,12 +378,16 @@ export default function PremiumCard({
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Procesando...
                   </>
+                ) : hasUsedTrial ? (
+                  "ACTIVA PREMIUM"
                 ) : (
                   "PRUEBA 1 SEMANA GRATIS"
                 )}
               </Button>
               <p className="text-xs text-white/80">
-                Luego $1/mes. Cancela cuando quieras.
+                {hasUsedTrial
+                  ? "7,99€/mes. Cancela cuando quieras."
+                  : "Luego $1/mes. Cancela cuando quieras."}
               </p>
             </div>
           </div>
