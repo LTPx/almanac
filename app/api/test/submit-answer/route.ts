@@ -149,14 +149,26 @@ export async function POST(request: NextRequest) {
     });
     // }
 
+    let hearts: number;
+
     if (!isCorrect) {
-      await reduceHeartsForFailedTest(testAttempt.userId, testAttemptId);
+      hearts = await reduceHeartsForFailedTest(
+        testAttempt.userId,
+        testAttemptId
+      );
+    } else {
+      const user = await prisma.user.findUnique({
+        where: { id: testAttempt.userId },
+        select: { hearts: true }
+      });
+      hearts = user?.hearts ?? 0;
     }
 
     return NextResponse.json({
       success: true,
       isCorrect,
-      answerId: testAnswer.id
+      answerId: testAnswer.id,
+      hearts
     });
   } catch (error) {
     console.error("Error al enviar respuesta:", error);
