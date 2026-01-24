@@ -193,27 +193,6 @@ export default function PremiumCard({
                 </div>
               </div>
             </div>
-
-            {/* CTA para suscribirse */}
-            <div className="space-y-2">
-              <Button
-                onClick={handleSubscribe}
-                disabled={isLoading}
-                className="w-full bg-white text-cyan-700 hover:bg-white/90 font-semibold"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Procesando...
-                  </>
-                ) : (
-                  "SUSCRIBIRTE PARA CONTINUAR"
-                )}
-              </Button>
-              <p className="text-xs text-white/80 text-center">
-                $1/mes despues de tu prueba. Cancela cuando quieras.
-              </p>
-            </div>
           </CardContent>
         </Card>
       );
