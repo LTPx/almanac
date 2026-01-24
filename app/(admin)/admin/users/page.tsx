@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,106 +13,20 @@ import {
 } from "@/components/ui/table";
 import { Search, Coins, Zap, Eye, Heart, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
-interface UserResult {
-  id: string;
-  name: string;
-  email: string;
-  walletAddress: string | null;
-  zapTokens: number;
-  hearts: number;
-  totalExperiencePoints: number;
-  totalCurriculumsCompleted: number;
-  createdAt: string;
-  userCurriculumTokens: {
-    id: string;
-    curriculumId: string;
-    quantity: number;
-    curriculum: {
-      id: string;
-      title: string;
-    };
-  }[];
-}
+import { useAdminUsers } from "@/hooks/useAdminUsers";
+import { subscriptionStatusConfig } from "@/lib/subscription-status";
 
 export default function UsersPage() {
   const router = useRouter();
-  const [searchEmail, setSearchEmail] = useState("");
-  const [users, setUsers] = useState<UserResult[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  // Estados de paginación
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalUsers, setTotalUsers] = useState(0);
-  const limit = 20;
-
-  // Cargar usuarios al montar el componente
-  useEffect(() => {
-    loadAllUsers(1);
-  }, []);
-
-  const loadAllUsers = async (page: number = 1) => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `/api/admin/users/search?page=${page}&limit=${limit}`
-      );
-      const data = await response.json();
-
-      if (response.ok) {
-        setUsers(data.users);
-        setCurrentPage(data.pagination.page);
-        setTotalPages(data.pagination.totalPages);
-        setTotalUsers(data.pagination.total);
-      } else {
-        console.error("Error loading users:", data.error);
-      }
-    } catch (error) {
-      console.error("Error loading users:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearch = async (page: number = 1) => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString()
-      });
-
-      if (searchEmail) {
-        params.append("email", searchEmail);
-      }
-
-      const response = await fetch(`/api/admin/users/search?${params}`);
-      const data = await response.json();
-
-      if (response.ok) {
-        setUsers(data.users);
-        setCurrentPage(data.pagination.page);
-        setTotalPages(data.pagination.totalPages);
-        setTotalUsers(data.pagination.total);
-      } else {
-        alert(data.error || "Error al buscar usuarios");
-      }
-    } catch (error) {
-      console.error("Error searching users:", error);
-      alert("Error al buscar usuarios");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleViewUser = (userId: string) => {
-    router.push(`/admin/users/${userId}/manage`);
-  };
-
-  const handleViewTutorStats = (userId: string) => {
-    router.push(`/admin/users/${userId}/tutor`);
-  };
+  const {
+    users,
+    loading,
+    pagination,
+    searchEmail,
+    setSearchEmail,
+    search,
+    goToPage
+  } = useAdminUsers();
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-7xl space-y-6">
@@ -131,11 +44,11 @@ export default function UsersPage() {
             placeholder="Buscar por email..."
             value={searchEmail}
             onChange={(e) => setSearchEmail(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch(1)}
+            onKeyDown={(e) => e.key === "Enter" && search(1)}
             className="w-64"
           />
           <Button
-            onClick={() => handleSearch(1)}
+            onClick={() => search(1)}
             disabled={loading}
             className="gap-2"
           >
@@ -152,6 +65,7 @@ export default function UsersPage() {
             <TableRow>
               <TableHead>Nombre</TableHead>
               <TableHead>Email</TableHead>
+              <TableHead className="text-center">Subscription</TableHead>
               <TableHead className="text-center">ZAPs</TableHead>
               <TableHead className="text-center">Hearts</TableHead>
               <TableHead className="text-center">Tokens</TableHead>
@@ -164,13 +78,13 @@ export default function UsersPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8">
+                <TableCell colSpan={10} className="text-center py-8">
                   Cargando...
                 </TableCell>
               </TableRow>
             ) : users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8">
+                <TableCell colSpan={10} className="text-center py-8">
                   <div className="flex flex-col items-center gap-2">
                     <Search className="w-8 h-8 text-muted-foreground" />
                     <p className="text-muted-foreground">
@@ -185,6 +99,16 @@ export default function UsersPage() {
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {user.email}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge
+                      variant={
+                        subscriptionStatusConfig[user.subscriptionStatus]
+                          .variant
+                      }
+                    >
+                      {subscriptionStatusConfig[user.subscriptionStatus].label}
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant="secondary" className="gap-1">
@@ -218,7 +142,9 @@ export default function UsersPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleViewUser(user.id)}
+                        onClick={() =>
+                          router.push(`/admin/users/${user.id}/manage`)
+                        }
                         className="gap-2"
                       >
                         <Eye className="w-4 h-4" />
@@ -227,7 +153,9 @@ export default function UsersPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleViewTutorStats(user.id)}
+                        onClick={() =>
+                          router.push(`/admin/users/${user.id}/tutor`)
+                        }
                         className="gap-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
                         title="Ver estadísticas del Almanac Tutor"
                       >
@@ -244,42 +172,28 @@ export default function UsersPage() {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">
           <p className="text-sm text-muted-foreground">
-            Mostrando {users.length} de {totalUsers} usuarios
+            Mostrando {users.length} de {pagination.total} usuarios
           </p>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                const newPage = currentPage - 1;
-                if (searchEmail) {
-                  handleSearch(newPage);
-                } else {
-                  loadAllUsers(newPage);
-                }
-              }}
-              disabled={currentPage === 1 || loading}
+              onClick={() => goToPage(pagination.page - 1)}
+              disabled={pagination.page === 1 || loading}
             >
               Anterior
             </Button>
             <span className="text-sm">
-              Página {currentPage} de {totalPages}
+              Página {pagination.page} de {pagination.totalPages}
             </span>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                const newPage = currentPage + 1;
-                if (searchEmail) {
-                  handleSearch(newPage);
-                } else {
-                  loadAllUsers(newPage);
-                }
-              }}
-              disabled={currentPage === totalPages || loading}
+              onClick={() => goToPage(pagination.page + 1)}
+              disabled={pagination.page === pagination.totalPages || loading}
             >
               Siguiente
             </Button>

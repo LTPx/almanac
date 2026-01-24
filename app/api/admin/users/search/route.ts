@@ -49,6 +49,7 @@ export async function GET(request: NextRequest) {
           hearts: true,
           totalExperiencePoints: true,
           totalCurriculumsCompleted: true,
+          subscriptionStatus: true,
           createdAt: true,
           userCurriculumTokens: {
             include: {
