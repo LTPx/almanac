@@ -241,6 +241,14 @@ export default function CurriculumPage() {
                           Gestionar unidades
                         </Link>
                       </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href={`/admin/curriculums/${curriculum.id}/final-test`}
+                        >
+                          <BookOpen className="mr-2 h-4 w-4" />
+                          Test Final
+                        </Link>
+                      </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => toggleCurriculumStatus(curriculum.id)}
                       >
