@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 import {
   Table,
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,10 +35,7 @@ import {
   Edit,
   Trash2,
   BookOpen,
-  ToggleLeft,
-  ToggleRight,
   GraduationCap,
-  Search,
   Route
 } from "lucide-react";
 import { Curriculum } from "@/lib/types";
@@ -45,17 +44,17 @@ const difficultyConfig = {
   BEGINNER: {
     label: "Principiante",
     variant: "default" as const,
-    className: "bg-green-100 text-green-800"
+    className: "bg-green-500"
   },
   INTERMEDIATE: {
     label: "Intermedio",
     variant: "default" as const,
-    className: "bg-yellow-100 text-yellow-800"
+    className: "bg-yellow-500 text-yellow-800"
   },
   ADVANCED: {
     label: "Avanzado",
     variant: "default" as const,
-    className: "bg-red-100 text-red-800"
+    className: "bg-blue-500"
   }
 };
 
@@ -132,20 +131,27 @@ export function CurriculumsTable({
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge
-                        variant={curriculum.isActive ? "default" : "secondary"}
-                      >
-                        {curriculum.isActive ? "Activo" : "Inactivo"}
-                      </Badge>
+                      <Switch
+                        checked={curriculum.isActive}
+                        onCheckedChange={() => onToggleStatus(curriculum.id)}
+                      />
                     </TableCell>
                     <TableCell className="text-center text-muted-foreground">
                       {curriculum.audienceAgeRange || "-"}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge variant="outline" className="gap-1">
-                        <BookOpen className="w-3 h-3" />
-                        {curriculum.units?.length || 0}
-                      </Badge>
+                      <Link
+                        href={`/admin/curriculums/${curriculum.id}/units`}
+                        className="inline-flex"
+                      >
+                        <Badge
+                          variant="outline"
+                          className="gap-1 cursor-pointer hover:bg-accent"
+                        >
+                          <BookOpen className="w-3 h-3" />
+                          {curriculum.units?.length || 0}
+                        </Badge>
+                      </Link>
                     </TableCell>
                     <TableCell className="text-center text-sm text-muted-foreground">
                       {new Date(curriculum.updatedAt).toLocaleDateString()}
@@ -197,21 +203,6 @@ export function CurriculumsTable({
                           >
                             <GraduationCap className="mr-2 h-4 w-4" />
                             Test Final
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => onToggleStatus(curriculum.id)}
-                          >
-                            {curriculum.isActive ? (
-                              <>
-                                <ToggleLeft className="mr-2 h-4 w-4" />
-                                Desactivar
-                              </>
-                            ) : (
-                              <>
-                                <ToggleRight className="mr-2 h-4 w-4" />
-                                Activar
-                              </>
-                            )}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-red-600"
