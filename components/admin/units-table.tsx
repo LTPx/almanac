@@ -36,7 +36,6 @@ import {
   Edit,
   Trash2,
   BookOpen,
-  Eye,
   HelpCircle
 } from "lucide-react";
 import { Unit } from "@/lib/types";
@@ -102,7 +101,14 @@ export function UnitsTable({
             ) : (
               units.map((unit) => (
                 <TableRow key={unit.id}>
-                  <TableCell className="font-medium">{unit.name}</TableCell>
+                  <TableCell className="font-medium">
+                      <Link
+                        href={`/admin/units/${unit.id}/edit`}
+                        className="hover:underline"
+                      >
+                        {unit.name}
+                      </Link>
+                    </TableCell>
                   <TableCell className="text-muted-foreground">
                     {unit.curriculum?.title || "-"}
                   </TableCell>
@@ -151,12 +157,6 @@ export function UnitsTable({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => router.push(`/admin/units/${unit.id}`)}
-                        >
-                          <Eye className="mr-2 h-4 w-4" />
-                          Ver detalles
-                        </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() =>
                             router.push(`/admin/units/${unit.id}/edit`)
