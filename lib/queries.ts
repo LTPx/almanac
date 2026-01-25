@@ -120,8 +120,7 @@ export const getUserProgressByUnit = cache(
 // ============== UNIT QUERIES ==============
 
 export const getUnitsPagination = cache(
-  async (search: string, page = 1, pageSize = 15) => {
-    console.log("search: ", search);
+  async (search: string, page = 1, pageSize = 15, curriculumId?: string) => {
     const whereClause = {
       // isActive: true,
       ...(search
@@ -131,7 +130,8 @@ export const getUnitsPagination = cache(
               mode: "insensitive" // no distingue mayúsculas/minúsculas
             }
           }
-        : {})
+        : {}),
+      ...(curriculumId ? { curriculumId } : {})
     };
 
     const skip = (page - 1) * pageSize;
