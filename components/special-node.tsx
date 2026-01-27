@@ -11,7 +11,7 @@ type SpecialYellowNodeProps = {
 
 const SpecialYellowNode: React.FC<SpecialYellowNodeProps> = ({ hearts }) => {
   const handleClick = () => {
-    console.log("click");
+    console.log("click", hearts);
   };
 
   const nodeContent = (
