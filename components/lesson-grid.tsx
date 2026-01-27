@@ -10,6 +10,7 @@ import {
   useLessonStatesStore
 } from "@/hooks/use-lessonsStates";
 import { useScrollToAvailableNode } from "@/hooks/use-scroll-lesson";
+import SpecialYellowNode from "./special-node";
 
 interface LessonGridProps {
   units: Unit[];
@@ -151,7 +152,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
       state: getLessonState(node),
       position: node.position,
       mandatory: node.mandatory,
-      isFirstMandatory: node.id === firstLesson?.id && node.mandatory,
+      isFirstMandatory: false,
       isHighestPosition: highestPositionNode?.id === node.id,
       isOptionalHighest: highestOptionalNode?.id === node.id
     }));
@@ -191,9 +192,33 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     }
   };
 
+  const firstNodeCol = firstLesson ? getRowCol(firstLesson.position).col : 2;
+
   return (
     <>
       <div className="max-w-sm mx-auto lesson-grid">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-5 gap-3 lg:gap-6 mb-6 lg:mb-6"
+          data-row="special"
+        >
+          {Array.from({ length: 5 }, (_, col) => (
+            <motion.div
+              key={col}
+              variants={itemVariants}
+              className="flex justify-center"
+            >
+              {col === firstNodeCol ? (
+                <SpecialYellowNode hearts={hearts} />
+              ) : (
+                <div className="w-16 h-16"></div>
+              )}
+            </motion.div>
+          ))}
+        </motion.div>
+
         {pathLayout.map((rowData, rowIndex) => {
           return (
             <motion.div
@@ -237,9 +262,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                         mandatory={nodeData.mandatory}
                         hearts={hearts}
                         shouldFloat={shouldFloat}
-                        isFirstMandatory={
-                          nodeData.id === firstLesson?.id && nodeData.mandatory
-                        }
+                        isFirstMandatory={false}
                         isHighestPosition={isHighestPosition}
                         isOptionalHighest={isOptionalHighest}
                         onStartLesson={() => onStartUnit(nodeData)}

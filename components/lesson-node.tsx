@@ -42,16 +42,11 @@ const LessonNode: React.FC<LessonNodeProps> = ({
 
   const getBackgroundColor = () => {
     if (state === "completed") {
-      return mandatory && isFirstMandatory
-        ? "bg-[#F9F0B6] border-[#F9F0B6]"
-        : mandatory
-          ? "bg-[#5EC16A] border-[#5EC16A]"
-          : "bg-[#1983DD] border-[#1983DD]";
+      return mandatory
+        ? "bg-[#5EC16A] border-[#5EC16A]"
+        : "bg-[#1983DD] border-[#1983DD]";
     }
     if (state === "available") {
-      if (isFirstMandatory && mandatory) {
-        return "bg-transparent";
-      }
       return mandatory
         ? "bg-[#5EC16A] border-[#5EC16A]"
         : "bg-[#1983DD] border-[#1983DD]";
@@ -64,16 +59,6 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       openNoHeartsModal(name);
     } else {
       onStartLesson();
-    }
-  };
-
-  const getFirstMandatoryStyle = () => {
-    if (!isFirstMandatory) return "";
-
-    if (state === "completed") {
-      return "border-[#F9F0B6] border-solid";
-    } else {
-      return "border-[#F9F0B6] border-dashed";
     }
   };
 
@@ -106,14 +91,8 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       w-full h-full lg:h-16 flex items-center justify-center
       relative
       ${getBackgroundColor()}
-      ${
-        isFirstMandatory
-          ? getFirstMandatoryStyle()
-          : state === "locked"
-            ? `${color} border-dashed`
-            : "shadow-lg"
-      }
-      ${isFirstMandatory ? "rounded-t-[2rem] rounded-b-lg" : "rounded-2xl"}
+      ${state === "locked" ? `${color} border-dashed` : "shadow-lg"}
+      rounded-2xl
       border-2 ${state !== "locked" ? "cursor-pointer" : "cursor-not-allowed opacity-75"}
     `}
       data-highest-position-node={
@@ -121,7 +100,6 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       }
       data-highest-position-mandatory={isHighestPosition ? "true" : undefined}
       data-optional-node={isOptionalHighest ? "true" : undefined}
-      data-first-mandatory={isFirstMandatory ? "true" : undefined}
       data-available-node={state === "available" ? "true" : undefined}
     >
       <motion.div
@@ -171,11 +149,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       <StepPopover
         unitId={unitId}
         title={name}
-        message={
-          isFirstMandatory
-            ? "Completa la unidad final para obtener el token que te permitirá crear tu certificado."
-            : "¡Completa todos los niveles anteriores para habilitar este nivel!"
-        }
+        message="¡Completa todos los niveles anteriores para habilitar este nivel!"
         buttonText="CERRADA"
         onButtonClick={() => {}}
         isLocked={true}

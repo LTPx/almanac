@@ -27,6 +27,7 @@ interface StepPopoverProps {
   unitId?: number;
   isHighestPosition?: boolean;
   isOptionalHighest?: boolean;
+  isSpecialYellow?: boolean;
 }
 
 export function StepPopover({
@@ -43,7 +44,8 @@ export function StepPopover({
   mandatory = false,
   unitId,
   isHighestPosition = false,
-  isOptionalHighest = false
+  isOptionalHighest = false,
+  isSpecialYellow = false
 }: StepPopoverProps) {
   const router = useRouter();
   const [isHovered, setIsHovered] = React.useState(false);
@@ -88,6 +90,7 @@ export function StepPopover({
       }
     };
   }, [isHighestPosition, isOptionalHighest, isFirstMandatory, isOpen]);
+
   const startPulseAnimation = React.useCallback(async () => {
     while (loopsCompleted.current < 4 && !animationCancelled.current) {
       if (isHovered) break;
@@ -143,45 +146,41 @@ export function StepPopover({
 
   const getPopoverClass = () => {
     if (className) return className;
+    if (isSpecialYellow) return "bg-[#F9F0B6] text-gray-900 p-4";
     if (isLocked) return "bg-gray-700 text-white p-4";
     if (isCompleted) {
-      if (isFirstMandatory && mandatory)
-        return "bg-[#F9F0B6] text-gray-900 p-4";
       if (mandatory) return "bg-[#5EC16A] text-white p-4";
       return "bg-[#1983DD] text-white p-4";
     }
-    if (isFirstMandatory) return "bg-[#F9F0B6] text-gray-900 p-4";
     if (isOptional) return "bg-[#1983DD] text-white p-4";
     return "bg-[#1F941C] text-white p-4";
   };
 
   const getArrowClass = () => {
+    if (isSpecialYellow) return "fill-[#F9F0B6]";
     if (isLocked) return "fill-gray-700";
     if (isCompleted) {
-      if (isFirstMandatory && mandatory) return "fill-[#F9F0B6]";
       if (mandatory) return "fill-[#5EC16A]";
       return "fill-[#1983DD]";
     }
-    if (isFirstMandatory) return "fill-[#F9F0B6]";
     if (isOptional) return "fill-[#1983DD]";
     return "fill-[#1F941C]";
   };
 
   const getButtonTextColor = () => {
+    if (isSpecialYellow) return "text-gray-900";
     if (isLocked) return "text-gray-400";
     if (isCompleted) {
-      if (isFirstMandatory && mandatory) return "text-gray-900";
       if (mandatory) return "text-[#5EC16A]";
       return "text-[#1983DD]";
     }
-    if (isFirstMandatory) return "text-gray-900";
     if (isOptional) return "text-[#1983DD]";
     return "text-[#1F941C]";
   };
 
   const getIconColor = () => {
+    if (isSpecialYellow) return "text-gray-900 opacity-90";
     if (isCompleted && !mandatory) return "text-white opacity-90";
-    if (isFirstMandatory) return "text-gray-900 opacity-90";
     return "text-white opacity-90";
   };
 
@@ -192,7 +191,9 @@ export function StepPopover({
   const handleBookClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    router.push(`/contents?unit=${unitId}`);
+    if (unitId && unitId !== -1) {
+      router.push(`/contents?unit=${unitId}`);
+    }
   };
 
   const handleOpenChange = (open: boolean) => {
@@ -227,22 +228,24 @@ export function StepPopover({
                 ease: [0.4, 0, 0.2, 1]
               }}
             >
-              <motion.button
-                onClick={handleBookClick}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                className="absolute top-4 right-4 cursor-pointer focus:outline-none group"
-                aria-label="Ver contenidos"
-                animate={controls}
-                initial={{ scale: 1, opacity: 1 }}
-                whileTap={{ scale: 0.9 }}
-                data-tutorial-book={isHighestPosition ? "true" : undefined}
-              >
-                <BookOpen
-                  className={`w-9 h-9 ${getIconColor()} group-hover:opacity-100 transition-opacity drop-shadow-sm`}
-                />
-              </motion.button>
-              <div className="pr-10">
+              {unitId && unitId !== -1 && (
+                <motion.button
+                  onClick={handleBookClick}
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
+                  className="absolute top-4 right-4 cursor-pointer focus:outline-none group"
+                  aria-label="Ver contenidos"
+                  animate={controls}
+                  initial={{ scale: 1, opacity: 1 }}
+                  whileTap={{ scale: 0.9 }}
+                  data-tutorial-book={isHighestPosition ? "true" : undefined}
+                >
+                  <BookOpen
+                    className={`w-9 h-9 ${getIconColor()} group-hover:opacity-100 transition-opacity drop-shadow-sm`}
+                  />
+                </motion.button>
+              )}
+              <div className={unitId && unitId !== -1 ? "pr-10" : ""}>
                 {title && <h3 className="font-bold text-lg">{title}</h3>}
                 {message && (
                   <p className="mt-2 line-clamp-4 text-sm">{message}</p>
