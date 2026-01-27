@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { LessonGrid } from "./lesson-grid";
 import { TestSystem } from "./test/TestSystem";
+import { FinalTestSystem } from "./test/FinalTestSystem";
 import { Curriculum, Unit } from "@/lib/types";
 import { useProgress } from "@/hooks/useProgress";
 
@@ -30,6 +31,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
   resumeTestAttemptId
 }) => {
   const [activeUnit, setActiveUnit] = useState<Unit | null>(null);
+  const [showFinalTest, setShowFinalTest] = useState(false);
   const [resumeTestId, setResumeTestId] = useState<number | undefined>(resumeTestAttemptId);
   const { progress, isLoading, refetch } = useProgress(userId, curriculum.id);
   const hasCheckedResume = useRef(false);
@@ -147,6 +149,30 @@ const LearningPath: React.FC<LearningPathProps> = ({
     }
   };
 
+  const handleCloseFinalTest = () => {
+    setShowFinalTest(false);
+    refetch();
+    if (onTestComplete) {
+      onTestComplete();
+    }
+  };
+
+  // Calcular el estado del test final
+  const getFinalTestState = (): "locked" | "available" | "completed" => {
+    // TODO: Verificar si el test final ya fue completado (desde progress)
+    const mandatoryUnits = assignedUnits.filter((u) => u.mandatory);
+    const allMandatoryCompleted = mandatoryUnits.every((u) =>
+      finalApprovedUnits.includes(u.id)
+    );
+
+    if (allMandatoryCompleted && mandatoryUnits.length > 0) {
+      return "available";
+    }
+    return "locked";
+  };
+
+  const finalTestState = getFinalTestState();
+
   if (activeUnit && hearts === 0) {
     setActiveUnit(null);
     return (
@@ -159,12 +185,29 @@ const LearningPath: React.FC<LearningPathProps> = ({
               units={assignedUnits}
               approvedUnits={finalApprovedUnits}
               onStartUnit={setActiveUnit}
+              onStartFinalTest={() => setShowFinalTest(true)}
               hearts={hearts}
               isTutorialMode={isTutorialMode}
               showOptionalAsAvailable={showOptionalAsAvailable}
               curriculumId={curriculum.id}
+              finalTestState={finalTestState}
             />
           )}
+        </div>
+      </div>
+    );
+  }
+
+  if (showFinalTest) {
+    return (
+      <div className="fixed inset-0 z-[100] flex justify-center items-start bg-black/50">
+        <div className="w-full max-w-[650px] bg-white shadow-xl overflow-hidden">
+          <FinalTestSystem
+            hearts={hearts || 0}
+            userId={userId}
+            curriculumId={curriculum.id}
+            onClose={handleCloseFinalTest}
+          />
         </div>
       </div>
     );
@@ -197,10 +240,12 @@ const LearningPath: React.FC<LearningPathProps> = ({
             units={assignedUnits}
             approvedUnits={finalApprovedUnits}
             onStartUnit={setActiveUnit}
+            onStartFinalTest={() => setShowFinalTest(true)}
             hearts={hearts}
             isTutorialMode={isTutorialMode}
             showOptionalAsAvailable={showOptionalAsAvailable}
             curriculumId={curriculum.id}
+            finalTestState={finalTestState}
           />
         )}
       </div>

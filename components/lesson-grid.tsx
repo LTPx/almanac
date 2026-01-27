@@ -17,9 +17,11 @@ interface LessonGridProps {
   approvedUnits: number[];
   hearts: number;
   onStartUnit: (unit: Unit) => void;
+  onStartFinalTest: () => void;
   isTutorialMode?: boolean;
   showOptionalAsAvailable?: boolean;
   curriculumId: string | number;
+  finalTestState: "locked" | "available" | "completed";
 }
 
 export const LessonGrid: React.FC<LessonGridProps> = ({
@@ -27,9 +29,11 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
   approvedUnits,
   hearts,
   onStartUnit,
+  onStartFinalTest,
   isTutorialMode = false,
   showOptionalAsAvailable = false,
-  curriculumId
+  curriculumId,
+  finalTestState
 }) => {
   const { setLessonStates } = useLessonStatesStore();
 
@@ -211,7 +215,11 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
               className="flex justify-center"
             >
               {col === firstNodeCol ? (
-                <SpecialYellowNode hearts={hearts} />
+                <SpecialYellowNode
+                  hearts={hearts}
+                  state={finalTestState}
+                  onStartFinalTest={onStartFinalTest}
+                />
               ) : (
                 <div className="w-16 h-16"></div>
               )}
