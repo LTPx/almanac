@@ -28,6 +28,7 @@ interface TestSystemProps {
   hearts: number;
   onHeartsChange?: (hearts: number) => void;
   resumeTestAttemptId?: number;
+  isReviewMode?: boolean;
 }
 
 type TestState =
@@ -45,7 +46,8 @@ export function TestSystem({
   onClose,
   hearts: initialHearts,
   onHeartsChange,
-  resumeTestAttemptId
+  resumeTestAttemptId,
+  isReviewMode
 }: TestSystemProps) {
   console.log("curriculumId ts: ", curriculumId);
   const [state, setState] = useState<TestState>("testing");
@@ -80,7 +82,7 @@ export function TestSystem({
     Set<number>
   >(new Set());
 
-  const { error, startTest, submitAnswer, completeTest, resumeTest } = useTest();
+  const { error, startTest, startReviewTest, submitAnswer, completeTest, resumeTest } = useTest();
   const hasInitialized = useRef(false);
   const modalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isCompletingTestRef = useRef(false);
@@ -201,12 +203,28 @@ export function TestSystem({
             setUniqueFailedQuestions(new Set(failed));
           }
         });
+      } else if (isReviewMode) {
+        startReviewTest(userId, curriculumId).then((testData) => {
+          if (testData) {
+            setCurrentTest(testData);
+            setCurrentQuestionIndex(0);
+            setAnswers({});
+            setQuestionStartTime(Date.now());
+            setState("testing");
+            setFirstPassQuestionCount(testData.questions.length);
+            setFailedQuestions([]);
+            setUniqueFailedQuestions(new Set());
+            setConsecutiveCorrect(0);
+            isCompletingTestRef.current = false;
+            hasCompletedRef.current = false;
+          }
+        });
       } else {
         handleStartTest(unitId);
       }
       hasInitialized.current = true;
     }
-  }, [handleStartTest, unitId, resumeTestAttemptId, resumeTest, userId]);
+  }, [handleStartTest, unitId, resumeTestAttemptId, resumeTest, userId, isReviewMode, startReviewTest, curriculumId]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {

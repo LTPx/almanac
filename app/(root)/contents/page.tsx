@@ -40,6 +40,7 @@ function Contents() {
   const [activeTest, setActiveTest] = useState<{
     unitId: number;
     unitName: string;
+    isReview?: boolean;
   } | null>(null);
   const hasScrolledRef = useRef(false);
 
@@ -213,6 +214,7 @@ function Contents() {
             unitId={activeTest.unitId}
             curriculumId={selectedCurriculumId}
             onClose={handleCloseTest}
+            isReviewMode={activeTest.isReview}
           />
         </div>
       </div>
@@ -279,7 +281,17 @@ function Contents() {
               Repasa tus errores recientes
             </h3>
 
-            <button className="w-full bg-white text-neutral-900 font-bold text-base py-4 rounded-xl hover:bg-gray-100 transition-colors">
+            <button
+              onClick={() =>
+                setActiveTest({ unitId: 0, unitName: "Repaso", isReview: true })
+              }
+              disabled={!stats?.totalAnswerErrors}
+              className={`w-full font-bold text-base py-4 rounded-xl transition-colors ${
+                stats?.totalAnswerErrors
+                  ? "bg-white text-neutral-900 hover:bg-gray-100"
+                  : "bg-neutral-700 text-gray-400 cursor-not-allowed"
+              }`}
+            >
               EMPEZAR MI REPASO
             </button>
             <div className="absolute -top-2 right-0 w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">

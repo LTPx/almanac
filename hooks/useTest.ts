@@ -117,10 +117,42 @@ export function useTest() {
     }
   };
 
+  const startReviewTest = async (
+    userId: string,
+    curriculumId: string
+  ): Promise<TestData | null> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/test/start-review", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ userId, curriculumId })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al iniciar el repaso");
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error desconocido");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     isLoading,
     error,
     startTest,
+    startReviewTest,
     submitAnswer,
     completeTest,
     resumeTest
