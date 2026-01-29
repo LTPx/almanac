@@ -17,6 +17,8 @@ type LearningPathProps = {
   showAllCompletedExceptFirst?: boolean;
   isTutorialMode?: boolean;
   resumeTestAttemptId?: number;
+  simulateOptionalNode?: boolean;
+  forcedOptionalNodeId?: number;
 };
 
 const LearningPath: React.FC<LearningPathProps> = ({
@@ -28,7 +30,9 @@ const LearningPath: React.FC<LearningPathProps> = ({
   showOptionalAsAvailable = false,
   showAllCompletedExceptFirst = false,
   isTutorialMode = false,
-  resumeTestAttemptId
+  resumeTestAttemptId,
+  simulateOptionalNode = false,
+  forcedOptionalNodeId = undefined
 }) => {
   const [activeUnit, setActiveUnit] = useState<Unit | null>(null);
   const [showFinalTest, setShowFinalTest] = useState(false);
@@ -38,7 +42,6 @@ const LearningPath: React.FC<LearningPathProps> = ({
   const { progress, isLoading, refetch } = useProgress(userId, curriculum.id);
   const hasCheckedResume = useRef(false);
 
-  // Cuando hay resumeTestAttemptId, obtener el unitId del test y activar esa unidad
   useEffect(() => {
     console.log(
       "🔄 Resume effect - resumeTestAttemptId:",
@@ -102,17 +105,6 @@ const LearningPath: React.FC<LearningPathProps> = ({
     !showAllCompletedExceptFirst;
 
   if (isInitialTutorialState) {
-    const mandatoryUnits = assignedUnits.filter((u) => u.mandatory);
-    const firstLesson =
-      mandatoryUnits.length > 0
-        ? mandatoryUnits.reduce((max, u) =>
-            u.position > max.position ? u : max
-          )
-        : assignedUnits.length > 0
-          ? assignedUnits.reduce((max, u) =>
-              u.position > max.position ? u : max
-            )
-          : null;
     finalApprovedUnits = [];
   } else if (showAsCompleted) {
     const mandatoryUnits = assignedUnits.filter((u) => u.mandatory);
@@ -131,51 +123,66 @@ const LearningPath: React.FC<LearningPathProps> = ({
       finalApprovedUnits = [highestPositionUnit.id];
     }
   } else if (showOptionalAsAvailable) {
-    const optionalNodes = assignedUnits.filter((u) => !u.mandatory);
-    const highestOptionalNode =
-      optionalNodes.length > 0
-        ? optionalNodes.reduce((max, node) =>
-            node.position > max.position ? node : max
-          )
-        : null;
+    if (simulateOptionalNode && forcedOptionalNodeId) {
+      const simulatedNode = assignedUnits.find(
+        (u) => u.id === forcedOptionalNodeId
+      );
 
-    if (highestOptionalNode) {
-      const optionalRow = Math.floor(highestOptionalNode.position / 5);
-      const optionalCol = highestOptionalNode.position % 5;
+      if (simulatedNode) {
+        const optionalRow = Math.floor(simulatedNode.position / 5);
+        const optionalCol = simulatedNode.position % 5;
 
-      const adjacentToApprove: number[] = [];
+        const adjacentToApprove: number[] = [];
 
-      assignedUnits.forEach((unit) => {
-        const unitRow = Math.floor(unit.position / 5);
-        const unitCol = unit.position % 5;
+        assignedUnits.forEach((unit) => {
+          const unitRow = Math.floor(unit.position / 5);
+          const unitCol = unit.position % 5;
 
-        const rowDiff = Math.abs(unitRow - optionalRow);
-        const colDiff = Math.abs(unitCol - optionalCol);
+          const rowDiff = Math.abs(unitRow - optionalRow);
+          const colDiff = Math.abs(unitCol - optionalCol);
 
-        if (
-          (rowDiff === 0 && colDiff === 1) ||
-          (rowDiff === 1 && colDiff === 0)
-        ) {
-          adjacentToApprove.push(unit.id);
-        }
-      });
+          if (
+            (rowDiff === 0 && colDiff === 1) ||
+            (rowDiff === 1 && colDiff === 0)
+          ) {
+            adjacentToApprove.push(unit.id);
+          }
+        });
 
-      finalApprovedUnits = adjacentToApprove;
-    }
-  } else if (showAllCompletedExceptFirst) {
-    const firstLesson =
-      assignedUnits.length > 0
-        ? assignedUnits.reduce((min, unit) =>
-            unit.position < min.position ? unit : min
-          )
-        : null;
+        finalApprovedUnits = adjacentToApprove;
+      }
+    } else {
+      const optionalNodes = assignedUnits.filter((u) => !u.mandatory);
+      const highestOptionalNode =
+        optionalNodes.length > 0
+          ? optionalNodes.reduce((max, node) =>
+              node.position > max.position ? node : max
+            )
+          : null;
 
-    if (firstLesson) {
-      const allExceptFirst = assignedUnits
-        .filter((unit) => unit.id !== firstLesson.id)
-        .map((unit) => unit.id);
+      if (highestOptionalNode) {
+        const optionalRow = Math.floor(highestOptionalNode.position / 5);
+        const optionalCol = highestOptionalNode.position % 5;
 
-      finalApprovedUnits = allExceptFirst;
+        const adjacentToApprove: number[] = [];
+
+        assignedUnits.forEach((unit) => {
+          const unitRow = Math.floor(unit.position / 5);
+          const unitCol = unit.position % 5;
+
+          const rowDiff = Math.abs(unitRow - optionalRow);
+          const colDiff = Math.abs(unitCol - optionalCol);
+
+          if (
+            (rowDiff === 0 && colDiff === 1) ||
+            (rowDiff === 1 && colDiff === 0)
+          ) {
+            adjacentToApprove.push(unit.id);
+          }
+        });
+
+        finalApprovedUnits = adjacentToApprove;
+      }
     }
   }
 
@@ -228,6 +235,8 @@ const LearningPath: React.FC<LearningPathProps> = ({
               showOptionalAsAvailable={showOptionalAsAvailable}
               curriculumId={curriculum.id}
               finalTestState={finalTestState}
+              simulateOptionalNode={simulateOptionalNode}
+              forcedOptionalNodeId={forcedOptionalNodeId}
             />
           )}
         </div>
@@ -283,6 +292,8 @@ const LearningPath: React.FC<LearningPathProps> = ({
             showOptionalAsAvailable={showOptionalAsAvailable}
             curriculumId={curriculum.id}
             finalTestState={finalTestState}
+            simulateOptionalNode={simulateOptionalNode}
+            forcedOptionalNodeId={forcedOptionalNodeId}
           />
         )}
       </div>

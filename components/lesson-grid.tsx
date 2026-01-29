@@ -22,6 +22,8 @@ interface LessonGridProps {
   showOptionalAsAvailable?: boolean;
   curriculumId: string | number;
   finalTestState: "locked" | "available" | "completed";
+  simulateOptionalNode?: boolean;
+  forcedOptionalNodeId?: number;
 }
 
 export const LessonGrid: React.FC<LessonGridProps> = ({
@@ -33,7 +35,9 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
   isTutorialMode = false,
   showOptionalAsAvailable = false,
   curriculumId,
-  finalTestState
+  finalTestState,
+  simulateOptionalNode = false,
+  forcedOptionalNodeId = undefined
 }) => {
   const { setLessonStates } = useLessonStatesStore();
 
@@ -122,16 +126,21 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
       : null;
 
   const optionalNodes = units.filter((u) => !u.mandatory);
-  const highestOptionalNode =
-    optionalNodes.length > 0
-      ? optionalNodes.reduce((max, node) =>
-          node.position > max.position ? node : max
-        )
-      : null;
+  let highestOptionalNode: Unit | null = null;
+
+  if (simulateOptionalNode && forcedOptionalNodeId) {
+    highestOptionalNode =
+      units.find((u) => u.id === forcedOptionalNodeId) || null;
+  } else if (optionalNodes.length > 0) {
+    highestOptionalNode = optionalNodes.reduce((max, node) =>
+      node.position > max.position ? node : max
+    );
+  }
 
   const getLessonState = (unit: Node): "completed" | "available" | "locked" => {
     if (isTutorialMode) {
       if (approvedUnits.includes(unit.id)) return "completed";
+
       if (approvedUnits.length === 0 && !showOptionalAsAvailable) {
         const mandatoryUnits = units.filter((u) => u.mandatory);
         const firstLesson =
@@ -140,6 +149,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                 u.position > max.position ? u : max
               )
             : units.reduce((max, u) => (u.position > max.position ? u : max));
+
         if (unit.id === firstLesson.id) return "available";
       }
 
@@ -249,15 +259,19 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
             >
               {Array.from({ length: 5 }, (_, col) => {
                 const nodeData = rowData.nodes.find((n) => n.col === col);
-
                 const isHighestPosition =
                   nodeData && highestPositionNode && nodeData.mandatory
                     ? nodeData.id === highestPositionNode.id
                     : false;
                 const isOptionalHighest =
-                  nodeData && highestOptionalNode && !nodeData.mandatory
+                  nodeData && highestOptionalNode
                     ? nodeData.id === highestOptionalNode.id
                     : false;
+                const displayAsMandatory = nodeData
+                  ? simulateOptionalNode && nodeData.id === forcedOptionalNodeId
+                    ? false
+                    : nodeData.mandatory
+                  : false;
                 const lessonState = nodeData
                   ? getLessonState(nodeData)
                   : "locked";
@@ -276,8 +290,8 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                         name={nodeData.name}
                         description={nodeData.description}
                         state={lessonState}
-                        color={getLockedColor(nodeData.mandatory)}
-                        mandatory={nodeData.mandatory}
+                        color={getLockedColor(displayAsMandatory)}
+                        mandatory={displayAsMandatory}
                         hearts={hearts}
                         shouldFloat={shouldFloat}
                         isFirstMandatory={false}
