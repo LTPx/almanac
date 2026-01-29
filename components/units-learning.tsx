@@ -32,23 +32,44 @@ const LearningPath: React.FC<LearningPathProps> = ({
 }) => {
   const [activeUnit, setActiveUnit] = useState<Unit | null>(null);
   const [showFinalTest, setShowFinalTest] = useState(false);
-  const [resumeTestId, setResumeTestId] = useState<number | undefined>(resumeTestAttemptId);
+  const [resumeTestId, setResumeTestId] = useState<number | undefined>(
+    resumeTestAttemptId
+  );
   const { progress, isLoading, refetch } = useProgress(userId, curriculum.id);
   const hasCheckedResume = useRef(false);
 
   // Cuando hay resumeTestAttemptId, obtener el unitId del test y activar esa unidad
   useEffect(() => {
-    console.log("🔄 Resume effect - resumeTestAttemptId:", resumeTestAttemptId, "hasChecked:", hasCheckedResume.current, "isLoading:", isLoading);
+    console.log(
+      "🔄 Resume effect - resumeTestAttemptId:",
+      resumeTestAttemptId,
+      "hasChecked:",
+      hasCheckedResume.current,
+      "isLoading:",
+      isLoading
+    );
     if (resumeTestAttemptId && !hasCheckedResume.current && !isLoading) {
       hasCheckedResume.current = true;
-      console.log("📡 Fetching resume data for testAttemptId:", resumeTestAttemptId);
-      fetch(`/api/test/resume?testAttemptId=${resumeTestAttemptId}&userId=${userId}`)
+      console.log(
+        "📡 Fetching resume data for testAttemptId:",
+        resumeTestAttemptId
+      );
+      fetch(
+        `/api/test/resume?testAttemptId=${resumeTestAttemptId}&userId=${userId}`
+      )
         .then((res) => res.json())
         .then((data) => {
           console.log("📥 Resume API response:", data);
           if (data.lesson?.id) {
-            console.log("🔍 Looking for unit with id:", data.lesson.id, "in units:", curriculum.units?.map(u => u.id));
-            const unitToResume = curriculum.units?.find((u) => u.id === data.lesson.id);
+            console.log(
+              "🔍 Looking for unit with id:",
+              data.lesson.id,
+              "in units:",
+              curriculum.units?.map((u) => u.id)
+            );
+            const unitToResume = curriculum.units?.find(
+              (u) => u.id === data.lesson.id
+            );
             if (unitToResume) {
               console.log("✅ Found unit to resume:", unitToResume.name);
               setActiveUnit(unitToResume);
@@ -74,8 +95,26 @@ const LearningPath: React.FC<LearningPathProps> = ({
     ) || [];
 
   let finalApprovedUnits = progress.approvedUnits;
+  const isInitialTutorialState =
+    isTutorialMode &&
+    !showAsCompleted &&
+    !showOptionalAsAvailable &&
+    !showAllCompletedExceptFirst;
 
-  if (showAsCompleted) {
+  if (isInitialTutorialState) {
+    const mandatoryUnits = assignedUnits.filter((u) => u.mandatory);
+    const firstLesson =
+      mandatoryUnits.length > 0
+        ? mandatoryUnits.reduce((max, u) =>
+            u.position > max.position ? u : max
+          )
+        : assignedUnits.length > 0
+          ? assignedUnits.reduce((max, u) =>
+              u.position > max.position ? u : max
+            )
+          : null;
+    finalApprovedUnits = [];
+  } else if (showAsCompleted) {
     const mandatoryUnits = assignedUnits.filter((u) => u.mandatory);
     const highestPositionUnit =
       mandatoryUnits.length > 0
@@ -157,9 +196,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
     }
   };
 
-  // Calcular el estado del test final
   const getFinalTestState = (): "locked" | "available" | "completed" => {
-    // TODO: Verificar si el test final ya fue completado (desde progress)
     const mandatoryUnits = assignedUnits.filter((u) => u.mandatory);
     const allMandatoryCompleted = mandatoryUnits.every((u) =>
       finalApprovedUnits.includes(u.id)

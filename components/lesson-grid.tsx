@@ -132,6 +132,16 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
   const getLessonState = (unit: Node): "completed" | "available" | "locked" => {
     if (isTutorialMode) {
       if (approvedUnits.includes(unit.id)) return "completed";
+      if (approvedUnits.length === 0 && !showOptionalAsAvailable) {
+        const mandatoryUnits = units.filter((u) => u.mandatory);
+        const firstLesson =
+          mandatoryUnits.length > 0
+            ? mandatoryUnits.reduce((max, u) =>
+                u.position > max.position ? u : max
+              )
+            : units.reduce((max, u) => (u.position > max.position ? u : max));
+        if (unit.id === firstLesson.id) return "available";
+      }
 
       if (
         showOptionalAsAvailable &&
