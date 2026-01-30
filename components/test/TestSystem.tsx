@@ -49,7 +49,6 @@ export function TestSystem({
   resumeTestAttemptId,
   isReviewMode
 }: TestSystemProps) {
-  console.log("curriculumId ts: ", curriculumId);
   const [state, setState] = useState<TestState>("testing");
   const [showStore, setShowStore] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
@@ -82,7 +81,14 @@ export function TestSystem({
     Set<number>
   >(new Set());
 
-  const { error, startTest, startReviewTest, submitAnswer, completeTest, resumeTest } = useTest();
+  const {
+    error,
+    startTest,
+    startReviewTest,
+    submitAnswer,
+    completeTest,
+    resumeTest
+  } = useTest();
   const hasInitialized = useRef(false);
   const modalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isCompletingTestRef = useRef(false);
@@ -224,7 +230,16 @@ export function TestSystem({
       }
       hasInitialized.current = true;
     }
-  }, [handleStartTest, unitId, resumeTestAttemptId, resumeTest, userId, isReviewMode, startReviewTest, curriculumId]);
+  }, [
+    handleStartTest,
+    unitId,
+    resumeTestAttemptId,
+    resumeTest,
+    userId,
+    isReviewMode,
+    startReviewTest,
+    curriculumId
+  ]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -511,7 +526,7 @@ export function TestSystem({
               onClose={onClose}
               hearts={currentHearts}
               percentage={progress}
-              hasActiveSubscription={false}
+              isPremium={isPremium}
               justAnsweredCorrect={justAnsweredCorrect}
             />
             <div className="relative flex-1 flex items-center justify-center">

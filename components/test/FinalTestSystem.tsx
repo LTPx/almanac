@@ -4,7 +4,11 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TestQuestion } from "./TestQuestion";
 import { TestResults } from "./TestResults";
-import { useFinalTest, FinalTestData, FinalTestResultsInterface } from "@/hooks/useFinalTest";
+import {
+  useFinalTest,
+  FinalTestData,
+  FinalTestResultsInterface
+} from "@/hooks/useFinalTest";
 import { HeaderBar } from "../header-bar";
 import { useNoHeartsTestModal } from "@/store/use-no-hearts-test-modal";
 import { StreakCelebration } from "./StreakCelebration";
@@ -48,8 +52,12 @@ export function FinalTestSystem({
   const [answers, setAnswers] = useState<{
     [questionId: number]: { answer: string; isCorrect: boolean };
   }>({});
-  const [results, setResults] = useState<FinalTestResultsInterface | null>(null);
-  const [questionStartTime, setQuestionStartTime] = useState<number>(Date.now());
+  const [results, setResults] = useState<FinalTestResultsInterface | null>(
+    null
+  );
+  const [questionStartTime, setQuestionStartTime] = useState<number>(
+    Date.now()
+  );
   const [currentHearts, setCurrentHearts] = useState(initialHearts);
   const [justAnsweredCorrect, setJustAnsweredCorrect] = useState(false);
   const [firstPassQuestionCount, setFirstPassQuestionCount] = useState(0);
@@ -65,9 +73,12 @@ export function FinalTestSystem({
   const isPremium = user?.isPremium || false;
   const showAd = isPremium ? false : true;
 
-  const [uniqueFailedQuestions, setUniqueFailedQuestions] = useState<Set<number>>(new Set());
+  const [uniqueFailedQuestions, setUniqueFailedQuestions] = useState<
+    Set<number>
+  >(new Set());
 
-  const { error, startFinalTest, submitAnswer, completeFinalTest } = useFinalTest();
+  const { error, startFinalTest, submitAnswer, completeFinalTest } =
+    useFinalTest();
   const hasInitialized = useRef(false);
   const modalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isCompletingTestRef = useRef(false);
@@ -137,7 +148,14 @@ export function FinalTestSystem({
         clearTimeout(modalTimeoutRef.current);
       }
     };
-  }, [currentHearts, state, showStore, openNoHeartsModal, handleOpenStore, handleExitTest]);
+  }, [
+    currentHearts,
+    state,
+    showStore,
+    openNoHeartsModal,
+    handleOpenStore,
+    handleExitTest
+  ]);
 
   const handleStartTest = useCallback(
     async (currId: string) => {
@@ -237,7 +255,9 @@ export function FinalTestSystem({
         setCurrentTest((prevTest) => {
           if (!prevTest) return prevTest;
 
-          const failedQuestion = prevTest.questions.find((q) => q.id === questionId);
+          const failedQuestion = prevTest.questions.find(
+            (q) => q.id === questionId
+          );
           if (!failedQuestion) return prevTest;
 
           const alreadyQueued = prevTest.questions
@@ -253,7 +273,15 @@ export function FinalTestSystem({
         });
       }
     },
-    [currentTest, questionStartTime, submitAnswer, currentHearts, state, currentQuestionIndex, consecutiveCorrect]
+    [
+      currentTest,
+      questionStartTime,
+      submitAnswer,
+      currentHearts,
+      state,
+      currentQuestionIndex,
+      consecutiveCorrect
+    ]
   );
 
   const handleCloseStore = useCallback(async () => {
@@ -300,7 +328,13 @@ export function FinalTestSystem({
         setAnimationKey((prev) => prev + 1);
       }
     }
-  }, [currentHearts, userId, onHeartsChange, currentTest, currentQuestionIndex]);
+  }, [
+    currentHearts,
+    userId,
+    onHeartsChange,
+    currentTest,
+    currentQuestionIndex
+  ]);
 
   const handleCompleteTest = useCallback(async () => {
     if (!currentTest) return;
@@ -311,7 +345,9 @@ export function FinalTestSystem({
     isCompletingTestRef.current = true;
 
     try {
-      const testResults = await completeFinalTest(currentTest.finalTestAttemptId);
+      const testResults = await completeFinalTest(
+        currentTest.finalTestAttemptId
+      );
 
       if (testResults) {
         const totalQuestions = firstPassQuestionCount;
@@ -332,7 +368,12 @@ export function FinalTestSystem({
       console.error("Error completing final test:", error);
       isCompletingTestRef.current = false;
     }
-  }, [currentTest, completeFinalTest, firstPassQuestionCount, uniqueFailedQuestions]);
+  }, [
+    currentTest,
+    completeFinalTest,
+    firstPassQuestionCount,
+    uniqueFailedQuestions
+  ]);
 
   const handleNext = useCallback(() => {
     if (!currentTest) return;
@@ -347,7 +388,10 @@ export function FinalTestSystem({
       });
     }
 
-    if (state === "testing" && currentQuestionIndex === firstPassQuestionCount - 1) {
+    if (
+      state === "testing" &&
+      currentQuestionIndex === firstPassQuestionCount - 1
+    ) {
       if (failedQuestions.length > 0) {
         setShowMistakeAnalyzer(true);
         return;
@@ -365,7 +409,14 @@ export function FinalTestSystem({
     } else {
       handleCompleteTest();
     }
-  }, [currentTest, currentQuestionIndex, state, firstPassQuestionCount, failedQuestions.length, handleCompleteTest]);
+  }, [
+    currentTest,
+    currentQuestionIndex,
+    state,
+    firstPassQuestionCount,
+    failedQuestions.length,
+    handleCompleteTest
+  ]);
 
   const handleHeartBreakComplete = useCallback(() => {
     setShowHeartBreakAnimation(false);
@@ -416,7 +467,7 @@ export function FinalTestSystem({
               onClose={onClose}
               hearts={currentHearts}
               percentage={progress}
-              hasActiveSubscription={false}
+              isPremium={isPremium}
               justAnsweredCorrect={justAnsweredCorrect}
             />
             <div className="relative flex-1 flex items-center justify-center">
@@ -438,10 +489,12 @@ export function FinalTestSystem({
                       !!answers[currentTest.questions[currentQuestionIndex]?.id]
                     }
                     isCorrect={
-                      answers[currentTest.questions[currentQuestionIndex]?.id]?.isCorrect
+                      answers[currentTest.questions[currentQuestionIndex]?.id]
+                        ?.isCorrect
                     }
                     selectedAnswer={
-                      answers[currentTest.questions[currentQuestionIndex]?.id]?.answer
+                      answers[currentTest.questions[currentQuestionIndex]?.id]
+                        ?.answer
                     }
                     isDisabled={isAnimationPlaying}
                   />

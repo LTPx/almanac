@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 type HeaderProps = {
   hearts: number;
   percentage: number;
-  hasActiveSubscription: boolean;
+  isPremium: boolean;
   justAnsweredCorrect?: boolean;
   onClose?: () => void;
   isTutorialMode?: boolean;
@@ -20,7 +20,7 @@ type HeaderProps = {
 export const HeaderBar = ({
   hearts,
   percentage,
-  hasActiveSubscription,
+  isPremium,
   justAnsweredCorrect = false,
   onClose,
   isTutorialMode = false
@@ -114,7 +114,7 @@ export const HeaderBar = ({
             }
             transition={{ duration: 0.5 }}
           >
-            {hasActiveSubscription ? (
+            {isPremium ? (
               <Infinity className="h-6 w-6 shrink-0 stroke-[3]" />
             ) : (
               hearts

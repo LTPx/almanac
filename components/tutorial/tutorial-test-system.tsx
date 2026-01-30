@@ -210,7 +210,7 @@ export function TutorialTestSystem({
           onClose={handleBack}
           hearts={simulatedHearts}
           percentage={progress}
-          hasActiveSubscription={false}
+          isPremium={false}
           justAnsweredCorrect={justAnsweredCorrect}
           isTutorialMode={true}
         />
