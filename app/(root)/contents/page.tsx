@@ -25,6 +25,7 @@ function Contents() {
   const curriculumIdParam = searchParams?.get("curriculumid");
   const user = useUser();
   const userId = user?.id || "";
+  const isPremium = user?.isPremium || false;
   const { selectedCurriculumId, setSelectedCurriculumId } =
     useCurriculumStore();
   const { isLoading, fetchCurriculumWithUnitsUserMetrics } = useCurriculums();
@@ -285,7 +286,7 @@ function Contents() {
               onClick={() =>
                 setActiveTest({ unitId: 0, unitName: "Repaso", isReview: true })
               }
-              disabled={!stats?.totalAnswerErrors}
+              disabled={!stats?.totalAnswerErrors || !isPremium}
               className={`w-full font-bold text-base py-4 rounded-xl transition-colors ${
                 stats?.totalAnswerErrors
                   ? "bg-white text-neutral-900 hover:bg-gray-100"
@@ -294,9 +295,14 @@ function Contents() {
             >
               EMPEZAR MI REPASO
             </button>
-            <div className="absolute -top-2 right-0 w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
-              <span className="text-white font-bold text-lg italic">PLUS</span>
-            </div>
+
+            {!isPremium && (
+              <div className="absolute -top-2 right-0 w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
+                <span className="text-white font-bold text-lg italic">
+                  PLUS
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
