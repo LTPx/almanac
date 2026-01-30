@@ -1,34 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { TestQuestion } from "./TestQuestion";
-import { TestResults } from "./TestResults";
-import {
-  useFinalTest,
-  FinalTestData,
-  FinalTestResultsInterface
-} from "@/hooks/useFinalTest";
-import { HeaderBar } from "../header-bar";
+import { useTest } from "@/hooks/useTest";
 import { useNoHeartsTestModal } from "@/store/use-no-hearts-test-modal";
-import { StreakCelebration } from "./StreakCelebration";
-import { HeartBreakAnimation } from "./HeartBreakAnimation";
-import StoreContent from "../store-content";
-import { ReportErrorModal } from "../modals/report-error-modal";
-import InterstitialAd from "../interstitialAd";
 import { useUser } from "@/context/UserContext";
-import { SuccessCompletion } from "./SuccessCompletion";
-import { MistakeAnalyzerOverlay } from "./MistakeAnalyzerOverlay";
+import type {
+  TestData,
+  TestResultsInterface as TestResultsType
+} from "@/lib/types";
 
-interface FinalTestSystemProps {
-  userId: string;
-  curriculumId: string;
-  onClose: () => void;
-  hearts: number;
-  onHeartsChange?: (hearts: number) => void;
-}
-
-type TestState =
+export type TestState =
   | "testing"
   | "review-intro"
   | "reviewing"
@@ -36,25 +17,37 @@ type TestState =
   | "success-celebration"
   | "ad-after-results";
 
-export function FinalTestSystem({
+interface UseTestSystemProps {
+  userId: string;
+  unitId: number;
+  curriculumId: string;
+  onClose: () => void;
+  hearts: number;
+  onHeartsChange?: (hearts: number) => void;
+  resumeTestAttemptId?: number;
+  isReviewMode?: boolean;
+}
+
+export function useTestSystem({
   userId,
+  unitId,
   curriculumId,
   onClose,
   hearts: initialHearts,
-  onHeartsChange
-}: FinalTestSystemProps) {
+  onHeartsChange,
+  resumeTestAttemptId,
+  isReviewMode
+}: UseTestSystemProps) {
   const [state, setState] = useState<TestState>("testing");
   const [showStore, setShowStore] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [currentTest, setCurrentTest] = useState<FinalTestData | null>(null);
+  const [currentTest, setCurrentTest] = useState<TestData | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [animationKey, setAnimationKey] = useState(0);
   const [answers, setAnswers] = useState<{
     [questionId: number]: { answer: string; isCorrect: boolean };
   }>({});
-  const [results, setResults] = useState<FinalTestResultsInterface | null>(
-    null
-  );
+  const [results, setResults] = useState<TestResultsType | null>(null);
   const [questionStartTime, setQuestionStartTime] = useState<number>(
     Date.now()
   );
@@ -68,17 +61,23 @@ export function FinalTestSystem({
   const [showMistakeAnalyzer, setShowMistakeAnalyzer] = useState(false);
   const [showHeartBreakAnimation, setShowHeartBreakAnimation] = useState(false);
   const [isAnimationPlaying, setIsAnimationPlaying] = useState(false);
-
-  const user = useUser();
-  const isPremium = user?.isPremium || false;
-  const showAd = isPremium ? false : true;
-
   const [uniqueFailedQuestions, setUniqueFailedQuestions] = useState<
     Set<number>
   >(new Set());
 
-  const { error, startFinalTest, submitAnswer, completeFinalTest } =
-    useFinalTest();
+  const user = useUser();
+  const isPremium = user?.isPremium || false;
+  const showAd = !isPremium;
+
+  const {
+    error,
+    startTest,
+    startReviewTest,
+    submitAnswer,
+    completeTest,
+    resumeTest
+  } = useTest();
+
   const hasInitialized = useRef(false);
   const modalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isCompletingTestRef = useRef(false);
@@ -86,6 +85,7 @@ export function FinalTestSystem({
 
   const { open: openNoHeartsModal } = useNoHeartsTestModal();
 
+  // Cleanup refs on unmount
   useEffect(() => {
     return () => {
       isCompletingTestRef.current = false;
@@ -101,33 +101,40 @@ export function FinalTestSystem({
     onClose();
   }, [onClose]);
 
-  const handleReportError = async (report: {
-    questionId: number;
-    reason: string;
-    description: string;
-  }) => {
-    try {
-      const response = await fetch("/api/questions/report", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          questionId: report.questionId,
-          reason: report.reason,
-          description: report.description
-        })
-      });
+  const handleReportError = useCallback(
+    async (report: {
+      questionId: number;
+      reason: string;
+      description: string;
+    }) => {
+      try {
+        const response = await fetch("/api/questions/report", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            questionId: report.questionId,
+            reason: report.reason,
+            description: report.description
+          })
+        });
 
-      if (!response.ok) {
-        throw new Error("Error al enviar el reporte");
+        if (!response.ok) {
+          throw new Error("Error al enviar el reporte");
+        }
+
+        const data = await response.json();
+        console.log("✅ Reporte enviado exitosamente:", data);
+      } catch (error) {
+        console.error("❌ Error al enviar reporte:", error);
+        throw error;
       }
-    } catch (error) {
-      console.error("Error al enviar reporte:", error);
-      throw error;
-    }
-  };
+    },
+    []
+  );
 
+  // No hearts modal effect
   useEffect(() => {
     if (
       currentHearts === 0 &&
@@ -158,8 +165,8 @@ export function FinalTestSystem({
   ]);
 
   const handleStartTest = useCallback(
-    async (currId: string) => {
-      const testData = await startFinalTest(userId, currId);
+    async (lessonId: number) => {
+      const testData = await startTest(userId, lessonId);
       if (testData) {
         setCurrentTest(testData);
         setCurrentQuestionIndex(0);
@@ -174,16 +181,61 @@ export function FinalTestSystem({
         hasCompletedRef.current = false;
       }
     },
-    [startFinalTest, userId]
+    [startTest, userId]
   );
 
+  // Initialize test
   useEffect(() => {
     if (!hasInitialized.current) {
-      handleStartTest(curriculumId);
+      if (resumeTestAttemptId) {
+        resumeTest(resumeTestAttemptId, userId).then((data) => {
+          if (data) {
+            setCurrentTest(data);
+            setCurrentQuestionIndex(data.currentQuestionIndex);
+            setAnswers(data.previousAnswers);
+            setQuestionStartTime(Date.now());
+            setState("testing");
+            setFirstPassQuestionCount(data.questions.length);
+            const failed = Object.entries(data.previousAnswers)
+              .filter(([, val]) => !val.isCorrect)
+              .map(([key]) => parseInt(key));
+            setFailedQuestions(failed);
+            setUniqueFailedQuestions(new Set(failed));
+          }
+        });
+      } else if (isReviewMode) {
+        startReviewTest(userId, curriculumId).then((testData) => {
+          if (testData) {
+            setCurrentTest(testData);
+            setCurrentQuestionIndex(0);
+            setAnswers({});
+            setQuestionStartTime(Date.now());
+            setState("testing");
+            setFirstPassQuestionCount(testData.questions.length);
+            setFailedQuestions([]);
+            setUniqueFailedQuestions(new Set());
+            setConsecutiveCorrect(0);
+            isCompletingTestRef.current = false;
+            hasCompletedRef.current = false;
+          }
+        });
+      } else {
+        handleStartTest(unitId);
+      }
       hasInitialized.current = true;
     }
-  }, [handleStartTest, curriculumId]);
+  }, [
+    handleStartTest,
+    unitId,
+    resumeTestAttemptId,
+    resumeTest,
+    userId,
+    isReviewMode,
+    startReviewTest,
+    curriculumId
+  ]);
 
+  // Before unload warning
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (state === "testing" || state === "reviewing") {
@@ -193,6 +245,7 @@ export function FinalTestSystem({
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
+
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
@@ -204,7 +257,7 @@ export function FinalTestSystem({
 
       const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
       const result = await submitAnswer(
-        currentTest.finalTestAttemptId,
+        currentTest.testAttemptId,
         questionId,
         answer,
         timeSpent
@@ -328,26 +381,20 @@ export function FinalTestSystem({
         setAnimationKey((prev) => prev + 1);
       }
     }
-  }, [
-    currentHearts,
-    userId,
-    onHeartsChange,
-    currentTest,
-    currentQuestionIndex
-  ]);
+  }, [currentHearts, userId, onHeartsChange, currentTest, currentQuestionIndex]);
 
   const handleCompleteTest = useCallback(async () => {
     if (!currentTest) return;
     if (isCompletingTestRef.current || hasCompletedRef.current) {
+      console.log("⚠️ Test completion already in progress or completed");
       return;
     }
 
     isCompletingTestRef.current = true;
+    console.log("✅ Starting test completion...");
 
     try {
-      const testResults = await completeFinalTest(
-        currentTest.finalTestAttemptId
-      );
+      const testResults = await completeTest(currentTest.testAttemptId);
 
       if (testResults) {
         const totalQuestions = firstPassQuestionCount;
@@ -363,17 +410,13 @@ export function FinalTestSystem({
         setResults(correctedResults);
         setState("results");
         hasCompletedRef.current = true;
+        console.log("✅ Test completed successfully");
       }
     } catch (error) {
-      console.error("Error completing final test:", error);
+      console.error("❌ Error completing test:", error);
       isCompletingTestRef.current = false;
     }
-  }, [
-    currentTest,
-    completeFinalTest,
-    firstPassQuestionCount,
-    uniqueFailedQuestions
-  ]);
+  }, [currentTest, completeTest, firstPassQuestionCount, uniqueFailedQuestions]);
 
   const handleNext = useCallback(() => {
     if (!currentTest) return;
@@ -435,196 +478,89 @@ export function FinalTestSystem({
     onClose();
   }, [onClose]);
 
+  const handleMistakeAnalyzerComplete = useCallback(() => {
+    setShowMistakeAnalyzer(false);
+    setState("reviewing");
+    setCurrentQuestionIndex((prev) => prev + 1);
+    setQuestionStartTime(Date.now());
+    setAnimationKey((prev) => prev + 1);
+  }, []);
+
+  const handleStreakCelebrationComplete = useCallback(() => {
+    setShowStreakCelebration(false);
+    setIsAnimationPlaying(false);
+  }, []);
+
+  const handleSuccessCelebrationStartComplete = useCallback(() => {
+    handleCompleteTest();
+  }, [handleCompleteTest]);
+
+  const handleSuccessCelebrationComplete = useCallback(() => {
+    setShowSuccessCelebration(false);
+  }, []);
+
+  const handleHeartsUpdate = useCallback(
+    (newHearts: number) => {
+      setCurrentHearts(newHearts);
+      onHeartsChange?.(newHearts);
+    },
+    [onHeartsChange]
+  );
+
   const progress = currentTest
     ? ((currentQuestionIndex + 1) / currentTest.questions.length) * 100
     : 0;
 
-  if (error) {
-    return (
-      <div className="bg-gray-900 min-h-screen p-6 flex items-center justify-center">
-        <div className="bg-red-500/20 border border-red-500 rounded-lg p-6 max-w-md w-full text-center">
-          <h2 className="text-xl font-bold text-red-400 mb-2">Error</h2>
-          <p className="text-gray-300">{error}</p>
-          <button
-            onClick={onClose}
-            className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-          >
-            Cerrar
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const currentQuestion = currentTest?.questions[currentQuestionIndex];
+  const currentQuestionAnswer = currentQuestion
+    ? answers[currentQuestion.id]
+    : undefined;
 
-  return (
-    <div className="bg-background h-[100dvh] flex flex-col overflow-hidden">
-      {(state === "testing" || state === "reviewing") &&
-        currentTest &&
-        !showSuccessCelebration &&
-        !showMistakeAnalyzer && (
-          <>
-            <HeaderBar
-              onClose={onClose}
-              hearts={currentHearts}
-              percentage={progress}
-              isPremium={isPremium}
-              justAnsweredCorrect={justAnsweredCorrect}
-            />
-            <div className="relative flex-1 flex items-center justify-center">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={animationKey}
-                  initial={{ opacity: 0, x: 50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -50 }}
-                  transition={{ duration: 0.4, ease: "easeInOut" }}
-                  className="absolute w-full h-full flex"
-                >
-                  <TestQuestion
-                    question={currentTest.questions[currentQuestionIndex]}
-                    onAnswer={handleAnswer}
-                    onNext={handleNext}
-                    onReportError={() => setShowReportModal(true)}
-                    showResult={
-                      !!answers[currentTest.questions[currentQuestionIndex]?.id]
-                    }
-                    isCorrect={
-                      answers[currentTest.questions[currentQuestionIndex]?.id]
-                        ?.isCorrect
-                    }
-                    selectedAnswer={
-                      answers[currentTest.questions[currentQuestionIndex]?.id]
-                        ?.answer
-                    }
-                    isDisabled={isAnimationPlaying}
-                  />
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </>
-        )}
+  return {
+    // State
+    state,
+    error,
+    currentTest,
+    currentQuestionIndex,
+    animationKey,
+    answers,
+    results,
+    currentHearts,
+    justAnsweredCorrect,
+    isPremium,
+    showAd,
+    progress,
+    currentQuestion,
+    currentQuestionAnswer,
 
-      {state === "results" && results && currentTest && (
-        <AnimatePresence>
-          <motion.div
-            key="results"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="absolute inset-0 w-full h-full flex items-center justify-center"
-          >
-            <TestResults
-              hearts={currentHearts}
-              results={{
-                score: results.score,
-                correctAnswers: results.correctAnswers,
-                totalQuestions: results.totalQuestions,
-                passed: results.passed,
-                experienceGained: results.experienceGained,
-                heartsLost: 0,
-                timeQuizInSeconds: results.timeQuizInSeconds
-              }}
-              lessonName={currentTest.finalTest.title || "Test Final"}
-              onReturnToLessons={handleReturnFromResults}
-            />
-          </motion.div>
-        </AnimatePresence>
-      )}
+    // UI State
+    showStore,
+    showReportModal,
+    showSuccessCelebration,
+    showStreakCelebration,
+    showMistakeAnalyzer,
+    showHeartBreakAnimation,
+    isAnimationPlaying,
+    uniqueFailedQuestions,
 
-      {state === "ad-after-results" && (
-        <InterstitialAd
-          onClose={handleAdAfterResultsClose}
-          curriculumId={curriculumId}
-        />
-      )}
+    // Handlers
+    onClose,
+    handleAnswer,
+    handleNext,
+    handleCloseStore,
+    handleExitTest,
+    handleReportError,
+    handleHeartBreakComplete,
+    handleReturnFromResults,
+    handleAdAfterResultsClose,
+    handleMistakeAnalyzerComplete,
+    handleStreakCelebrationComplete,
+    handleSuccessCelebrationStartComplete,
+    handleSuccessCelebrationComplete,
+    handleHeartsUpdate,
+    setShowReportModal,
 
-      {showStore && (
-        <AnimatePresence>
-          <motion.div
-            key="store"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="fixed inset-0 w-full h-full flex justify-center overflow-y-auto bg-background z-[250]"
-          >
-            <div className="relative max-w-[650px] h-full">
-              <StoreContent
-                onBack={handleCloseStore}
-                showBackButton={true}
-                title="Tienda"
-                backButtonVariant="button"
-                onHeartsUpdate={(newHearts: number) => {
-                  setCurrentHearts(newHearts);
-                  if (onHeartsChange) {
-                    onHeartsChange(newHearts);
-                  }
-                }}
-              />
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      )}
-
-      {currentTest && (
-        <ReportErrorModal
-          isOpen={showReportModal}
-          onClose={() => setShowReportModal(false)}
-          questionId={currentTest.questions[currentQuestionIndex]?.id}
-          questionText={currentTest.questions[currentQuestionIndex]?.title}
-          onSubmit={handleReportError}
-        />
-      )}
-
-      <AnimatePresence>
-        {showHeartBreakAnimation && (
-          <HeartBreakAnimation
-            onComplete={handleHeartBreakComplete}
-            onExit={handleExitTest}
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showStreakCelebration && (
-          <StreakCelebration
-            count={5}
-            onComplete={() => {
-              setShowStreakCelebration(false);
-              setIsAnimationPlaying(false);
-            }}
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showMistakeAnalyzer && (
-          <MistakeAnalyzerOverlay
-            errorCount={uniqueFailedQuestions.size}
-            onComplete={() => {
-              setShowMistakeAnalyzer(false);
-              setState("reviewing");
-              setCurrentQuestionIndex((prev) => prev + 1);
-              setQuestionStartTime(Date.now());
-              setAnimationKey((prev) => prev + 1);
-            }}
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showSuccessCelebration && (
-          <SuccessCompletion
-            onStartComplete={() => {
-              handleCompleteTest();
-            }}
-            onComplete={() => {
-              setShowSuccessCelebration(false);
-            }}
-          />
-        )}
-      </AnimatePresence>
-    </div>
-  );
+    // Props passthrough
+    curriculumId
+  };
 }
