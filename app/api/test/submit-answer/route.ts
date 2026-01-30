@@ -111,29 +111,6 @@ export async function POST(request: NextRequest) {
         isCorrect = false;
     }
 
-    // Verificar si ya existe una respuesta para esta pregunta en este intento
-    // const existingAnswer = await prisma.testAnswer.findFirst({
-    //   where: {
-    //     testAttemptId,
-    //     questionId
-    //   }
-    // });
-
-    // let testAnswer;
-    // if (existingAnswer) {
-    //   // Actualizar respuesta existente
-    //   testAnswer = await prisma.testAnswer.update({
-    //     where: { id: existingAnswer.id },
-    //     data: {
-    //       userAnswer:
-    //         typeof userAnswer === "string"
-    //           ? userAnswer
-    //           : JSON.stringify(userAnswer),
-    //       isCorrect,
-    //       timeSpent
-    //     }
-    //   });
-    // } else {
     // Crear nueva respuesta
     const testAnswer = await prisma.testAnswer.create({
       data: {
@@ -147,7 +124,6 @@ export async function POST(request: NextRequest) {
         timeSpent
       }
     });
-    // }
 
     let hearts: number;
 

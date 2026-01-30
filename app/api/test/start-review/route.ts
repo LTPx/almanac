@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
         isCorrect: false,
         testAttempt: {
           userId,
+          isReviewTest: { not: true },
           unit: {
             curriculum: { id: curriculumId }
           }
@@ -70,7 +71,8 @@ export async function POST(request: NextRequest) {
         totalQuestions: questions.length,
         correctAnswers: 0,
         score: 0,
-        isCompleted: false
+        isCompleted: false,
+        isReviewTest: true
       }
     });
 

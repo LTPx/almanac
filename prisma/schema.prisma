@@ -295,6 +295,7 @@ model TestAttempt {
   completedAt    DateTime?
   questionOrder  Json?
   answers        TestAnswer[]
+  isReviewTest   Boolean      @default(false)
 
   heartTransactions HeartTransaction[]
 

@@ -411,7 +411,10 @@ export const getUnitsByCurriculumIdAndUserStats = cache(
               }
             },
             testAttempt: {
-              where: { userId },
+              where: {
+                userId,
+                isReviewTest: { not: true }
+              },
               select: {
                 id: true,
                 answers: {
