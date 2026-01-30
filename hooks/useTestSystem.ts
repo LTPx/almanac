@@ -286,7 +286,7 @@ export function useTestSystem({
       }
 
       if (!result.isCorrect) {
-        const newHearts = Math.max(0, currentHearts - 1);
+        const newHearts = result.hearts;
         setCurrentHearts(newHearts);
 
         if (newHearts === 0) {
@@ -381,7 +381,13 @@ export function useTestSystem({
         setAnimationKey((prev) => prev + 1);
       }
     }
-  }, [currentHearts, userId, onHeartsChange, currentTest, currentQuestionIndex]);
+  }, [
+    currentHearts,
+    userId,
+    onHeartsChange,
+    currentTest,
+    currentQuestionIndex
+  ]);
 
   const handleCompleteTest = useCallback(async () => {
     if (!currentTest) return;
@@ -416,7 +422,12 @@ export function useTestSystem({
       console.error("❌ Error completing test:", error);
       isCompletingTestRef.current = false;
     }
-  }, [currentTest, completeTest, firstPassQuestionCount, uniqueFailedQuestions]);
+  }, [
+    currentTest,
+    completeTest,
+    firstPassQuestionCount,
+    uniqueFailedQuestions
+  ]);
 
   const handleNext = useCallback(() => {
     if (!currentTest) return;
