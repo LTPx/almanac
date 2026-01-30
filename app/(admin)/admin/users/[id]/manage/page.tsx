@@ -21,7 +21,11 @@ import {
   User,
   Calendar,
   TrendingUp,
-  ArrowLeft
+  ArrowLeft,
+  BookOpen,
+  CheckCircle2,
+  Circle,
+  Loader2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -52,6 +56,16 @@ interface Curriculum {
   title: string;
 }
 
+interface UnitProgress {
+  id: number;
+  name: string;
+  order: number;
+  experiencePoints: number;
+  isCompleted: boolean;
+  completedAt: string | null;
+  earnedXP: number;
+}
+
 export default function UserManagePage() {
   const router = useRouter();
   const params = useParams();
@@ -68,6 +82,12 @@ export default function UserManagePage() {
   const [tokenQuantity, setTokenQuantity] = useState(1);
   const [assigningToken, setAssigningToken] = useState(false);
   const [adjustingZaps, setAdjustingZaps] = useState(false);
+
+  // Estados para progreso de unidades
+  const [selectedCurriculumId, setSelectedCurriculumId] = useState("");
+  const [units, setUnits] = useState<UnitProgress[]>([]);
+  const [loadingUnits, setLoadingUnits] = useState(false);
+  const [togglingUnit, setTogglingUnit] = useState<number | null>(null);
 
   useEffect(() => {
     loadUser();
@@ -105,6 +125,64 @@ export default function UserManagePage() {
       setCurriculums(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error loading curriculums:", error);
+    }
+  };
+
+  const loadUnits = async (curriculumId: string) => {
+    if (!curriculumId || !userId) return;
+
+    setLoadingUnits(true);
+    try {
+      const response = await fetch(
+        `/api/admin/users/${userId}/unit-progress?curriculumId=${curriculumId}`
+      );
+      const data = await response.json();
+
+      if (response.ok) {
+        setUnits(data.units || []);
+      } else {
+        console.error("Error loading units:", data.error);
+        setUnits([]);
+      }
+    } catch (error) {
+      console.error("Error loading units:", error);
+      setUnits([]);
+    } finally {
+      setLoadingUnits(false);
+    }
+  };
+
+  const handleCurriculumSelect = (curriculumId: string) => {
+    setSelectedCurriculumId(curriculumId);
+    loadUnits(curriculumId);
+  };
+
+  const handleToggleUnit = async (
+    unitId: number,
+    isCurrentlyCompleted: boolean
+  ) => {
+    setTogglingUnit(unitId);
+    try {
+      const method = isCurrentlyCompleted ? "DELETE" : "POST";
+      const response = await fetch(`/api/admin/users/${userId}/unit-progress`, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unitId })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Recargar las unidades para actualizar el estado
+        loadUnits(selectedCurriculumId);
+      } else {
+        alert(data.error || "Error al actualizar progreso");
+      }
+    } catch (error) {
+      console.error("Error toggling unit:", error);
+      alert("Error al actualizar progreso");
+    } finally {
+      setTogglingUnit(null);
     }
   };
 
@@ -381,6 +459,107 @@ export default function UserManagePage() {
             {adjustingZaps ? "Ajustando..." : "Ajustar ZAPs"}
           </Button>
         </div>
+      </Card>
+
+      {/* Progreso de Unidades */}
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <BookOpen className="w-5 h-5" />
+          Gestión de Progreso de Unidades
+        </h2>
+
+        {/* Selector de Curriculum */}
+        <div className="mb-4">
+          <Label htmlFor="curriculum-select">Selecciona un Curriculum</Label>
+          <Select
+            value={selectedCurriculumId}
+            onValueChange={handleCurriculumSelect}
+          >
+            <SelectTrigger id="curriculum-select">
+              <SelectValue placeholder="Selecciona un curriculum" />
+            </SelectTrigger>
+            <SelectContent>
+              {curriculums.map((curr) => (
+                <SelectItem key={curr.id} value={curr.id}>
+                  {curr.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Lista de Unidades */}
+        {selectedCurriculumId && (
+          <div className="border-t pt-4">
+            {loadingUnits ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                <span className="ml-2 text-muted-foreground">
+                  Cargando unidades...
+                </span>
+              </div>
+            ) : units.length === 0 ? (
+              <p className="text-muted-foreground text-center py-4">
+                No hay unidades en este curriculum
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {units.map((unit) => (
+                  <div
+                    key={unit.id}
+                    className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${
+                      unit.isCompleted
+                        ? "bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-900"
+                        : "border-gray-200 dark:border-gray-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() =>
+                          handleToggleUnit(unit.id, unit.isCompleted)
+                        }
+                        disabled={togglingUnit === unit.id}
+                        className="focus:outline-none"
+                      >
+                        {togglingUnit === unit.id ? (
+                          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                        ) : unit.isCompleted ? (
+                          <CheckCircle2 className="w-5 h-5 text-green-600" />
+                        ) : (
+                          <Circle className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+                        )}
+                      </button>
+                      <div>
+                        <p className="font-medium text-gray-500">
+                          {unit.order}. {unit.name}
+                        </p>
+                        {unit.isCompleted && unit.completedAt && (
+                          <div className="text-xs text-muted-foreground">
+                            Completado:{" "}
+                            {new Date(unit.completedAt).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant={unit.isCompleted ? "default" : "secondary"}
+                        className="gap-1"
+                      >
+                        <TrendingUp className="w-3 h-3" />
+                        {unit.experiencePoints} XP
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+                <div className="pt-2 text-sm text-muted-foreground text-right">
+                  Completadas: {units.filter((u) => u.isCompleted).length} /{" "}
+                  {units.length}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </Card>
     </div>
   );

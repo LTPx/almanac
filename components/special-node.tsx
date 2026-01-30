@@ -71,6 +71,7 @@ const SpecialYellowNode: React.FC<SpecialYellowNodeProps> = ({
       whileHover={state !== "locked" ? { scale: 1.05, y: -2 } : {}}
       whileTap={state !== "locked" ? { scale: 0.95 } : {}}
       animate={state === "available" ? { y: [0, -8, 0] } : {}}
+      data-first-mandatory={"true"}
       transition={
         state === "available"
           ? {

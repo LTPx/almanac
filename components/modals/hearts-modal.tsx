@@ -33,11 +33,11 @@ export const NoHeartsModal = () => {
   return (
     <Dialog open={isOpen} onOpenChange={close}>
       <DialogOverlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[199]" />
-      <DialogContent className="max-w-md z-[200] border-border/50 bg-gradient-to-b from-card via-card to-background overflow-hidden p-8">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-md sm:w-full z-[200] border-border/50 bg-gradient-to-b from-card via-card to-background overflow-hidden p-6 sm:p-8">
         <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 via-transparent to-transparent pointer-events-none" />
 
         <DialogHeader className="relative z-10">
-          <div className="mb-8 flex w-full items-center justify-center">
+          <div className="mb-6 sm:mb-8 flex w-full items-center justify-center">
             <AnimatePresence mode="wait">
               {isOpen && (
                 <motion.div
@@ -53,9 +53,9 @@ export const NoHeartsModal = () => {
                 >
                   <div className="absolute inset-0 bg-destructive/30 rounded-full blur-2xl animate-pulse" />
 
-                  <div className="relative bg-card rounded-full p-2 shadow-lg">
-                    <div className="bg-gradient-to-br from-destructive to-destructive/80 p-6 rounded-full shadow-[0_0_30px_rgba(237,83,40,0.4)]">
-                      <Heart className="h-14 w-14 text-white fill-white" />
+                  <div className="relative bg-card rounded-full p-1.5 sm:p-2 shadow-lg">
+                    <div className="bg-gradient-to-br from-destructive to-destructive/80 p-4 sm:p-6 rounded-full shadow-[0_0_30px_rgba(237,83,40,0.4)]">
+                      <Heart className="h-10 w-10 sm:h-14 sm:w-14 text-white fill-white" />
                     </div>
                   </div>
 
@@ -63,7 +63,7 @@ export const NoHeartsModal = () => {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.4, type: "spring", stiffness: 300 }}
-                    className="absolute -right-1 -bottom-1 bg-destructive rounded-full w-9 h-9 flex items-center justify-center text-white text-base font-bold shadow-lg ring-4 ring-card"
+                    className="absolute -right-1 -bottom-1 bg-destructive rounded-full w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center text-white text-sm sm:text-base font-bold shadow-lg ring-4 ring-card"
                   >
                     0
                   </motion.div>
@@ -75,8 +75,8 @@ export const NoHeartsModal = () => {
                       animate={{
                         scale: [0, 1, 0],
                         opacity: [0, 1, 0],
-                        x: [0, Math.cos((i * 60 * Math.PI) / 180) * 60],
-                        y: [0, Math.sin((i * 60 * Math.PI) / 180) * 60]
+                        x: [0, Math.cos((i * 60 * Math.PI) / 180) * 45],
+                        y: [0, Math.sin((i * 60 * Math.PI) / 180) * 45]
                       }}
                       transition={{
                         duration: 1.2,
@@ -95,20 +95,20 @@ export const NoHeartsModal = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.4 }}
-            className="space-y-3"
+            className="space-y-2 sm:space-y-3"
           >
-            <DialogTitle className="text-center text-3xl font-bold text-foreground">
+            <DialogTitle className="text-center text-xl sm:text-2xl md:text-3xl font-bold text-foreground leading-tight">
               ¡Sin Corazones!
             </DialogTitle>
 
-            <DialogDescription className="text-center text-base text-muted-foreground leading-relaxed px-4">
+            <DialogDescription className="text-center text-xs sm:text-sm md:text-base text-muted-foreground leading-relaxed">
               Te quedaste sin corazones. ¡Completa otras lecciones o vuelve
               mañana para obtener más!
             </DialogDescription>
           </motion.div>
         </DialogHeader>
 
-        <DialogFooter className="mb-2 relative z-10 mt-8">
+        <DialogFooter className="mb-2 relative z-10 mt-6 sm:mt-8">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -116,19 +116,19 @@ export const NoHeartsModal = () => {
             className="flex w-full"
           >
             <Button
-              className="w-full rounded-xl py-6 text-base font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:shadow-primary/30 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 group"
+              className="w-full rounded-xl py-4 sm:py-5 md:py-6 text-xs sm:text-sm md:text-base font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:shadow-primary/30 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 group"
               size="lg"
               onClick={handleGetHearts}
             >
-              <ShoppingBag className="h-5 w-5 group-hover:rotate-12 transition-transform" />
-              Obtener Corazones
-              <Sparkles className="h-4 w-4 text-primary-foreground/70 group-hover:text-primary-foreground transition-colors" />
+              <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 group-hover:rotate-12 transition-transform flex-shrink-0" />
+              <span className="truncate">Obtener Corazones</span>
+              <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-primary-foreground/70 group-hover:text-primary-foreground transition-colors flex-shrink-0" />
             </Button>
           </motion.div>
         </DialogFooter>
 
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-accent/5 to-transparent rounded-tr-full pointer-events-none" />
+        <div className="absolute top-0 right-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-gradient-to-tr from-accent/5 to-transparent rounded-tr-full pointer-events-none" />
       </DialogContent>
     </Dialog>
   );

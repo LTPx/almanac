@@ -17,6 +17,8 @@ type LearningPathProps = {
   showAllCompletedExceptFirst?: boolean;
   isTutorialMode?: boolean;
   resumeTestAttemptId?: number;
+  simulateOptionalNode?: boolean;
+  forcedOptionalNodeId?: number;
 };
 
 const LearningPath: React.FC<LearningPathProps> = ({
@@ -28,27 +30,49 @@ const LearningPath: React.FC<LearningPathProps> = ({
   showOptionalAsAvailable = false,
   showAllCompletedExceptFirst = false,
   isTutorialMode = false,
-  resumeTestAttemptId
+  resumeTestAttemptId,
+  simulateOptionalNode = false,
+  forcedOptionalNodeId = undefined
 }) => {
   const [activeUnit, setActiveUnit] = useState<Unit | null>(null);
   const [showFinalTest, setShowFinalTest] = useState(false);
-  const [resumeTestId, setResumeTestId] = useState<number | undefined>(resumeTestAttemptId);
+  const [resumeTestId, setResumeTestId] = useState<number | undefined>(
+    resumeTestAttemptId
+  );
   const { progress, isLoading, refetch } = useProgress(userId, curriculum.id);
   const hasCheckedResume = useRef(false);
 
-  // Cuando hay resumeTestAttemptId, obtener el unitId del test y activar esa unidad
   useEffect(() => {
-    console.log("🔄 Resume effect - resumeTestAttemptId:", resumeTestAttemptId, "hasChecked:", hasCheckedResume.current, "isLoading:", isLoading);
+    console.log(
+      "🔄 Resume effect - resumeTestAttemptId:",
+      resumeTestAttemptId,
+      "hasChecked:",
+      hasCheckedResume.current,
+      "isLoading:",
+      isLoading
+    );
     if (resumeTestAttemptId && !hasCheckedResume.current && !isLoading) {
       hasCheckedResume.current = true;
-      console.log("📡 Fetching resume data for testAttemptId:", resumeTestAttemptId);
-      fetch(`/api/test/resume?testAttemptId=${resumeTestAttemptId}&userId=${userId}`)
+      console.log(
+        "📡 Fetching resume data for testAttemptId:",
+        resumeTestAttemptId
+      );
+      fetch(
+        `/api/test/resume?testAttemptId=${resumeTestAttemptId}&userId=${userId}`
+      )
         .then((res) => res.json())
         .then((data) => {
           console.log("📥 Resume API response:", data);
           if (data.lesson?.id) {
-            console.log("🔍 Looking for unit with id:", data.lesson.id, "in units:", curriculum.units?.map(u => u.id));
-            const unitToResume = curriculum.units?.find((u) => u.id === data.lesson.id);
+            console.log(
+              "🔍 Looking for unit with id:",
+              data.lesson.id,
+              "in units:",
+              curriculum.units?.map((u) => u.id)
+            );
+            const unitToResume = curriculum.units?.find(
+              (u) => u.id === data.lesson.id
+            );
             if (unitToResume) {
               console.log("✅ Found unit to resume:", unitToResume.name);
               setActiveUnit(unitToResume);
@@ -74,8 +98,15 @@ const LearningPath: React.FC<LearningPathProps> = ({
     ) || [];
 
   let finalApprovedUnits = progress.approvedUnits;
+  const isInitialTutorialState =
+    isTutorialMode &&
+    !showAsCompleted &&
+    !showOptionalAsAvailable &&
+    !showAllCompletedExceptFirst;
 
-  if (showAsCompleted) {
+  if (isInitialTutorialState) {
+    finalApprovedUnits = [];
+  } else if (showAsCompleted) {
     const mandatoryUnits = assignedUnits.filter((u) => u.mandatory);
     const highestPositionUnit =
       mandatoryUnits.length > 0
@@ -92,51 +123,66 @@ const LearningPath: React.FC<LearningPathProps> = ({
       finalApprovedUnits = [highestPositionUnit.id];
     }
   } else if (showOptionalAsAvailable) {
-    const optionalNodes = assignedUnits.filter((u) => !u.mandatory);
-    const highestOptionalNode =
-      optionalNodes.length > 0
-        ? optionalNodes.reduce((max, node) =>
-            node.position > max.position ? node : max
-          )
-        : null;
+    if (simulateOptionalNode && forcedOptionalNodeId) {
+      const simulatedNode = assignedUnits.find(
+        (u) => u.id === forcedOptionalNodeId
+      );
 
-    if (highestOptionalNode) {
-      const optionalRow = Math.floor(highestOptionalNode.position / 5);
-      const optionalCol = highestOptionalNode.position % 5;
+      if (simulatedNode) {
+        const optionalRow = Math.floor(simulatedNode.position / 5);
+        const optionalCol = simulatedNode.position % 5;
 
-      const adjacentToApprove: number[] = [];
+        const adjacentToApprove: number[] = [];
 
-      assignedUnits.forEach((unit) => {
-        const unitRow = Math.floor(unit.position / 5);
-        const unitCol = unit.position % 5;
+        assignedUnits.forEach((unit) => {
+          const unitRow = Math.floor(unit.position / 5);
+          const unitCol = unit.position % 5;
 
-        const rowDiff = Math.abs(unitRow - optionalRow);
-        const colDiff = Math.abs(unitCol - optionalCol);
+          const rowDiff = Math.abs(unitRow - optionalRow);
+          const colDiff = Math.abs(unitCol - optionalCol);
 
-        if (
-          (rowDiff === 0 && colDiff === 1) ||
-          (rowDiff === 1 && colDiff === 0)
-        ) {
-          adjacentToApprove.push(unit.id);
-        }
-      });
+          if (
+            (rowDiff === 0 && colDiff === 1) ||
+            (rowDiff === 1 && colDiff === 0)
+          ) {
+            adjacentToApprove.push(unit.id);
+          }
+        });
 
-      finalApprovedUnits = adjacentToApprove;
-    }
-  } else if (showAllCompletedExceptFirst) {
-    const firstLesson =
-      assignedUnits.length > 0
-        ? assignedUnits.reduce((min, unit) =>
-            unit.position < min.position ? unit : min
-          )
-        : null;
+        finalApprovedUnits = adjacentToApprove;
+      }
+    } else {
+      const optionalNodes = assignedUnits.filter((u) => !u.mandatory);
+      const highestOptionalNode =
+        optionalNodes.length > 0
+          ? optionalNodes.reduce((max, node) =>
+              node.position > max.position ? node : max
+            )
+          : null;
 
-    if (firstLesson) {
-      const allExceptFirst = assignedUnits
-        .filter((unit) => unit.id !== firstLesson.id)
-        .map((unit) => unit.id);
+      if (highestOptionalNode) {
+        const optionalRow = Math.floor(highestOptionalNode.position / 5);
+        const optionalCol = highestOptionalNode.position % 5;
 
-      finalApprovedUnits = allExceptFirst;
+        const adjacentToApprove: number[] = [];
+
+        assignedUnits.forEach((unit) => {
+          const unitRow = Math.floor(unit.position / 5);
+          const unitCol = unit.position % 5;
+
+          const rowDiff = Math.abs(unitRow - optionalRow);
+          const colDiff = Math.abs(unitCol - optionalCol);
+
+          if (
+            (rowDiff === 0 && colDiff === 1) ||
+            (rowDiff === 1 && colDiff === 0)
+          ) {
+            adjacentToApprove.push(unit.id);
+          }
+        });
+
+        finalApprovedUnits = adjacentToApprove;
+      }
     }
   }
 
@@ -157,9 +203,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
     }
   };
 
-  // Calcular el estado del test final
   const getFinalTestState = (): "locked" | "available" | "completed" => {
-    // TODO: Verificar si el test final ya fue completado (desde progress)
     const mandatoryUnits = assignedUnits.filter((u) => u.mandatory);
     const allMandatoryCompleted = mandatoryUnits.every((u) =>
       finalApprovedUnits.includes(u.id)
@@ -191,6 +235,8 @@ const LearningPath: React.FC<LearningPathProps> = ({
               showOptionalAsAvailable={showOptionalAsAvailable}
               curriculumId={curriculum.id}
               finalTestState={finalTestState}
+              simulateOptionalNode={simulateOptionalNode}
+              forcedOptionalNodeId={forcedOptionalNodeId}
             />
           )}
         </div>
@@ -246,6 +292,8 @@ const LearningPath: React.FC<LearningPathProps> = ({
             showOptionalAsAvailable={showOptionalAsAvailable}
             curriculumId={curriculum.id}
             finalTestState={finalTestState}
+            simulateOptionalNode={simulateOptionalNode}
+            forcedOptionalNodeId={forcedOptionalNodeId}
           />
         )}
       </div>
