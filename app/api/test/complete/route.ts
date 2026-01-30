@@ -80,47 +80,47 @@ export async function POST(request: NextRequest) {
     let experienceGained = 0;
 
     if (passed) {
-      const existingUnitProgress = await prisma.userUnitProgress.findUnique({
-        where: {
-          userId_unitId: {
-            userId: testAttempt.userId,
-            unitId: testAttempt.unitId
-          }
-        }
-      });
+      experienceGained = userXP;
 
-      if (!existingUnitProgress) {
-        // Primer intento aprobado: XP completa
-        experienceGained = userXP;
-
-        await prisma.userUnitProgress.create({
-          data: {
-            userId: testAttempt.userId,
-            unitId: testAttempt.unitId,
-            experiencePoints: experienceGained,
-            completedAt: new Date()
-          }
-        });
-      } else {
-        // Usuario repite el test y aprueba: dar XP y sumarla
-        experienceGained = userXP;
-
-        await prisma.userUnitProgress.update({
+      // Solo actualizar UserUnitProgress si NO es un test de repaso
+      if (!testAttempt.isReviewTest) {
+        const existingUnitProgress = await prisma.userUnitProgress.findUnique({
           where: {
             userId_unitId: {
               userId: testAttempt.userId,
               unitId: testAttempt.unitId
             }
-          },
-          data: {
-            experiencePoints: {
-              increment: experienceGained
-            },
-            completedAt: new Date()
           }
         });
+
+        if (!existingUnitProgress) {
+          await prisma.userUnitProgress.create({
+            data: {
+              userId: testAttempt.userId,
+              unitId: testAttempt.unitId,
+              experiencePoints: experienceGained,
+              completedAt: new Date()
+            }
+          });
+        } else {
+          await prisma.userUnitProgress.update({
+            where: {
+              userId_unitId: {
+                userId: testAttempt.userId,
+                unitId: testAttempt.unitId
+              }
+            },
+            data: {
+              experiencePoints: {
+                increment: experienceGained
+              },
+              completedAt: new Date()
+            }
+          });
+        }
       }
 
+      // Siempre dar XP al usuario (tests normales y de repaso)
       await prisma.user.update({
         where: { id: testAttempt.userId },
         data: {
