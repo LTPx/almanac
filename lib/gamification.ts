@@ -115,10 +115,19 @@ export async function reduceHeartsForFailedTest(
 ) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { hearts: true }
+    select: { hearts: true, subscriptionStatus: true }
   });
 
   if (!user) throw new Error("User not found");
+
+  // No reducir corazones si el usuario tiene suscripción TRIALING o ACTIVE
+  if (
+    user.subscriptionStatus === "TRIALING" ||
+    user.subscriptionStatus === "ACTIVE"
+  ) {
+    return user.hearts;
+  }
+
   if (user.hearts <= 0) throw new Error("No hay corazones disponibles");
 
   // Actualizar corazones y reiniciar el contador de regeneración
