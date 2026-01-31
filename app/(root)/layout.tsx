@@ -1,5 +1,5 @@
 // app/(root)/layout.tsx
-import Navbar from "@/components/navbar";
+// import Navbar from "@/components/navbar";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -22,10 +22,8 @@ export default async function HomeLayout({
 
   const user = session.user;
 
-  // Verificar si el trial interno ha expirado y actualizar status
   const trialExpired = await checkAndUpdateTrialStatus(user.id);
 
-  // Si el trial expiró, usar FREE como status
   const status = trialExpired ? "FREE" : user.subscriptionStatus;
   const isTrialing = status === "TRIALING";
   const isActive = status === "ACTIVE";
@@ -38,7 +36,7 @@ export default async function HomeLayout({
   return (
     <UserProvider user={{ ...user, isPremium, isAdmin, hasWallet }}>
       <div className="relative">
-        <Navbar />
+        {/* <Navbar /> */}
         <main>{children}</main>
         <FooterNav />
       </div>

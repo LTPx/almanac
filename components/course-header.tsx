@@ -120,7 +120,7 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
             >
               <SelectTrigger className="w-full text-black">
                 <SelectValue placeholder="Selecciona una unidad...">
-                  <span className="truncate block">
+                  <span className="truncate block font-semibold">
                     {selectedCurriculum
                       ? selectedCurriculum.title
                       : "Selecciona una unidad..."}
@@ -145,7 +145,6 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
             </Select>
           </motion.div>
 
-          {/* Contadores con flex-shrink-0 */}
           <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             <AnimatePresence mode="wait">
               <motion.div
