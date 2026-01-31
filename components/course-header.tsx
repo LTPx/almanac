@@ -7,7 +7,7 @@ import React, {
   useImperativeHandle
 } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
 import Link from "next/link";
 import {
   Select,
@@ -153,9 +153,9 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
                 animate={{
                   scale: prevZaps.current !== zaps ? [1, 1.3, 1] : 1,
                   boxShadow: [
-                    "0 0 0px rgba(168, 85, 247, 0.4)",
-                    "0 0 20px rgba(168, 85, 247, 0.6)",
-                    "0 0 0px rgba(168, 85, 247, 0.4)"
+                    "0 0 0px rgba(233, 167, 86, 0.4)",
+                    "0 0 20px rgba(233, 167, 86, 0.6)",
+                    "0 0 0px rgba(233, 167, 86, 0.4)"
                   ]
                 }}
                 transition={{
@@ -168,32 +168,43 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
                 }}
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg bg-purple-50 cursor-pointer hover:bg-purple-100 transition-colors zaps-counter"
+                className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg bg-orange-50 cursor-pointer hover:bg-orange-100 transition-colors zaps-counter"
               >
                 <Link
                   href="/store"
                   className="flex items-center gap-1.5 sm:gap-2"
                 >
-                  <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 fill-current flex-shrink-0" />
+                  <img
+                    alt="logo-search-bg"
+                    className="w-7 h-7"
+                    src={"/zap-logo.png"}
+                  />
                   {isPremium ? (
                     <motion.span
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      className="text-lg sm:text-xl font-bold text-purple-600"
+                      className="text-lg sm:text-xl font-bold"
+                      style={{ color: "#e9a756" }}
                     >
                       ∞
                     </motion.span>
                   ) : (
-                    <motion.span
-                      key={`zap-value-${zaps}`}
-                      initial={{ y: -10, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: 10, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="text-xs sm:text-sm font-medium text-purple-600"
-                    >
-                      {zaps}
-                    </motion.span>
+                    <div className="flex items-center gap-0.5">
+                      <motion.span
+                        key={`zap-value-${zaps}`}
+                        initial={{ y: -10, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 10, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        style={{ color: "#e9a756" }}
+                        className="text-xs sm:text-sm font-medium"
+                      >
+                        {zaps}
+                      </motion.span>
+                      <span className="text-xs sm:text-sm font-bold text-[#e9a756]">
+                        +
+                      </span>
+                    </div>
                   )}
                 </Link>
               </motion.div>
@@ -220,50 +231,66 @@ const CourseHeader = forwardRef<CourseHeaderRef, CourseHeaderProps>(
                   lives <= 2
                     ? "bg-red-100 hover:bg-red-200"
                     : "bg-red-50 hover:bg-red-100"
-                } ${lives === 0 && !isPremium ? "cursor-pointer" : ""}`}
+                } ${!isPremium ? "cursor-pointer" : ""}`}
               >
-                <motion.div
-                  animate={{
-                    scale: lives <= 2 ? [1, 1.2, 1] : 1,
-                    rotate:
-                      prevLives.current !== lives ? [0, -10, 10, -10, 0] : 0
-                  }}
-                  transition={{
-                    scale: {
-                      duration: 0.8,
-                      repeat: lives <= 2 ? Infinity : 0
-                    },
-                    rotate: { duration: 0.5 }
+                <Link
+                  href="/store"
+                  className="flex items-center gap-1.5 sm:gap-2"
+                  onClick={(e) => {
+                    if (lives === 0 && !isPremium) {
+                      e.preventDefault();
+                      handleHeartClick();
+                    }
                   }}
                 >
-                  <Heart
-                    className={`w-4 h-4 sm:w-5 sm:h-5 fill-current flex-shrink-0 ${
-                      lives <= 2 ? "text-red-600" : "text-red-500"
-                    }`}
-                  />
-                </motion.div>
-                {isPremium ? (
-                  <motion.span
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="text-lg sm:text-xl font-bold text-red-600"
+                  <motion.div
+                    animate={{
+                      scale: lives <= 2 ? [1, 1.2, 1] : 1,
+                      rotate:
+                        prevLives.current !== lives ? [0, -10, 10, -10, 0] : 0
+                    }}
+                    transition={{
+                      scale: {
+                        duration: 0.8,
+                        repeat: lives <= 2 ? Infinity : 0
+                      },
+                      rotate: { duration: 0.5 }
+                    }}
                   >
-                    ∞
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key={`lives-value-${lives}`}
-                    initial={{ y: -10, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: 10, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className={`text-xs sm:text-sm font-medium ${
-                      lives <= 2 ? "text-red-700 font-bold" : "text-red-600"
-                    }`}
-                  >
-                    {lives}
-                  </motion.span>
-                )}
+                    <Heart
+                      className={`w-4 h-4 sm:w-5 sm:h-5 fill-current flex-shrink-0 ${
+                        lives <= 2 ? "text-red-600" : "text-red-500"
+                      }`}
+                    />
+                  </motion.div>
+                  {isPremium ? (
+                    <motion.span
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="text-lg sm:text-xl font-bold text-red-600"
+                    >
+                      ∞
+                    </motion.span>
+                  ) : (
+                    <div className="flex items-center gap-0.5">
+                      <motion.span
+                        key={`lives-value-${lives}`}
+                        initial={{ y: -10, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 10, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className={`text-xs sm:text-sm font-medium ${
+                          lives <= 2 ? "text-red-700 font-bold" : "text-red-600"
+                        }`}
+                      >
+                        {lives}
+                      </motion.span>
+                      <span className="text-xs sm:text-sm font-bold text-red-500">
+                        +
+                      </span>
+                    </div>
+                  )}
+                </Link>
               </motion.div>
             </AnimatePresence>
           </div>
