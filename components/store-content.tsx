@@ -167,7 +167,7 @@ export default function StoreContent({
     <div className="min-h-screen text-white">
       <div
         className={`sticky z-10 bg-background flex items-center justify-between p-3 sm:p-4 border-b border-gray-800 ${
-          backButtonVariant === "button" ? "top-0" : "top-[60px]"
+          backButtonVariant === "button" ? "top-0" : "top-[0px]"
         }`}
       >
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
@@ -239,7 +239,11 @@ export default function StoreContent({
       )}
 
       <div className="p-3 pb-[60px] space-y-4 sm:space-y-6">
-        <PremiumCard userId={userId} subscription={subscription} testAttemptId={testAttemptId} />
+        <PremiumCard
+          userId={userId}
+          subscription={subscription}
+          testAttemptId={testAttemptId}
+        />
         {!subscription?.isPremium && (
           <>
             <div className="space-y-3 sm:space-y-4">

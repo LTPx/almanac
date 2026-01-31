@@ -100,7 +100,7 @@ export default function PrivacySettings() {
 
   return (
     <div className="min-h-screen text-white pb-[60px]">
-      <div className="sticky top-[60px] bg-[#171717] flex items-center gap-3 p-4 border-b border-gray-700">
+      <div className="sticky top-[0px] bg-[#171717] flex items-center gap-3 p-4 border-b border-gray-700">
         <button
           onClick={() => router.back()}
           className="text-white hover:bg-white/10 p-2 rounded-full transition-colors"

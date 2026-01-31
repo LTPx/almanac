@@ -206,7 +206,7 @@ export default function CreateCertificatePage() {
 
   return (
     <div className="min-h-screen ">
-      <div className="sticky top-[60px] z-10 backdrop-blur-sm  border-b border-gray-800">
+      <div className="sticky top-[0px] z-10 backdrop-blur-sm  border-b border-gray-800">
         <div className="flex items-center justify-between p-4  mx-auto">
           <button
             onClick={handleBack}

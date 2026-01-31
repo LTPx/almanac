@@ -141,7 +141,7 @@ export default function NFTAssetDetailPage() {
 
   return (
     <div className="min-h-screen bg-black text-white pb-20">
-      <div className="sticky top-[60px] z-10 bg-black/80 backdrop-blur-sm border-b border-gray-800">
+      <div className="sticky top-[0px] z-10 bg-black/80 backdrop-blur-sm border-b border-gray-800">
         <div className="flex items-center justify-between p-4">
           <button
             onClick={() => router.back()}
