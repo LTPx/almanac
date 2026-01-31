@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useMemo } from "react";
-import { Search, ArrowRight, X, Sparkles } from "lucide-react";
+import { ArrowRight, X, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface ChatTutorBarProps {
@@ -66,10 +66,15 @@ export default function ChatTutorBar({ curriculumTitle }: ChatTutorBarProps) {
           }`}
           data-tutorial-chat="true"
         >
-          <Search
+          {/* <Search
             className={`h-5 w-5 transition-colors flex-shrink-0 ${
               isFocused ? "text-purple-400" : "text-muted-foreground"
             }`}
+          /> */}
+          <img
+            alt="logo-search-bg"
+            className="w-5 h-5"
+            src={"/logo-search-bg.png"}
           />
 
           <input
@@ -92,8 +97,13 @@ export default function ChatTutorBar({ curriculumTitle }: ChatTutorBarProps) {
               <X className="h-4 w-4 text-muted-foreground" />
             </button>
           )}
-
-          <button
+          <img
+            onClick={handleSearchClick}
+            alt="icon-search-bar"
+            className="w-10 h-7"
+            src={"/icon-search-bar.png"}
+          />
+          {/* <button
             onClick={handleSearchClick}
             className={`p-2 rounded-full transition-all duration-200 flex-shrink-0 ${
               inputValue
@@ -102,7 +112,7 @@ export default function ChatTutorBar({ curriculumTitle }: ChatTutorBarProps) {
             }`}
           >
             <ArrowRight className="h-5 w-5" />
-          </button>
+          </button> */}
         </div>
 
         {isFocused && !inputValue && (
