@@ -11,10 +11,10 @@ import {
   Download,
   Eye,
   EyeOff,
-  CheckCircle2
+  CheckCircle2,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 type WalletStep = "create" | "backup" | "complete";
 
@@ -120,7 +120,7 @@ Fecha: ${new Date().toLocaleString()}
 
   if (hasWallet) {
     return (
-      <div className="px-4 min-h-full flex flex-col justify-between pt-6 pb-4">
+      <div className="px-4 flex-1 flex flex-col pt-6 pb-4">
         {loading && (
           <div className="grid grid-cols-2 gap-4 mb-8">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -146,26 +146,40 @@ Fecha: ${new Date().toLocaleString()}
           </Alert>
         )}
 
-        {!loading && !error && (
-          <>
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-              {nfts.map((nft) => (
-                <CardNFT
-                  key={nft.id}
-                  id={nft.id}
-                  image={nft.imageUrl || ""}
-                  title={nft.name || "Medalla NFT"}
-                  description=""
+        {!loading && !error && nfts.length === 0 && (
+          <div className="flex-1 flex items-center justify-center px-4">
+            <div className="flex flex-col items-center gap-4 max-w-sm mx-auto text-center">
+              <div className="w-20 h-20 rounded-full border-2 border-gray-600 flex items-center justify-center">
+                <Sparkles
+                  className="w-10 h-10 text-gray-500"
+                  strokeWidth={1.5}
                 />
-              ))}
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-white">
+                  Explora la colección
+                </h3>
+                <p className="text-sm text-gray-400 leading-relaxed">
+                  Obtén tu primera medalla para explorar la colección completa
+                </p>
+              </div>
             </div>
-            <Link
-              href={"/achievements/new"}
-              className="mb-[140px] w-full h-[50px] flex items-center justify-center bg-[#1983DD] hover:bg-[#1666B0] text-white text-base font-medium rounded-lg transition-colors"
-            >
-              Crear Nueva Medalla (NFT)
-            </Link>
-          </>
+          </div>
+        )}
+
+        {!loading && !error && nfts.length > 0 && (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {nfts.map((nft) => (
+              <CardNFT
+                key={nft.id}
+                id={nft.id}
+                image={nft.imageUrl || ""}
+                title={nft.name || "Medalla NFT"}
+                description=""
+              />
+            ))}
+          </div>
         )}
       </div>
     );
@@ -174,7 +188,7 @@ Fecha: ${new Date().toLocaleString()}
   // STEP 1: CREATE WALLET
   if (step === "create") {
     return (
-      <div className="px-4 min-h-full flex items-center justify-center pt-6 pb-4">
+      <div className="px-4 flex-1 flex items-center justify-center pt-6 pb-4">
         <div className="max-w-md w-full bg-card rounded-2xl p-8 text-center border border-border">
           <div className="mb-6 flex justify-center">
             <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center">
@@ -224,7 +238,7 @@ Fecha: ${new Date().toLocaleString()}
   // STEP 2: BACKUP MNEMONIC
   if (step === "backup" && walletData?.mnemonic) {
     return (
-      <div className="px-4 min-h-full flex items-center justify-center pt-6 pb-4">
+      <div className="px-4 flex-1 flex items-center justify-center pt-6 pb-4">
         <div className="max-w-2xl w-full bg-card rounded-2xl p-8 border border-border">
           <div className="mb-6 flex justify-center">
             <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
@@ -331,7 +345,7 @@ Fecha: ${new Date().toLocaleString()}
 
   // STEP 3: COMPLETE
   return (
-    <div className="px-4 min-h-full flex items-center justify-center pt-6 pb-4">
+    <div className="px-4 flex-1 flex items-center justify-center pt-6 pb-4">
       <div className="max-w-md w-full bg-card rounded-2xl p-8 text-center border border-border">
         <div className="mb-6 flex justify-center">
           <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center">

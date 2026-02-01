@@ -69,8 +69,8 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
 
   if (loading) {
     return (
-      <div className="px-4 pt-6 pb-4">
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="flex-1 flex items-center justify-center">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 px-4">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-40 w-full rounded-lg bg-gray-700" />
           ))}
@@ -81,7 +81,7 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
 
   if (availableNFTs.length === 0 && nfts.length === 0) {
     return (
-      <div className="px-4 min-h-full flex flex-col items-center justify-center -mt-20">
+      <div className="flex-1 flex items-center justify-center px-4">
         <div className="flex flex-col items-center gap-4 max-w-sm mx-auto text-center">
           <div className="w-20 h-20 rounded-full border-2 border-gray-600 flex items-center justify-center">
             <Sparkles className="w-10 h-10 text-gray-500" strokeWidth={1.5} />
@@ -102,8 +102,8 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
 
   if (availableNFTs.length === 0 && nfts.length > 0) {
     return (
-      <div className="px-4 min-h-full flex flex-col items-center justify-center -mt-20">
-        <div className="flex flex-col items-center gap-4 max-w-sm mx-auto text-center">
+      <div className="flex-1 flex items-center justify-center px-4">
+        <div className="mt-[-250px] flex flex-col items-center gap-4 max-w-sm mx-auto text-center">
           <div className="w-20 h-20 rounded-full border-2 border-gray-600 flex items-center justify-center">
             <Sparkles className="w-10 h-10 text-gray-500" strokeWidth={1.5} />
           </div>
