@@ -148,7 +148,7 @@ Fecha: ${new Date().toLocaleString()}
 
         {!loading && !error && nfts.length === 0 && (
           <div className="flex-1 flex items-center justify-center px-4">
-            <div className="flex flex-col items-center gap-4 max-w-sm mx-auto text-center">
+            <div className="mt-[140px] flex flex-col items-center gap-4 max-w-sm mx-auto text-center">
               <div className="w-20 h-20 rounded-full border-2 border-gray-600 flex items-center justify-center">
                 <Sparkles
                   className="w-10 h-10 text-gray-500"

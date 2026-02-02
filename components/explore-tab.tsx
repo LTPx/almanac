@@ -82,14 +82,13 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
   if (availableNFTs.length === 0 && nfts.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center px-4">
-        <div className="flex flex-col items-center gap-4 max-w-sm mx-auto text-center">
+        <div className="mt-[-250px] flex flex-col items-center gap-4 max-w-sm mx-auto text-center">
           <div className="w-20 h-20 rounded-full border-2 border-gray-600 flex items-center justify-center">
             <Sparkles className="w-10 h-10 text-gray-500" strokeWidth={1.5} />
           </div>
-
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-white">
-              Explora la colección
+              ¡Explora la colección!
             </h3>
             <p className="text-sm text-gray-400 leading-relaxed">
               Obtén tu primera medalla para explorar la colección completa
