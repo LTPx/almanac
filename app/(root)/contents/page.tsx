@@ -345,6 +345,14 @@ function Contents() {
       <ErrorsModal
         isOpen={showErrorsModal}
         onClose={() => setShowErrorsModal(false)}
+        onStartReview={() => {
+          setShowErrorsModal(false);
+          if (!isPremium) {
+            openSubscriptionModal();
+          } else {
+            setActiveTest({ unitId: 0, unitName: "Repaso", isReview: true });
+          }
+        }}
         userId={userId}
         curriculumId={selectedCurriculumId}
       />

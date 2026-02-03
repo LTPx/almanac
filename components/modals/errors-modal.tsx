@@ -14,6 +14,7 @@ interface FailedQuestion {
 interface ErrorsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onStartReview: () => void;
   userId: string;
   curriculumId: string;
 }
@@ -21,6 +22,7 @@ interface ErrorsModalProps {
 export function ErrorsModal({
   isOpen,
   onClose,
+  onStartReview,
   userId,
   curriculumId
 }: ErrorsModalProps) {
@@ -150,6 +152,18 @@ export function ErrorsModal({
               </div>
             )}
           </div>
+
+          {/* Footer */}
+          {!isLoading && !error && questions.length > 0 && (
+            <div className="p-6 border-t border-[#3a3a3a] flex-shrink-0">
+              <button
+                onClick={onStartReview}
+                className="w-full font-bold text-base py-4 rounded-xl bg-white text-neutral-900 hover:bg-gray-100 transition-colors"
+              >
+                EMPEZAR MI REPASO
+              </button>
+            </div>
+          )}
         </motion.div>
       </motion.div>
     </AnimatePresence>
