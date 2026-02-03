@@ -34,7 +34,8 @@ export async function GET(
           select: {
             id: true,
             name: true,
-            imageUrl: true
+            imageUrl: true,
+            rarity: true
           }
         }
       },
@@ -77,7 +78,8 @@ export async function GET(
           id: nft.id,
           nftAssetId: nft.nftAssetId,
           name: nft.curriculum.title || nft.nftAsset?.name,
-          imageUrl: nft.nftAsset?.imageUrl || null
+          imageUrl: nft.nftAsset?.imageUrl || null,
+          rarity: nft.nftAsset?.rarity
         };
       }),
       total: nfts.length,

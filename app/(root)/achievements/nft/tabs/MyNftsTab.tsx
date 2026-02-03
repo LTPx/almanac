@@ -176,6 +176,7 @@ Fecha: ${new Date().toLocaleString()}
                 id={nft.id}
                 image={nft.imageUrl || ""}
                 title={nft.name || "Medalla NFT"}
+                rarity={nft.rarity || "NORMAL"}
                 description=""
               />
             ))}

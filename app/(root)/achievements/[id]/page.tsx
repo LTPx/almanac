@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -66,6 +66,8 @@ export default function NFTDetailPage() {
   const [collectionExpanded, setCollectionExpanded] = useState(false);
   const [blockchainExpanded, setBlockchainExpanded] = useState(false);
   const [moreFromCollection, setMoreFromCollection] = useState<any[]>([]);
+  const searchParams = useSearchParams();
+  const fromTab = searchParams.get("from") || "medallas";
 
   const rarityColors: Record<string, { bg: string; text: string }> = {
     NORMAL: { bg: "from-gray-400 to-gray-600", text: "text-gray-400" },
@@ -224,7 +226,7 @@ export default function NFTDetailPage() {
       <div className="sticky top-[0px] z-10 bg-black/80 backdrop-blur-sm border-b border-gray-800">
         <div className="flex items-center justify-between p-4">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push(`/achievements?tab=${fromTab}`)} // Usar el tab de origen
             className="p-2 hover:bg-gray-800 rounded-full transition-colors"
           >
             <ChevronLeft className="w-6 h-6" />

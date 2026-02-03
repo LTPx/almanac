@@ -21,23 +21,22 @@ export default function AchievementsContent({ user }: { user: User }) {
         onValueChange={setTab}
         className="w-full flex-1 flex flex-col "
       >
-        <TabsList className="w-full h-14 bg-[#32C781] rounded-none shrink-0 relative p-0 gap-0">
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-black/30"></div>
+        <TabsList className="w-full h-14 bg-[#1a1a1a] rounded-none shrink-0 relative p-0 gap-0">
           <TabsTrigger
             value="medallas"
-            className="flex-1 h-full text-white data-[state=active]:bg-transparent shadow-none border-0 border-b-2 border-b-transparent data-[state=active]:border-b-white rounded-none font-medium transition-all duration-300 relative z-10"
+            className="flex-1 h-full text-gray-400 data-[state=active]:text-white data-[state=active]:bg-transparent shadow-none border-0 border-b-4 border-b-transparent data-[state=active]:border-b-[#32C781] rounded-none font-semibold transition-all duration-300 relative z-10 data-[state=active]:scale-105"
           >
             Medallas
           </TabsTrigger>
           <TabsTrigger
             value="disponible"
-            className="flex-1 h-full text-white data-[state=active]:bg-transparent shadow-none border-0 border-b-2 border-b-transparent data-[state=active]:border-b-white rounded-none font-medium transition-all duration-300 relative z-10"
+            className="flex-1 h-full text-gray-400 data-[state=active]:text-white data-[state=active]:bg-transparent shadow-none border-0 border-b-4 border-b-transparent data-[state=active]:border-b-[#32C781] rounded-none font-semibold transition-all duration-300 relative z-10 data-[state=active]:scale-105"
           >
             Disponible
           </TabsTrigger>
           <TabsTrigger
             value="explorar"
-            className="flex-1 h-full text-white data-[state=active]:bg-transparent shadow-none border-0 border-b-2 border-b-transparent data-[state=active]:border-b-white rounded-none font-medium transition-all duration-300 relative z-10"
+            className="flex-1 h-full text-gray-400 data-[state=active]:text-white data-[state=active]:bg-transparent shadow-none border-0 border-b-4 border-b-transparent data-[state=active]:border-b-[#32C781] rounded-none font-semibold transition-all duration-300 relative z-10 data-[state=active]:scale-105"
           >
             Explorar
           </TabsTrigger>

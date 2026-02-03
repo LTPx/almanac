@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -57,6 +57,8 @@ export default function NFTAssetDetailPage() {
   const [aboutExpanded, setAboutExpanded] = useState(true);
   const [collectionExpanded, setCollectionExpanded] = useState(false);
   const [rarityExpanded, setRarityExpanded] = useState(false);
+  const searchParams = useSearchParams();
+  const fromTab = searchParams.get("from") || "explorar";
 
   useEffect(() => {
     if (assetId) {
@@ -144,7 +146,7 @@ export default function NFTAssetDetailPage() {
       <div className="sticky top-[0px] z-10 bg-black/80 backdrop-blur-sm border-b border-gray-800">
         <div className="flex items-center justify-between p-4">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push(`/achievements?tab=${fromTab}`)} // Usar el tab de origen
             className="p-2 hover:bg-gray-800 rounded-full transition-colors"
           >
             <ChevronLeft className="w-6 h-6" />
