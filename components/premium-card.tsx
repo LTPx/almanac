@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SubscriptionData } from "@/lib/types";
+import SubscriptionModal from "@/components/subscription-modal";
 import {
   Plus,
   Loader2,
@@ -22,6 +23,7 @@ export default function PremiumCard({
   testAttemptId?: number;
 }) {
   const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const handleSubscribe = async () => {
     try {
@@ -351,51 +353,55 @@ export default function PremiumCard({
   }
 
   return (
-    <Card className="bg-gradient-to-b from-[#1881F0] to-[#1F960D] border-none text-white overflow-hidden relative">
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start">
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold leading-tight">
-              Funciones
-              <br />
-              para acelerar tu
-              <br />
-              aprendizaje
-            </h2>
-            <p className="text-blue-100 text-sm">
-              Disfruta de vidas ilimitadas
-              <br />y dile adiós a los anuncios
-            </p>
-            <div className="space-y-2">
-              <Button
-                onClick={handleSubscribe}
-                disabled={isLoading}
-                className="bg-white text-gray-900 hover:bg-gray-100 font-semibold px-8 py-3 rounded-full w-full sm:w-auto"
-                size="lg"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Procesando...
-                  </>
-                ) : hasUsedTrial ? (
-                  "ACTIVA PREMIUM"
-                ) : (
-                  "PRUEBA 1 SEMANA GRATIS"
-                )}
-              </Button>
-              <p className="text-xs text-white/80">
-                {hasUsedTrial
-                  ? "7,99€/mes. Cancela cuando quieras."
-                  : "Luego $1/mes. Cancela cuando quieras."}
+    <>
+      <Card className="bg-gradient-to-b from-[#1881F0] to-[#1F960D] border-none text-white overflow-hidden relative">
+        <CardContent className="p-6">
+          <div className="flex justify-between items-start">
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold leading-tight">
+                Funciones
+                <br />
+                para acelerar tu
+                <br />
+                aprendizaje
+              </h2>
+              <p className="text-blue-100 text-sm">
+                Disfruta de vidas ilimitadas
+                <br />y dile adiós a los anuncios
               </p>
+              <div className="space-y-2">
+                <Button
+                  onClick={() => setShowModal(true)}
+                  disabled={isLoading}
+                  className="bg-white text-gray-900 hover:bg-gray-100 font-semibold px-8 py-3 rounded-full w-full sm:w-auto"
+                  size="lg"
+                >
+                  {hasUsedTrial ? "ACTIVA PREMIUM" : "PRUEBA 1 SEMANA GRATIS"}
+                </Button>
+                <p className="text-xs text-white/80">
+                  {hasUsedTrial
+                    ? "7,99€/mes. Cancela cuando quieras."
+                    : "Luego $1/mes. Cancela cuando quieras."}
+                </p>
+              </div>
+            </div>
+            <div className="bg-white/20 rounded-lg p-3 backdrop-blur-sm">
+              <Plus className="w-8 h-8 text-white" />
             </div>
           </div>
-          <div className="bg-white/20 rounded-lg p-3 backdrop-blur-sm">
-            <Plus className="w-8 h-8 text-white" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <SubscriptionModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        onConfirm={() => {
+          setShowModal(false);
+          handleSubscribe();
+        }}
+        hasUsedTrial={hasUsedTrial}
+        isLoading={isLoading}
+      />
+    </>
   );
 }
