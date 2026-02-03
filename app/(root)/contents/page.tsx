@@ -19,6 +19,7 @@ import { useHome } from "@/hooks/useHome";
 import { useLessonStatesStore } from "@/hooks/use-lessonsStates";
 import SubscriptionModal from "@/components/subscription-modal";
 import { useSubscriptionModal } from "@/hooks/useSubscriptionModal";
+import { ErrorsModal } from "@/components/modals/errors-modal";
 
 function Contents() {
   const searchParams = useSearchParams();
@@ -52,6 +53,7 @@ function Contents() {
     closeModal: closeSubscriptionModal,
     handleSubscribe
   } = useSubscriptionModal(userId);
+  const [showErrorsModal, setShowErrorsModal] = useState(false);
   const hasScrolledRef = useRef(false);
 
   useEffect(() => {
@@ -280,12 +282,20 @@ function Contents() {
               +25
             </span>
           </div>
-          <div className="border-2 border-neutral-600 rounded-2xl p-5 mb-6 flex items-center justify-between">
+          <button
+            onClick={() => stats?.totalAnswerErrors && setShowErrorsModal(true)}
+            disabled={!stats?.totalAnswerErrors}
+            className={`w-full border-2 border-neutral-600 rounded-2xl p-5 mb-6 flex items-center justify-between ${
+              stats?.totalAnswerErrors
+                ? "hover:border-neutral-400 transition-colors cursor-pointer"
+                : "cursor-default"
+            }`}
+          >
             <span className="text-lg font-semibold">Errores</span>
             <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
               {stats?.totalAnswerErrors}
             </span>
-          </div>
+          </button>
           <div className="relative">
             <h3 className="text-lg font-semibold mb-[100px]">
               Repasa tus errores recientes
@@ -330,6 +340,13 @@ function Contents() {
         onConfirm={handleSubscribe}
         hasUsedTrial={false}
         isLoading={isSubscribing}
+      />
+
+      <ErrorsModal
+        isOpen={showErrorsModal}
+        onClose={() => setShowErrorsModal(false)}
+        userId={userId}
+        curriculumId={selectedCurriculumId}
       />
     </div>
   );
