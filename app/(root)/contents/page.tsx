@@ -17,6 +17,7 @@ import { Lock, RotateCcw, Play } from "lucide-react";
 import { TestSystem } from "@/components/test/TestSystem";
 import { useHome } from "@/hooks/useHome";
 import { useLessonStatesStore } from "@/hooks/use-lessonsStates";
+import SubscriptionModal from "@/components/subscription-modal";
 
 function Contents() {
   const searchParams = useSearchParams();
@@ -43,7 +44,32 @@ function Contents() {
     unitName: string;
     isReview?: boolean;
   } | null>(null);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [isSubscribing, setIsSubscribing] = useState(false);
   const hasScrolledRef = useRef(false);
+
+  const handleSubscribe = async () => {
+    try {
+      setIsSubscribing(true);
+      const response = await fetch("/api/payments/stripe/subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Error al crear suscripción");
+      }
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error: any) {
+      console.error("Error:", error);
+      alert(error.message || "Ocurrió un error al procesar tu suscripción");
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
 
   useEffect(() => {
     if (curriculumIdParam && curriculumIdParam !== selectedCurriculumId) {
@@ -283,10 +309,14 @@ function Contents() {
             </h3>
 
             <button
-              onClick={() =>
-                setActiveTest({ unitId: 0, unitName: "Repaso", isReview: true })
-              }
-              disabled={!stats?.totalAnswerErrors || !isPremium}
+              onClick={() => {
+                if (!isPremium) {
+                  setShowSubscriptionModal(true);
+                } else {
+                  setActiveTest({ unitId: 0, unitName: "Repaso", isReview: true });
+                }
+              }}
+              disabled={!stats?.totalAnswerErrors}
               className={`w-full font-bold text-base py-4 rounded-xl transition-colors ${
                 stats?.totalAnswerErrors
                   ? "bg-white text-neutral-900 hover:bg-gray-100"
@@ -306,6 +336,17 @@ function Contents() {
           </div>
         </div>
       </div>
+
+      <SubscriptionModal
+        open={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+        onConfirm={() => {
+          setShowSubscriptionModal(false);
+          handleSubscribe();
+        }}
+        hasUsedTrial={false}
+        isLoading={isSubscribing}
+      />
     </div>
   );
 }
