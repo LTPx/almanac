@@ -7,10 +7,12 @@ import { useNFTs } from "@/hooks/useNfts";
 import ExploreTabContent from "./nft/tabs/ExploreTabContent";
 import { useState } from "react";
 import TokenAvailableCard from "./nft/tabs/ready-tab";
+import { useSearchParams } from "next/navigation";
 
 export default function AchievementsContent({ user }: { user: User }) {
   const { nfts, loading, error, refetch } = useNFTs(user.id);
-  const [tab, setTab] = useState("medallas");
+  const searchParams = useSearchParams();
+  const [tab, setTab] = useState(searchParams.get("tab") || "medallas");
 
   return (
     <div className="AchievementPage bg-black flex flex-col">
