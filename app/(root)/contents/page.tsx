@@ -18,6 +18,7 @@ import { TestSystem } from "@/components/test/TestSystem";
 import { useHome } from "@/hooks/useHome";
 import { useLessonStatesStore } from "@/hooks/use-lessonsStates";
 import SubscriptionModal from "@/components/subscription-modal";
+import { useSubscriptionModal } from "@/hooks/useSubscriptionModal";
 
 function Contents() {
   const searchParams = useSearchParams();
@@ -44,32 +45,14 @@ function Contents() {
     unitName: string;
     isReview?: boolean;
   } | null>(null);
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-  const [isSubscribing, setIsSubscribing] = useState(false);
+  const {
+    showModal: showSubscriptionModal,
+    isLoading: isSubscribing,
+    openModal: openSubscriptionModal,
+    closeModal: closeSubscriptionModal,
+    handleSubscribe
+  } = useSubscriptionModal(userId);
   const hasScrolledRef = useRef(false);
-
-  const handleSubscribe = async () => {
-    try {
-      setIsSubscribing(true);
-      const response = await fetch("/api/payments/stripe/subscription", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId })
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Error al crear suscripción");
-      }
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch (error: any) {
-      console.error("Error:", error);
-      alert(error.message || "Ocurrió un error al procesar tu suscripción");
-    } finally {
-      setIsSubscribing(false);
-    }
-  };
 
   useEffect(() => {
     if (curriculumIdParam && curriculumIdParam !== selectedCurriculumId) {
@@ -311,9 +294,13 @@ function Contents() {
             <button
               onClick={() => {
                 if (!isPremium) {
-                  setShowSubscriptionModal(true);
+                  openSubscriptionModal();
                 } else {
-                  setActiveTest({ unitId: 0, unitName: "Repaso", isReview: true });
+                  setActiveTest({
+                    unitId: 0,
+                    unitName: "Repaso",
+                    isReview: true
+                  });
                 }
               }}
               disabled={!stats?.totalAnswerErrors}
@@ -339,11 +326,8 @@ function Contents() {
 
       <SubscriptionModal
         open={showSubscriptionModal}
-        onClose={() => setShowSubscriptionModal(false)}
-        onConfirm={() => {
-          setShowSubscriptionModal(false);
-          handleSubscribe();
-        }}
+        onClose={closeSubscriptionModal}
+        onConfirm={handleSubscribe}
         hasUsedTrial={false}
         isLoading={isSubscribing}
       />

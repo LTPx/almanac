@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SubscriptionData } from "@/lib/types";
 import SubscriptionModal from "@/components/subscription-modal";
+import { useSubscriptionModal } from "@/hooks/useSubscriptionModal";
 import {
   Plus,
   Loader2,
@@ -23,36 +24,13 @@ export default function PremiumCard({
   testAttemptId?: number;
 }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-
-  const handleSubscribe = async () => {
-    try {
-      setIsLoading(true);
-
-      const response = await fetch("/api/payments/stripe/subscription", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ userId, testAttemptId })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Error al crear suscripción");
-      }
-
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch (error: any) {
-      console.error("Error:", error);
-      alert(error.message || "Ocurrió un error al procesar tu suscripción");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const {
+    showModal,
+    isLoading: isSubscribing,
+    openModal,
+    closeModal,
+    handleSubscribe
+  } = useSubscriptionModal(userId, testAttemptId);
 
   const handleCancelSubscription = async () => {
     if (
@@ -371,7 +349,7 @@ export default function PremiumCard({
               </p>
               <div className="space-y-2">
                 <Button
-                  onClick={() => setShowModal(true)}
+                  onClick={openModal}
                   disabled={isLoading}
                   className="bg-white text-gray-900 hover:bg-gray-100 font-semibold px-8 py-3 rounded-full w-full sm:w-auto"
                   size="lg"
@@ -394,13 +372,10 @@ export default function PremiumCard({
 
       <SubscriptionModal
         open={showModal}
-        onClose={() => setShowModal(false)}
-        onConfirm={() => {
-          setShowModal(false);
-          handleSubscribe();
-        }}
+        onClose={closeModal}
+        onConfirm={handleSubscribe}
         hasUsedTrial={hasUsedTrial}
-        isLoading={isLoading}
+        isLoading={isSubscribing}
       />
     </>
   );
