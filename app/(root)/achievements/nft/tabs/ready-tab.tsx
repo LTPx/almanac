@@ -86,9 +86,9 @@ export default function TokenAvailableCard() {
       {availableUnits.map((unit) => (
         <div
           key={unit.unitId}
-          className="bg-card border border-border rounded-lg p-6 hover:border-primary/50 transition-colors"
+          className="bg-card border border-border rounded-lg p-4 sm:p-6 hover:border-primary/50 transition-colors"
         >
-          <div className="flex items-center justify-between gap-6 mb-3">
+          <div className="hidden sm:flex items-center justify-between gap-6 mb-3">
             <div className="flex-1">
               <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
                 Token
@@ -106,35 +106,45 @@ export default function TokenAvailableCard() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-6 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-6">
             <div className="flex-1">
-              <h3 className="text-foreground font-semibold text-lg mb-1">
+              <h3 className="text-foreground font-semibold text-base sm:text-lg mb-1">
                 {unit.unitName}
               </h3>
               <p className="text-muted-foreground text-sm">{unit.courseName}</p>
             </div>
 
-            <div className="w-32 flex justify-center">
-              <div className="flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-md px-4 py-2.5">
-                <Zap className="text-primary" size={20} fill="currentColor" />
-                <span className="text-primary font-semibold text-lg">500</span>
+            <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6">
+              <div className="flex flex-col sm:w-32 sm:items-center">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-1.5 sm:hidden">
+                  Costo
+                </p>
+                <div className="flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-md px-3 py-2 sm:px-4 sm:py-2.5">
+                  <Zap className="text-primary" size={18} fill="currentColor" />
+                  <span className="text-primary font-semibold text-base sm:text-lg">
+                    500
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <div className="w-20 flex justify-center">
-              <div className="flex items-center justify-center w-16 h-16 bg-muted/30 border border-border rounded-md">
-                <HelpCircle
-                  className="text-muted-foreground"
-                  size={32}
-                  strokeWidth={1.5}
-                />
+              <div className="flex flex-col items-center sm:w-20">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-1.5 sm:hidden">
+                  Certificado
+                </p>
+                <div className="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-muted/30 border border-border rounded-md">
+                  <HelpCircle
+                    className="text-muted-foreground"
+                    size={28}
+                    strokeWidth={1.5}
+                  />
+                </div>
               </div>
             </div>
           </div>
 
           <button
             onClick={() => router.push("/achievements/new")}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3.5 px-6 rounded-md font-medium transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 sm:py-3.5 px-6 rounded-md font-medium transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             <Zap size={18} fill="currentColor" />
             Mintear ahora
