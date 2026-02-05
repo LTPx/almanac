@@ -113,7 +113,7 @@ model Verification {
 
 model Curriculum {
   id               String          @id @default(cuid())
-  title            String
+  title            String // MANTENER temporalmente - se moverá a translations
   audienceAgeRange String?
   difficulty       DifficultyLevel
   units            Unit[]
@@ -122,7 +122,10 @@ model Curriculum {
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 
-  // GAMIFICATION 
+  // Multi-language support
+  translations CurriculumTranslation[]
+
+  // GAMIFICATION
   userCurriculumTokens UserCurriculumToken[]
   zapTransactions      ZapTransaction[]
 
@@ -171,8 +174,8 @@ model Citation {
 
 model Unit {
   id          Int      @id @default(autoincrement())
-  name        String
-  description String?
+  name        String // MANTENER temporalmente - se moverá a translations
+  description String? // MANTENER temporalmente - se moverá a translations
   lessons     Lesson[]
   order       Int
   position    Int?
@@ -182,6 +185,9 @@ model Unit {
 
   mandatory        Boolean @default(true)
   experiencePoints Int     @default(25)
+
+  // Multi-language support
+  translations UnitTranslation[]
 
   // test
   questions Question[]
@@ -199,15 +205,19 @@ model Unit {
 }
 
 model Lesson {
-  id                 Int                 @id @default(autoincrement())
-  name               String
-  description        String?
-  unit               Unit                @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  unitId             Int
-  position           Int?
-  isActive           Boolean             @default(true)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
+  id          Int      @id @default(autoincrement())
+  name        String // MANTENER temporalmente - se moverá a translations
+  description String? // MANTENER temporalmente - se moverá a translations
+  unit        Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId      Int
+  position    Int?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Multi-language support
+  translations LessonTranslation[]
+
   learningObjectives LearningObjective[]
   facts              Fact[]
   tutorSessions      TutorSession[]
@@ -220,12 +230,15 @@ model Question {
   unit      Unit         @relation(fields: [unitId], references: [id], onDelete: Cascade)
   unitId    Int
   type      QuestionType
-  title     String
+  title     String // MANTENER temporalmente - se moverá a translations
   order     Int
   isActive  Boolean      @default(true)
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
-  content   Json
+  content   Json // MANTENER temporalmente - se moverá a translations
+
+  // Multi-language support
+  translations QuestionTranslation[]
 
   answers            Answer[]
   testAnswers        TestAnswer[]
@@ -586,6 +599,13 @@ model PaymentTransaction {
 }
 
 //ENUMS
+enum Language {
+  EN
+  ES
+
+  @@map("language")
+}
+
 enum ZapTransactionType {
   UNIT_COMPLETED // Ganó ZAPs por completar unidad
   HEART_PURCHASE // Gastó ZAPs en comprar corazón
@@ -758,4 +778,60 @@ model TutorConfig {
   createdAt          DateTime @default(now())
 
   @@map("tutor_config")
+}
+
+// MULTI-LANGUAGE TRANSLATIONS
+model CurriculumTranslation {
+  id           Int        @id @default(autoincrement())
+  curriculum   Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  curriculumId String
+  language     Language
+  title        String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([curriculumId, language])
+  @@map("curriculum_translation")
+}
+
+model UnitTranslation {
+  id          Int      @id @default(autoincrement())
+  unit        Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId      Int
+  language    Language
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([unitId, language])
+  @@map("unit_translation")
+}
+
+model LessonTranslation {
+  id          Int      @id @default(autoincrement())
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId    Int
+  language    Language
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([lessonId, language])
+  @@map("lesson_translation")
+}
+
+model QuestionTranslation {
+  id         Int      @id @default(autoincrement())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId Int
+  language   Language
+  title      String
+  content    Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([questionId, language])
+  @@map("question_translation")
 }
