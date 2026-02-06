@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
               }
             }
           : true,
+        translations: true, // Incluir traducciones
         _count: {
           select: { units: true }
         }
@@ -85,11 +86,20 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, audienceAgeRange, difficulty, unitIds, metadata } = body;
+    const { title, audienceAgeRange, difficulty, unitIds, metadata, translations } =
+      body;
 
-    if (!title || !difficulty) {
+    // Validar traducciones
+    if (!translations || !translations.EN?.title || !translations.ES?.title) {
       return NextResponse.json(
-        { error: "title y difficulty son requeridos" },
+        { error: "Se requieren traducciones en EN y ES" },
+        { status: 400 }
+      );
+    }
+
+    if (!difficulty) {
+      return NextResponse.json(
+        { error: "difficulty es requerido" },
         { status: 400 }
       );
     }
@@ -134,33 +144,53 @@ export async function POST(request: NextRequest) {
 
     // Crear el curriculum con transacción
     const curriculum = await prisma.$transaction(async (tx) => {
-      // 1. Crear el curriculum
+      // 1. Crear el curriculum (mantenemos title por compatibilidad, usando EN como default)
       const newCurriculum = await tx.curriculum.create({
         data: {
-          title,
+          title: translations.EN.title, // Usar traducción EN como título principal
           audienceAgeRange: audienceAgeRange || null,
           difficulty,
           metadata: metadata || null
         }
       });
-      const units = unitIds || [];
-      // 2. Conectar las unidades manteniendo el orden
-      await tx.curriculum.update({
-        where: { id: newCurriculum.id },
-        data: {
-          units: {
-            connect: units.map((id: number) => ({ id }))
+
+      // 2. Crear traducciones EN y ES
+      await tx.curriculumTranslation.createMany({
+        data: [
+          {
+            curriculumId: newCurriculum.id,
+            language: "EN",
+            title: translations.EN.title
+          },
+          {
+            curriculumId: newCurriculum.id,
+            language: "ES",
+            title: translations.ES.title
           }
-        }
+        ]
       });
 
-      // 3. Obtener el curriculum completo con las unidades
+      const units = unitIds || [];
+      // 3. Conectar las unidades manteniendo el orden
+      if (units.length > 0) {
+        await tx.curriculum.update({
+          where: { id: newCurriculum.id },
+          data: {
+            units: {
+              connect: units.map((id: number) => ({ id }))
+            }
+          }
+        });
+      }
+
+      // 4. Obtener el curriculum completo con las unidades y traducciones
       const completeCurriculum = await tx.curriculum.findUnique({
         where: { id: newCurriculum.id },
         include: {
           units: {
             orderBy: { order: "asc" }
-          }
+          },
+          translations: true
         }
       });
 

@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Badge, Save, Star } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge, Save, Star, Globe } from "lucide-react";
 import Link from "next/link";
 import { Unit } from "@/lib/types";
 import {
@@ -33,6 +34,10 @@ export type UnitInput = {
   experiencePoints: number;
   curriculumId?: number;
   position: number;
+  translations: {
+    EN: { name: string; description: string };
+    ES: { name: string; description: string };
+  };
 };
 
 export default function UnitForm({
@@ -41,6 +46,20 @@ export default function UnitForm({
   submitting,
   buttonText
 }: UnitFormProps) {
+  // Helper para obtener traducción inicial
+  const getInitialTranslation = (lang: "EN" | "ES") => {
+    if (initialData?.translations) {
+      const translation = (initialData.translations as any[]).find(
+        (t: any) => t.language === lang
+      );
+      return {
+        name: translation?.name || "",
+        description: translation?.description || ""
+      };
+    }
+    return { name: "", description: "" };
+  };
+
   const [formData, setFormData] = useState<UnitInput>({
     name: initialData?.name || "",
     description: initialData?.description || "",
@@ -48,7 +67,20 @@ export default function UnitForm({
     isActive: !!initialData?.isActive,
     experiencePoints: initialData?.experiencePoints || 25,
     mandatory: initialData?.mandatory || false,
-    position: initialData?.position || 1
+    position: initialData?.position || 1,
+    translations: {
+      EN:
+        getInitialTranslation("EN").name || initialData?.name
+          ? {
+              name: getInitialTranslation("EN").name || initialData?.name || "",
+              description:
+                getInitialTranslation("EN").description ||
+                initialData?.description ||
+                ""
+            }
+          : { name: "", description: "" },
+      ES: getInitialTranslation("ES")
+    }
   });
 
   const isLoading = submitting;
@@ -58,6 +90,23 @@ export default function UnitForm({
     value: string | number | boolean
   ) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleTranslationChange = (
+    lang: "EN" | "ES",
+    field: "name" | "description",
+    value: string
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      translations: {
+        ...prev.translations,
+        [lang]: {
+          ...prev.translations[lang],
+          [field]: value
+        }
+      }
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,29 +131,77 @@ export default function UnitForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="name">Nombre de la Unidad *</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => handleChange("name", e.target.value)}
-            placeholder="Ej: Introducción a Blockchain"
-            required
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Descripción</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => handleChange("description", e.target.value)}
-          placeholder="Describe brevemente el contenido de esta unidad..."
-          rows={4}
-        />
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="w-5 h-5" />
+            Información de la Unidad
+          </CardTitle>
+          <CardDescription>
+            Completa la información en ambos idiomas
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="EN" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="EN">🇺🇸 English (EN)</TabsTrigger>
+              <TabsTrigger value="ES">🇪🇸 Español (ES)</TabsTrigger>
+            </TabsList>
+            <TabsContent value="EN" className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="name-en">Unit Name (English)*</Label>
+                <Input
+                  id="name-en"
+                  value={formData.translations.EN.name}
+                  onChange={(e) =>
+                    handleTranslationChange("EN", "name", e.target.value)
+                  }
+                  placeholder="Ex: Introduction to Blockchain"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description-en">Description (English)</Label>
+                <Textarea
+                  id="description-en"
+                  value={formData.translations.EN.description}
+                  onChange={(e) =>
+                    handleTranslationChange("EN", "description", e.target.value)
+                  }
+                  placeholder="Briefly describe the unit content..."
+                  rows={4}
+                />
+              </div>
+            </TabsContent>
+            <TabsContent value="ES" className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="name-es">Nombre de la Unidad (Español)*</Label>
+                <Input
+                  id="name-es"
+                  value={formData.translations.ES.name}
+                  onChange={(e) =>
+                    handleTranslationChange("ES", "name", e.target.value)
+                  }
+                  placeholder="Ej: Introducción a Blockchain"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description-es">Descripción (Español)</Label>
+                <Textarea
+                  id="description-es"
+                  value={formData.translations.ES.description}
+                  onChange={(e) =>
+                    handleTranslationChange("ES", "description", e.target.value)
+                  }
+                  placeholder="Describe brevemente el contenido de esta unidad..."
+                  rows={4}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
 
       {/* Configuración avanzada */}
       <Card className="bg-card border-border">
@@ -201,7 +298,14 @@ export default function UnitForm({
             Cancelar
           </Button>
         </Link>
-        <Button type="submit" disabled={isLoading}>
+        <Button
+          type="submit"
+          disabled={
+            isLoading ||
+            !formData.translations.EN.name ||
+            !formData.translations.ES.name
+          }
+        >
           <Save className="mr-2 h-4 w-4" />
           {isLoading ? "Guardando..." : buttonText || "Crear Unidad"}
         </Button>

@@ -26,6 +26,7 @@ export async function GET(
           },
           orderBy: { position: "asc" }
         },
+        translations: true, // Incluir traducciones
         _count: {
           select: {
             lessons: true
@@ -68,31 +69,92 @@ export async function PUT(
       isActive,
       position,
       experiencePoints,
-      mandatory
+      mandatory,
+      translations
     } = body;
 
-    console.log("experiencePoints: ", experiencePoints);
+    // Usar transacción para actualizar unit y traducciones
+    const unit = await prisma.$transaction(async (tx) => {
+      // Actualizar la unidad
+      const updatedUnit = await tx.unit.update({
+        where: { id },
+        data: {
+          // Si se proporcionan traducciones, usar EN como nombre principal
+          ...(translations?.EN?.name
+            ? { name: translations.EN.name }
+            : name && { name }),
+          ...(translations?.EN?.description !== undefined
+            ? { description: translations.EN.description }
+            : description !== undefined && { description }),
+          ...(order !== undefined && { order }),
+          ...(isActive !== undefined && { isActive }),
+          ...(position !== undefined && { position }),
+          ...(experiencePoints !== undefined && { experiencePoints }),
+          ...(mandatory !== undefined && { mandatory }),
+          updatedAt: new Date()
+        }
+      });
 
-    const unit = await prisma.unit.update({
-      where: { id },
-      data: {
-        ...(name && { name }),
-        ...(description !== undefined && { description }),
-        ...(order !== undefined && { order }),
-        ...(isActive !== undefined && { isActive }),
-        ...(position !== undefined && { position }),
-        ...(experiencePoints !== undefined && { experiencePoints }),
-        ...(mandatory !== undefined && { mandatory }),
-        updatedAt: new Date()
-      },
-      include: {
-        _count: {
-          select: {
-            questions: true,
-            lessons: true
-          }
+      // Actualizar traducciones si se proporcionan
+      if (translations) {
+        // Actualizar o crear traducción EN
+        if (translations.EN) {
+          await tx.unitTranslation.upsert({
+            where: {
+              unitId_language: {
+                unitId: id,
+                language: "EN"
+              }
+            },
+            update: {
+              name: translations.EN.name,
+              description: translations.EN.description || null
+            },
+            create: {
+              unitId: id,
+              language: "EN",
+              name: translations.EN.name,
+              description: translations.EN.description || null
+            }
+          });
+        }
+
+        // Actualizar o crear traducción ES
+        if (translations.ES) {
+          await tx.unitTranslation.upsert({
+            where: {
+              unitId_language: {
+                unitId: id,
+                language: "ES"
+              }
+            },
+            update: {
+              name: translations.ES.name,
+              description: translations.ES.description || null
+            },
+            create: {
+              unitId: id,
+              language: "ES",
+              name: translations.ES.name,
+              description: translations.ES.description || null
+            }
+          });
         }
       }
+
+      // Obtener unidad actualizada con traducciones
+      return await tx.unit.findUnique({
+        where: { id },
+        include: {
+          translations: true,
+          _count: {
+            select: {
+              questions: true,
+              lessons: true
+            }
+          }
+        }
+      });
     });
 
     return NextResponse.json(unit);
