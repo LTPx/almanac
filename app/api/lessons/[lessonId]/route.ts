@@ -40,7 +40,8 @@ export async function PUT(
     }
     const body = await request.json();
 
-    const { name, description, position, isActive, unitId, translations } = body;
+    const { name, description, position, isActive, unitId, translations } =
+      body;
 
     const existingLesson = await prisma.lesson.findUnique({
       where: { id }
@@ -53,7 +54,7 @@ export async function PUT(
     // Usar transacción para actualizar lesson y traducciones
     const lesson = await prisma.$transaction(async (tx) => {
       // Actualizar la lección
-      const updatedLesson = await tx.lesson.update({
+      await tx.lesson.update({
         where: { id },
         data: {
           // Si se proporcionan traducciones, usar EN como nombre principal
