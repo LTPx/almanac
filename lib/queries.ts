@@ -283,7 +283,8 @@ export const getLessonById = cache(async (lessonId: number) => {
       isActive: true
     },
     include: {
-      unit: true
+      unit: true,
+      translations: true // Incluir traducciones
       // questions: {
       //   where: {
       //     isActive: true

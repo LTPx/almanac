@@ -62,6 +62,16 @@ export interface TestResultsInterface {
   timeQuizInSeconds: number;
 }
 
+export type LessonTranslation = {
+  id: number;
+  lessonId: number;
+  language: "EN" | "ES";
+  name: string;
+  description: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type Lesson = {
   id: number;
   name: string;
@@ -71,6 +81,7 @@ export type Lesson = {
   mandatory: boolean;
   experiencePoints: number;
   isActive: boolean;
+  translations?: LessonTranslation[];
 };
 
 export type LessonAdmin = {

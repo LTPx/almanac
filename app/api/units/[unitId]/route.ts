@@ -76,7 +76,7 @@ export async function PUT(
     // Usar transacción para actualizar unit y traducciones
     const unit = await prisma.$transaction(async (tx) => {
       // Actualizar la unidad
-      const updatedUnit = await tx.unit.update({
+      await tx.unit.update({
         where: { id },
         data: {
           // Si se proporcionan traducciones, usar EN como nombre principal

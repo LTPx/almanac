@@ -108,7 +108,7 @@ export async function PUT(
       }
 
       // Actualizar el curriculum
-      const curriculum = await tx.curriculum.update({
+      await tx.curriculum.update({
         where: { id: curriculumId },
         data: updateData
       });

@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, audienceAgeRange, difficulty, unitIds, metadata, translations } =
+    const { audienceAgeRange, difficulty, unitIds, metadata, translations } =
       body;
 
     // Validar traducciones
