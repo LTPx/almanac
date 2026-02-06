@@ -19,7 +19,6 @@ import { useHome } from "@/hooks/useHome";
 import { useLessonStatesStore } from "@/hooks/use-lessonsStates";
 import SubscriptionModal from "@/components/subscription-modal";
 import { useSubscriptionModal } from "@/hooks/useSubscriptionModal";
-import { ErrorsModal } from "@/components/modals/errors-modal";
 
 function Contents() {
   const searchParams = useSearchParams();
@@ -53,7 +52,6 @@ function Contents() {
     closeModal: closeSubscriptionModal,
     handleSubscribe
   } = useSubscriptionModal(userId);
-  const [showErrorsModal, setShowErrorsModal] = useState(false);
   const hasScrolledRef = useRef(false);
 
   useEffect(() => {
@@ -283,7 +281,12 @@ function Contents() {
             </span>
           </div>
           <button
-            onClick={() => stats?.totalAnswerErrors && setShowErrorsModal(true)}
+            onClick={() =>
+              stats?.totalAnswerErrors &&
+              router.push(
+                `/contents/errors?curriculumid=${selectedCurriculumId}&userId=${userId}`
+              )
+            }
             disabled={!stats?.totalAnswerErrors}
             className={`w-full border-2 border-neutral-600 rounded-2xl p-5 mb-6 flex items-center justify-between ${
               stats?.totalAnswerErrors
@@ -342,20 +345,6 @@ function Contents() {
         isLoading={isSubscribing}
       />
 
-      <ErrorsModal
-        isOpen={showErrorsModal}
-        onClose={() => setShowErrorsModal(false)}
-        onStartReview={() => {
-          setShowErrorsModal(false);
-          if (!isPremium) {
-            openSubscriptionModal();
-          } else {
-            setActiveTest({ unitId: 0, unitName: "Repaso", isReview: true });
-          }
-        }}
-        userId={userId}
-        curriculumId={selectedCurriculumId}
-      />
     </div>
   );
 }

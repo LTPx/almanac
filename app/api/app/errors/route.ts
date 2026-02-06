@@ -32,9 +32,19 @@ export async function GET(request: NextRequest) {
             id: true,
             title: true,
             type: true,
+            content: true,
             unit: {
               select: {
                 name: true
+              }
+            },
+            answers: {
+              where: {
+                isCorrect: true
+              },
+              select: {
+                text: true,
+                order: true
               }
             }
           }
@@ -47,7 +57,9 @@ export async function GET(request: NextRequest) {
       id: a.question.id,
       title: a.question.title,
       type: a.question.type,
-      unitName: a.question.unit.name
+      content: a.question.content,
+      unitName: a.question.unit.name,
+      correctAnswers: a.question.answers
     }));
 
     return NextResponse.json({ questions });
