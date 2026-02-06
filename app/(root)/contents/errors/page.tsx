@@ -9,7 +9,6 @@ import {
   AccordionTrigger
 } from "@/components/ui/accordion";
 import { AlertTriangle, Loader2, ArrowLeft } from "lucide-react";
-import { FormattedTextDisplay } from "@/components/formatted-text-display";
 import { useUser } from "@/context/UserContext";
 import SubscriptionModal from "@/components/subscription-modal";
 import { useSubscriptionModal } from "@/hooks/useSubscriptionModal";
@@ -92,14 +91,11 @@ function ErrorsPage() {
     fetchErrors();
   }, [userId, curriculumId]);
 
-  const questionsByUnit: QuestionsByUnit = questions.reduce(
-    (acc, q) => {
-      if (!acc[q.unitName]) acc[q.unitName] = [];
-      acc[q.unitName].push(q);
-      return acc;
-    },
-    {} as QuestionsByUnit
-  );
+  const questionsByUnit: QuestionsByUnit = questions.reduce((acc, q) => {
+    if (!acc[q.unitName]) acc[q.unitName] = [];
+    acc[q.unitName].push(q);
+    return acc;
+  }, {} as QuestionsByUnit);
 
   const renderCorrectAnswer = (question: FailedQuestion) => {
     const sortedAnswers = [...question.correctAnswers].sort(
@@ -239,7 +235,9 @@ function ErrorsPage() {
         {/* Header */}
         <div className="mb-6">
           <button
-            onClick={() => router.push(`/contents?curriculumid=${curriculumId}`)}
+            onClick={() =>
+              router.push(`/contents?curriculumid=${curriculumId}`)
+            }
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4"
           >
             <ArrowLeft className="w-5 h-5" />
