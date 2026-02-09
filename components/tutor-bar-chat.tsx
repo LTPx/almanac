@@ -3,6 +3,7 @@
 import React, { useState, useRef, useMemo } from "react";
 import { ArrowRight, X, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/context/UserContext";
 
 interface ChatTutorBarProps {
   curriculumTitle?: string;
@@ -10,6 +11,8 @@ interface ChatTutorBarProps {
 
 export default function ChatTutorBar({ curriculumTitle }: ChatTutorBarProps) {
   const router = useRouter();
+  const user = useUser();
+  const userId = user?.id || "";
   const [inputValue, setInputValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -32,12 +35,35 @@ export default function ChatTutorBar({ curriculumTitle }: ChatTutorBarProps) {
     ];
   }, [curriculumTitle]);
 
-  const handleSearchClick = () => {
-    if (inputValue.trim()) {
-      router.push(`/almanac-tutor?q=${encodeURIComponent(inputValue.trim())}`);
-    } else {
-      router.push("/almanac-tutor");
+  const clearSessionAndNavigate = async (question?: string) => {
+    try {
+      if (userId) {
+        await fetch("/api/almanac/chat", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ userId })
+        });
+      }
+
+      if (question?.trim()) {
+        router.push(`/almanac-tutor?q=${encodeURIComponent(question.trim())}`);
+      } else {
+        router.push("/almanac-tutor");
+      }
+    } catch (error) {
+      console.error("Error clearing session:", error);
+      if (question?.trim()) {
+        router.push(`/almanac-tutor?q=${encodeURIComponent(question.trim())}`);
+      } else {
+        router.push("/almanac-tutor");
+      }
     }
+  };
+
+  const handleSearchClick = () => {
+    clearSessionAndNavigate(inputValue);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -47,7 +73,7 @@ export default function ChatTutorBar({ curriculumTitle }: ChatTutorBarProps) {
   };
 
   const handleSuggestionClick = (question: string) => {
-    router.push(`/almanac-tutor?q=${encodeURIComponent(question)}`);
+    clearSessionAndNavigate(question);
   };
 
   const handleClear = () => {
@@ -66,11 +92,6 @@ export default function ChatTutorBar({ curriculumTitle }: ChatTutorBarProps) {
           }`}
           data-tutorial-chat="true"
         >
-          {/* <Search
-            className={`h-5 w-5 transition-colors flex-shrink-0 ${
-              isFocused ? "text-purple-400" : "text-muted-foreground"
-            }`}
-          /> */}
           <img
             alt="logo-search-bg"
             className="w-5 h-5"
@@ -100,19 +121,9 @@ export default function ChatTutorBar({ curriculumTitle }: ChatTutorBarProps) {
           <img
             onClick={handleSearchClick}
             alt="icon-search-bar"
-            className="w-10 h-7"
+            className="w-10 h-7 cursor-pointer"
             src={"/icon-search-bar.png"}
           />
-          {/* <button
-            onClick={handleSearchClick}
-            className={`p-2 rounded-full transition-all duration-200 flex-shrink-0 ${
-              inputValue
-                ? "bg-purple-600 hover:bg-purple-700 text-white"
-                : "bg-zinc-800 hover:bg-zinc-700 text-muted-foreground"
-            }`}
-          >
-            <ArrowRight className="h-5 w-5" />
-          </button> */}
         </div>
 
         {isFocused && !inputValue && (
