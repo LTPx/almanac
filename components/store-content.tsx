@@ -166,7 +166,7 @@ export default function StoreContent({
   return (
     <div className="min-h-screen text-white">
       <div
-        className={`sticky z-10 bg-background flex items-center justify-between p-3 sm:p-4 border-b border-gray-800 ${
+        className={`sticky z-50 bg-background flex items-center justify-between p-3 sm:p-4 border-b border-gray-800 ${
           backButtonVariant === "button" ? "top-0" : "top-[0px]"
         }`}
       >

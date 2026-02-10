@@ -14,10 +14,7 @@ import {
   X,
   ChevronDown,
   ChevronUp,
-  Heart,
-  Zap,
   Shield,
-  Trophy,
   Infinity,
   Award,
   TrendingUp
@@ -156,14 +153,13 @@ export default function PremiumCard({
       subscription?.subscriptionStatus || ""
     );
 
-  // Si tiene suscripción premium (activa o en trial)
   if (subscription?.isPremium) {
     if (isInternalTrial) {
       return (
         <Card className="bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-700 border-none text-white overflow-hidden relative">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
 
-          <CardContent className="p-6 relative z-0">
+          <CardContent className="p-6 relative z-10">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="bg-white/20 rounded-full p-2 backdrop-blur-sm">
@@ -220,10 +216,9 @@ export default function PremiumCard({
               </div>
             </div>
 
-            {/* Botón para ver todos los beneficios */}
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-3 flex items-center justify-between transition-colors relative z-0"
+              className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-3 flex items-center justify-between transition-colors relative z-10"
             >
               <span className="text-sm font-medium">
                 Ver todos los beneficios
@@ -242,9 +237,9 @@ export default function PremiumCard({
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="overflow-hidden relative z-0"
+                  className="overflow-hidden relative z-10"
                 >
-                  <div className="mt-4 space-y-3  premium-benefits-scroll">
+                  <div className="mt-4 space-y-3 premium-benefits-scroll">
                     {premiumBenefits.map((benefit, index) => (
                       <motion.div
                         key={index}
@@ -281,7 +276,7 @@ export default function PremiumCard({
       <Card className="bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-700 border-none text-white overflow-hidden relative">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
 
-        <CardContent className="p-6 relative z-0">
+        <CardContent className="p-6 relative z-10">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="bg-white/20 rounded-full p-2 backdrop-blur-sm">
@@ -377,10 +372,9 @@ export default function PremiumCard({
             </div>
           )}
 
-          {/* Botón para ver todos los beneficios */}
           <button
             onClick={() => setShowDetails(!showDetails)}
-            className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-3 flex items-center justify-between transition-colors mb-2 relative z-0"
+            className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-3 flex items-center justify-between transition-colors mb-2 relative z-10"
           >
             <span className="text-sm font-medium">
               Ver todos tus beneficios
@@ -399,9 +393,9 @@ export default function PremiumCard({
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="overflow-hidden mb-4 relative z-0"
+                className="overflow-hidden mb-4 relative z-5"
               >
-                <div className="mt-2 space-y-3 max-h-[300px] overflow-y-auto premium-benefits-scroll">
+                <div className="mt-2 space-y-3 premium-benefits-scroll">
                   {premiumBenefits.map((benefit, index) => (
                     <motion.div
                       key={index}
@@ -469,120 +463,42 @@ export default function PremiumCard({
     );
   }
 
-  // Usuario sin premium - mostrar call to action con beneficios
   return (
     <>
       <Card className="bg-gradient-to-b from-[#1881F0] to-[#1F960D] border-none text-white overflow-hidden relative">
-        <CardContent className="p-6 relative z-0">
-          <div className="flex justify-between items-start mb-4">
-            <div className="space-y-3 flex-1">
-              <div className="flex items-center gap-2">
-                <div className="bg-white/20 rounded-full p-2 backdrop-blur-sm">
-                  <Crown className="w-6 h-6" color="#fbbf24" fill="#fbbf24" />
-                </div>
-                <h2 className="text-2xl font-bold">Premium</h2>
-              </div>
-              <h3 className="text-xl font-semibold leading-tight">
-                Funciones para acelerar
+        <CardContent className="p-6">
+          <div className="flex justify-between items-start">
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold leading-tight">
+                Funciones
                 <br />
-                tu aprendizaje
-              </h3>
+                para acelerar tu
+                <br />
+                aprendizaje
+              </h2>
               <p className="text-blue-100 text-sm">
-                Desbloquea todo tu potencial con acceso ilimitado
+                Disfruta de vidas ilimitadas
+                <br />y dile adiós a los anuncios
               </p>
+              <div className="space-y-2">
+                <Button
+                  onClick={openModal}
+                  disabled={isLoading}
+                  className="bg-white text-gray-900 hover:bg-gray-100 font-semibold px-8 py-3 rounded-full w-full sm:w-auto"
+                  size="lg"
+                >
+                  {hasUsedTrial ? "ACTIVA PREMIUM" : "PRUEBA 1 SEMANA GRATIS"}
+                </Button>
+                <p className="text-xs text-white/80">
+                  {hasUsedTrial
+                    ? "7,99€/mes. Cancela cuando quieras."
+                    : "Luego 7,99€/mes. Cancela cuando quieras."}
+                </p>
+              </div>
             </div>
             <div className="bg-white/20 rounded-lg p-3 backdrop-blur-sm">
               <Plus className="w-8 h-8 text-white" />
             </div>
-          </div>
-
-          {/* Beneficios destacados */}
-          <div className="grid grid-cols-2 gap-2 mb-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-              <Heart className="w-5 h-5 mx-auto mb-1 text-red-300 fill-red-300" />
-              <p className="text-xs font-medium">Vidas ilimitadas</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-              <Shield className="w-5 h-5 mx-auto mb-1 text-green-300" />
-              <p className="text-xs font-medium">Sin anuncios</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-              <Zap className="w-5 h-5 mx-auto mb-1 text-purple-300" />
-              <p className="text-xs font-medium">Zaps ilimitados</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-              <Trophy className="w-5 h-5 mx-auto mb-1 text-yellow-300" />
-              <p className="text-xs font-medium">Contenido exclusivo</p>
-            </div>
-          </div>
-
-          {/* Botón para ver todos los beneficios */}
-          <button
-            onClick={() => setShowDetails(!showDetails)}
-            className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-3 flex items-center justify-between transition-colors mb-4 relative z-0"
-          >
-            <span className="text-sm font-medium">
-              Ver todos los beneficios
-            </span>
-            {showDetails ? (
-              <ChevronUp className="w-5 h-5" />
-            ) : (
-              <ChevronDown className="w-5 h-5" />
-            )}
-          </button>
-
-          <AnimatePresence>
-            {showDetails && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden mb-4 relative z-0"
-              >
-                <div className="space-y-3 max-h-[300px] overflow-y-auto premium-benefits-scroll">
-                  {premiumBenefits.map((benefit, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="bg-white/10 backdrop-blur-sm rounded-lg p-3"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0 mt-0.5">
-                          {benefit.icon}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-sm mb-1">
-                            {benefit.title}
-                          </h4>
-                          <p className="text-xs text-white/80 leading-relaxed">
-                            {benefit.description}
-                          </p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <div className="space-y-3">
-            <Button
-              onClick={openModal}
-              disabled={isLoading}
-              className="bg-white text-gray-900 hover:bg-gray-100 font-semibold px-8 py-6 rounded-full w-full text-base"
-              size="lg"
-            >
-              {hasUsedTrial ? "ACTIVA PREMIUM" : "PRUEBA 1 SEMANA GRATIS"}
-            </Button>
-            <p className="text-xs text-center text-white/80">
-              {hasUsedTrial
-                ? "7,99€/mes. Cancela cuando quieras."
-                : "Luego 7,99€/mes. Cancela cuando quieras."}
-            </p>
           </div>
         </CardContent>
       </Card>
