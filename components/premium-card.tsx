@@ -492,7 +492,7 @@ export default function PremiumCard({
                 <p className="text-xs text-white/80">
                   {hasUsedTrial
                     ? "7,99€/mes. Cancela cuando quieras."
-                    : "Luego 7,99€/mes. Cancela cuando quieras."}
+                    : "Luego $1/mes. Cancela cuando quieras."}
                 </p>
               </div>
             </div>
