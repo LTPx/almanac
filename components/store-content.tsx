@@ -200,15 +200,27 @@ export default function StoreContent({
         <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
           <div className="flex items-center gap-1 sm:gap-2">
             <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 fill-red-500" />
-            <span className="text-sm sm:text-base text-red-500 font-semibold">
-              {hearts ?? "-"}
-            </span>
+            {subscription?.isPremium ? (
+              <span className="text-lg sm:text-xl font-bold text-red-500">
+                ∞
+              </span>
+            ) : (
+              <span className="text-sm sm:text-base text-red-500 font-semibold">
+                {hearts ?? "-"}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1 sm:gap-2">
             <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
-            <span className="text-sm sm:text-base text-purple-500 font-semibold">
-              {zapTokens ?? "-"}
-            </span>
+            {subscription?.isPremium ? (
+              <span className="text-lg sm:text-xl font-bold text-purple-500">
+                ∞
+              </span>
+            ) : (
+              <span className="text-sm sm:text-base text-purple-500 font-semibold">
+                {zapTokens ?? "-"}
+              </span>
+            )}
           </div>
         </div>
       </div>
