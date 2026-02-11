@@ -20,11 +20,14 @@ import {
   Loader2,
   BookOpen,
   GraduationCap,
+  Library,
   RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
 
 interface Stats {
+  totalCurriculums: number;
+  curriculumsWithES: number;
   totalUnits: number;
   unitsWithES: number;
   totalLessons: number;
@@ -32,7 +35,7 @@ interface Stats {
 }
 
 interface LogEntry {
-  id: number;
+  id: number | string;
   name: string;
   translated?: string;
   error?: string;
@@ -60,8 +63,10 @@ const initialJob: JobState = {
 export default function TranslationsPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [curriculumsJob, setCurriculumsJob] = useState<JobState>(initialJob);
   const [unitsJob, setUnitsJob] = useState<JobState>(initialJob);
   const [lessonsJob, setLessonsJob] = useState<JobState>(initialJob);
+  const curriculumsScrollRef = useRef<HTMLDivElement>(null);
   const unitsScrollRef = useRef<HTMLDivElement>(null);
   const lessonsScrollRef = useRef<HTMLDivElement>(null);
 
@@ -85,6 +90,10 @@ export default function TranslationsPage() {
 
   // Auto-scroll en el log
   useEffect(() => {
+    curriculumsScrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [curriculumsJob.log.length]);
+
+  useEffect(() => {
     unitsScrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [unitsJob.log.length]);
 
@@ -93,10 +102,15 @@ export default function TranslationsPage() {
   }, [lessonsJob.log.length]);
 
   const startJob = (
-    type: "units" | "lessons",
+    type: "curriculums" | "units" | "lessons",
     onlyMissing: boolean = true
   ) => {
-    const setJob = type === "units" ? setUnitsJob : setLessonsJob;
+    const setJob =
+      type === "curriculums"
+        ? setCurriculumsJob
+        : type === "units"
+          ? setUnitsJob
+          : setLessonsJob;
 
     setJob({ running: true, processed: 0, total: 0, errors: 0, done: false, log: [] });
 
@@ -114,7 +128,8 @@ export default function TranslationsPage() {
           if (data.total === 0) {
             next.running = false;
             next.done = true;
-            toast.success(`Todas las ${type === "units" ? "unidades" : "lecciones"} ya están traducidas`);
+            const label = type === "curriculums" ? "currículums" : type === "units" ? "unidades" : "lecciones";
+            toast.success(`Todos los ${label} ya están traducidos`);
             eventSource.close();
           }
         }
@@ -192,7 +207,7 @@ export default function TranslationsPage() {
     translated,
     scrollRef
   }: {
-    type: "units" | "lessons";
+    type: "curriculums" | "units" | "lessons";
     job: JobState;
     icon: any;
     title: string;
@@ -339,6 +354,16 @@ export default function TranslationsPage() {
         </div>
       ) : stats ? (
         <div className="space-y-6">
+          <JobPanel
+            type="curriculums"
+            job={curriculumsJob}
+            icon={Library}
+            title="Currículums"
+            description="Traduce el título de cada currículum de EN a ES"
+            total={stats.totalCurriculums}
+            translated={stats.curriculumsWithES}
+            scrollRef={curriculumsScrollRef}
+          />
           <JobPanel
             type="units"
             job={unitsJob}
