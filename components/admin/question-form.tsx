@@ -73,17 +73,13 @@ type QuestionType =
   | "MULTIPLE_CHOICE"
   | "FILL_IN_BLANK"
   | "ORDER_WORDS"
-  | "TRUE_FALSE"
-  | "MATCHING"
-  | "DRAG_DROP";
+  | "TRUE_FALSE";
 
 const questionTypes = [
   { value: "MULTIPLE_CHOICE", label: "Opción múltiple" },
   { value: "FILL_IN_BLANK", label: "Completar espacios" },
   { value: "ORDER_WORDS", label: "Ordenar palabras" },
-  { value: "TRUE_FALSE", label: "Verdadero/Falso" },
-  { value: "MATCHING", label: "Emparejar" },
-  { value: "DRAG_DROP", label: "Arrastrar y soltar" }
+  { value: "TRUE_FALSE", label: "Verdadero/Falso" }
 ] as const;
 
 export default function QuestionForm({
@@ -691,43 +687,6 @@ export default function QuestionForm({
   "sentence": "Frase completa que el usuario debe ordenar",
   "words": ["Frase", "completa", "que", "el", "usuario", "debe", "ordenar"],
   "correctOrder": ["Frase", "completa", "que", "el", "usuario", "debe", "ordenar"],
-  "explanation": "Explicación de la respuesta"
-}`}
-                </pre>
-              </div>
-            )}
-
-            {formData.type === "MATCHING" && (
-              <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                <p className="text-sm text-blue-800 dark:text-blue-200 font-semibold mb-2">
-                  Ejemplo de estructura:
-                </p>
-                <pre className="text-xs text-blue-700 dark:text-blue-300 overflow-x-auto">
-                  {`{
-  "pairs": [
-    { "left": "Elemento 1", "right": "Definición 1" },
-    { "left": "Elemento 2", "right": "Definición 2" }
-  ],
-  "explanation": "Explicación de la respuesta"
-}`}
-                </pre>
-              </div>
-            )}
-
-            {formData.type === "DRAG_DROP" && (
-              <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                <p className="text-sm text-blue-800 dark:text-blue-200 font-semibold mb-2">
-                  Ejemplo de estructura:
-                </p>
-                <pre className="text-xs text-blue-700 dark:text-blue-300 overflow-x-auto">
-                  {`{
-  "items": ["Item 1", "Item 2", "Item 3"],
-  "zones": ["Zona A", "Zona B", "Zona C"],
-  "correctMapping": {
-    "Item 1": "Zona A",
-    "Item 2": "Zona B",
-    "Item 3": "Zona C"
-  },
   "explanation": "Explicación de la respuesta"
 }`}
                 </pre>

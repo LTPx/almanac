@@ -37,9 +37,7 @@ const questionTypeLabels: Record<string, string> = {
   MULTIPLE_CHOICE: "Opción múltiple",
   FILL_IN_BLANK: "Completar espacios",
   ORDER_WORDS: "Ordenar palabras",
-  TRUE_FALSE: "Verdadero/Falso",
-  MATCHING: "Emparejar",
-  DRAG_DROP: "Arrastrar y soltar"
+  TRUE_FALSE: "Verdadero/Falso"
 };
 
 interface QuestionsTableProps {
