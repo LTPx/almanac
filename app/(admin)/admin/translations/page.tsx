@@ -85,10 +85,15 @@ const initialSectionMigration: SectionMigrationState = {
 export default function TranslationsPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
-  const [curriculumsMigration, setCurriculumsMigration] = useState<SectionMigrationState>(initialSectionMigration);
-  const [unitsMigration, setUnitsMigration] = useState<SectionMigrationState>(initialSectionMigration);
-  const [lessonsMigration, setLessonsMigration] = useState<SectionMigrationState>(initialSectionMigration);
-  const [questionsMigration, setQuestionsMigration] = useState<SectionMigrationState>(initialSectionMigration);
+  const [curriculumsMigration, setCurriculumsMigration] =
+    useState<SectionMigrationState>(initialSectionMigration);
+  const [unitsMigration, setUnitsMigration] = useState<SectionMigrationState>(
+    initialSectionMigration
+  );
+  const [lessonsMigration, setLessonsMigration] =
+    useState<SectionMigrationState>(initialSectionMigration);
+  const [questionsMigration, setQuestionsMigration] =
+    useState<SectionMigrationState>(initialSectionMigration);
   const [curriculumsJob, setCurriculumsJob] = useState<JobState>(initialJob);
   const [unitsJob, setUnitsJob] = useState<JobState>(initialJob);
   const [lessonsJob, setLessonsJob] = useState<JobState>(initialJob);
@@ -127,22 +132,34 @@ export default function TranslationsPage() {
     lessonsScrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [lessonsJob.log.length]);
 
-  const startSectionMigration = (section: "curriculums" | "units" | "lessons" | "questions") => {
+  const startSectionMigration = (
+    section: "curriculums" | "units" | "lessons" | "questions"
+  ) => {
     const setState =
-      section === "curriculums" ? setCurriculumsMigration
-      : section === "units" ? setUnitsMigration
-      : section === "lessons" ? setLessonsMigration
-      : setQuestionsMigration;
+      section === "curriculums"
+        ? setCurriculumsMigration
+        : section === "units"
+          ? setUnitsMigration
+          : section === "lessons"
+            ? setLessonsMigration
+            : setQuestionsMigration;
 
     setState({ running: true, done: false, migrated: 0, skipped: 0 });
 
-    const eventSource = new EventSource(`/api/admin/migrate?section=${section}`);
+    const eventSource = new EventSource(
+      `/api/admin/migrate?section=${section}`
+    );
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
       if (data.type === "done") {
-        setState({ running: false, done: true, migrated: data.totalMigrated, skipped: data.totalSkipped });
+        setState({
+          running: false,
+          done: true,
+          migrated: data.totalMigrated,
+          skipped: data.totalSkipped
+        });
         eventSource.close();
         fetchStats();
         if (data.totalMigrated > 0) {
@@ -177,7 +194,14 @@ export default function TranslationsPage() {
           ? setUnitsJob
           : setLessonsJob;
 
-    setJob({ running: true, processed: 0, total: 0, errors: 0, done: false, log: [] });
+    setJob({
+      running: true,
+      processed: 0,
+      total: 0,
+      errors: 0,
+      done: false,
+      log: []
+    });
 
     const url = `/api/admin/translate/bulk?type=${type}&onlyMissing=${onlyMissing}`;
     const eventSource = new EventSource(url);
@@ -193,7 +217,12 @@ export default function TranslationsPage() {
           if (data.total === 0) {
             next.running = false;
             next.done = true;
-            const label = type === "curriculums" ? "currículums" : type === "units" ? "unidades" : "lecciones";
+            const label =
+              type === "curriculums"
+                ? "currículums"
+                : type === "units"
+                  ? "unidades"
+                  : "lecciones";
             toast.success(`Todos los ${label} ya están traducidos`);
             eventSource.close();
           }
@@ -235,7 +264,9 @@ export default function TranslationsPage() {
           eventSource.close();
           fetchStats();
           if (data.errors === 0) {
-            toast.success(`¡Traducción completada! ${data.processed} elementos traducidos`);
+            toast.success(
+              `¡Traducción completada! ${data.processed} elementos traducidos`
+            );
           } else {
             toast.warning(`Completado con ${data.errors} errores`);
           }
@@ -297,7 +328,10 @@ export default function TranslationsPage() {
                 {translated}/{total} traducidas
               </Badge>
               {!allDone && (
-                <Badge variant="outline" className="text-orange-600 border-orange-300">
+                <Badge
+                  variant="outline"
+                  className="text-orange-600 border-orange-300"
+                >
                   {missing} pendientes
                 </Badge>
               )}
@@ -341,7 +375,9 @@ export default function TranslationsPage() {
                 <span>
                   {job.processed} / {job.total} procesados
                   {job.errors > 0 && (
-                    <span className="text-red-500 ml-2">({job.errors} errores)</span>
+                    <span className="text-red-500 ml-2">
+                      ({job.errors} errores)
+                    </span>
                   )}
                 </span>
                 <span>{progressPercent(job)}%</span>
@@ -373,7 +409,9 @@ export default function TranslationsPage() {
                     {entry.translated && (
                       <>
                         <span className="text-muted-foreground">→</span>
-                        <span className="truncate text-green-600">{entry.translated}</span>
+                        <span className="truncate text-green-600">
+                          {entry.translated}
+                        </span>
                       </>
                     )}
                     {entry.error && (
@@ -390,7 +428,6 @@ export default function TranslationsPage() {
     );
   };
 
-
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl space-y-8">
       {/* Header */}
@@ -404,8 +441,15 @@ export default function TranslationsPage() {
             Migración y traducción por lote EN ↔ ES
           </p>
         </div>
-        <Button variant="outline" onClick={fetchStats} disabled={loadingStats} className="gap-2">
-          <RefreshCw className={`w-4 h-4 ${loadingStats ? "animate-spin" : ""}`} />
+        <Button
+          variant="outline"
+          onClick={fetchStats}
+          disabled={loadingStats}
+          className="gap-2"
+        >
+          <RefreshCw
+            className={`w-4 h-4 ${loadingStats ? "animate-spin" : ""}`}
+          />
           Actualizar stats
         </Button>
       </div>
@@ -425,7 +469,9 @@ export default function TranslationsPage() {
                 Migración de datos a EN
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Copia los datos originales (title/name/description) a las tablas de traducción EN. Solo procesa los registros que aún no tienen traducción EN.
+                Copia los datos originales (title/name/description) a las tablas
+                de traducción EN. Solo procesa los registros que aún no tienen
+                traducción EN.
               </p>
             </div>
 
@@ -433,54 +479,102 @@ export default function TranslationsPage() {
               <CardContent className="pt-6">
                 <div className="divide-y">
                   {[
-                    { section: "curriculums" as const, label: "Currículums", icon: Library, withEN: stats.curriculumsWithEN, total: stats.totalCurriculums, state: curriculumsMigration },
-                    { section: "units" as const, label: "Unidades", icon: GraduationCap, withEN: stats.unitsWithEN, total: stats.totalUnits, state: unitsMigration },
-                    { section: "lessons" as const, label: "Lecciones", icon: BookOpen, withEN: stats.lessonsWithEN, total: stats.totalLessons, state: lessonsMigration },
-                    { section: "questions" as const, label: "Preguntas", icon: HelpCircle, withEN: stats.questionsWithEN, total: stats.totalQuestions, state: questionsMigration }
-                  ].map(({ section, label, icon: Icon, withEN, total, state }) => {
-                    const missing = total - withEN;
-                    const allDone = missing === 0;
-                    return (
-                      <div key={section} className="flex items-center justify-between py-3 gap-4">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
-                          <span className="font-medium text-sm">{label}</span>
-                          <span className="text-sm text-muted-foreground">
-                            {withEN}<span className="text-muted-foreground/60">/{total}</span>
-                          </span>
-                          {allDone ? (
-                            <Badge variant="default" className="bg-green-600 text-xs py-0">
-                              <CheckCircle2 className="w-3 h-3 mr-1" />
-                              Listo
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-orange-600 border-orange-300 text-xs py-0">
-                              {missing} pendientes
-                            </Badge>
-                          )}
-                          {state.done && state.migrated > 0 && (
-                            <span className="text-xs text-green-600">✓ {state.migrated} migrados</span>
-                          )}
-                        </div>
-                        <Button
-                          size="sm"
-                          variant={allDone ? "outline" : "default"}
-                          onClick={() => startSectionMigration(section)}
-                          disabled={state.running || allDone}
-                          className="gap-1.5 shrink-0"
+                    {
+                      section: "curriculums" as const,
+                      label: "Currículums",
+                      icon: Library,
+                      withEN: stats.curriculumsWithEN,
+                      total: stats.totalCurriculums,
+                      state: curriculumsMigration
+                    },
+                    {
+                      section: "units" as const,
+                      label: "Unidades",
+                      icon: GraduationCap,
+                      withEN: stats.unitsWithEN,
+                      total: stats.totalUnits,
+                      state: unitsMigration
+                    },
+                    {
+                      section: "lessons" as const,
+                      label: "Lecciones",
+                      icon: BookOpen,
+                      withEN: stats.lessonsWithEN,
+                      total: stats.totalLessons,
+                      state: lessonsMigration
+                    },
+                    {
+                      section: "questions" as const,
+                      label: "Preguntas",
+                      icon: HelpCircle,
+                      withEN: stats.questionsWithEN,
+                      total: stats.totalQuestions,
+                      state: questionsMigration
+                    }
+                  ].map(
+                    ({ section, label, icon: Icon, withEN, total, state }) => {
+                      const missing = total - withEN;
+                      const allDone = missing === 0;
+                      return (
+                        <div
+                          key={section}
+                          className="flex items-center justify-between py-3 gap-4"
                         >
-                          {state.running ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          ) : allDone ? (
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                          ) : (
-                            <DatabaseZap className="w-3.5 h-3.5" />
-                          )}
-                          {state.running ? "Migrando..." : allDone ? "Migrado" : "Migrar"}
-                        </Button>
-                      </div>
-                    );
-                  })}
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <span className="font-medium text-sm">{label}</span>
+                            <span className="text-sm text-muted-foreground">
+                              {withEN}
+                              <span className="text-muted-foreground/60">
+                                /{total}
+                              </span>
+                            </span>
+                            {allDone ? (
+                              <Badge
+                                variant="default"
+                                className="bg-green-600 text-xs py-0"
+                              >
+                                <CheckCircle2 className="w-3 h-3 mr-1" />
+                                Listo
+                              </Badge>
+                            ) : (
+                              <Badge
+                                variant="outline"
+                                className="text-orange-600 border-orange-300 text-xs py-0"
+                              >
+                                {missing} pendientes
+                              </Badge>
+                            )}
+                            {state.done && state.migrated > 0 && (
+                              <span className="text-xs text-green-600">
+                                ✓ {state.migrated} migrados
+                              </span>
+                            )}
+                          </div>
+                          <Button
+                            size="sm"
+                            variant={allDone ? "outline" : "default"}
+                            onClick={() => startSectionMigration(section)}
+                            disabled={state.running || allDone}
+                            className="gap-1.5 shrink-0"
+                          >
+                            {state.running ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : allDone ? (
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            ) : (
+                              <DatabaseZap className="w-3.5 h-3.5" />
+                            )}
+                            {state.running
+                              ? "Migrando..."
+                              : allDone
+                                ? "Migrado"
+                                : "Migrar"}
+                          </Button>
+                        </div>
+                      );
+                    }
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -496,7 +590,8 @@ export default function TranslationsPage() {
                 Traducción EN → ES con IA
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Traduce el contenido de EN a ES usando Gemini. Requiere tener la migración EN completa.
+                Traduce el contenido de EN a ES usando Gemini. Requiere tener la
+                migración EN completa.
               </p>
             </div>
 
@@ -520,7 +615,7 @@ export default function TranslationsPage() {
               translated={stats.unitsWithES}
               scrollRef={unitsScrollRef}
             />
-            <JobPanel
+            {/* <JobPanel
               type="lessons"
               job={lessonsJob}
               icon={BookOpen}
@@ -529,11 +624,13 @@ export default function TranslationsPage() {
               total={stats.totalLessons}
               translated={stats.lessonsWithES}
               scrollRef={lessonsScrollRef}
-            />
+            /> */}
           </div>
         </>
       ) : (
-        <p className="text-muted-foreground">No se pudieron cargar las estadísticas</p>
+        <p className="text-muted-foreground">
+          No se pudieron cargar las estadísticas
+        </p>
       )}
     </div>
   );
