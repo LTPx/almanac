@@ -57,11 +57,22 @@ async function delay(ms: number) {
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const type = searchParams.get("type") as "curriculums" | "units" | "lessons" | "questions" | null;
+  const type = searchParams.get("type") as
+    | "curriculums"
+    | "units"
+    | "lessons"
+    | "questions"
+    | null;
   const onlyMissing = searchParams.get("onlyMissing") !== "false";
 
-  if (!type || !["curriculums", "units", "lessons", "questions"].includes(type)) {
-    return new Response("type must be 'curriculums', 'units', 'lessons' or 'questions'", { status: 400 });
+  if (
+    !type ||
+    !["curriculums", "units", "lessons", "questions"].includes(type)
+  ) {
+    return new Response(
+      "type must be 'curriculums', 'units', 'lessons' or 'questions'",
+      { status: 400 }
+    );
   }
 
   if (!genAI) {
@@ -80,14 +91,16 @@ export async function GET(request: NextRequest) {
         // 1. Obtener registros sin traducción ES
         // Curriculum uses String id and only has 'title'; units/lessons use Int id and have 'name'+'description'
         let curriculumItems: { id: string; title: string }[] = [];
-        let items: { id: number; name: string; description: string | null }[] = [];
+        let items: { id: number; name: string; description: string | null }[] =
+          [];
 
         if (type === "curriculums") {
           if (onlyMissing) {
-            const alreadyTranslated = await prisma.curriculumTranslation.findMany({
-              where: { language: "ES" },
-              select: { curriculumId: true }
-            });
+            const alreadyTranslated =
+              await prisma.curriculumTranslation.findMany({
+                where: { language: "ES" },
+                select: { curriculumId: true }
+              });
             const translatedIds = alreadyTranslated.map((t) => t.curriculumId);
             curriculumItems = await prisma.curriculum.findMany({
               where: { id: { notIn: translatedIds } },
@@ -139,7 +152,8 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        const total = type === "curriculums" ? curriculumItems.length : items.length;
+        const total =
+          type === "curriculums" ? curriculumItems.length : items.length;
         send({ type: "start", total });
 
         let processed = 0;
@@ -154,17 +168,36 @@ export async function GET(request: NextRequest) {
               batch.map(async (item) => {
                 try {
                   // Obtener traducción EN como fuente
-                  const enTranslation = await prisma.curriculumTranslation.findUnique({
-                    where: { curriculumId_language: { curriculumId: item.id, language: "EN" } }
-                  });
+                  const enTranslation =
+                    await prisma.curriculumTranslation.findUnique({
+                      where: {
+                        curriculumId_language: {
+                          curriculumId: item.id,
+                          language: "EN"
+                        }
+                      }
+                    });
                   const sourceTitle = enTranslation?.title || item.title;
 
-                  const translated = await translateFields({ title: sourceTitle }, "EN", "ES");
+                  const translated = await translateFields(
+                    { title: sourceTitle },
+                    "EN",
+                    "ES"
+                  );
 
                   await prisma.curriculumTranslation.upsert({
-                    where: { curriculumId_language: { curriculumId: item.id, language: "ES" } },
+                    where: {
+                      curriculumId_language: {
+                        curriculumId: item.id,
+                        language: "ES"
+                      }
+                    },
                     update: { title: translated.title || sourceTitle },
-                    create: { curriculumId: item.id, language: "ES", title: translated.title || sourceTitle }
+                    create: {
+                      curriculumId: item.id,
+                      language: "ES",
+                      title: translated.title || sourceTitle
+                    }
                   });
 
                   processed++;
@@ -173,7 +206,11 @@ export async function GET(request: NextRequest) {
                     processed,
                     total,
                     errors,
-                    current: { id: item.id, name: sourceTitle, translated: translated.title }
+                    current: {
+                      id: item.id,
+                      name: sourceTitle,
+                      translated: translated.title
+                    }
                   });
                 } catch (err: any) {
                   errors++;
@@ -183,7 +220,11 @@ export async function GET(request: NextRequest) {
                     processed,
                     total,
                     errors,
-                    current: { id: item.id, name: item.title, error: err.message }
+                    current: {
+                      id: item.id,
+                      name: item.title,
+                      error: err.message
+                    }
                   });
                 }
               })
@@ -194,135 +235,167 @@ export async function GET(request: NextRequest) {
             }
           }
         } else {
-        for (let i = 0; i < items.length; i += BATCH_SIZE) {
-          const batch = items.slice(i, i + BATCH_SIZE);
+          for (let i = 0; i < items.length; i += BATCH_SIZE) {
+            const batch = items.slice(i, i + BATCH_SIZE);
 
-          await Promise.allSettled(
-            batch.map(async (item) => {
-              try {
-                // Obtener traducción EN como fuente
-                let sourceName = item.name;
-                let sourceDescription = item.description || "";
+            await Promise.allSettled(
+              batch.map(async (item) => {
+                try {
+                  // Obtener traducción EN como fuente
+                  let sourceName = item.name;
+                  let sourceDescription = item.description || "";
 
-                if (type === "units") {
-                  const enTranslation = await prisma.unitTranslation.findUnique(
-                    {
-                      where: {
-                        unitId_language: { unitId: item.id, language: "EN" }
-                      }
+                  if (type === "units") {
+                    const enTranslation =
+                      await prisma.unitTranslation.findUnique({
+                        where: {
+                          unitId_language: { unitId: item.id, language: "EN" }
+                        }
+                      });
+                    if (enTranslation) {
+                      sourceName = enTranslation.name;
+                      sourceDescription = enTranslation.description || "";
                     }
-                  );
-                  if (enTranslation) {
-                    sourceName = enTranslation.name;
-                    sourceDescription = enTranslation.description || "";
+                  } else {
+                    const enTranslation =
+                      await prisma.lessonTranslation.findUnique({
+                        where: {
+                          lessonId_language: {
+                            lessonId: item.id,
+                            language: "EN"
+                          }
+                        }
+                      });
+                    if (enTranslation) {
+                      sourceName = enTranslation.name;
+                      sourceDescription = enTranslation.description || "";
+                    }
                   }
-                } else {
-                  const enTranslation =
-                    await prisma.lessonTranslation.findUnique({
+
+                  const fields: Record<string, string> = { name: sourceName };
+                  if (sourceDescription) fields.description = sourceDescription;
+
+                  const translated = await translateFields(fields, "EN", "ES");
+
+                  // Guardar traducción ES en la DB
+                  if (type === "units") {
+                    await prisma.unitTranslation.upsert({
                       where: {
-                        lessonId_language: { lessonId: item.id, language: "EN" }
+                        unitId_language: { unitId: item.id, language: "ES" }
+                      },
+                      update: {
+                        name: translated.name || sourceName,
+                        description: translated.description || null
+                      },
+                      create: {
+                        unitId: item.id,
+                        language: "ES",
+                        name: translated.name || sourceName,
+                        description: translated.description || null
                       }
                     });
-                  if (enTranslation) {
-                    sourceName = enTranslation.name;
-                    sourceDescription = enTranslation.description || "";
+                  } else {
+                    await prisma.lessonTranslation.upsert({
+                      where: {
+                        lessonId_language: { lessonId: item.id, language: "ES" }
+                      },
+                      update: {
+                        name: translated.name || sourceName,
+                        description: translated.description || null
+                      },
+                      create: {
+                        lessonId: item.id,
+                        language: "ES",
+                        name: translated.name || sourceName,
+                        description: translated.description || null
+                      }
+                    });
                   }
-                }
 
-                const fields: Record<string, string> = { name: sourceName };
-                if (sourceDescription) fields.description = sourceDescription;
-
-                const translated = await translateFields(fields, "EN", "ES");
-
-                // Guardar traducción ES en la DB
-                if (type === "units") {
-                  await prisma.unitTranslation.upsert({
-                    where: {
-                      unitId_language: { unitId: item.id, language: "ES" }
-                    },
-                    update: {
-                      name: translated.name || sourceName,
-                      description: translated.description || null
-                    },
-                    create: {
-                      unitId: item.id,
-                      language: "ES",
-                      name: translated.name || sourceName,
-                      description: translated.description || null
+                  processed++;
+                  send({
+                    type: "progress",
+                    processed,
+                    total,
+                    errors,
+                    current: {
+                      id: item.id,
+                      name: sourceName,
+                      translated: translated.name
                     }
                   });
-                } else {
-                  await prisma.lessonTranslation.upsert({
-                    where: {
-                      lessonId_language: { lessonId: item.id, language: "ES" }
-                    },
-                    update: {
-                      name: translated.name || sourceName,
-                      description: translated.description || null
-                    },
-                    create: {
-                      lessonId: item.id,
-                      language: "ES",
-                      name: translated.name || sourceName,
-                      description: translated.description || null
+                } catch (err: any) {
+                  errors++;
+                  processed++;
+                  send({
+                    type: "error",
+                    processed,
+                    total,
+                    errors,
+                    current: {
+                      id: item.id,
+                      name: item.name,
+                      error: err.message
                     }
                   });
                 }
+              })
+            );
 
-                processed++;
-                send({
-                  type: "progress",
-                  processed,
-                  total,
-                  errors,
-                  current: {
-                    id: item.id,
-                    name: sourceName,
-                    translated: translated.name
-                  }
-                });
-              } catch (err: any) {
-                errors++;
-                processed++;
-                send({
-                  type: "error",
-                  processed,
-                  total,
-                  errors,
-                  current: { id: item.id, name: item.name, error: err.message }
-                });
-              }
-            })
-          );
-
-          // Delay entre lotes para no saturar Gemini
-          if (i + BATCH_SIZE < items.length) {
-            await delay(BATCH_DELAY_MS);
+            // Delay entre lotes para no saturar Gemini
+            if (i + BATCH_SIZE < items.length) {
+              await delay(BATCH_DELAY_MS);
+            }
           }
-        }
         } // end else (units/lessons)
 
         // ── QUESTIONS ──────────────────────────────────────────────
         if (type === "questions") {
-          type QItem = { id: number; title: string; type: string; content: any; answers: { id: number; text: string; order: number }[] };
+          type QItem = {
+            id: number;
+            title: string;
+            type: string;
+            content: any;
+            answers: { id: number; text: string; order: number }[];
+          };
           let questionItems: QItem[] = [];
 
           if (onlyMissing) {
-            const alreadyTranslated = await prisma.questionTranslation.findMany({
-              where: { language: "ES" },
-              select: { questionId: true }
-            });
+            const alreadyTranslated = await prisma.questionTranslation.findMany(
+              {
+                where: { language: "ES" },
+                select: { questionId: true }
+              }
+            );
             const translatedIds = alreadyTranslated.map((t) => t.questionId);
-            questionItems = await prisma.question.findMany({
+            questionItems = (await prisma.question.findMany({
               where: { id: { notIn: translatedIds } },
-              select: { id: true, title: true, type: true, content: true, answers: { select: { id: true, text: true, order: true }, orderBy: { order: "asc" } } },
+              select: {
+                id: true,
+                title: true,
+                type: true,
+                content: true,
+                answers: {
+                  select: { id: true, text: true, order: true },
+                  orderBy: { order: "asc" }
+                }
+              },
               orderBy: { id: "asc" }
-            }) as QItem[];
+            })) as QItem[];
           } else {
-            questionItems = await prisma.question.findMany({
-              select: { id: true, title: true, type: true, content: true, answers: { select: { id: true, text: true, order: true }, orderBy: { order: "asc" } } },
+            questionItems = (await prisma.question.findMany({
+              select: {
+                id: true,
+                title: true,
+                type: true,
+                content: true,
+                answers: {
+                  select: { id: true, text: true, order: true },
+                  orderBy: { order: "asc" }
+                }
+              },
               orderBy: { id: "asc" }
-            }) as QItem[];
+            })) as QItem[];
           }
 
           const qTotal = questionItems.length;
@@ -345,7 +418,12 @@ export async function GET(request: NextRequest) {
                 try {
                   // Get EN translation as source
                   const enT = await prisma.questionTranslation.findUnique({
-                    where: { questionId_language: { questionId: item.id, language: "EN" } }
+                    where: {
+                      questionId_language: {
+                        questionId: item.id,
+                        language: "EN"
+                      }
+                    }
                   });
                   const sourceTitle = enT?.title || item.title;
                   const sourceContent = enT?.content ?? item.content;
@@ -369,36 +447,81 @@ export async function GET(request: NextRequest) {
 
                   // Upsert QuestionTranslation ES
                   await prisma.questionTranslation.upsert({
-                    where: { questionId_language: { questionId: item.id, language: "ES" } },
-                    update: { title: translated.title || sourceTitle, content: translatedContent },
-                    create: { questionId: item.id, language: "ES", title: translated.title || sourceTitle, content: translatedContent }
+                    where: {
+                      questionId_language: {
+                        questionId: item.id,
+                        language: "ES"
+                      }
+                    },
+                    update: {
+                      title: translated.title || sourceTitle,
+                      content: translatedContent
+                    },
+                    create: {
+                      questionId: item.id,
+                      language: "ES",
+                      title: translated.title || sourceTitle,
+                      content: translatedContent
+                    }
                   });
 
                   // Ensure EN QuestionTranslation exists
                   await prisma.questionTranslation.upsert({
-                    where: { questionId_language: { questionId: item.id, language: "EN" } },
+                    where: {
+                      questionId_language: {
+                        questionId: item.id,
+                        language: "EN"
+                      }
+                    },
                     update: { title: sourceTitle, content: sourceContent },
-                    create: { questionId: item.id, language: "EN", title: sourceTitle, content: sourceContent }
+                    create: {
+                      questionId: item.id,
+                      language: "EN",
+                      title: sourceTitle,
+                      content: sourceContent
+                    }
                   });
 
                   // Create AnswerTranslation for MULTIPLE_CHOICE
-                  if (item.type === "MULTIPLE_CHOICE" && Array.isArray(translatedContent?.options)) {
-                    const translatedOptions: string[] = translatedContent.options;
+                  if (
+                    item.type === "MULTIPLE_CHOICE" &&
+                    Array.isArray(translatedContent?.options)
+                  ) {
+                    const translatedOptions: string[] =
+                      translatedContent.options;
                     for (let j = 0; j < item.answers.length; j++) {
                       const ans = item.answers[j];
                       const translatedText = translatedOptions[j];
                       if (translatedText?.trim()) {
                         await prisma.answerTranslation.upsert({
-                          where: { answerId_language: { answerId: ans.id, language: "ES" } },
+                          where: {
+                            answerId_language: {
+                              answerId: ans.id,
+                              language: "ES"
+                            }
+                          },
                           update: { text: translatedText },
-                          create: { answerId: ans.id, language: "ES", text: translatedText }
+                          create: {
+                            answerId: ans.id,
+                            language: "ES",
+                            text: translatedText
+                          }
                         });
                       }
                       // EN answer translation
                       await prisma.answerTranslation.upsert({
-                        where: { answerId_language: { answerId: ans.id, language: "EN" } },
+                        where: {
+                          answerId_language: {
+                            answerId: ans.id,
+                            language: "EN"
+                          }
+                        },
                         update: { text: ans.text },
-                        create: { answerId: ans.id, language: "EN", text: ans.text }
+                        create: {
+                          answerId: ans.id,
+                          language: "EN",
+                          text: ans.text
+                        }
                       });
                     }
                   }
@@ -409,7 +532,11 @@ export async function GET(request: NextRequest) {
                     processed: qProcessed,
                     total: qTotal,
                     errors: qErrors,
-                    current: { id: item.id, name: sourceTitle, translated: translated.title }
+                    current: {
+                      id: item.id,
+                      name: sourceTitle,
+                      translated: translated.title
+                    }
                   });
                 } catch (err: any) {
                   qErrors++;
@@ -419,7 +546,11 @@ export async function GET(request: NextRequest) {
                     processed: qProcessed,
                     total: qTotal,
                     errors: qErrors,
-                    current: { id: item.id, name: item.title, error: err.message }
+                    current: {
+                      id: item.id,
+                      name: item.title,
+                      error: err.message
+                    }
                   });
                 }
               })
@@ -429,7 +560,12 @@ export async function GET(request: NextRequest) {
               await delay(BATCH_DELAY_MS);
             }
           }
-          send({ type: "done", processed: qProcessed, total: qTotal, errors: qErrors });
+          send({
+            type: "done",
+            processed: qProcessed,
+            total: qTotal,
+            errors: qErrors
+          });
           return;
         }
         // ── END QUESTIONS ──────────────────────────────────────────
