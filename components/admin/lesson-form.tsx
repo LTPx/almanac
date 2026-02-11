@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, Globe } from "lucide-react";
+import { Save, Globe, Sparkles, Loader2, ArrowRight, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import {
   Select,
@@ -94,7 +94,55 @@ export default function LessonForm({
     return response.json();
   };
 
+  const [translating, setTranslating] = useState<"EN" | "ES" | null>(null);
   const isLoading = submitting;
+
+  const handleTranslate = async (from: "EN" | "ES") => {
+    const to = from === "EN" ? "ES" : "EN";
+    const source = formData.translations[from];
+
+    if (!source.name.trim()) {
+      toast.error(`Escribe al menos el nombre en ${from} antes de traducir`);
+      return;
+    }
+
+    setTranslating(to);
+    try {
+      const res = await fetch("/api/admin/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fields: { name: source.name, description: source.description },
+          from,
+          to
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Error al traducir");
+      }
+
+      const { translated } = await res.json();
+
+      setFormData((prev) => ({
+        ...prev,
+        translations: {
+          ...prev.translations,
+          [to]: {
+            name: translated.name || prev.translations[to].name,
+            description: translated.description ?? prev.translations[to].description
+          }
+        }
+      }));
+
+      toast.success(`Traducción al ${to === "ES" ? "Español" : "Inglés"} completada`);
+    } catch (err: any) {
+      toast.error(err.message || "Error al traducir");
+    } finally {
+      setTranslating(null);
+    }
+  };
 
   const handleInputChange = (
     key: keyof LessonInput,
@@ -158,6 +206,24 @@ export default function LessonForm({
               <TabsTrigger value="ES">🇪🇸 Español (ES)</TabsTrigger>
             </TabsList>
             <TabsContent value="EN" className="space-y-4 mt-4">
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  disabled={translating !== null || !formData.translations.EN.name.trim()}
+                  onClick={() => handleTranslate("EN")}
+                >
+                  {translating === "ES" ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-3.5 h-3.5" />
+                  )}
+                  {translating === "ES" ? "Traduciendo..." : "Traducir a Español"}
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="name-en">Lesson Name (English)*</Label>
                 <Input
@@ -186,6 +252,24 @@ export default function LessonForm({
               </div>
             </TabsContent>
             <TabsContent value="ES" className="space-y-4 mt-4">
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  disabled={translating !== null || !formData.translations.ES.name.trim()}
+                  onClick={() => handleTranslate("ES")}
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  {translating === "EN" ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-3.5 h-3.5" />
+                  )}
+                  {translating === "EN" ? "Traduciendo..." : "Traducir a Inglés"}
+                </Button>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="name-es">
                   Nombre de la Lección (Español)*
