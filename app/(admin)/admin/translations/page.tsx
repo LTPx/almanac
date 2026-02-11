@@ -64,7 +64,7 @@ interface MigrationState {
   totalMigrated: number;
   totalSkipped: number;
   currentSection: string;
-  log: { type: "migrated" | "skipped" | "section"; entity?: string; name: string }[];
+  log: { type: "section" | "section_done"; name: string; migrated?: number; skipped?: number; total?: number }[];
 }
 
 const initialJob: JobState = {
@@ -148,14 +148,14 @@ export default function TranslationsPage() {
           next.log = [...next.log, { type: "section", name: data.label }];
         }
 
-        if (data.type === "migrated") {
-          next.totalMigrated += 1;
-          next.log = [...next.log, { type: "migrated", entity: data.entity, name: data.name }];
-        }
-
-        if (data.type === "skipped") {
-          next.totalSkipped += 1;
-          next.log = [...next.log, { type: "skipped", entity: data.entity, name: data.name }];
+        if (data.type === "section_done") {
+          next.log = [...next.log, {
+            type: "section_done",
+            name: data.label,
+            migrated: data.migrated,
+            skipped: data.skipped,
+            total: data.total
+          }];
         }
 
         if (data.type === "done") {
@@ -520,21 +520,30 @@ export default function TranslationsPage() {
                       {migrationState.log.map((entry, i) => {
                         if (entry.type === "section") {
                           return (
-                            <p key={i} className="text-muted-foreground font-semibold pt-2 pb-1">
+                            <p key={i} className="text-muted-foreground font-semibold pt-2 pb-0.5">
                               — {entry.name}
                             </p>
                           );
                         }
-                        return (
-                          <div key={i} className={`flex items-center gap-2 ${entry.type === "skipped" ? "text-muted-foreground" : "text-foreground"}`}>
-                            {entry.type === "migrated" ? (
-                              <CheckCircle2 className="w-3.5 h-3.5 text-green-500 shrink-0" />
-                            ) : (
-                              <span className="w-3.5 h-3.5 shrink-0 text-center">–</span>
-                            )}
-                            <span className="truncate">{entry.name}</span>
-                          </div>
-                        );
+                        if (entry.type === "section_done") {
+                          return (
+                            <div key={i} className="flex items-center gap-2 pl-2">
+                              {entry.migrated! > 0 ? (
+                                <CheckCircle2 className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                              ) : (
+                                <span className="w-3.5 h-3.5 shrink-0 text-center text-muted-foreground">–</span>
+                              )}
+                              <span className={entry.migrated! > 0 ? "text-green-600" : "text-muted-foreground"}>
+                                {entry.migrated} migrados
+                              </span>
+                              {entry.skipped! > 0 && (
+                                <span className="text-muted-foreground">· {entry.skipped} ya existían</span>
+                              )}
+                              <span className="text-muted-foreground">({entry.total} total)</span>
+                            </div>
+                          );
+                        }
+                        return null;
                       })}
                       <div ref={migrationScrollRef} />
                     </div>

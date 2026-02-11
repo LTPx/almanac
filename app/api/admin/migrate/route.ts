@@ -18,115 +18,132 @@ export async function GET() {
         let totalSkipped = 0;
 
         // 1. Curriculums
+        // Fetch all records and existing EN translations in 2 queries, then createMany in 1
         send({ type: "section", label: "Currículums" });
-        const curriculums = await prisma.curriculum.findMany({
-          select: { id: true, title: true }
-        });
-
-        for (const item of curriculums) {
-          const existing = await prisma.curriculumTranslation.findUnique({
-            where: {
-              curriculumId_language: { curriculumId: item.id, language: "EN" }
-            }
+        const [curriculums, curriculumENIds] = await Promise.all([
+          prisma.curriculum.findMany({ select: { id: true, title: true } }),
+          prisma.curriculumTranslation.findMany({
+            where: { language: "EN" },
+            select: { curriculumId: true }
+          })
+        ]);
+        const curriculumExistingIds = new Set(curriculumENIds.map((t) => t.curriculumId));
+        const curriculumsToMigrate = curriculums.filter((c) => !curriculumExistingIds.has(c.id));
+        if (curriculumsToMigrate.length > 0) {
+          await prisma.curriculumTranslation.createMany({
+            data: curriculumsToMigrate.map((c) => ({
+              curriculumId: c.id,
+              language: "EN",
+              title: c.title
+            })),
+            skipDuplicates: true
           });
-
-          if (!existing) {
-            await prisma.curriculumTranslation.create({
-              data: { curriculumId: item.id, language: "EN", title: item.title }
-            });
-            totalMigrated++;
-            send({ type: "migrated", entity: "curriculum", name: item.title });
-          } else {
-            totalSkipped++;
-            send({ type: "skipped", entity: "curriculum", name: item.title });
-          }
         }
+        totalMigrated += curriculumsToMigrate.length;
+        totalSkipped += curriculums.length - curriculumsToMigrate.length;
+        send({
+          type: "section_done",
+          label: "Currículums",
+          migrated: curriculumsToMigrate.length,
+          skipped: curriculums.length - curriculumsToMigrate.length,
+          total: curriculums.length
+        });
 
         // 2. Units
         send({ type: "section", label: "Unidades" });
-        const units = await prisma.unit.findMany({
-          select: { id: true, name: true, description: true }
-        });
-
-        for (const item of units) {
-          const existing = await prisma.unitTranslation.findUnique({
-            where: { unitId_language: { unitId: item.id, language: "EN" } }
+        const [units, unitENIds] = await Promise.all([
+          prisma.unit.findMany({ select: { id: true, name: true, description: true } }),
+          prisma.unitTranslation.findMany({
+            where: { language: "EN" },
+            select: { unitId: true }
+          })
+        ]);
+        const unitExistingIds = new Set(unitENIds.map((t) => t.unitId));
+        const unitsToMigrate = units.filter((u) => !unitExistingIds.has(u.id));
+        if (unitsToMigrate.length > 0) {
+          await prisma.unitTranslation.createMany({
+            data: unitsToMigrate.map((u) => ({
+              unitId: u.id,
+              language: "EN",
+              name: u.name,
+              description: u.description
+            })),
+            skipDuplicates: true
           });
-
-          if (!existing) {
-            await prisma.unitTranslation.create({
-              data: {
-                unitId: item.id,
-                language: "EN",
-                name: item.name,
-                description: item.description
-              }
-            });
-            totalMigrated++;
-            send({ type: "migrated", entity: "unit", name: item.name });
-          } else {
-            totalSkipped++;
-            send({ type: "skipped", entity: "unit", name: item.name });
-          }
         }
+        totalMigrated += unitsToMigrate.length;
+        totalSkipped += units.length - unitsToMigrate.length;
+        send({
+          type: "section_done",
+          label: "Unidades",
+          migrated: unitsToMigrate.length,
+          skipped: units.length - unitsToMigrate.length,
+          total: units.length
+        });
 
         // 3. Lessons
         send({ type: "section", label: "Lecciones" });
-        const lessons = await prisma.lesson.findMany({
-          select: { id: true, name: true, description: true }
-        });
-
-        for (const item of lessons) {
-          const existing = await prisma.lessonTranslation.findUnique({
-            where: { lessonId_language: { lessonId: item.id, language: "EN" } }
+        const [lessons, lessonENIds] = await Promise.all([
+          prisma.lesson.findMany({ select: { id: true, name: true, description: true } }),
+          prisma.lessonTranslation.findMany({
+            where: { language: "EN" },
+            select: { lessonId: true }
+          })
+        ]);
+        const lessonExistingIds = new Set(lessonENIds.map((t) => t.lessonId));
+        const lessonsToMigrate = lessons.filter((l) => !lessonExistingIds.has(l.id));
+        if (lessonsToMigrate.length > 0) {
+          await prisma.lessonTranslation.createMany({
+            data: lessonsToMigrate.map((l) => ({
+              lessonId: l.id,
+              language: "EN",
+              name: l.name,
+              description: l.description
+            })),
+            skipDuplicates: true
           });
-
-          if (!existing) {
-            await prisma.lessonTranslation.create({
-              data: {
-                lessonId: item.id,
-                language: "EN",
-                name: item.name,
-                description: item.description
-              }
-            });
-            totalMigrated++;
-            send({ type: "migrated", entity: "lesson", name: item.name });
-          } else {
-            totalSkipped++;
-            send({ type: "skipped", entity: "lesson", name: item.name });
-          }
         }
+        totalMigrated += lessonsToMigrate.length;
+        totalSkipped += lessons.length - lessonsToMigrate.length;
+        send({
+          type: "section_done",
+          label: "Lecciones",
+          migrated: lessonsToMigrate.length,
+          skipped: lessons.length - lessonsToMigrate.length,
+          total: lessons.length
+        });
 
         // 4. Questions
         send({ type: "section", label: "Preguntas" });
-        const questions = await prisma.question.findMany({
-          select: { id: true, title: true, content: true }
-        });
-
-        for (const item of questions) {
-          const existing = await prisma.questionTranslation.findUnique({
-            where: {
-              questionId_language: { questionId: item.id, language: "EN" }
-            }
+        const [questions, questionENIds] = await Promise.all([
+          prisma.question.findMany({ select: { id: true, title: true, content: true } }),
+          prisma.questionTranslation.findMany({
+            where: { language: "EN" },
+            select: { questionId: true }
+          })
+        ]);
+        const questionExistingIds = new Set(questionENIds.map((t) => t.questionId));
+        const questionsToMigrate = questions.filter((q) => !questionExistingIds.has(q.id));
+        if (questionsToMigrate.length > 0) {
+          await prisma.questionTranslation.createMany({
+            data: questionsToMigrate.map((q) => ({
+              questionId: q.id,
+              language: "EN",
+              title: q.title,
+              content: q.content as any
+            })),
+            skipDuplicates: true
           });
-
-          if (!existing) {
-            await prisma.questionTranslation.create({
-              data: {
-                questionId: item.id,
-                language: "EN",
-                title: item.title,
-                content: item.content as any
-              }
-            });
-            totalMigrated++;
-            send({ type: "migrated", entity: "question", name: item.title });
-          } else {
-            totalSkipped++;
-            send({ type: "skipped", entity: "question", name: item.title });
-          }
         }
+        totalMigrated += questionsToMigrate.length;
+        totalSkipped += questions.length - questionsToMigrate.length;
+        send({
+          type: "section_done",
+          label: "Preguntas",
+          migrated: questionsToMigrate.length,
+          skipped: questions.length - questionsToMigrate.length,
+          total: questions.length
+        });
 
         send({
           type: "done",
