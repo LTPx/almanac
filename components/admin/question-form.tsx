@@ -19,8 +19,14 @@ import {
   Trash2,
   CheckCircle,
   AlertCircle,
-  Code
+  Code,
+  Globe,
+  Sparkles,
+  Loader2,
+  ArrowRight,
+  ArrowLeft
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import {
   Select,
@@ -50,6 +56,7 @@ export type QuestionData = {
   isActive: boolean;
   content: any;
   answers?: AnswerData[];
+  translations?: { language: string; title: string }[];
 };
 
 export type AnswerData = {
@@ -67,6 +74,10 @@ export type QuestionInput = {
   isActive: boolean;
   content: any;
   answers: AnswerData[];
+  translations: {
+    EN: { title: string };
+    ES: { title: string };
+  };
 };
 
 type QuestionType =
@@ -88,6 +99,15 @@ export default function QuestionForm({
   submitting
 }: QuestionFormProps) {
   const [units, setUnits] = useState<Unit[]>([]);
+
+  const getInitialTranslation = (lang: "EN" | "ES") => {
+    if (initialData?.translations) {
+      const t = initialData.translations.find((t) => t.language === lang);
+      return { title: t?.title || "" };
+    }
+    return { title: "" };
+  };
+
   const [formData, setFormData] = useState<QuestionInput>({
     title: initialData?.title || "",
     type: initialData?.type || "MULTIPLE_CHOICE",
@@ -100,8 +120,69 @@ export default function QuestionForm({
       { text: "", isCorrect: false, order: 1 },
       { text: "", isCorrect: false, order: 2 },
       { text: "", isCorrect: false, order: 3 }
-    ]
+    ],
+    translations: {
+      EN:
+        getInitialTranslation("EN").title || initialData?.title
+          ? {
+              title:
+                getInitialTranslation("EN").title || initialData?.title || ""
+            }
+          : { title: "" },
+      ES: getInitialTranslation("ES")
+    }
   });
+
+  const [translating, setTranslating] = useState<"EN" | "ES" | null>(null);
+
+  const handleTranslate = async (from: "EN" | "ES") => {
+    const to = from === "EN" ? "ES" : "EN";
+    const source = formData.translations[from];
+
+    if (!source.title.trim()) {
+      toast.error(`Escribe la pregunta en ${from} antes de traducir`);
+      return;
+    }
+
+    setTranslating(to);
+    try {
+      const res = await fetch("/api/admin/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fields: { title: source.title }, from, to })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Error al traducir");
+      }
+
+      const { translated } = await res.json();
+
+      setFormData((prev) => ({
+        ...prev,
+        translations: {
+          ...prev.translations,
+          [to]: { title: translated.title || prev.translations[to].title }
+        }
+      }));
+
+      toast.success(
+        `Traducción al ${to === "ES" ? "Español" : "Inglés"} completada`
+      );
+    } catch (err: any) {
+      toast.error(err.message || "Error al traducir");
+    } finally {
+      setTranslating(null);
+    }
+  };
+
+  const handleTranslationChange = (lang: "EN" | "ES", value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      translations: { ...prev.translations, [lang]: { title: value } }
+    }));
+  };
 
   const [trueFalseAnswer, setTrueFalseAnswer] = useState<boolean>(
     initialData?.content?.correctAnswer ?? true
@@ -289,10 +370,18 @@ export default function QuestionForm({
     e.preventDefault();
 
     // Validaciones
-    if (!formData.title.trim()) {
-      toast.error("El título de la pregunta es requerido");
+    if (!formData.translations.EN.title.trim()) {
+      toast.error("La pregunta en inglés es requerida");
       return;
     }
+
+    if (!formData.translations.ES.title.trim()) {
+      toast.error("La pregunta en español es requerida");
+      return;
+    }
+
+    // Sincronizar title principal con EN
+    formData.title = formData.translations.EN.title;
 
     if (!formData.unitId) {
       toast.error("Debes seleccionar una unidad");
@@ -344,7 +433,7 @@ export default function QuestionForm({
         );
         return;
       }
-      debugger;
+
       try {
         const parsedContent = JSON.parse(jsonContent);
         formData.content = parsedContent;
@@ -374,22 +463,97 @@ export default function QuestionForm({
       {/* Información básica */}
       <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle>Información Básica</CardTitle>
-          <CardDescription>Datos principales de la pregunta</CardDescription>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="w-5 h-5" />
+            Información Básica
+          </CardTitle>
+          <CardDescription>
+            Escribe la pregunta en ambos idiomas
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Pregunta *</Label>
-            <Textarea
-              id="title"
-              value={formData.title}
-              onChange={(e) => handleInputChange("title", e.target.value)}
-              placeholder="Escribe aquí tu pregunta..."
-              rows={3}
-              required
-              className="bg-background border-border text-foreground"
-            />
-          </div>
+          <Tabs defaultValue="EN" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="EN">🇺🇸 English (EN)</TabsTrigger>
+              <TabsTrigger value="ES">🇪🇸 Español (ES)</TabsTrigger>
+            </TabsList>
+            <TabsContent value="EN" className="space-y-4 mt-4">
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  disabled={
+                    translating !== null ||
+                    !formData.translations.EN.title.trim()
+                  }
+                  onClick={() => handleTranslate("EN")}
+                >
+                  {translating === "ES" ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-3.5 h-3.5" />
+                  )}
+                  {translating === "ES"
+                    ? "Traduciendo..."
+                    : "Traducir a Español"}
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="title-en">Question (English) *</Label>
+                <Textarea
+                  id="title-en"
+                  value={formData.translations.EN.title}
+                  onChange={(e) =>
+                    handleTranslationChange("EN", e.target.value)
+                  }
+                  placeholder="Write the question here..."
+                  rows={3}
+                  className="bg-background border-border text-foreground"
+                />
+              </div>
+            </TabsContent>
+            <TabsContent value="ES" className="space-y-4 mt-4">
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  disabled={
+                    translating !== null ||
+                    !formData.translations.ES.title.trim()
+                  }
+                  onClick={() => handleTranslate("ES")}
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  {translating === "EN" ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-3.5 h-3.5" />
+                  )}
+                  {translating === "EN"
+                    ? "Traduciendo..."
+                    : "Traducir a Inglés"}
+                </Button>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="title-es">Pregunta (Español) *</Label>
+                <Textarea
+                  id="title-es"
+                  value={formData.translations.ES.title}
+                  onChange={(e) =>
+                    handleTranslationChange("ES", e.target.value)
+                  }
+                  placeholder="Escribe aquí tu pregunta..."
+                  rows={3}
+                  className="bg-background border-border text-foreground"
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="space-y-2">
@@ -683,7 +847,8 @@ export default function QuestionForm({
         <CardContent>
           <div className="p-6 bg-muted rounded-lg border border-border">
             <h3 className="font-semibold text-lg mb-4 text-foreground">
-              {formData.title || "Tu pregunta aparecerá aquí..."}
+              {formData.translations.EN.title ||
+                "Tu pregunta aparecerá aquí..."}
             </h3>
 
             {formData.type === "MULTIPLE_CHOICE" &&
@@ -769,7 +934,15 @@ export default function QuestionForm({
             Cancelar
           </Button>
         </Link>
-        <Button type="submit" disabled={isLoading}>
+        <Button
+          type="submit"
+          disabled={
+            isLoading ||
+            !formData.translations.EN.title ||
+            !formData.translations.ES.title ||
+            !formData.unitId
+          }
+        >
           <Save className="mr-2 h-4 w-4" />
           {isLoading
             ? "Guardando..."

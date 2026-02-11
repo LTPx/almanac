@@ -34,6 +34,12 @@ export async function GET(
             order: "asc"
           }
         },
+        translations: {
+          select: {
+            language: true,
+            title: true
+          }
+        },
         _count: {
           select: {
             answers: true
@@ -74,8 +80,7 @@ export async function PUT(
 
     const questionId = parseInt(id);
     const body = await request.json();
-    // const { answers } = body;
-    const { title, type, unitId, order, isActive, content, answers } = body;
+    const { title, type, unitId, order, isActive, content, answers, translations } = body;
 
     // Verificar que la pregunta existe
     const existingQuestion = await prisma.question.findUnique({
@@ -121,6 +126,20 @@ export async function PUT(
         });
       }
 
+      // Guardar traducciones si vienen en el body
+      if (translations) {
+        for (const lang of ["EN", "ES"] as const) {
+          const t = translations[lang];
+          if (t?.title?.trim()) {
+            await tx.questionTranslation.upsert({
+              where: { questionId_language: { questionId, language: lang } },
+              update: { title: t.title },
+              create: { questionId, language: lang, title: t.title, content: {} }
+            });
+          }
+        }
+      }
+
       // Obtener la pregunta actualizada con las respuestas
       return tx.question.findUnique({
         where: { id: questionId },
@@ -134,6 +153,12 @@ export async function PUT(
           answers: {
             orderBy: {
               order: "asc"
+            }
+          },
+          translations: {
+            select: {
+              language: true,
+              title: true
             }
           },
           _count: {

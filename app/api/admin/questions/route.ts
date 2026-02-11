@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     if (adminCheck) return adminCheck;
 
     const body = await request.json();
-    const { title, type, unitId, order, isActive, content, answers } = body;
+    const { title, type, unitId, order, isActive, content, answers, translations } = body;
 
     // Validaciones
     if (!title || !type || !unitId) {
@@ -88,6 +88,18 @@ export async function POST(request: Request) {
             order: answer.order ?? index
           }))
         });
+      }
+
+      // Guardar traducciones si vienen en el body
+      if (translations) {
+        for (const lang of ["EN", "ES"] as const) {
+          const t = translations[lang];
+          if (t?.title?.trim()) {
+            await tx.questionTranslation.create({
+              data: { questionId: newQuestion.id, language: lang, title: t.title, content: {} }
+            });
+          }
+        }
       }
 
       // Obtener la pregunta con las respuestas
