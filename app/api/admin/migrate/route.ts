@@ -1,11 +1,10 @@
-import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 
 function sseEvent(data: object): string {
   return `data: ${JSON.stringify(data)}\n\n`;
 }
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
@@ -26,7 +25,9 @@ export async function GET(_request: NextRequest) {
 
         for (const item of curriculums) {
           const existing = await prisma.curriculumTranslation.findUnique({
-            where: { curriculumId_language: { curriculumId: item.id, language: "EN" } }
+            where: {
+              curriculumId_language: { curriculumId: item.id, language: "EN" }
+            }
           });
 
           if (!existing) {
@@ -54,7 +55,12 @@ export async function GET(_request: NextRequest) {
 
           if (!existing) {
             await prisma.unitTranslation.create({
-              data: { unitId: item.id, language: "EN", name: item.name, description: item.description }
+              data: {
+                unitId: item.id,
+                language: "EN",
+                name: item.name,
+                description: item.description
+              }
             });
             totalMigrated++;
             send({ type: "migrated", entity: "unit", name: item.name });
@@ -77,7 +83,12 @@ export async function GET(_request: NextRequest) {
 
           if (!existing) {
             await prisma.lessonTranslation.create({
-              data: { lessonId: item.id, language: "EN", name: item.name, description: item.description }
+              data: {
+                lessonId: item.id,
+                language: "EN",
+                name: item.name,
+                description: item.description
+              }
             });
             totalMigrated++;
             send({ type: "migrated", entity: "lesson", name: item.name });
@@ -95,12 +106,19 @@ export async function GET(_request: NextRequest) {
 
         for (const item of questions) {
           const existing = await prisma.questionTranslation.findUnique({
-            where: { questionId_language: { questionId: item.id, language: "EN" } }
+            where: {
+              questionId_language: { questionId: item.id, language: "EN" }
+            }
           });
 
           if (!existing) {
             await prisma.questionTranslation.create({
-              data: { questionId: item.id, language: "EN", title: item.title, content: item.content as any }
+              data: {
+                questionId: item.id,
+                language: "EN",
+                title: item.title,
+                content: item.content as any
+              }
             });
             totalMigrated++;
             send({ type: "migrated", entity: "question", name: item.title });
