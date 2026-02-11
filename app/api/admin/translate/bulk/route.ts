@@ -12,7 +12,7 @@ const genAI = process.env.GEMINI_API_KEY
 
 // Tamaño del lote y delay entre lotes para no saturar la API de Gemini
 const BATCH_SIZE = 3;
-const BATCH_DELAY_MS = 4000;
+const BATCH_DELAY_MS = 5000;
 
 function sseEvent(data: object): string {
   return `data: ${JSON.stringify(data)}\n\n`;
@@ -153,204 +153,212 @@ export async function GET(request: NextRequest) {
         }
 
         if (type !== "questions") {
-        const total =
-          type === "curriculums" ? curriculumItems.length : items.length;
-        send({ type: "start", total });
+          const total =
+            type === "curriculums" ? curriculumItems.length : items.length;
+          send({ type: "start", total });
 
-        let processed = 0;
-        let errors = 0;
+          let processed = 0;
+          let errors = 0;
 
-        // 2. Procesar en lotes
-        if (type === "curriculums") {
-          for (let i = 0; i < curriculumItems.length; i += BATCH_SIZE) {
-            const batch = curriculumItems.slice(i, i + BATCH_SIZE);
+          // 2. Procesar en lotes
+          if (type === "curriculums") {
+            for (let i = 0; i < curriculumItems.length; i += BATCH_SIZE) {
+              const batch = curriculumItems.slice(i, i + BATCH_SIZE);
 
-            await Promise.allSettled(
-              batch.map(async (item) => {
-                try {
-                  // Obtener traducción EN como fuente
-                  const enTranslation =
-                    await prisma.curriculumTranslation.findUnique({
-                      where: {
-                        curriculumId_language: {
-                          curriculumId: item.id,
-                          language: "EN"
-                        }
-                      }
-                    });
-                  const sourceTitle = enTranslation?.title || item.title;
-
-                  const translated = await translateFields(
-                    { title: sourceTitle },
-                    "EN",
-                    "ES"
-                  );
-
-                  await prisma.curriculumTranslation.upsert({
-                    where: {
-                      curriculumId_language: {
-                        curriculumId: item.id,
-                        language: "ES"
-                      }
-                    },
-                    update: { title: translated.title || sourceTitle },
-                    create: {
-                      curriculumId: item.id,
-                      language: "ES",
-                      title: translated.title || sourceTitle
-                    }
-                  });
-
-                  processed++;
-                  send({
-                    type: "progress",
-                    processed,
-                    total,
-                    errors,
-                    current: {
-                      id: item.id,
-                      name: sourceTitle,
-                      translated: translated.title
-                    }
-                  });
-                } catch (err: any) {
-                  errors++;
-                  processed++;
-                  send({
-                    type: "error",
-                    processed,
-                    total,
-                    errors,
-                    current: {
-                      id: item.id,
-                      name: item.title,
-                      error: err.message
-                    }
-                  });
-                }
-              })
-            );
-
-            if (i + BATCH_SIZE < curriculumItems.length) {
-              await delay(BATCH_DELAY_MS);
-            }
-          }
-        } else {
-          for (let i = 0; i < items.length; i += BATCH_SIZE) {
-            const batch = items.slice(i, i + BATCH_SIZE);
-
-            await Promise.allSettled(
-              batch.map(async (item) => {
-                try {
-                  // Obtener traducción EN como fuente
-                  let sourceName = item.name;
-                  let sourceDescription = item.description || "";
-
-                  if (type === "units") {
+              await Promise.allSettled(
+                batch.map(async (item) => {
+                  try {
+                    // Obtener traducción EN como fuente
                     const enTranslation =
-                      await prisma.unitTranslation.findUnique({
+                      await prisma.curriculumTranslation.findUnique({
                         where: {
-                          unitId_language: { unitId: item.id, language: "EN" }
-                        }
-                      });
-                    if (enTranslation) {
-                      sourceName = enTranslation.name;
-                      sourceDescription = enTranslation.description || "";
-                    }
-                  } else {
-                    const enTranslation =
-                      await prisma.lessonTranslation.findUnique({
-                        where: {
-                          lessonId_language: {
-                            lessonId: item.id,
+                          curriculumId_language: {
+                            curriculumId: item.id,
                             language: "EN"
                           }
                         }
                       });
-                    if (enTranslation) {
-                      sourceName = enTranslation.name;
-                      sourceDescription = enTranslation.description || "";
-                    }
-                  }
+                    const sourceTitle = enTranslation?.title || item.title;
 
-                  const fields: Record<string, string> = { name: sourceName };
-                  if (sourceDescription) fields.description = sourceDescription;
+                    const translated = await translateFields(
+                      { title: sourceTitle },
+                      "EN",
+                      "ES"
+                    );
 
-                  const translated = await translateFields(fields, "EN", "ES");
-
-                  // Guardar traducción ES en la DB
-                  if (type === "units") {
-                    await prisma.unitTranslation.upsert({
+                    await prisma.curriculumTranslation.upsert({
                       where: {
-                        unitId_language: { unitId: item.id, language: "ES" }
+                        curriculumId_language: {
+                          curriculumId: item.id,
+                          language: "ES"
+                        }
                       },
-                      update: {
-                        name: translated.name || sourceName,
-                        description: translated.description || null
-                      },
+                      update: { title: translated.title || sourceTitle },
                       create: {
-                        unitId: item.id,
+                        curriculumId: item.id,
                         language: "ES",
-                        name: translated.name || sourceName,
-                        description: translated.description || null
+                        title: translated.title || sourceTitle
                       }
                     });
-                  } else {
-                    await prisma.lessonTranslation.upsert({
-                      where: {
-                        lessonId_language: { lessonId: item.id, language: "ES" }
-                      },
-                      update: {
-                        name: translated.name || sourceName,
-                        description: translated.description || null
-                      },
-                      create: {
-                        lessonId: item.id,
-                        language: "ES",
-                        name: translated.name || sourceName,
-                        description: translated.description || null
+
+                    processed++;
+                    send({
+                      type: "progress",
+                      processed,
+                      total,
+                      errors,
+                      current: {
+                        id: item.id,
+                        name: sourceTitle,
+                        translated: translated.title
+                      }
+                    });
+                  } catch (err: any) {
+                    errors++;
+                    processed++;
+                    send({
+                      type: "error",
+                      processed,
+                      total,
+                      errors,
+                      current: {
+                        id: item.id,
+                        name: item.title,
+                        error: err.message
                       }
                     });
                   }
+                })
+              );
 
-                  processed++;
-                  send({
-                    type: "progress",
-                    processed,
-                    total,
-                    errors,
-                    current: {
-                      id: item.id,
-                      name: sourceName,
-                      translated: translated.name
-                    }
-                  });
-                } catch (err: any) {
-                  errors++;
-                  processed++;
-                  send({
-                    type: "error",
-                    processed,
-                    total,
-                    errors,
-                    current: {
-                      id: item.id,
-                      name: item.name,
-                      error: err.message
-                    }
-                  });
-                }
-              })
-            );
-
-            // Delay entre lotes para no saturar Gemini
-            if (i + BATCH_SIZE < items.length) {
-              await delay(BATCH_DELAY_MS);
+              if (i + BATCH_SIZE < curriculumItems.length) {
+                await delay(BATCH_DELAY_MS);
+              }
             }
-          }
-        } // end else (units/lessons)
+          } else {
+            for (let i = 0; i < items.length; i += BATCH_SIZE) {
+              const batch = items.slice(i, i + BATCH_SIZE);
 
-        send({ type: "done", processed, total, errors });
+              await Promise.allSettled(
+                batch.map(async (item) => {
+                  try {
+                    // Obtener traducción EN como fuente
+                    let sourceName = item.name;
+                    let sourceDescription = item.description || "";
+
+                    if (type === "units") {
+                      const enTranslation =
+                        await prisma.unitTranslation.findUnique({
+                          where: {
+                            unitId_language: { unitId: item.id, language: "EN" }
+                          }
+                        });
+                      if (enTranslation) {
+                        sourceName = enTranslation.name;
+                        sourceDescription = enTranslation.description || "";
+                      }
+                    } else {
+                      const enTranslation =
+                        await prisma.lessonTranslation.findUnique({
+                          where: {
+                            lessonId_language: {
+                              lessonId: item.id,
+                              language: "EN"
+                            }
+                          }
+                        });
+                      if (enTranslation) {
+                        sourceName = enTranslation.name;
+                        sourceDescription = enTranslation.description || "";
+                      }
+                    }
+
+                    const fields: Record<string, string> = { name: sourceName };
+                    if (sourceDescription)
+                      fields.description = sourceDescription;
+
+                    const translated = await translateFields(
+                      fields,
+                      "EN",
+                      "ES"
+                    );
+
+                    // Guardar traducción ES en la DB
+                    if (type === "units") {
+                      await prisma.unitTranslation.upsert({
+                        where: {
+                          unitId_language: { unitId: item.id, language: "ES" }
+                        },
+                        update: {
+                          name: translated.name || sourceName,
+                          description: translated.description || null
+                        },
+                        create: {
+                          unitId: item.id,
+                          language: "ES",
+                          name: translated.name || sourceName,
+                          description: translated.description || null
+                        }
+                      });
+                    } else {
+                      await prisma.lessonTranslation.upsert({
+                        where: {
+                          lessonId_language: {
+                            lessonId: item.id,
+                            language: "ES"
+                          }
+                        },
+                        update: {
+                          name: translated.name || sourceName,
+                          description: translated.description || null
+                        },
+                        create: {
+                          lessonId: item.id,
+                          language: "ES",
+                          name: translated.name || sourceName,
+                          description: translated.description || null
+                        }
+                      });
+                    }
+
+                    processed++;
+                    send({
+                      type: "progress",
+                      processed,
+                      total,
+                      errors,
+                      current: {
+                        id: item.id,
+                        name: sourceName,
+                        translated: translated.name
+                      }
+                    });
+                  } catch (err: any) {
+                    errors++;
+                    processed++;
+                    send({
+                      type: "error",
+                      processed,
+                      total,
+                      errors,
+                      current: {
+                        id: item.id,
+                        name: item.name,
+                        error: err.message
+                      }
+                    });
+                  }
+                })
+              );
+
+              // Delay entre lotes para no saturar Gemini
+              if (i + BATCH_SIZE < items.length) {
+                await delay(BATCH_DELAY_MS);
+              }
+            }
+          } // end else (units/lessons)
+
+          send({ type: "done", processed, total, errors });
         } // end if (type !== "questions")
 
         // ── QUESTIONS ──────────────────────────────────────────────
