@@ -12,6 +12,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import {
   Languages,
   Play,
@@ -21,17 +22,23 @@ import {
   BookOpen,
   GraduationCap,
   Library,
-  RefreshCw
+  RefreshCw,
+  DatabaseZap
 } from "lucide-react";
 import { toast } from "sonner";
 
 interface Stats {
   totalCurriculums: number;
+  curriculumsWithEN: number;
   curriculumsWithES: number;
   totalUnits: number;
+  unitsWithEN: number;
   unitsWithES: number;
   totalLessons: number;
+  lessonsWithEN: number;
   lessonsWithES: number;
+  totalQuestions: number;
+  questionsWithEN: number;
 }
 
 interface LogEntry {
@@ -39,7 +46,7 @@ interface LogEntry {
   name: string;
   translated?: string;
   error?: string;
-  status: "ok" | "error";
+  status: "ok" | "error" | "skipped";
 }
 
 interface JobState {
@@ -51,6 +58,15 @@ interface JobState {
   log: LogEntry[];
 }
 
+interface MigrationState {
+  running: boolean;
+  done: boolean;
+  totalMigrated: number;
+  totalSkipped: number;
+  currentSection: string;
+  log: { type: "migrated" | "skipped" | "section"; entity?: string; name: string }[];
+}
+
 const initialJob: JobState = {
   running: false,
   processed: 0,
@@ -60,12 +76,23 @@ const initialJob: JobState = {
   log: []
 };
 
+const initialMigration: MigrationState = {
+  running: false,
+  done: false,
+  totalMigrated: 0,
+  totalSkipped: 0,
+  currentSection: "",
+  log: []
+};
+
 export default function TranslationsPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [migrationState, setMigrationState] = useState<MigrationState>(initialMigration);
   const [curriculumsJob, setCurriculumsJob] = useState<JobState>(initialJob);
   const [unitsJob, setUnitsJob] = useState<JobState>(initialJob);
   const [lessonsJob, setLessonsJob] = useState<JobState>(initialJob);
+  const migrationScrollRef = useRef<HTMLDivElement>(null);
   const curriculumsScrollRef = useRef<HTMLDivElement>(null);
   const unitsScrollRef = useRef<HTMLDivElement>(null);
   const lessonsScrollRef = useRef<HTMLDivElement>(null);
@@ -88,7 +115,11 @@ export default function TranslationsPage() {
     fetchStats();
   }, []);
 
-  // Auto-scroll en el log
+  // Auto-scroll logs
+  useEffect(() => {
+    migrationScrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [migrationState.log.length]);
+
   useEffect(() => {
     curriculumsScrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [curriculumsJob.log.length]);
@@ -100,6 +131,64 @@ export default function TranslationsPage() {
   useEffect(() => {
     lessonsScrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [lessonsJob.log.length]);
+
+  const startMigration = () => {
+    setMigrationState({ ...initialMigration, running: true });
+
+    const eventSource = new EventSource("/api/admin/migrate");
+
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      setMigrationState((prev) => {
+        const next = { ...prev, log: [...prev.log] };
+
+        if (data.type === "section") {
+          next.currentSection = data.label;
+          next.log = [...next.log, { type: "section", name: data.label }];
+        }
+
+        if (data.type === "migrated") {
+          next.totalMigrated += 1;
+          next.log = [...next.log, { type: "migrated", entity: data.entity, name: data.name }];
+        }
+
+        if (data.type === "skipped") {
+          next.totalSkipped += 1;
+          next.log = [...next.log, { type: "skipped", entity: data.entity, name: data.name }];
+        }
+
+        if (data.type === "done") {
+          next.running = false;
+          next.done = true;
+          next.totalMigrated = data.totalMigrated;
+          next.totalSkipped = data.totalSkipped;
+          eventSource.close();
+          fetchStats();
+          if (data.totalMigrated > 0) {
+            toast.success(`Migración completada: ${data.totalMigrated} registros migrados`);
+          } else {
+            toast.success("Todo ya estaba migrado, no hubo cambios");
+          }
+        }
+
+        if (data.type === "fatal") {
+          next.running = false;
+          next.done = true;
+          eventSource.close();
+          toast.error(data.error || "Error fatal en la migración");
+        }
+
+        return next;
+      });
+    };
+
+    eventSource.onerror = () => {
+      setMigrationState((prev) => ({ ...prev, running: false, done: true }));
+      eventSource.close();
+      toast.error("Se perdió la conexión con el servidor");
+    };
+  };
 
   const startJob = (
     type: "curriculums" | "units" | "lessons",
@@ -168,7 +257,7 @@ export default function TranslationsPage() {
           next.processed = data.processed;
           next.errors = data.errors;
           eventSource.close();
-          fetchStats(); // Recargar estadísticas
+          fetchStats();
           if (data.errors === 0) {
             toast.success(`¡Traducción completada! ${data.processed} elementos traducidos`);
           } else {
@@ -241,7 +330,6 @@ export default function TranslationsPage() {
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Botones */}
           <div className="flex gap-2">
             <Button
               onClick={() => startJob(type, true)}
@@ -271,7 +359,6 @@ export default function TranslationsPage() {
             </Button>
           </div>
 
-          {/* Barra de progreso */}
           {(job.running || job.done) && job.total > 0 && (
             <div className="space-y-2">
               <div className="flex justify-between text-sm text-muted-foreground">
@@ -292,7 +379,6 @@ export default function TranslationsPage() {
             </div>
           )}
 
-          {/* Log en tiempo real */}
           {job.log.length > 0 && (
             <ScrollArea className="h-52 rounded-md border bg-muted/30 p-3">
               <div className="space-y-1 font-mono text-xs">
@@ -328,17 +414,24 @@ export default function TranslationsPage() {
     );
   };
 
+  const migrationAllDone =
+    stats &&
+    stats.curriculumsWithEN === stats.totalCurriculums &&
+    stats.unitsWithEN === stats.totalUnits &&
+    stats.lessonsWithEN === stats.totalLessons &&
+    stats.questionsWithEN === stats.totalQuestions;
+
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl space-y-6">
+    <div className="container mx-auto py-8 px-4 max-w-4xl space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Languages className="w-8 h-8" />
-            Traducciones por Lote
+            Traducciones
           </h1>
           <p className="text-muted-foreground mt-1">
-            Traduce el contenido de EN a ES usando IA (Gemini)
+            Migración y traducción por lote EN ↔ ES
           </p>
         </div>
         <Button variant="outline" onClick={fetchStats} disabled={loadingStats} className="gap-2">
@@ -353,38 +446,150 @@ export default function TranslationsPage() {
           Cargando estadísticas...
         </div>
       ) : stats ? (
-        <div className="space-y-6">
-          <JobPanel
-            type="curriculums"
-            job={curriculumsJob}
-            icon={Library}
-            title="Currículums"
-            description="Traduce el título de cada currículum de EN a ES"
-            total={stats.totalCurriculums}
-            translated={stats.curriculumsWithES}
-            scrollRef={curriculumsScrollRef}
-          />
-          <JobPanel
-            type="units"
-            job={unitsJob}
-            icon={GraduationCap}
-            title="Unidades"
-            description="Traduce nombre y descripción de cada unidad de EN a ES"
-            total={stats.totalUnits}
-            translated={stats.unitsWithES}
-            scrollRef={unitsScrollRef}
-          />
-          <JobPanel
-            type="lessons"
-            job={lessonsJob}
-            icon={BookOpen}
-            title="Lecciones"
-            description="Traduce nombre y descripción de cada lección de EN a ES"
-            total={stats.totalLessons}
-            translated={stats.lessonsWithES}
-            scrollRef={lessonsScrollRef}
-          />
-        </div>
+        <>
+          {/* SECCIÓN: Migración EN */}
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <DatabaseZap className="w-5 h-5" />
+                Migración de datos a EN
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Copia los datos originales (title/name/description) a las tablas de traducción EN. Solo procesa los registros que aún no tienen traducción EN.
+              </p>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">Estado de la migración EN</CardTitle>
+                  {migrationAllDone && (
+                    <Badge variant="default" className="bg-green-600">
+                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                      Completo
+                    </Badge>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {[
+                    { label: "Currículums", withEN: stats.curriculumsWithEN, total: stats.totalCurriculums },
+                    { label: "Unidades", withEN: stats.unitsWithEN, total: stats.totalUnits },
+                    { label: "Lecciones", withEN: stats.lessonsWithEN, total: stats.totalLessons },
+                    { label: "Preguntas", withEN: stats.questionsWithEN, total: stats.totalQuestions }
+                  ].map((s) => (
+                    <div key={s.label} className="rounded-lg border p-3 text-center">
+                      <p className="text-xs text-muted-foreground mb-1">{s.label}</p>
+                      <p className="text-lg font-bold">{s.withEN}<span className="text-muted-foreground font-normal text-sm">/{s.total}</span></p>
+                      {s.withEN < s.total && (
+                        <p className="text-xs text-orange-500">{s.total - s.withEN} sin EN</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    onClick={startMigration}
+                    disabled={migrationState.running || !!migrationAllDone}
+                    className="gap-2"
+                  >
+                    {migrationState.running ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <DatabaseZap className="w-4 h-4" />
+                    )}
+                    {migrationState.running
+                      ? `Migrando ${migrationState.currentSection}...`
+                      : migrationAllDone
+                        ? "Todo migrado"
+                        : "Ejecutar migración"}
+                  </Button>
+                </div>
+
+                {migrationState.done && (
+                  <p className="text-sm text-green-600 font-medium">
+                    ✓ Migración completada — {migrationState.totalMigrated} migrados, {migrationState.totalSkipped} ya existían
+                  </p>
+                )}
+
+                {migrationState.log.length > 0 && (
+                  <ScrollArea className="h-52 rounded-md border bg-muted/30 p-3">
+                    <div className="space-y-0.5 font-mono text-xs">
+                      {migrationState.log.map((entry, i) => {
+                        if (entry.type === "section") {
+                          return (
+                            <p key={i} className="text-muted-foreground font-semibold pt-2 pb-1">
+                              — {entry.name}
+                            </p>
+                          );
+                        }
+                        return (
+                          <div key={i} className={`flex items-center gap-2 ${entry.type === "skipped" ? "text-muted-foreground" : "text-foreground"}`}>
+                            {entry.type === "migrated" ? (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                            ) : (
+                              <span className="w-3.5 h-3.5 shrink-0 text-center">–</span>
+                            )}
+                            <span className="truncate">{entry.name}</span>
+                          </div>
+                        );
+                      })}
+                      <div ref={migrationScrollRef} />
+                    </div>
+                  </ScrollArea>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          <Separator />
+
+          {/* SECCIÓN: Traducciones ES */}
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Languages className="w-5 h-5" />
+                Traducción EN → ES con IA
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Traduce el contenido de EN a ES usando Gemini. Requiere tener la migración EN completa.
+              </p>
+            </div>
+
+            <JobPanel
+              type="curriculums"
+              job={curriculumsJob}
+              icon={Library}
+              title="Currículums"
+              description="Traduce el título de cada currículum de EN a ES"
+              total={stats.totalCurriculums}
+              translated={stats.curriculumsWithES}
+              scrollRef={curriculumsScrollRef}
+            />
+            <JobPanel
+              type="units"
+              job={unitsJob}
+              icon={GraduationCap}
+              title="Unidades"
+              description="Traduce nombre y descripción de cada unidad de EN a ES"
+              total={stats.totalUnits}
+              translated={stats.unitsWithES}
+              scrollRef={unitsScrollRef}
+            />
+            <JobPanel
+              type="lessons"
+              job={lessonsJob}
+              icon={BookOpen}
+              title="Lecciones"
+              description="Traduce nombre y descripción de cada lección de EN a ES"
+              total={stats.totalLessons}
+              translated={stats.lessonsWithES}
+              scrollRef={lessonsScrollRef}
+            />
+          </div>
+        </>
       ) : (
         <p className="text-muted-foreground">No se pudieron cargar las estadísticas</p>
       )}

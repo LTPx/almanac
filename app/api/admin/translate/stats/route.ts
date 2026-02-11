@@ -5,27 +5,42 @@ export async function GET() {
   try {
     const [
       totalCurriculums,
+      curriculumsWithEN,
       curriculumsWithES,
       totalUnits,
+      unitsWithEN,
       unitsWithES,
       totalLessons,
-      lessonsWithES
+      lessonsWithEN,
+      lessonsWithES,
+      totalQuestions,
+      questionsWithEN
     ] = await Promise.all([
       prisma.curriculum.count(),
+      prisma.curriculumTranslation.count({ where: { language: "EN" } }),
       prisma.curriculumTranslation.count({ where: { language: "ES" } }),
       prisma.unit.count(),
+      prisma.unitTranslation.count({ where: { language: "EN" } }),
       prisma.unitTranslation.count({ where: { language: "ES" } }),
       prisma.lesson.count(),
-      prisma.lessonTranslation.count({ where: { language: "ES" } })
+      prisma.lessonTranslation.count({ where: { language: "EN" } }),
+      prisma.lessonTranslation.count({ where: { language: "ES" } }),
+      prisma.question.count(),
+      prisma.questionTranslation.count({ where: { language: "EN" } })
     ]);
 
     return NextResponse.json({
       totalCurriculums,
+      curriculumsWithEN,
       curriculumsWithES,
       totalUnits,
+      unitsWithEN,
       unitsWithES,
       totalLessons,
-      lessonsWithES
+      lessonsWithEN,
+      lessonsWithES,
+      totalQuestions,
+      questionsWithEN
     });
   } catch (error) {
     console.error("Error fetching translation stats:", error);
