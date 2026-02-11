@@ -1,0 +1,368 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Languages,
+  Play,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  BookOpen,
+  GraduationCap,
+  RefreshCw
+} from "lucide-react";
+import { toast } from "sonner";
+
+interface Stats {
+  totalUnits: number;
+  unitsWithES: number;
+  totalLessons: number;
+  lessonsWithES: number;
+}
+
+interface LogEntry {
+  id: number;
+  name: string;
+  translated?: string;
+  error?: string;
+  status: "ok" | "error";
+}
+
+interface JobState {
+  running: boolean;
+  processed: number;
+  total: number;
+  errors: number;
+  done: boolean;
+  log: LogEntry[];
+}
+
+const initialJob: JobState = {
+  running: false,
+  processed: 0,
+  total: 0,
+  errors: 0,
+  done: false,
+  log: []
+};
+
+export default function TranslationsPage() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [unitsJob, setUnitsJob] = useState<JobState>(initialJob);
+  const [lessonsJob, setLessonsJob] = useState<JobState>(initialJob);
+  const unitsScrollRef = useRef<HTMLDivElement>(null);
+  const lessonsScrollRef = useRef<HTMLDivElement>(null);
+
+  const fetchStats = async () => {
+    setLoadingStats(true);
+    try {
+      const res = await fetch("/api/admin/translate/stats");
+      if (!res.ok) throw new Error("Error al cargar estadísticas");
+      const data = await res.json();
+      setStats(data);
+    } catch {
+      toast.error("No se pudieron cargar las estadísticas");
+    } finally {
+      setLoadingStats(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  // Auto-scroll en el log
+  useEffect(() => {
+    unitsScrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [unitsJob.log.length]);
+
+  useEffect(() => {
+    lessonsScrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [lessonsJob.log.length]);
+
+  const startJob = (
+    type: "units" | "lessons",
+    onlyMissing: boolean = true
+  ) => {
+    const setJob = type === "units" ? setUnitsJob : setLessonsJob;
+
+    setJob({ running: true, processed: 0, total: 0, errors: 0, done: false, log: [] });
+
+    const url = `/api/admin/translate/bulk?type=${type}&onlyMissing=${onlyMissing}`;
+    const eventSource = new EventSource(url);
+
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      setJob((prev) => {
+        const next = { ...prev };
+
+        if (data.type === "start") {
+          next.total = data.total;
+          if (data.total === 0) {
+            next.running = false;
+            next.done = true;
+            toast.success(`Todas las ${type === "units" ? "unidades" : "lecciones"} ya están traducidas`);
+            eventSource.close();
+          }
+        }
+
+        if (data.type === "progress") {
+          next.processed = data.processed;
+          next.errors = data.errors;
+          next.log = [
+            ...prev.log,
+            {
+              id: data.current.id,
+              name: data.current.name,
+              translated: data.current.translated,
+              status: "ok"
+            }
+          ];
+        }
+
+        if (data.type === "error") {
+          next.processed = data.processed;
+          next.errors = data.errors;
+          next.log = [
+            ...prev.log,
+            {
+              id: data.current.id,
+              name: data.current.name,
+              error: data.current.error,
+              status: "error"
+            }
+          ];
+        }
+
+        if (data.type === "done") {
+          next.running = false;
+          next.done = true;
+          next.processed = data.processed;
+          next.errors = data.errors;
+          eventSource.close();
+          fetchStats(); // Recargar estadísticas
+          if (data.errors === 0) {
+            toast.success(`¡Traducción completada! ${data.processed} elementos traducidos`);
+          } else {
+            toast.warning(`Completado con ${data.errors} errores`);
+          }
+        }
+
+        if (data.type === "fatal") {
+          next.running = false;
+          next.done = true;
+          eventSource.close();
+          toast.error(data.error || "Error fatal en la traducción");
+        }
+
+        return next;
+      });
+    };
+
+    eventSource.onerror = () => {
+      setJob((prev) => ({ ...prev, running: false, done: true }));
+      eventSource.close();
+      toast.error("Se perdió la conexión con el servidor");
+    };
+  };
+
+  const progressPercent = (job: JobState) =>
+    job.total > 0 ? Math.round((job.processed / job.total) * 100) : 0;
+
+  const JobPanel = ({
+    type,
+    job,
+    icon: Icon,
+    title,
+    description,
+    total,
+    translated,
+    scrollRef
+  }: {
+    type: "units" | "lessons";
+    job: JobState;
+    icon: any;
+    title: string;
+    description: string;
+    total: number;
+    translated: number;
+    scrollRef: React.RefObject<HTMLDivElement | null>;
+  }) => {
+    const missing = total - translated;
+    const allDone = missing === 0;
+
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Icon className="w-5 h-5" />
+              {title}
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Badge variant={allDone ? "default" : "secondary"}>
+                {translated}/{total} traducidas
+              </Badge>
+              {!allDone && (
+                <Badge variant="outline" className="text-orange-600 border-orange-300">
+                  {missing} pendientes
+                </Badge>
+              )}
+            </div>
+          </div>
+          <CardDescription>{description}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Botones */}
+          <div className="flex gap-2">
+            <Button
+              onClick={() => startJob(type, true)}
+              disabled={job.running || allDone}
+              className="gap-2"
+            >
+              {job.running ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Play className="w-4 h-4" />
+              )}
+              {job.running
+                ? "Traduciendo..."
+                : allDone
+                  ? "Todo traducido"
+                  : `Traducir ${missing} pendientes`}
+            </Button>
+            <Button
+              onClick={() => startJob(type, false)}
+              disabled={job.running}
+              variant="outline"
+              className="gap-2"
+              title="Re-traducir todo, incluyendo los que ya tienen traducción ES"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Re-traducir todo
+            </Button>
+          </div>
+
+          {/* Barra de progreso */}
+          {(job.running || job.done) && job.total > 0 && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>
+                  {job.processed} / {job.total} procesados
+                  {job.errors > 0 && (
+                    <span className="text-red-500 ml-2">({job.errors} errores)</span>
+                  )}
+                </span>
+                <span>{progressPercent(job)}%</span>
+              </div>
+              <Progress value={progressPercent(job)} className="h-2" />
+              {job.done && (
+                <p className="text-sm text-green-600 font-medium">
+                  ✓ Traducción completada
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Log en tiempo real */}
+          {job.log.length > 0 && (
+            <ScrollArea className="h-52 rounded-md border bg-muted/30 p-3">
+              <div className="space-y-1 font-mono text-xs">
+                {job.log.map((entry, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-start gap-2 ${entry.status === "error" ? "text-red-500" : "text-foreground"}`}
+                  >
+                    {entry.status === "ok" ? (
+                      <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 text-green-500 shrink-0" />
+                    ) : (
+                      <XCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                    )}
+                    <span className="text-muted-foreground">[{entry.id}]</span>
+                    <span className="truncate">{entry.name}</span>
+                    {entry.translated && (
+                      <>
+                        <span className="text-muted-foreground">→</span>
+                        <span className="truncate text-green-600">{entry.translated}</span>
+                      </>
+                    )}
+                    {entry.error && (
+                      <span className="text-red-400">{entry.error}</span>
+                    )}
+                  </div>
+                ))}
+                <div ref={scrollRef} />
+              </div>
+            </ScrollArea>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
+  return (
+    <div className="container mx-auto py-8 px-4 max-w-4xl space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <Languages className="w-8 h-8" />
+            Traducciones por Lote
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Traduce el contenido de EN a ES usando IA (Gemini)
+          </p>
+        </div>
+        <Button variant="outline" onClick={fetchStats} disabled={loadingStats} className="gap-2">
+          <RefreshCw className={`w-4 h-4 ${loadingStats ? "animate-spin" : ""}`} />
+          Actualizar stats
+        </Button>
+      </div>
+
+      {loadingStats ? (
+        <div className="text-center py-12 text-muted-foreground">
+          <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+          Cargando estadísticas...
+        </div>
+      ) : stats ? (
+        <div className="space-y-6">
+          <JobPanel
+            type="units"
+            job={unitsJob}
+            icon={GraduationCap}
+            title="Unidades"
+            description="Traduce nombre y descripción de cada unidad de EN a ES"
+            total={stats.totalUnits}
+            translated={stats.unitsWithES}
+            scrollRef={unitsScrollRef}
+          />
+          <JobPanel
+            type="lessons"
+            job={lessonsJob}
+            icon={BookOpen}
+            title="Lecciones"
+            description="Traduce nombre y descripción de cada lección de EN a ES"
+            total={stats.totalLessons}
+            translated={stats.lessonsWithES}
+            scrollRef={lessonsScrollRef}
+          />
+        </div>
+      ) : (
+        <p className="text-muted-foreground">No se pudieron cargar las estadísticas</p>
+      )}
+    </div>
+  );
+}
