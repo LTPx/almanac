@@ -615,7 +615,7 @@ export default function TranslationsPage() {
               translated={stats.unitsWithES}
               scrollRef={unitsScrollRef}
             />
-            {/* <JobPanel
+            <JobPanel
               type="lessons"
               job={lessonsJob}
               icon={BookOpen}
@@ -624,7 +624,7 @@ export default function TranslationsPage() {
               total={stats.totalLessons}
               translated={stats.lessonsWithES}
               scrollRef={lessonsScrollRef}
-            /> */}
+            />
           </div>
         </>
       ) : (
