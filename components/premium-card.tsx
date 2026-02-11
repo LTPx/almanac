@@ -11,8 +11,21 @@ import {
   CheckCircle2,
   Clock,
   Sparkles,
-  X
+  X,
+  ChevronDown,
+  ChevronUp,
+  Shield,
+  Infinity,
+  Award,
+  TrendingUp
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+interface BenefitItem {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
 
 export default function PremiumCard({
   userId,
@@ -24,6 +37,7 @@ export default function PremiumCard({
   testAttemptId?: number;
 }) {
   const [isLoading, setIsLoading] = useState(false);
+  const [showDetails, setShowDetails] = useState(true);
   const {
     showModal,
     isLoading: isSubscribing,
@@ -31,6 +45,39 @@ export default function PremiumCard({
     closeModal,
     handleSubscribe
   } = useSubscriptionModal(userId, testAttemptId);
+
+  const premiumBenefits: BenefitItem[] = [
+    {
+      icon: <Infinity className="w-6 h-6 text-cyan-400" />,
+      title: "Vidas Ilimitadas",
+      description:
+        "Nunca te quedes sin oportunidades para practicar. Aprende a tu ritmo sin preocuparte por perder vidas en los exámenes."
+    },
+    {
+      icon: <Infinity className="w-6 h-6 text-purple-400" />,
+      title: "Zaps Ilimitados",
+      description:
+        "Acceso completo a todos los recursos de aprendizaje sin restricciones. Usa tus Zaps libremente para mejorar tu experiencia."
+    },
+    {
+      icon: <Shield className="w-6 h-6 text-green-400" />,
+      title: "Sin Anuncios",
+      description:
+        "Enfócate 100% en tu aprendizaje sin interrupciones. Una experiencia limpia y fluida para maximizar tu concentración."
+    },
+    {
+      icon: <Award className="w-6 h-6 text-amber-400" />,
+      title: "NFTs Certificados Sin Límites",
+      description:
+        "Mintea certificados NFT de cada currículum completado sin restricciones. Construye tu colección de logros blockchain ilimitadamente."
+    },
+    {
+      icon: <TrendingUp className="w-6 h-6 text-blue-400" />,
+      title: "Progreso Acelerado",
+      description:
+        "Sin preocuparte por las vidas, avanza más rápido. Practica intensivamente y completa currículums a tu propio ritmo."
+    }
+  ];
 
   const handleCancelSubscription = async () => {
     if (
@@ -57,9 +104,6 @@ export default function PremiumCard({
       if (!response.ok) {
         throw new Error(data.error || "Error al cancelar suscripción");
       }
-
-      // Actualizar estado local
-      // await fetchSubscriptionStatus();
 
       alert(data.message || "Suscripción cancelada exitosamente");
     } catch (error: any) {
@@ -91,9 +135,6 @@ export default function PremiumCard({
         throw new Error(data.error || "Error al reactivar suscripción");
       }
 
-      // Actualizar estado local
-      // await fetchSubscriptionStatus();
-
       alert(data.message || "Suscripción reactivada exitosamente");
     } catch (error: any) {
       console.error("Error:", error);
@@ -103,20 +144,16 @@ export default function PremiumCard({
     }
   };
 
-  // Detectar si es trial interno (sin suscripción de Stripe)
   const isInternalTrial =
     subscription?.isTrialing && !subscription?.subscription?.platform;
 
-  // Detectar si ya usó el trial
   const hasUsedTrial =
     subscription?.subscriptionTrialEnd !== null ||
     ["CANCELED", "EXPIRED", "PAST_DUE", "UNPAID", "PAUSED"].includes(
       subscription?.subscriptionStatus || ""
     );
 
-  // Si tiene suscripción premium (activa o en trial)
   if (subscription?.isPremium) {
-    // Trial interno: mostrar CTA para suscribirse
     if (isInternalTrial) {
       return (
         <Card className="bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-700 border-none text-white overflow-hidden relative">
@@ -144,7 +181,6 @@ export default function PremiumCard({
               </div>
             </div>
 
-            {/* Información del trial */}
             <div className="space-y-3 mb-4">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 flex items-center gap-2">
                 <Clock className="w-5 h-5 flex-shrink-0" />
@@ -168,7 +204,6 @@ export default function PremiumCard({
                 </div>
               </div>
 
-              {/* Beneficios activos */}
               <div className="grid grid-cols-2 gap-2 mt-3">
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
                   <CheckCircle2 className="w-4 h-4 mx-auto mb-1" />
@@ -180,15 +215,65 @@ export default function PremiumCard({
                 </div>
               </div>
             </div>
+
+            <button
+              onClick={() => setShowDetails(!showDetails)}
+              className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-3 flex items-center justify-between transition-colors relative z-10"
+            >
+              <span className="text-sm font-medium">
+                Ver todos los beneficios
+              </span>
+              {showDetails ? (
+                <ChevronUp className="w-5 h-5" />
+              ) : (
+                <ChevronDown className="w-5 h-5" />
+              )}
+            </button>
+
+            <AnimatePresence>
+              {showDetails && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden relative z-10"
+                >
+                  <div className="mt-4 space-y-3 premium-benefits-scroll">
+                    {premiumBenefits.map((benefit, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="bg-white/10 backdrop-blur-sm rounded-lg p-3"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 mt-0.5">
+                            {benefit.icon}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-sm mb-1">
+                              {benefit.title}
+                            </h4>
+                            <p className="text-xs text-white/80 leading-relaxed">
+                              {benefit.description}
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </CardContent>
         </Card>
       );
     }
 
-    // Trial o suscripción de Stripe
     return (
       <Card className="bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-700 border-none text-white overflow-hidden relative">
-        {/* Efecto de brillo */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
 
         <CardContent className="p-6 relative z-10">
@@ -215,7 +300,6 @@ export default function PremiumCard({
             </div>
           </div>
 
-          {/* Información de la suscripción */}
           <div className="space-y-3 mb-4">
             {subscription.isTrialing && (
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 flex items-center gap-2">
@@ -261,7 +345,6 @@ export default function PremiumCard({
               </div>
             )}
 
-            {/* Beneficios activos */}
             <div className="grid grid-cols-2 gap-2 mt-3">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
                 <CheckCircle2 className="w-4 h-4 mx-auto mb-1" />
@@ -274,7 +357,6 @@ export default function PremiumCard({
             </div>
           </div>
 
-          {/* Estado de cancelación */}
           {subscription.willCancelAtPeriodEnd && (
             <div className="bg-red-500/20 backdrop-blur-sm rounded-lg p-3 mb-4 flex items-center gap-2">
               <X className="w-5 h-5 flex-shrink-0" />
@@ -290,7 +372,58 @@ export default function PremiumCard({
             </div>
           )}
 
-          {/* Botones de gestión */}
+          <button
+            onClick={() => setShowDetails(!showDetails)}
+            className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-3 flex items-center justify-between transition-colors mb-2 relative z-10"
+          >
+            <span className="text-sm font-medium">
+              Ver todos tus beneficios
+            </span>
+            {showDetails ? (
+              <ChevronUp className="w-5 h-5" />
+            ) : (
+              <ChevronDown className="w-5 h-5" />
+            )}
+          </button>
+
+          <AnimatePresence>
+            {showDetails && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden mb-4 relative z-5"
+              >
+                <div className="mt-2 space-y-3 premium-benefits-scroll">
+                  {premiumBenefits.map((benefit, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="bg-white/10 backdrop-blur-sm rounded-lg p-3"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 mt-0.5">
+                          {benefit.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-sm mb-1">
+                            {benefit.title}
+                          </h4>
+                          <p className="text-xs text-white/80 leading-relaxed">
+                            {benefit.description}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="space-y-2">
             {!subscription.willCancelAtPeriodEnd ? (
               <Button
