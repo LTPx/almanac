@@ -62,6 +62,16 @@ export interface TestResultsInterface {
   timeQuizInSeconds: number;
 }
 
+export type LessonTranslation = {
+  id: number;
+  lessonId: number;
+  language: "EN" | "ES";
+  name: string;
+  description: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type Lesson = {
   id: number;
   name: string;
@@ -71,6 +81,7 @@ export type Lesson = {
   mandatory: boolean;
   experiencePoints: number;
   isActive: boolean;
+  translations?: LessonTranslation[];
 };
 
 export type LessonAdmin = {
@@ -87,7 +98,18 @@ export type LessonAdmin = {
   unit: {
     name: string;
   };
+  translations?: { language: string }[];
   _count: { questions: number };
+};
+
+export type UnitTranslation = {
+  id: number;
+  unitId: number;
+  language: "EN" | "ES";
+  name: string;
+  description: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type Unit = {
@@ -107,6 +129,7 @@ export type Unit = {
     title: string;
     id: string;
   };
+  translations?: UnitTranslation[];
 };
 
 export type EducationalNFT = {
@@ -155,6 +178,15 @@ export type NFTAssetsResponse = {
   }[];
 };
 
+export type CurriculumTranslation = {
+  id: number;
+  curriculumId: string;
+  language: "EN" | "ES";
+  title: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type Curriculum = {
   id: string;
   title: string;
@@ -165,6 +197,7 @@ export type Curriculum = {
   updatedAt: Date;
   units: Unit[];
   isActive: boolean;
+  translations?: CurriculumTranslation[];
 };
 
 export interface UserGamification {

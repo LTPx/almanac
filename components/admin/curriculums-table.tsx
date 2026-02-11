@@ -90,6 +90,7 @@ export function CurriculumsTable({
           <TableHeader>
             <TableRow>
               <TableHead>Titulo</TableHead>
+              <TableHead className="text-center">Idiomas</TableHead>
               <TableHead className="text-center">Dificultad</TableHead>
               <TableHead className="text-center">Estado</TableHead>
               <TableHead className="text-center">Audiencia</TableHead>
@@ -101,13 +102,13 @@ export function CurriculumsTable({
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
+                <TableCell colSpan={8} className="text-center py-8">
                   Cargando...
                 </TableCell>
               </TableRow>
             ) : curriculums.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
+                <TableCell colSpan={8} className="text-center py-8">
                   <div className="flex flex-col items-center gap-2">
                     <GraduationCap className="w-8 h-8 text-muted-foreground" />
                     <p className="text-muted-foreground">
@@ -124,6 +125,23 @@ export function CurriculumsTable({
                   <TableRow key={curriculum.id}>
                     <TableCell className="font-medium">
                       {curriculum.title}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        {(["EN", "ES"] as const).map((lang) => {
+                          const has = (curriculum.translations as any[])?.some((t) => t.language === lang);
+                          const flag = lang === "EN" ? "🇺🇸" : "🇪🇸";
+                          return (
+                            <span
+                              key={lang}
+                              title={lang}
+                              className={`text-base leading-none ${has ? "opacity-100" : "opacity-25"}`}
+                            >
+                              {flag}
+                            </span>
+                          );
+                        })}
+                      </div>
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge className={difficultyInfo.className}>

@@ -18,7 +18,8 @@ import {
   ChevronRight,
   GraduationCap as AcademicIcon,
   Users,
-  Bot
+  Bot,
+  Languages
 } from "lucide-react";
 
 interface NavItem {
@@ -53,7 +54,8 @@ const settingsNav: NavItem[] = [
     children: [
       { name: "Generador IA", href: "/admin/ai-generator", icon: Sparkles },
       { name: "Programación Tutor", href: "/admin/tutor-config", icon: Bot },
-      { name: "Subir Contenido", href: "/admin/settings", icon: AcademicIcon }
+      { name: "Subir Contenido", href: "/admin/settings", icon: AcademicIcon },
+      { name: "Traducciones IA", href: "/admin/translations", icon: Languages }
       // { name: "Corazones", href: "/admin/gamification/hearts", icon: Heart }
     ]
   }
