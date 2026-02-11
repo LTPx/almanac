@@ -107,10 +107,6 @@ export default function QuestionForm({
     initialData?.content?.correctAnswer ?? true
   );
 
-  const [fillInBlankAnswers, setFillInBlankAnswers] = useState<string>(
-    initialData?.content?.correctAnswers?.join(", ") || ""
-  );
-
   const [jsonContent, setJsonContent] = useState<string>(() => {
     if (initialData?.content && Object.keys(initialData.content).length > 0) {
       return JSON.stringify(initialData.content, null, 2);
@@ -125,6 +121,16 @@ export default function QuestionForm({
 
   // Plantillas para tipos de preguntas complejas
   const contentTemplates = {
+    FILL_IN_BLANK: {
+      text: "Bitcoin fue creado en el año ____ por ____",
+      blanks: [
+        { id: 1, answer: "2008", position: 0 },
+        { id: 2, answer: "Satoshi Nakamoto", position: 1 }
+      ],
+      caseSensitive: false,
+      explanation:
+        "Bitcoin fue lanzado en 2008 por el pseudónimo Satoshi Nakamoto"
+    },
     ORDER_WORDS: {
       sentence: "Cuando un valor cambia de signo también cambia de lado",
       words: [
@@ -205,7 +211,11 @@ export default function QuestionForm({
     // Si cambió el tipo de pregunta, cargar la plantilla correspondiente
     if (key === "type") {
       const questionType = value as QuestionType;
-      if (["ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(questionType)) {
+      if (
+        ["FILL_IN_BLANK", "ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(
+          questionType
+        )
+      ) {
         const template =
           contentTemplates[questionType as keyof typeof contentTemplates];
         if (template) {
@@ -317,24 +327,10 @@ export default function QuestionForm({
         { text: "Verdadero", isCorrect: trueFalseAnswer, order: 0 },
         { text: "Falso", isCorrect: !trueFalseAnswer, order: 1 }
       ];
-    } else if (formData.type === "FILL_IN_BLANK") {
-      const correctAnswers = fillInBlankAnswers
-        .split(",")
-        .map((a) => a.trim())
-        .filter((a) => a);
-
-      if (correctAnswers.length === 0) {
-        toast.error("Debes proporcionar al menos una respuesta correcta");
-        return;
-      }
-
-      formData.content = {
-        correctAnswers,
-        caseSensitive: false
-      };
-      formData.answers = [];
     } else if (
-      ["ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(formData.type)
+      ["FILL_IN_BLANK", "ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(
+        formData.type
+      )
     ) {
       // Para tipos complejos, parsear el JSON del content
       if (!jsonContent.trim()) {
@@ -550,44 +546,6 @@ export default function QuestionForm({
         </Card>
       )}
 
-      {/* Configuración para completar espacios */}
-      {formData.type === "FILL_IN_BLANK" && (
-        <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle>Configuración de Espacios en Blanco</CardTitle>
-            <CardDescription>
-              Usa guiones bajos (____) o corchetes [respuesta] para marcar los
-              espacios en blanco en la pregunta principal.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-              <p className="text-sm text-blue-800 dark:text-blue-200">
-                <strong>Ejemplo:</strong> Bitcoin fue creado en el año ____ por
-                ____
-              </p>
-              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                O usa: Bitcoin fue creado en el año [2008] por [Satoshi
-                Nakamoto]
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label>Respuestas correctas (separadas por coma) *</Label>
-              <Input
-                placeholder="2008, Satoshi Nakamoto"
-                value={fillInBlankAnswers}
-                onChange={(e) => setFillInBlankAnswers(e.target.value)}
-                className="bg-background border-border text-foreground"
-              />
-              <p className="text-xs text-muted-foreground">
-                Las respuestas deben estar en el orden en que aparecen los
-                espacios en blanco
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Configuración para verdadero/falso */}
       {formData.type === "TRUE_FALSE" && (
         <Card className="bg-card border-border">
@@ -631,7 +589,9 @@ export default function QuestionForm({
       )}
 
       {/* Configuración para tipos complejos (ORDER_WORDS, MATCHING, DRAG_DROP) */}
-      {["ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(formData.type) && (
+      {["FILL_IN_BLANK", "ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(
+        formData.type
+      ) && (
         <Card className="bg-card border-border">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -676,6 +636,22 @@ export default function QuestionForm({
                 }}
               />
             </div>
+
+            {formData.type === "FILL_IN_BLANK" && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200 font-semibold mb-2">
+                  Ejemplo de estructura:
+                </p>
+                <pre className="text-xs text-blue-700 dark:text-blue-300 overflow-x-auto">
+                  {`{
+  "sentence": "12 + ___ = 20",
+  "explanation": "Para que 12 + algo = 20, necesitamos 8",
+  "correctAnswer": "8"
+}
+                  `}
+                </pre>
+              </div>
+            )}
 
             {formData.type === "ORDER_WORDS" && (
               <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
@@ -768,22 +744,9 @@ export default function QuestionForm({
               </div>
             )}
 
-            {formData.type === "FILL_IN_BLANK" && fillInBlankAnswers && (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  Respuestas correctas:
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {fillInBlankAnswers.split(",").map((answer, index) => (
-                    <Badge key={index} variant="secondary">
-                      {answer.trim()}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {["ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(formData.type) &&
+            {["FILL_IN_BLANK", "ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(
+              formData.type
+            ) &&
               jsonContent &&
               !jsonError && (
                 <div className="space-y-2">
