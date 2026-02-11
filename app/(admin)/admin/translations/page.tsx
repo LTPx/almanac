@@ -40,6 +40,7 @@ interface Stats {
   lessonsWithES: number;
   totalQuestions: number;
   questionsWithEN: number;
+  questionsWithES: number;
 }
 
 interface LogEntry {
@@ -97,9 +98,11 @@ export default function TranslationsPage() {
   const [curriculumsJob, setCurriculumsJob] = useState<JobState>(initialJob);
   const [unitsJob, setUnitsJob] = useState<JobState>(initialJob);
   const [lessonsJob, setLessonsJob] = useState<JobState>(initialJob);
+  const [questionsJob, setQuestionsJob] = useState<JobState>(initialJob);
   const curriculumsScrollRef = useRef<HTMLDivElement>(null);
   const unitsScrollRef = useRef<HTMLDivElement>(null);
   const lessonsScrollRef = useRef<HTMLDivElement>(null);
+  const questionsScrollRef = useRef<HTMLDivElement>(null);
 
   const fetchStats = async () => {
     setLoadingStats(true);
@@ -131,6 +134,10 @@ export default function TranslationsPage() {
   useEffect(() => {
     lessonsScrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [lessonsJob.log.length]);
+
+  useEffect(() => {
+    questionsScrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [questionsJob.log.length]);
 
   const startSectionMigration = (
     section: "curriculums" | "units" | "lessons" | "questions"
@@ -184,7 +191,7 @@ export default function TranslationsPage() {
   };
 
   const startJob = (
-    type: "curriculums" | "units" | "lessons",
+    type: "curriculums" | "units" | "lessons" | "questions",
     onlyMissing: boolean = true
   ) => {
     const setJob =
@@ -192,7 +199,9 @@ export default function TranslationsPage() {
         ? setCurriculumsJob
         : type === "units"
           ? setUnitsJob
-          : setLessonsJob;
+          : type === "lessons"
+            ? setLessonsJob
+            : setQuestionsJob;
 
     setJob({
       running: true,
@@ -222,7 +231,9 @@ export default function TranslationsPage() {
                 ? "currículums"
                 : type === "units"
                   ? "unidades"
-                  : "lecciones";
+                  : type === "lessons"
+                    ? "lecciones"
+                    : "preguntas";
             toast.success(`Todos los ${label} ya están traducidos`);
             eventSource.close();
           }
@@ -303,7 +314,7 @@ export default function TranslationsPage() {
     translated,
     scrollRef
   }: {
-    type: "curriculums" | "units" | "lessons";
+    type: "curriculums" | "units" | "lessons" | "questions";
     job: JobState;
     icon: any;
     title: string;
@@ -624,6 +635,16 @@ export default function TranslationsPage() {
               total={stats.totalLessons}
               translated={stats.lessonsWithES}
               scrollRef={lessonsScrollRef}
+            />
+            <JobPanel
+              type="questions"
+              job={questionsJob}
+              icon={HelpCircle}
+              title="Preguntas"
+              description="Traduce título y contenido (sentence, options, explanation) de cada pregunta de EN a ES. También crea AnswerTranslation para opción múltiple."
+              total={stats.totalQuestions}
+              translated={stats.questionsWithES}
+              scrollRef={questionsScrollRef}
             />
           </div>
         </>

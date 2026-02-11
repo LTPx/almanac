@@ -38,6 +38,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Unit } from "@/lib/types";
 import { toast } from "sonner";
+import {
+  getTranslatableContentFields,
+  buildTranslatedContent
+} from "@/lib/question-translation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Editor from "@monaco-editor/react";
 
@@ -56,7 +60,7 @@ export type QuestionData = {
   isActive: boolean;
   content: any;
   answers?: AnswerData[];
-  translations?: { language: string; title: string }[];
+  translations?: { language: string; title: string; content?: any }[];
 };
 
 export type AnswerData = {
@@ -75,8 +79,8 @@ export type QuestionInput = {
   content: any;
   answers: AnswerData[];
   translations: {
-    EN: { title: string };
-    ES: { title: string };
+    EN: { title: string; content?: any };
+    ES: { title: string; content?: any };
   };
 };
 
@@ -103,9 +107,9 @@ export default function QuestionForm({
   const getInitialTranslation = (lang: "EN" | "ES") => {
     if (initialData?.translations) {
       const t = initialData.translations.find((t) => t.language === lang);
-      return { title: t?.title || "" };
+      return { title: t?.title || "", content: t?.content ?? undefined };
     }
-    return { title: "" };
+    return { title: "", content: undefined };
   };
 
   const [formData, setFormData] = useState<QuestionInput>({
@@ -144,12 +148,24 @@ export default function QuestionForm({
       return;
     }
 
+    // Parse current content JSON to also translate it
+    let parsedContent: any = null;
+    if (jsonContent && !jsonError) {
+      try { parsedContent = JSON.parse(jsonContent); } catch {}
+    }
+
+    // Build flat fields: title + content fields
+    const fields: Record<string, string> = { title: source.title };
+    if (parsedContent) {
+      Object.assign(fields, getTranslatableContentFields(formData.type, parsedContent));
+    }
+
     setTranslating(to);
     try {
       const res = await fetch("/api/admin/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fields: { title: source.title }, from, to })
+        body: JSON.stringify({ fields, from, to })
       });
 
       if (!res.ok) {
@@ -159,11 +175,19 @@ export default function QuestionForm({
 
       const { translated } = await res.json();
 
+      // Rebuild translated content from flat fields
+      const translatedContent = parsedContent
+        ? buildTranslatedContent(formData.type, parsedContent, translated)
+        : undefined;
+
       setFormData((prev) => ({
         ...prev,
         translations: {
           ...prev.translations,
-          [to]: { title: translated.title || prev.translations[to].title }
+          [to]: {
+            title: translated.title || prev.translations[to].title,
+            content: translatedContent ?? prev.translations[to].content
+          }
         }
       }));
 

@@ -37,7 +37,8 @@ export async function GET(
         translations: {
           select: {
             language: true,
-            title: true
+            title: true,
+            content: true
           }
         },
         _count: {
@@ -133,10 +134,37 @@ export async function PUT(
           if (t?.title?.trim()) {
             await tx.questionTranslation.upsert({
               where: { questionId_language: { questionId, language: lang } },
-              update: { title: t.title },
-              create: { questionId, language: lang, title: t.title, content: {} }
+              update: { title: t.title, content: t.content ?? {} },
+              create: { questionId, language: lang, title: t.title, content: t.content ?? {} }
             });
           }
+        }
+      }
+
+      // Crear AnswerTranslation para MULTIPLE_CHOICE si hay opciones traducidas en ES
+      if (type === "MULTIPLE_CHOICE" && translations?.ES?.content?.options) {
+        const updatedAnswers = await tx.answer.findMany({
+          where: { questionId },
+          orderBy: { order: "asc" }
+        });
+        const translatedOptions: string[] = translations.ES.content.options;
+        for (let i = 0; i < updatedAnswers.length; i++) {
+          const translatedText = translatedOptions[i];
+          if (translatedText?.trim()) {
+            await tx.answerTranslation.upsert({
+              where: { answerId_language: { answerId: updatedAnswers[i].id, language: "ES" } },
+              update: { text: translatedText },
+              create: { answerId: updatedAnswers[i].id, language: "ES", text: translatedText }
+            });
+          }
+        }
+        // EN AnswerTranslation from existing answer text
+        for (const ans of updatedAnswers) {
+          await tx.answerTranslation.upsert({
+            where: { answerId_language: { answerId: ans.id, language: "EN" } },
+            update: { text: ans.text },
+            create: { answerId: ans.id, language: "EN", text: ans.text }
+          });
         }
       }
 
@@ -158,7 +186,8 @@ export async function PUT(
           translations: {
             select: {
               language: true,
-              title: true
+              title: true,
+              content: true
             }
           },
           _count: {

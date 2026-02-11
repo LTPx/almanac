@@ -1,6 +1,10 @@
 import { NextRequest } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import prisma from "@/lib/prisma";
+import {
+  getTranslatableContentFields,
+  buildTranslatedContent
+} from "@/lib/question-translation";
 
 const genAI = process.env.GEMINI_API_KEY
   ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
@@ -53,11 +57,11 @@ async function delay(ms: number) {
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const type = searchParams.get("type") as "curriculums" | "units" | "lessons" | null;
+  const type = searchParams.get("type") as "curriculums" | "units" | "lessons" | "questions" | null;
   const onlyMissing = searchParams.get("onlyMissing") !== "false";
 
-  if (!type || !["curriculums", "units", "lessons"].includes(type)) {
-    return new Response("type must be 'curriculums', 'units' or 'lessons'", { status: 400 });
+  if (!type || !["curriculums", "units", "lessons", "questions"].includes(type)) {
+    return new Response("type must be 'curriculums', 'units', 'lessons' or 'questions'", { status: 400 });
   }
 
   if (!genAI) {
@@ -297,6 +301,138 @@ export async function GET(request: NextRequest) {
           }
         }
         } // end else (units/lessons)
+
+        // ── QUESTIONS ──────────────────────────────────────────────
+        if (type === "questions") {
+          type QItem = { id: number; title: string; type: string; content: any; answers: { id: number; text: string; order: number }[] };
+          let questionItems: QItem[] = [];
+
+          if (onlyMissing) {
+            const alreadyTranslated = await prisma.questionTranslation.findMany({
+              where: { language: "ES" },
+              select: { questionId: true }
+            });
+            const translatedIds = alreadyTranslated.map((t) => t.questionId);
+            questionItems = await prisma.question.findMany({
+              where: { id: { notIn: translatedIds } },
+              select: { id: true, title: true, type: true, content: true, answers: { select: { id: true, text: true, order: true }, orderBy: { order: "asc" } } },
+              orderBy: { id: "asc" }
+            }) as QItem[];
+          } else {
+            questionItems = await prisma.question.findMany({
+              select: { id: true, title: true, type: true, content: true, answers: { select: { id: true, text: true, order: true }, orderBy: { order: "asc" } } },
+              orderBy: { id: "asc" }
+            }) as QItem[];
+          }
+
+          const qTotal = questionItems.length;
+          send({ type: "start", total: qTotal });
+
+          if (qTotal === 0) {
+            send({ type: "done", processed: 0, total: 0, errors: 0 });
+            controller.close();
+            return;
+          }
+
+          let qProcessed = 0;
+          let qErrors = 0;
+
+          for (let i = 0; i < questionItems.length; i += BATCH_SIZE) {
+            const batch = questionItems.slice(i, i + BATCH_SIZE);
+
+            await Promise.allSettled(
+              batch.map(async (item) => {
+                try {
+                  // Get EN translation as source
+                  const enT = await prisma.questionTranslation.findUnique({
+                    where: { questionId_language: { questionId: item.id, language: "EN" } }
+                  });
+                  const sourceTitle = enT?.title || item.title;
+                  const sourceContent = enT?.content ?? item.content;
+
+                  // Build flat fields: title + content fields
+                  const fields: Record<string, string> = { title: sourceTitle };
+                  const contentFields = getTranslatableContentFields(
+                    item.type as any,
+                    sourceContent
+                  );
+                  Object.assign(fields, contentFields);
+
+                  const translated = await translateFields(fields, "EN", "ES");
+
+                  // Rebuild translated content
+                  const translatedContent = buildTranslatedContent(
+                    item.type as any,
+                    sourceContent,
+                    translated
+                  );
+
+                  // Upsert QuestionTranslation ES
+                  await prisma.questionTranslation.upsert({
+                    where: { questionId_language: { questionId: item.id, language: "ES" } },
+                    update: { title: translated.title || sourceTitle, content: translatedContent },
+                    create: { questionId: item.id, language: "ES", title: translated.title || sourceTitle, content: translatedContent }
+                  });
+
+                  // Ensure EN QuestionTranslation exists
+                  await prisma.questionTranslation.upsert({
+                    where: { questionId_language: { questionId: item.id, language: "EN" } },
+                    update: { title: sourceTitle, content: sourceContent },
+                    create: { questionId: item.id, language: "EN", title: sourceTitle, content: sourceContent }
+                  });
+
+                  // Create AnswerTranslation for MULTIPLE_CHOICE
+                  if (item.type === "MULTIPLE_CHOICE" && Array.isArray(translatedContent?.options)) {
+                    const translatedOptions: string[] = translatedContent.options;
+                    for (let j = 0; j < item.answers.length; j++) {
+                      const ans = item.answers[j];
+                      const translatedText = translatedOptions[j];
+                      if (translatedText?.trim()) {
+                        await prisma.answerTranslation.upsert({
+                          where: { answerId_language: { answerId: ans.id, language: "ES" } },
+                          update: { text: translatedText },
+                          create: { answerId: ans.id, language: "ES", text: translatedText }
+                        });
+                      }
+                      // EN answer translation
+                      await prisma.answerTranslation.upsert({
+                        where: { answerId_language: { answerId: ans.id, language: "EN" } },
+                        update: { text: ans.text },
+                        create: { answerId: ans.id, language: "EN", text: ans.text }
+                      });
+                    }
+                  }
+
+                  qProcessed++;
+                  send({
+                    type: "progress",
+                    processed: qProcessed,
+                    total: qTotal,
+                    errors: qErrors,
+                    current: { id: item.id, name: sourceTitle, translated: translated.title }
+                  });
+                } catch (err: any) {
+                  qErrors++;
+                  qProcessed++;
+                  send({
+                    type: "error",
+                    processed: qProcessed,
+                    total: qTotal,
+                    errors: qErrors,
+                    current: { id: item.id, name: item.title, error: err.message }
+                  });
+                }
+              })
+            );
+
+            if (i + BATCH_SIZE < questionItems.length) {
+              await delay(BATCH_DELAY_MS);
+            }
+          }
+          send({ type: "done", processed: qProcessed, total: qTotal, errors: qErrors });
+          return;
+        }
+        // ── END QUESTIONS ──────────────────────────────────────────
 
         send({ type: "done", processed, total, errors });
       } catch (err: any) {
