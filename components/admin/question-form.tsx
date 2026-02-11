@@ -203,14 +203,9 @@ export default function QuestionForm({
   // Plantillas para tipos de preguntas complejas
   const contentTemplates = {
     FILL_IN_BLANK: {
-      text: "Bitcoin fue creado en el año ____ por ____",
-      blanks: [
-        { id: 1, answer: "2008", position: 0 },
-        { id: 2, answer: "Satoshi Nakamoto", position: 1 }
-      ],
-      caseSensitive: false,
-      explanation:
-        "Bitcoin fue lanzado en 2008 por el pseudónimo Satoshi Nakamoto"
+      sentence: "12 + ___ = 20",
+      explanation: "Para que 12 + algo = 20, necesitamos 8",
+      correctAnswer: "8"
     },
     ORDER_WORDS: {
       sentence: "Cuando un valor cambia de signo también cambia de lado",
@@ -239,24 +234,6 @@ export default function QuestionForm({
         "lado"
       ],
       explanation: "Esta es una regla fundamental del álgebra"
-    },
-    MATCHING: {
-      pairs: [
-        { left: "Bitcoin", right: "Criptomoneda" },
-        { left: "Blockchain", right: "Tecnología de registro distribuido" },
-        { left: "Smart Contract", right: "Contrato inteligente" }
-      ],
-      explanation: "Empareja cada concepto con su definición"
-    },
-    DRAG_DROP: {
-      items: ["Item 1", "Item 2", "Item 3"],
-      zones: ["Zona A", "Zona B", "Zona C"],
-      correctMapping: {
-        "Item 1": "Zona A",
-        "Item 2": "Zona B",
-        "Item 3": "Zona C"
-      },
-      explanation: "Arrastra cada elemento a su zona correcta"
     }
   };
 
@@ -292,11 +269,7 @@ export default function QuestionForm({
     // Si cambió el tipo de pregunta, cargar la plantilla correspondiente
     if (key === "type") {
       const questionType = value as QuestionType;
-      if (
-        ["FILL_IN_BLANK", "ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(
-          questionType
-        )
-      ) {
+      if (["FILL_IN_BLANK", "ORDER_WORDS"].includes(questionType)) {
         const template =
           contentTemplates[questionType as keyof typeof contentTemplates];
         if (template) {
@@ -416,11 +389,7 @@ export default function QuestionForm({
         { text: "Verdadero", isCorrect: trueFalseAnswer, order: 0 },
         { text: "Falso", isCorrect: !trueFalseAnswer, order: 1 }
       ];
-    } else if (
-      ["FILL_IN_BLANK", "ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(
-        formData.type
-      )
-    ) {
+    } else if (["FILL_IN_BLANK", "ORDER_WORDS"].includes(formData.type)) {
       // Para tipos complejos, parsear el JSON del content
       if (!jsonContent.trim()) {
         toast.error("Debes proporcionar el contenido en formato JSON");
@@ -753,9 +722,7 @@ export default function QuestionForm({
       )}
 
       {/* Configuración para tipos complejos (ORDER_WORDS, MATCHING, DRAG_DROP) */}
-      {["FILL_IN_BLANK", "ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(
-        formData.type
-      ) && (
+      {["FILL_IN_BLANK", "ORDER_WORDS"].includes(formData.type) && (
         <Card className="bg-card border-border">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -908,10 +875,7 @@ export default function QuestionForm({
                 </div>
               </div>
             )}
-
-            {["FILL_IN_BLANK", "ORDER_WORDS", "MATCHING", "DRAG_DROP"].includes(
-              formData.type
-            ) &&
+            {["FILL_IN_BLANK", "ORDER_WORDS"].includes(formData.type) &&
               jsonContent &&
               !jsonError && (
                 <div className="space-y-2">
