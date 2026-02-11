@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
               orderBy: { id: "asc" }
             });
           }
-        } else {
+        } else if (type === "lessons") {
           if (onlyMissing) {
             const alreadyTranslated = await prisma.lessonTranslation.findMany({
               where: { language: "ES" },
@@ -152,6 +152,7 @@ export async function GET(request: NextRequest) {
           }
         }
 
+        if (type !== "questions") {
         const total =
           type === "curriculums" ? curriculumItems.length : items.length;
         send({ type: "start", total });
@@ -348,6 +349,9 @@ export async function GET(request: NextRequest) {
             }
           }
         } // end else (units/lessons)
+
+        send({ type: "done", processed, total, errors });
+        } // end if (type !== "questions")
 
         // ── QUESTIONS ──────────────────────────────────────────────
         if (type === "questions") {
@@ -569,8 +573,6 @@ export async function GET(request: NextRequest) {
           return;
         }
         // ── END QUESTIONS ──────────────────────────────────────────
-
-        send({ type: "done", processed, total, errors });
       } catch (err: any) {
         send({ type: "fatal", error: err.message });
       } finally {
