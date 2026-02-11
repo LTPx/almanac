@@ -23,7 +23,8 @@ import {
   GraduationCap,
   Library,
   RefreshCw,
-  DatabaseZap
+  DatabaseZap,
+  HelpCircle
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -58,13 +59,11 @@ interface JobState {
   log: LogEntry[];
 }
 
-interface MigrationState {
+interface SectionMigrationState {
   running: boolean;
   done: boolean;
-  totalMigrated: number;
-  totalSkipped: number;
-  currentSection: string;
-  log: { type: "section" | "section_done"; name: string; migrated?: number; skipped?: number; total?: number }[];
+  migrated: number;
+  skipped: number;
 }
 
 const initialJob: JobState = {
@@ -76,23 +75,23 @@ const initialJob: JobState = {
   log: []
 };
 
-const initialMigration: MigrationState = {
+const initialSectionMigration: SectionMigrationState = {
   running: false,
   done: false,
-  totalMigrated: 0,
-  totalSkipped: 0,
-  currentSection: "",
-  log: []
+  migrated: 0,
+  skipped: 0
 };
 
 export default function TranslationsPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
-  const [migrationState, setMigrationState] = useState<MigrationState>(initialMigration);
+  const [curriculumsMigration, setCurriculumsMigration] = useState<SectionMigrationState>(initialSectionMigration);
+  const [unitsMigration, setUnitsMigration] = useState<SectionMigrationState>(initialSectionMigration);
+  const [lessonsMigration, setLessonsMigration] = useState<SectionMigrationState>(initialSectionMigration);
+  const [questionsMigration, setQuestionsMigration] = useState<SectionMigrationState>(initialSectionMigration);
   const [curriculumsJob, setCurriculumsJob] = useState<JobState>(initialJob);
   const [unitsJob, setUnitsJob] = useState<JobState>(initialJob);
   const [lessonsJob, setLessonsJob] = useState<JobState>(initialJob);
-  const migrationScrollRef = useRef<HTMLDivElement>(null);
   const curriculumsScrollRef = useRef<HTMLDivElement>(null);
   const unitsScrollRef = useRef<HTMLDivElement>(null);
   const lessonsScrollRef = useRef<HTMLDivElement>(null);
@@ -117,10 +116,6 @@ export default function TranslationsPage() {
 
   // Auto-scroll logs
   useEffect(() => {
-    migrationScrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [migrationState.log.length]);
-
-  useEffect(() => {
     curriculumsScrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [curriculumsJob.log.length]);
 
@@ -132,59 +127,40 @@ export default function TranslationsPage() {
     lessonsScrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [lessonsJob.log.length]);
 
-  const startMigration = () => {
-    setMigrationState({ ...initialMigration, running: true });
+  const startSectionMigration = (section: "curriculums" | "units" | "lessons" | "questions") => {
+    const setState =
+      section === "curriculums" ? setCurriculumsMigration
+      : section === "units" ? setUnitsMigration
+      : section === "lessons" ? setLessonsMigration
+      : setQuestionsMigration;
 
-    const eventSource = new EventSource("/api/admin/migrate");
+    setState({ running: true, done: false, migrated: 0, skipped: 0 });
+
+    const eventSource = new EventSource(`/api/admin/migrate?section=${section}`);
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      setMigrationState((prev) => {
-        const next = { ...prev, log: [...prev.log] };
-
-        if (data.type === "section") {
-          next.currentSection = data.label;
-          next.log = [...next.log, { type: "section", name: data.label }];
+      if (data.type === "done") {
+        setState({ running: false, done: true, migrated: data.totalMigrated, skipped: data.totalSkipped });
+        eventSource.close();
+        fetchStats();
+        if (data.totalMigrated > 0) {
+          toast.success(`${data.totalMigrated} registros migrados`);
+        } else {
+          toast.success("Todo ya estaba migrado");
         }
+      }
 
-        if (data.type === "section_done") {
-          next.log = [...next.log, {
-            type: "section_done",
-            name: data.label,
-            migrated: data.migrated,
-            skipped: data.skipped,
-            total: data.total
-          }];
-        }
-
-        if (data.type === "done") {
-          next.running = false;
-          next.done = true;
-          next.totalMigrated = data.totalMigrated;
-          next.totalSkipped = data.totalSkipped;
-          eventSource.close();
-          fetchStats();
-          if (data.totalMigrated > 0) {
-            toast.success(`Migración completada: ${data.totalMigrated} registros migrados`);
-          } else {
-            toast.success("Todo ya estaba migrado, no hubo cambios");
-          }
-        }
-
-        if (data.type === "fatal") {
-          next.running = false;
-          next.done = true;
-          eventSource.close();
-          toast.error(data.error || "Error fatal en la migración");
-        }
-
-        return next;
-      });
+      if (data.type === "fatal") {
+        setState((prev) => ({ ...prev, running: false, done: true }));
+        eventSource.close();
+        toast.error(data.error || "Error fatal en la migración");
+      }
     };
 
     eventSource.onerror = () => {
-      setMigrationState((prev) => ({ ...prev, running: false, done: true }));
+      setState((prev) => ({ ...prev, running: false, done: true }));
       eventSource.close();
       toast.error("Se perdió la conexión con el servidor");
     };
@@ -414,12 +390,6 @@ export default function TranslationsPage() {
     );
   };
 
-  const migrationAllDone =
-    stats &&
-    stats.curriculumsWithEN === stats.totalCurriculums &&
-    stats.unitsWithEN === stats.totalUnits &&
-    stats.lessonsWithEN === stats.totalLessons &&
-    stats.questionsWithEN === stats.totalQuestions;
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl space-y-8">
@@ -460,95 +430,58 @@ export default function TranslationsPage() {
             </div>
 
             <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">Estado de la migración EN</CardTitle>
-                  {migrationAllDone && (
-                    <Badge variant="default" className="bg-green-600">
-                      <CheckCircle2 className="w-3 h-3 mr-1" />
-                      Completo
-                    </Badge>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <CardContent className="pt-6">
+                <div className="divide-y">
                   {[
-                    { label: "Currículums", withEN: stats.curriculumsWithEN, total: stats.totalCurriculums },
-                    { label: "Unidades", withEN: stats.unitsWithEN, total: stats.totalUnits },
-                    { label: "Lecciones", withEN: stats.lessonsWithEN, total: stats.totalLessons },
-                    { label: "Preguntas", withEN: stats.questionsWithEN, total: stats.totalQuestions }
-                  ].map((s) => (
-                    <div key={s.label} className="rounded-lg border p-3 text-center">
-                      <p className="text-xs text-muted-foreground mb-1">{s.label}</p>
-                      <p className="text-lg font-bold">{s.withEN}<span className="text-muted-foreground font-normal text-sm">/{s.total}</span></p>
-                      {s.withEN < s.total && (
-                        <p className="text-xs text-orange-500">{s.total - s.withEN} sin EN</p>
-                      )}
-                    </div>
-                  ))}
+                    { section: "curriculums" as const, label: "Currículums", icon: Library, withEN: stats.curriculumsWithEN, total: stats.totalCurriculums, state: curriculumsMigration },
+                    { section: "units" as const, label: "Unidades", icon: GraduationCap, withEN: stats.unitsWithEN, total: stats.totalUnits, state: unitsMigration },
+                    { section: "lessons" as const, label: "Lecciones", icon: BookOpen, withEN: stats.lessonsWithEN, total: stats.totalLessons, state: lessonsMigration },
+                    { section: "questions" as const, label: "Preguntas", icon: HelpCircle, withEN: stats.questionsWithEN, total: stats.totalQuestions, state: questionsMigration }
+                  ].map(({ section, label, icon: Icon, withEN, total, state }) => {
+                    const missing = total - withEN;
+                    const allDone = missing === 0;
+                    return (
+                      <div key={section} className="flex items-center justify-between py-3 gap-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
+                          <span className="font-medium text-sm">{label}</span>
+                          <span className="text-sm text-muted-foreground">
+                            {withEN}<span className="text-muted-foreground/60">/{total}</span>
+                          </span>
+                          {allDone ? (
+                            <Badge variant="default" className="bg-green-600 text-xs py-0">
+                              <CheckCircle2 className="w-3 h-3 mr-1" />
+                              Listo
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-orange-600 border-orange-300 text-xs py-0">
+                              {missing} pendientes
+                            </Badge>
+                          )}
+                          {state.done && state.migrated > 0 && (
+                            <span className="text-xs text-green-600">✓ {state.migrated} migrados</span>
+                          )}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant={allDone ? "outline" : "default"}
+                          onClick={() => startSectionMigration(section)}
+                          disabled={state.running || allDone}
+                          className="gap-1.5 shrink-0"
+                        >
+                          {state.running ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : allDone ? (
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                          ) : (
+                            <DatabaseZap className="w-3.5 h-3.5" />
+                          )}
+                          {state.running ? "Migrando..." : allDone ? "Migrado" : "Migrar"}
+                        </Button>
+                      </div>
+                    );
+                  })}
                 </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    onClick={startMigration}
-                    disabled={migrationState.running || !!migrationAllDone}
-                    className="gap-2"
-                  >
-                    {migrationState.running ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <DatabaseZap className="w-4 h-4" />
-                    )}
-                    {migrationState.running
-                      ? `Migrando ${migrationState.currentSection}...`
-                      : migrationAllDone
-                        ? "Todo migrado"
-                        : "Ejecutar migración"}
-                  </Button>
-                </div>
-
-                {migrationState.done && (
-                  <p className="text-sm text-green-600 font-medium">
-                    ✓ Migración completada — {migrationState.totalMigrated} migrados, {migrationState.totalSkipped} ya existían
-                  </p>
-                )}
-
-                {migrationState.log.length > 0 && (
-                  <ScrollArea className="h-52 rounded-md border bg-muted/30 p-3">
-                    <div className="space-y-0.5 font-mono text-xs">
-                      {migrationState.log.map((entry, i) => {
-                        if (entry.type === "section") {
-                          return (
-                            <p key={i} className="text-muted-foreground font-semibold pt-2 pb-0.5">
-                              — {entry.name}
-                            </p>
-                          );
-                        }
-                        if (entry.type === "section_done") {
-                          return (
-                            <div key={i} className="flex items-center gap-2 pl-2">
-                              {entry.migrated! > 0 ? (
-                                <CheckCircle2 className="w-3.5 h-3.5 text-green-500 shrink-0" />
-                              ) : (
-                                <span className="w-3.5 h-3.5 shrink-0 text-center text-muted-foreground">–</span>
-                              )}
-                              <span className={entry.migrated! > 0 ? "text-green-600" : "text-muted-foreground"}>
-                                {entry.migrated} migrados
-                              </span>
-                              {entry.skipped! > 0 && (
-                                <span className="text-muted-foreground">· {entry.skipped} ya existían</span>
-                              )}
-                              <span className="text-muted-foreground">({entry.total} total)</span>
-                            </div>
-                          );
-                        }
-                        return null;
-                      })}
-                      <div ref={migrationScrollRef} />
-                    </div>
-                  </ScrollArea>
-                )}
               </CardContent>
             </Card>
           </div>
