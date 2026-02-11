@@ -260,6 +260,8 @@ model Answer {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  translations AnswerTranslation[]
+
   @@map("answer")
 }
 
@@ -834,4 +836,17 @@ model QuestionTranslation {
 
   @@unique([questionId, language])
   @@map("question_translation")
+}
+
+model AnswerTranslation {
+  id        Int      @id @default(autoincrement())
+  answer    Answer   @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  answerId  Int
+  language  Language
+  text      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([answerId, language])
+  @@map("answer_translation")
 }
