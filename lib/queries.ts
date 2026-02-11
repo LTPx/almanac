@@ -366,6 +366,9 @@ export const getQuestions = cache(
           },
           _count: {
             select: { answers: true }
+          },
+          translations: {
+            select: { language: true }
           }
         },
         orderBy: { createdAt: "asc" },

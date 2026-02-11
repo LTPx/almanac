@@ -71,6 +71,7 @@ export function QuestionsTable({
             <TableRow>
               <TableHead>Título</TableHead>
               <TableHead>Unidad</TableHead>
+              <TableHead className="text-center">Idiomas</TableHead>
               <TableHead className="text-center">Tipo</TableHead>
               <TableHead className="text-center">Estado</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
@@ -79,13 +80,13 @@ export function QuestionsTable({
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
+                <TableCell colSpan={7} className="text-center py-8">
                   Cargando...
                 </TableCell>
               </TableRow>
             ) : questions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
+                <TableCell colSpan={7} className="text-center py-8">
                   <div className="flex flex-col items-center gap-2">
                     <HelpCircle className="w-8 h-8 text-muted-foreground" />
                     <p className="text-muted-foreground">
@@ -107,6 +108,12 @@ export function QuestionsTable({
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {question.unit?.name || "-"}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      <span className={question.translations?.some(t => t.language === "EN") ? "opacity-100" : "opacity-25"}>🇺🇸</span>
+                      <span className={question.translations?.some(t => t.language === "ES") ? "opacity-100" : "opacity-25"}>🇪🇸</span>
+                    </div>
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant="outline">

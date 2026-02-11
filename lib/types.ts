@@ -20,6 +20,7 @@ export interface SessionApp {
 
 export interface Question {
   id: number;
+  translations?: { language: string }[];
   type:
     | "MULTIPLE_CHOICE"
     | "FILL_IN_BLANK"
