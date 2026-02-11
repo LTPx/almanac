@@ -72,6 +72,7 @@ export function UnitsTable({
             <TableRow>
               <TableHead>Nombre</TableHead>
               <TableHead>Curriculum</TableHead>
+              <TableHead className="text-center">Idiomas</TableHead>
               <TableHead className="text-center">Estado</TableHead>
               <TableHead className="text-center">Obligatoria</TableHead>
               <TableHead className="text-center">Lecciones</TableHead>
@@ -83,13 +84,13 @@ export function UnitsTable({
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8">
+                <TableCell colSpan={10} className="text-center py-8">
                   Cargando...
                 </TableCell>
               </TableRow>
             ) : units.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8">
+                <TableCell colSpan={10} className="text-center py-8">
                   <div className="flex flex-col items-center gap-2">
                     <BookOpen className="w-8 h-8 text-muted-foreground" />
                     <p className="text-muted-foreground">
@@ -111,6 +112,23 @@ export function UnitsTable({
                     </TableCell>
                   <TableCell className="text-muted-foreground">
                     {unit.curriculum?.title || "-"}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      {(["EN", "ES"] as const).map((lang) => {
+                        const has = unit.translations?.some((t) => t.language === lang);
+                        const flag = lang === "EN" ? "🇺🇸" : "🇪🇸";
+                        return (
+                          <span
+                            key={lang}
+                            title={lang}
+                            className={`text-base leading-none ${has ? "opacity-100" : "opacity-25"}`}
+                          >
+                            {flag}
+                          </span>
+                        );
+                      })}
+                    </div>
                   </TableCell>
                   <TableCell className="text-center">
                     <Switch

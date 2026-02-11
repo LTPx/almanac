@@ -151,6 +151,9 @@ export const getUnitsPagination = cache(
               title: true
             }
           },
+          translations: {
+            select: { language: true }
+          },
           _count: {
             select: { lessons: true, questions: true }
           }
@@ -252,6 +255,9 @@ export const getAllLessons = cache(
             select: {
               name: true
             }
+          },
+          translations: {
+            select: { language: true }
           }
         },
         orderBy: { createdAt: "desc" },

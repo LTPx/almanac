@@ -98,6 +98,7 @@ export type LessonAdmin = {
   unit: {
     name: string;
   };
+  translations?: { language: string }[];
   _count: { questions: number };
 };
 
