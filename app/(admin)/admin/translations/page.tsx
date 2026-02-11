@@ -24,7 +24,8 @@ import {
   Library,
   RefreshCw,
   DatabaseZap,
-  HelpCircle
+  HelpCircle,
+  Square
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -103,6 +104,10 @@ export default function TranslationsPage() {
   const unitsScrollRef = useRef<HTMLDivElement>(null);
   const lessonsScrollRef = useRef<HTMLDivElement>(null);
   const questionsScrollRef = useRef<HTMLDivElement>(null);
+  const curriculumsESRef = useRef<EventSource | null>(null);
+  const unitsESRef = useRef<EventSource | null>(null);
+  const lessonsESRef = useRef<EventSource | null>(null);
+  const questionsESRef = useRef<EventSource | null>(null);
 
   const fetchStats = async () => {
     setLoadingStats(true);
@@ -190,10 +195,42 @@ export default function TranslationsPage() {
     };
   };
 
+  const stopJob = (type: "curriculums" | "units" | "lessons" | "questions") => {
+    const ref =
+      type === "curriculums"
+        ? curriculumsESRef
+        : type === "units"
+          ? unitsESRef
+          : type === "lessons"
+            ? lessonsESRef
+            : questionsESRef;
+    const setJob =
+      type === "curriculums"
+        ? setCurriculumsJob
+        : type === "units"
+          ? setUnitsJob
+          : type === "lessons"
+            ? setLessonsJob
+            : setQuestionsJob;
+
+    ref.current?.close();
+    ref.current = null;
+    setJob((prev) => ({ ...prev, running: false, done: true }));
+    toast.info("Traducción detenida");
+  };
+
   const startJob = (
     type: "curriculums" | "units" | "lessons" | "questions",
     onlyMissing: boolean = true
   ) => {
+    const esRef =
+      type === "curriculums"
+        ? curriculumsESRef
+        : type === "units"
+          ? unitsESRef
+          : type === "lessons"
+            ? lessonsESRef
+            : questionsESRef;
     const setJob =
       type === "curriculums"
         ? setCurriculumsJob
@@ -214,6 +251,7 @@ export default function TranslationsPage() {
 
     const url = `/api/admin/translate/bulk?type=${type}&onlyMissing=${onlyMissing}`;
     const eventSource = new EventSource(url);
+    esRef.current = eventSource;
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -323,6 +361,7 @@ export default function TranslationsPage() {
     translated: number;
     scrollRef: React.RefObject<HTMLDivElement | null>;
   }) => {
+    const handleStop = () => stopJob(type);
     const missing = total - translated;
     const allDone = missing === 0;
 
@@ -368,16 +407,28 @@ export default function TranslationsPage() {
                   ? "Todo traducido"
                   : `Traducir ${missing} pendientes`}
             </Button>
-            <Button
-              onClick={() => startJob(type, false)}
-              disabled={job.running}
-              variant="outline"
-              className="gap-2"
-              title="Re-traducir todo, incluyendo los que ya tienen traducción ES"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Re-traducir todo
-            </Button>
+            {job.running && (
+              <Button
+                onClick={handleStop}
+                variant="destructive"
+                className="gap-2"
+              >
+                <Square className="w-4 h-4" />
+                Detener
+              </Button>
+            )}
+            {!job.running && (
+              <Button
+                onClick={() => startJob(type, false)}
+                disabled={allDone && !job.done}
+                variant="outline"
+                className="gap-2"
+                title="Re-traducir todo, incluyendo los que ya tienen traducción ES"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Re-traducir todo
+              </Button>
+            )}
           </div>
 
           {(job.running || job.done) && job.total > 0 && (
