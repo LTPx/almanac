@@ -196,6 +196,17 @@ export default function QuestionForm({
         }
       }));
 
+      if (translatedContent) {
+        const serialized = JSON.stringify(translatedContent, null, 2);
+        if (to === "ES") {
+          setJsonContentES(serialized);
+          setJsonErrorES("");
+        } else {
+          setJsonContent(serialized);
+          setJsonError("");
+        }
+      }
+
       toast.success(
         `Traducción al ${to === "ES" ? "Español" : "Inglés"} completada`
       );
@@ -227,8 +238,20 @@ export default function QuestionForm({
     return "";
   });
 
+  const [jsonContentES, setJsonContentES] = useState<string>(() => {
+    const esTranslation = initialData?.translations?.find(
+      (t) => t.language === "ES"
+    );
+    if (esTranslation?.content && Object.keys(esTranslation.content).length > 0) {
+      return JSON.stringify(esTranslation.content, null, 2);
+    }
+    return "";
+  });
+
   const [jsonError, setJsonError] = useState<string>("");
+  const [jsonErrorES, setJsonErrorES] = useState<string>("");
   const editorRef = useRef<any>(null);
+  const editorRefES = useRef<any>(null);
 
   const isLoading = submitting;
 
@@ -307,6 +330,8 @@ export default function QuestionForm({
         if (template) {
           setJsonContent(JSON.stringify(template, null, 2));
           setJsonError("");
+          setJsonContentES("");
+          setJsonErrorES("");
         }
       }
     }
@@ -326,6 +351,37 @@ export default function QuestionForm({
       setJsonError("");
     } catch (error: any) {
       setJsonError("JSON inválido: " + error.message);
+    }
+  };
+
+  const handleJsonChangeES = (value: string | undefined) => {
+    if (!value) {
+      setJsonContentES("");
+      setJsonErrorES("");
+      setFormData((prev) => ({
+        ...prev,
+        translations: {
+          ...prev.translations,
+          ES: { ...prev.translations.ES, content: undefined }
+        }
+      }));
+      return;
+    }
+
+    setJsonContentES(value);
+
+    try {
+      const parsed = JSON.parse(value);
+      setJsonErrorES("");
+      setFormData((prev) => ({
+        ...prev,
+        translations: {
+          ...prev.translations,
+          ES: { ...prev.translations.ES, content: parsed }
+        }
+      }));
+    } catch (error: any) {
+      setJsonErrorES("JSON inválido: " + error.message);
     }
   };
 
@@ -862,35 +918,74 @@ export default function QuestionForm({
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {jsonError && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{jsonError}</AlertDescription>
-              </Alert>
-            )}
+            <Tabs defaultValue="EN" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="EN">🇺🇸 English (EN)</TabsTrigger>
+                <TabsTrigger value="ES">🇪🇸 Español (ES)</TabsTrigger>
+              </TabsList>
 
-            <div className="border border-border rounded-lg overflow-hidden">
-              <Editor
-                height="400px"
-                defaultLanguage="json"
-                value={jsonContent}
-                onChange={handleJsonChange}
-                theme="vs-dark"
-                options={{
-                  minimap: { enabled: false },
-                  fontSize: 14,
-                  lineNumbers: "on",
-                  scrollBeyondLastLine: false,
-                  automaticLayout: true,
-                  tabSize: 2,
-                  formatOnPaste: true,
-                  formatOnType: true
-                }}
-                onMount={(editor) => {
-                  editorRef.current = editor;
-                }}
-              />
-            </div>
+              <TabsContent value="EN" className="space-y-4 mt-4">
+                {jsonError && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{jsonError}</AlertDescription>
+                  </Alert>
+                )}
+                <div className="border border-border rounded-lg overflow-hidden">
+                  <Editor
+                    height="400px"
+                    defaultLanguage="json"
+                    value={jsonContent}
+                    onChange={handleJsonChange}
+                    theme="vs-dark"
+                    options={{
+                      minimap: { enabled: false },
+                      fontSize: 14,
+                      lineNumbers: "on",
+                      scrollBeyondLastLine: false,
+                      automaticLayout: true,
+                      tabSize: 2,
+                      formatOnPaste: true,
+                      formatOnType: true
+                    }}
+                    onMount={(editor) => {
+                      editorRef.current = editor;
+                    }}
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="ES" className="space-y-4 mt-4">
+                {jsonErrorES && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{jsonErrorES}</AlertDescription>
+                  </Alert>
+                )}
+                <div className="border border-border rounded-lg overflow-hidden">
+                  <Editor
+                    height="400px"
+                    defaultLanguage="json"
+                    value={jsonContentES}
+                    onChange={handleJsonChangeES}
+                    theme="vs-dark"
+                    options={{
+                      minimap: { enabled: false },
+                      fontSize: 14,
+                      lineNumbers: "on",
+                      scrollBeyondLastLine: false,
+                      automaticLayout: true,
+                      tabSize: 2,
+                      formatOnPaste: true,
+                      formatOnType: true
+                    }}
+                    onMount={(editor) => {
+                      editorRefES.current = editor;
+                    }}
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
 
             {formData.type === "FILL_IN_BLANK" && (
               <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
