@@ -151,13 +151,18 @@ export default function QuestionForm({
     // Parse current content JSON to also translate it
     let parsedContent: any = null;
     if (jsonContent && !jsonError) {
-      try { parsedContent = JSON.parse(jsonContent); } catch {}
+      try {
+        parsedContent = JSON.parse(jsonContent);
+      } catch {}
     }
 
     // Build flat fields: title + content fields
     const fields: Record<string, string> = { title: source.title };
     if (parsedContent) {
-      Object.assign(fields, getTranslatableContentFields(formData.type, parsedContent));
+      Object.assign(
+        fields,
+        getTranslatableContentFields(formData.type, parsedContent)
+      );
     }
 
     setTranslating(to);
@@ -204,7 +209,10 @@ export default function QuestionForm({
   const handleTranslationChange = (lang: "EN" | "ES", value: string) => {
     setFormData((prev) => ({
       ...prev,
-      translations: { ...prev.translations, [lang]: { title: value } }
+      translations: {
+        ...prev.translations,
+        [lang]: { ...prev.translations[lang], title: value }
+      }
     }));
   };
 
@@ -335,21 +343,48 @@ export default function QuestionForm({
   };
 
   const addAnswer = () => {
-    setFormData((prev) => ({
-      ...prev,
-      answers: [
-        ...prev.answers,
-        { text: "", isCorrect: false, order: prev.answers.length }
-      ]
-    }));
+    setFormData((prev) => {
+      const esOptions = prev.translations.ES.content?.options;
+      return {
+        ...prev,
+        answers: [
+          ...prev.answers,
+          { text: "", isCorrect: false, order: prev.answers.length }
+        ],
+        translations: esOptions
+          ? {
+              ...prev.translations,
+              ES: {
+                ...prev.translations.ES,
+                content: { ...prev.translations.ES.content, options: [...esOptions, ""] }
+              }
+            }
+          : prev.translations
+      };
+    });
   };
 
   const removeAnswer = (index: number) => {
     if (formData.answers.length > 2) {
-      setFormData((prev) => ({
-        ...prev,
-        answers: prev.answers.filter((_, i) => i !== index)
-      }));
+      setFormData((prev) => {
+        const esOptions = prev.translations.ES.content?.options;
+        return {
+          ...prev,
+          answers: prev.answers.filter((_, i) => i !== index),
+          translations: esOptions
+            ? {
+                ...prev.translations,
+                ES: {
+                  ...prev.translations.ES,
+                  content: {
+                    ...prev.translations.ES.content,
+                    options: esOptions.filter((_: string, i: number) => i !== index)
+                  }
+                }
+              }
+            : prev.translations
+        };
+      });
     }
   };
 
@@ -361,6 +396,27 @@ export default function QuestionForm({
         isCorrect: i === index
       }))
     }));
+  };
+
+  const handleESAnswerChange = (index: number, value: string) => {
+    setFormData((prev) => {
+      const currentOptions: string[] =
+        prev.translations.ES.content?.options ||
+        prev.answers.map(() => "");
+      const newOptions = [...currentOptions];
+      while (newOptions.length <= index) newOptions.push("");
+      newOptions[index] = value;
+      return {
+        ...prev,
+        translations: {
+          ...prev.translations,
+          ES: {
+            ...prev.translations.ES,
+            content: { ...prev.translations.ES.content, options: newOptions }
+          }
+        }
+      };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -632,7 +688,7 @@ export default function QuestionForm({
           <CardHeader>
             <CardTitle>Opciones de Respuesta</CardTitle>
             <CardDescription>
-              Configura las opciones de respuesta. Marca una como correcta.
+              Configura las opciones de respuesta en ambos idiomas. Marca una como correcta.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -645,48 +701,92 @@ export default function QuestionForm({
               </Alert>
             )}
 
-            {formData.answers.map((answer, index) => (
-              <div
-                key={index}
-                className="flex items-center space-x-4 p-4 border border-border rounded-lg bg-background"
-              >
-                <div className="flex-1">
-                  <Input
-                    placeholder={`Opción ${index + 1}`}
-                    value={answer.text}
-                    onChange={(e) =>
-                      handleAnswerChange(index, "text", e.target.value)
-                    }
-                    className="bg-background border-border text-foreground"
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant={answer.isCorrect ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCorrectAnswer(index)}
-                  className={
-                    answer.isCorrect
-                      ? "bg-green-600 hover:bg-green-700 text-white"
-                      : ""
-                  }
-                >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  {answer.isCorrect ? "Correcta" : "Marcar"}
-                </Button>
-                {formData.answers.length > 2 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeAnswer(index)}
-                    className="text-red-600 hover:text-red-700"
+            <Tabs defaultValue="EN" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="EN">🇺🇸 English (EN)</TabsTrigger>
+                <TabsTrigger value="ES">🇪🇸 Español (ES)</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="EN" className="space-y-3 mt-4">
+                {formData.answers.map((answer, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center space-x-4 p-4 border border-border rounded-lg bg-background"
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
+                    <div className="flex-1">
+                      <Input
+                        placeholder={`Option ${index + 1}`}
+                        value={answer.text}
+                        onChange={(e) =>
+                          handleAnswerChange(index, "text", e.target.value)
+                        }
+                        className="bg-background border-border text-foreground"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant={answer.isCorrect ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCorrectAnswer(index)}
+                      className={
+                        answer.isCorrect
+                          ? "bg-green-600 hover:bg-green-700 text-white"
+                          : ""
+                      }
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      {answer.isCorrect ? "Correcta" : "Marcar"}
+                    </Button>
+                    {formData.answers.length > 2 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeAnswer(index)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </TabsContent>
+
+              <TabsContent value="ES" className="space-y-3 mt-4">
+                {formData.answers.map((answer, index) => {
+                  const esText =
+                    formData.translations.ES.content?.options?.[index] ?? "";
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center space-x-4 p-4 border border-border rounded-lg bg-background"
+                    >
+                      <div className="flex-1 space-y-1">
+                        <Input
+                          placeholder={`Opción ${index + 1}`}
+                          value={esText}
+                          onChange={(e) =>
+                            handleESAnswerChange(index, e.target.value)
+                          }
+                          className="bg-background border-border text-foreground"
+                        />
+                        {answer.text && (
+                          <p className="text-xs text-muted-foreground pl-1">
+                            EN: {answer.text}
+                          </p>
+                        )}
+                      </div>
+                      {answer.isCorrect && (
+                        <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400 font-medium shrink-0">
+                          <CheckCircle className="h-3.5 w-3.5" />
+                          Correcta
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </TabsContent>
+            </Tabs>
 
             {formData.answers.length < 6 && (
               <Button
