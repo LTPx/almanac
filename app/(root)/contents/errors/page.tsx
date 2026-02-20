@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { AlertTriangle, Loader2, ArrowLeft } from "lucide-react";
 import { useUser } from "@/context/UserContext";
+import { useTranslation } from "@/hooks/useTranslation";
 import SubscriptionModal from "@/components/subscription-modal";
 import { useSubscriptionModal } from "@/hooks/useSubscriptionModal";
 import { TestSystem } from "@/components/test/TestSystem";
@@ -41,6 +42,7 @@ function ErrorsPage() {
   const user = useUser();
   const userId = userIdParam || user?.id || "";
   const isPremium = user?.isPremium || false;
+  const { t } = useTranslation();
   const { gamification, refetch: refetchGamification } = useHome(userId);
 
   const [questions, setQuestions] = useState<FailedQuestion[]>([]);
@@ -63,7 +65,7 @@ function ErrorsPage() {
   useEffect(() => {
     const fetchErrors = async () => {
       if (!userId || !curriculumId) {
-        setError("Faltan parámetros requeridos");
+        setError(t("errorsPage", "missingParams"));
         setIsLoading(false);
         return;
       }
@@ -77,7 +79,7 @@ function ErrorsPage() {
         const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data.error || "Error al obtener errores");
+          throw new Error(data.error || t("errorsPage", "errorFetching"));
         }
 
         setQuestions(data.questions);
@@ -108,7 +110,7 @@ function ErrorsPage() {
         return (
           <div className="space-y-2">
             <p className="text-sm font-semibold text-green-400">
-              Respuesta correcta:
+              {t("errorsPage", "correctAnswer")}
             </p>
             {sortedAnswers.map((answer, idx) => (
               <div
@@ -125,7 +127,7 @@ function ErrorsPage() {
         return (
           <div className="space-y-2">
             <p className="text-sm font-semibold text-green-400">
-              Respuesta correcta:
+              {t("errorsPage", "correctAnswer")}
             </p>
             {sortedAnswers.map((answer, idx) => (
               <div
@@ -142,7 +144,7 @@ function ErrorsPage() {
         return (
           <div className="space-y-2">
             <p className="text-sm font-semibold text-green-400">
-              Orden correcto:
+              {t("errorsPage", "correctOrder")}
             </p>
             <div className="space-y-1">
               {sortedAnswers.map((answer, idx) => (
@@ -164,7 +166,7 @@ function ErrorsPage() {
         return (
           <div className="space-y-2">
             <p className="text-sm font-semibold text-green-400">
-              Respuesta correcta:
+              {t("errorsPage", "correctAnswer")}
             </p>
             {sortedAnswers.map((answer, idx) => (
               <div
@@ -241,17 +243,19 @@ function ErrorsPage() {
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4"
           >
             <ArrowLeft className="w-5 h-5" />
-            Volver a Contenidos
+            {t("errorsPage", "backToContents")}
           </button>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center">
               <AlertTriangle className="w-6 h-6 text-orange-500" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">Tus Errores</h1>
+              <h1 className="text-2xl font-bold">{t("errorsPage", "yourErrors")}</h1>
               <p className="text-sm text-gray-400">
                 {questions.length}{" "}
-                {questions.length === 1 ? "pregunta" : "preguntas"}
+                {questions.length === 1
+                  ? t("errorsPage", "question")
+                  : t("errorsPage", "questions")}
               </p>
             </div>
           </div>
@@ -260,7 +264,7 @@ function ErrorsPage() {
         {/* Empty State */}
         {questions.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-400">No tienes errores registrados</p>
+            <p className="text-gray-400">{t("errorsPage", "noErrors")}</p>
           </div>
         )}
 
@@ -307,7 +311,7 @@ function ErrorsPage() {
                 onClick={handleStartReview}
                 className="w-full font-bold text-base py-4 rounded-xl bg-white text-neutral-900 hover:bg-gray-100 transition-colors"
               >
-                EMPEZAR MI REPASO
+                {t("errorsPage", "startReview")}
               </button>
             </div>
           </>

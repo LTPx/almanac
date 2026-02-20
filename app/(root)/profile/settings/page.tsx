@@ -13,8 +13,10 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function SettingsProfile() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isUpdatingLanguage, setIsUpdatingLanguage] = useState(false);
@@ -24,11 +26,11 @@ export default function SettingsProfile() {
     setIsLoggingOut(true);
     try {
       await authClient.signOut();
-      toast.success("Logged out successfully");
+      toast.success(t("settings", "logoutSuccess"));
       window.location.href = "/sign-in";
     } catch (error) {
       setIsLoggingOut(false);
-      toast.error("Failed to log out");
+      toast.error(t("settings", "logoutError"));
       console.error("Logout error:", error);
     }
   };
@@ -48,11 +50,11 @@ export default function SettingsProfile() {
         throw new Error("Failed to update language preference");
       }
 
-      toast.success("Language updated successfully");
+      toast.success(t("settings", "languageUpdated"));
       // Recargar la página para aplicar cambios
       window.location.reload();
     } catch (error) {
-      toast.error("Failed to update language");
+      toast.error(t("settings", "languageUpdateError"));
       console.error("Language update error:", error);
     } finally {
       setIsUpdatingLanguage(false);
@@ -70,14 +72,14 @@ export default function SettingsProfile() {
 
   return (
     <div className="min-h-screen text-white pb-[60px]">
-      <SettingsHeader />
+      <SettingsHeader title={t("settings", "title")} />
       <div className="pb-8">
         <div className="mt-6">
-          <SectionTitle title="Idioma / Language" />
+          <SectionTitle title={t("settings", "languageSection")} />
           <div className="mx-4 px-4 py-3 bg-gray-800/50 rounded-lg border border-gray-700">
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-300">
-                Selecciona tu idioma
+                {t("settings", "selectLanguage")}
               </span>
               <Select
                 value={currentLanguage}
@@ -100,19 +102,19 @@ export default function SettingsProfile() {
           </div>
         </div>
         <div className="mt-8">
-          <SectionTitle title="Cuenta" />
+          <SectionTitle title={t("settings", "account")} />
           <div className="mx-4 overflow-hidden">
-            <MenuItem title="Preferencias" onClick={handlePreferences} />
-            <MenuItem title="Perfil" onClick={handleProfile} />
-            <MenuItem title="Notificaciones" onClick={handleNotifications} />
-            <MenuItem title="Ajustes de privacidad" onClick={handlePrivacy} />
+            <MenuItem title={t("settings", "preferences")} onClick={handlePreferences} />
+            <MenuItem title={t("settings", "profile")} onClick={handleProfile} />
+            <MenuItem title={t("settings", "notifications")} onClick={handleNotifications} />
+            <MenuItem title={t("settings", "privacy")} onClick={handlePrivacy} />
           </div>
         </div>
         <div className="mt-8">
-          <SectionTitle title="Ayuda" />
+          <SectionTitle title={t("settings", "help")} />
           <div className="mx-4 overflow-hidden">
-            <MenuItem title="F.A.Q." onClick={handleFAQ} />
-            <MenuItem title="Soporte" onClick={handleSupport} />
+            <MenuItem title={t("settings", "faq")} onClick={handleFAQ} />
+            <MenuItem title={t("settings", "support")} onClick={handleSupport} />
           </div>
         </div>
         <div className="flex justify-center mt-8 px-4">
@@ -122,7 +124,7 @@ export default function SettingsProfile() {
             onClick={handleLogout}
             disabled={isLoggingOut}
           >
-            {isLoggingOut ? "Logging out..." : "Log out"}
+            {isLoggingOut ? t("settings", "loggingOut") : t("settings", "logout")}
           </Button>
         </div>
       </div>
@@ -130,12 +132,12 @@ export default function SettingsProfile() {
   );
 }
 
-const SettingsHeader = () => {
+const SettingsHeader = ({ title }: { title: string }) => {
   const router = useRouter();
   return (
     <div className="flex items-center justify-between p-4 border-b border-gray-700">
       <h1 className="text-xl font-semibold text-white text-center flex-1">
-        Configuración
+        {title}
       </h1>
       <Button
         variant="ghost"

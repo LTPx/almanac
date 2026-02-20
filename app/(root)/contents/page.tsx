@@ -18,6 +18,7 @@ import { TestSystem } from "@/components/test/TestSystem";
 import { useHome } from "@/hooks/useHome";
 import SubscriptionModal from "@/components/subscription-modal";
 import { useSubscriptionModal } from "@/hooks/useSubscriptionModal";
+import { useTranslation } from "@/hooks/useTranslation";
 
 function ContentsPage() {
   const searchParams = useSearchParams();
@@ -31,6 +32,7 @@ function ContentsPage() {
     useCurriculumStore();
   const { isLoading, fetchCurriculumWithUnitsUserMetrics } = useCurriculums();
   const { gamification, refetch: refetchGamification } = useHome(userId);
+  const { t } = useTranslation();
 
   const [unitStates, setUnitStates] = useState<Record<string, string>>({});
 
@@ -155,7 +157,7 @@ function ContentsPage() {
           className="px-3 py-1.5 rounded-md text-xs font-semibold bg-neutral-800 text-gray-400 cursor-not-allowed flex items-center gap-1.5 border border-neutral-700"
         >
           <Lock className="w-3 h-3" />
-          Sin datos
+          {t("contents", "noData")}
         </button>
       );
     }
@@ -168,7 +170,7 @@ function ContentsPage() {
             className="px-3 py-1.5 rounded-md text-xs font-semibold bg-neutral-800 hover:bg-neutral-700 text-white transition-colors flex items-center gap-1.5 border border-neutral-600"
           >
             <RotateCcw className="w-3 h-3" />
-            Reintentar
+            {t("contents", "retry")}
           </button>
         );
       case "available":
@@ -183,7 +185,7 @@ function ContentsPage() {
             }`}
           >
             <Play className="w-3 h-3" />
-            {hearts === 0 ? "Sin Corazones" : "Empezar"}
+            {hearts === 0 ? t("contents", "noHearts") : t("contents", "start")}
           </button>
         );
       case "locked":
@@ -193,7 +195,7 @@ function ContentsPage() {
             className="px-3 py-1.5 rounded-md text-xs font-semibold bg-neutral-800 text-gray-400 cursor-not-allowed flex items-center gap-1.5 border border-neutral-700"
           >
             <Lock className="w-3 h-3" />
-            Bloqueada
+            {t("contents", "locked")}
           </button>
         );
       default:
@@ -210,7 +212,7 @@ function ContentsPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-neutral-900 text-white flex items-center justify-center">
-        <div className="text-gray-400 text-lg">Cargando unidades...</div>
+        <div className="text-gray-400 text-lg">{t("contents", "loadingUnits")}</div>
       </div>
     );
   }
@@ -219,7 +221,7 @@ function ContentsPage() {
     return (
       <div className="min-h-screen bg-neutral-900 text-white flex items-center justify-center">
         <div className="text-gray-400 text-lg">
-          No se ha seleccionado un curriculum
+          {t("contents", "noCurriculum")}
         </div>
       </div>
     );
@@ -246,7 +248,7 @@ function ContentsPage() {
     <div className="min-h-screen bg-neutral-900 text-white p-6 pb-20">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">{curriculum.title}</h1>
-        <h2 className="text-[22px] font-bold mb-6">Temas</h2>
+        <h2 className="text-[22px] font-bold mb-6">{t("contents", "topics")}</h2>
         {units.map((unit: Unit) => (
           <div
             key={unit.id}
@@ -284,9 +286,9 @@ function ContentsPage() {
           </div>
         ))}
         <div className="mt-8">
-          <h2 className="text-[22px] font-bold mb-4">Tu Historia</h2>
+          <h2 className="text-[22px] font-bold mb-4">{t("contents", "yourHistory")}</h2>
           <div className="border-2 border-neutral-600 rounded-2xl p-5 mb-4 flex items-center justify-between">
-            <span className="text-lg font-semibold">Conceptos</span>
+            <span className="text-lg font-semibold">{t("contents", "concepts")}</span>
             <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
               +25
             </span>
@@ -305,14 +307,14 @@ function ContentsPage() {
                 : "cursor-default"
             }`}
           >
-            <span className="text-lg font-semibold">Errores</span>
+            <span className="text-lg font-semibold">{t("contents", "errors")}</span>
             <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
               {stats?.totalAnswerErrors}
             </span>
           </button>
           <div className="relative">
             <h3 className="text-lg font-semibold mb-[100px]">
-              Repasa tus errores recientes
+              {t("contents", "reviewRecentErrors")}
             </h3>
 
             <button
@@ -334,7 +336,7 @@ function ContentsPage() {
                   : "bg-neutral-700 text-gray-400 cursor-not-allowed"
               }`}
             >
-              EMPEZAR MI REPASO
+              {t("contents", "startReview")}
             </button>
 
             {!isPremium && (

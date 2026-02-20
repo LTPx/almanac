@@ -19,17 +19,21 @@ import TutorialNFTMinting from "@/components/tutorial/tutorial-nft-minting";
 import { TutorialChatDemo } from "@/components/tutorial/tutorial-chat-demo";
 import { TutorialContentsDemo } from "@/components/tutorial/tutorial-contents";
 import ChatTutorBar from "@/components/tutor-bar-chat";
+import { useTranslation } from "@/hooks/useTranslation";
 
-const ContentLoadingScreen = () => (
-  <div className="flex items-center justify-center min-h-[60vh]">
-    <div className="flex flex-col items-center gap-4">
-      <Loader2 className="w-12 h-12 animate-spin text-purple-500" />
-      <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-        Cargando
-      </p>
+const ContentLoadingScreen = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="w-12 h-12 animate-spin text-purple-500" />
+        <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+          {t("home", "loading")}
+        </p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 function HomePageContent() {
   const searchParams = useSearchParams();
@@ -46,6 +50,7 @@ function HomePageContent() {
 
   const user = useUser();
   const userId = user?.id || "";
+  const { t } = useTranslation();
   const { isLoading, error, fetchCurriculums, fetchCurriculumWithUnits } =
     useCurriculums();
 
@@ -72,8 +77,8 @@ function HomePageContent() {
       ...createTutorialSteps(courseHeaderRef).slice(0, 3),
       {
         id: "contents-demo",
-        title: "Explora los Contenidos",
-        description: "Revisa las explicaciones detalladas",
+        title: t("tutorial", "contentsTitle"),
+        description: t("tutorial", "contentsDesc"),
         isFullScreen: true,
         customContent: (
           <TutorialContentsDemo
@@ -90,8 +95,8 @@ function HomePageContent() {
       ...createTutorialSteps(courseHeaderRef).slice(3, 4),
       {
         id: "test-demo",
-        title: "Práctica Interactiva",
-        description: "Demo del sistema de pruebas",
+        title: t("tutorial", "testTitle"),
+        description: t("tutorial", "testDesc"),
         isFullScreen: true,
         customContent: (
           <TutorialTestSystem
@@ -109,8 +114,8 @@ function HomePageContent() {
       ...createTutorialSteps(courseHeaderRef).slice(4, 7),
       {
         id: "chat-demo",
-        title: "Demo del Tutor",
-        description: "Conoce a tu tutor personal",
+        title: t("tutorial", "chatTitle"),
+        description: t("tutorial", "chatDesc"),
         isFullScreen: true,
         customContent: (
           <TutorialChatDemo
@@ -127,8 +132,8 @@ function HomePageContent() {
       ...createTutorialSteps(courseHeaderRef).slice(7, 8),
       {
         id: "nft-minting",
-        title: "Crea tu Medalla NFT",
-        description: "Aprende a mintear tus certificados",
+        title: t("tutorial", "nftTitle"),
+        description: t("tutorial", "nftDesc"),
         isFullScreen: true,
         customContent: (
           <TutorialNFTMinting
@@ -231,10 +236,10 @@ function HomePageContent() {
             </div>
             <div className="text-center">
               <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                Cargando tu progreso
+                {t("home", "loadingProgress")}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Preparando todo para ti...
+                {t("home", "preparingAll")}
               </p>
             </div>
           </div>
