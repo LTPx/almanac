@@ -146,9 +146,11 @@ function HomePageContent() {
     [nextStep, prevStep, gamification?.hearts, courseHeaderRef]
   );
 
+  const lang = user?.languagePreference ?? undefined;
+
   useEffect(() => {
     const loadUnits = async () => {
-      const data = await fetchCurriculums({ active: "true" });
+      const data = await fetchCurriculums({ active: "true", lang });
       if (data) {
         setCurriculums(data);
         if (data.length > 0 && !selectedCurriculumId) {
@@ -157,17 +159,17 @@ function HomePageContent() {
       }
     };
     loadUnits();
-  }, [fetchCurriculums, selectedCurriculumId, setSelectedCurriculumId]);
+  }, [fetchCurriculums, selectedCurriculumId, setSelectedCurriculumId, lang]);
 
   useEffect(() => {
     if (!selectedCurriculumId) return;
 
     const loadUnit = async () => {
-      const unit = await fetchCurriculumWithUnits(selectedCurriculumId);
+      const unit = await fetchCurriculumWithUnits(selectedCurriculumId, lang);
       if (unit) setSelectedCurriculum(unit);
     };
     loadUnit();
-  }, [selectedCurriculumId, fetchCurriculumWithUnits]);
+  }, [selectedCurriculumId, fetchCurriculumWithUnits, lang]);
 
   useEffect(() => {
     if (

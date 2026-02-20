@@ -40,16 +40,17 @@ export function useCurriculums() {
   );
 
   const fetchCurriculumWithUnits = useCallback(
-    async (curriculumId: string): Promise<Curriculum | null> => {
+    async (curriculumId: string, lang?: string): Promise<Curriculum | null> => {
       setIsLoading(true);
       setError(null);
 
       try {
-        const unitRes = await fetch(`/api/curriculums/${curriculumId}`);
+        const langParam = lang ? `?lang=${lang}` : "";
+        const unitRes = await fetch(`/api/curriculums/${curriculumId}${langParam}`);
         if (!unitRes.ok) throw new Error("Error al cargar curriculums");
         const unitData = await unitRes.json();
 
-        const unitsRes = await fetch(`/api/curriculums/${curriculumId}/units`);
+        const unitsRes = await fetch(`/api/curriculums/${curriculumId}/units${langParam}`);
         if (!unitsRes.ok) throw new Error("Error al cargar units");
         const unitsData = await unitsRes.json();
 

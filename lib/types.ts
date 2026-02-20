@@ -11,6 +11,7 @@ export interface User {
   isPremium?: boolean;
   hasWallet?: boolean;
   isAdmin?: boolean;
+  languagePreference?: string | null; // ISO 639-1: "es", "en"
 }
 
 export interface SessionApp {
@@ -280,6 +281,7 @@ export type CurriculumFilters = {
   active?: "true" | "false";
   difficulty?: "easy" | "medium" | "hard" | "all";
   includeUnits?: boolean;
+  lang?: string; // ISO 639-1: "en", "es"
 };
 
 export interface EducationalNFTAsset {
