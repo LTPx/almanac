@@ -131,6 +131,7 @@ export type Unit = {
     id: string;
   };
   translations?: UnitTranslation[];
+  state?: "completed" | "available" | "locked";
 };
 
 export type EducationalNFT = {

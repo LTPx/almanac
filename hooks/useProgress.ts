@@ -6,6 +6,7 @@ interface ProgressData {
   approvedUnits: number[];
   experiencePoints: number;
   isCompleted: boolean;
+  unitStates: Record<number, "completed" | "available" | "locked">;
 }
 
 export function useProgress(userId: string, curriculumId: string) {
@@ -14,7 +15,8 @@ export function useProgress(userId: string, curriculumId: string) {
   const [progress, setProgress] = useState<ProgressData>({
     approvedUnits: [],
     experiencePoints: 0,
-    isCompleted: false
+    isCompleted: false,
+    unitStates: {}
   });
 
   const fetchProgress = async () => {
@@ -35,7 +37,8 @@ export function useProgress(userId: string, curriculumId: string) {
       setProgress({
         approvedUnits: data.approvedUnits.map((l: any) => l.id),
         experiencePoints: data.experiencePoints || 0,
-        isCompleted: data.isCompleted || false
+        isCompleted: data.isCompleted || false,
+        unitStates: data.unitStates || {}
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");

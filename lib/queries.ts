@@ -1,5 +1,6 @@
 import { cache } from "react";
 import prisma from "./prisma";
+import { computeUnitStates } from "@/lib/utils/compute-unit-states";
 
 export const getUnitsByCurriculumId = cache(async (curriculumId: string) => {
   const data = await prisma.curriculum.findUnique({
@@ -83,13 +84,11 @@ export const getUserProgressByUnit = cache(
       }
     });
 
-    if (approvedUnitsInCurriculum.length === 0) return null;
-
-    // ✅ Unidad completada si TODAS las obligatorias están aprobadas
     const approvedUnitsIds = new Set(
       approvedUnitsInCurriculum.map((p) => p.unitId)
     );
 
+    // ✅ Unidad completada si TODAS las obligatorias están aprobadas
     const isUnitCompleted = mandatoryLessons.every((l) =>
       approvedUnitsIds.has(l.id)
     );
@@ -105,6 +104,16 @@ export const getUserProgressByUnit = cache(
       0
     );
 
+    // ✅ Estado de cada unidad calculado en el backend
+    const unitStates = computeUnitStates(
+      allUnits.map((u) => ({
+        id: u.id,
+        position: u.position ?? 0,
+        mandatory: u.mandatory
+      })),
+      [...approvedUnitsIds]
+    );
+
     return {
       curriculum: {
         id: curriculum.id,
@@ -112,7 +121,8 @@ export const getUserProgressByUnit = cache(
       },
       experiencePoints: currentXpInUnit,
       approvedUnits,
-      isCompleted: isUnitCompleted
+      isCompleted: isUnitCompleted,
+      unitStates
     };
   }
 );
