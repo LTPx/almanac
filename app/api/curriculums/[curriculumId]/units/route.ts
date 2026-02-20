@@ -10,6 +10,10 @@ export async function GET(
   const lang = toLangCode(request.nextUrl.searchParams.get("lang"));
 
   try {
+    const translationsFilter = lang === "ES"
+      ? { where: { language: "ES" as const }, select: { name: true, description: true } }
+      : false as const;
+
     const curriculum = await prisma.curriculum.findUnique({
       where: { id: curriculumId },
       include: {
@@ -17,24 +21,13 @@ export async function GET(
           where: { isActive: true },
           orderBy: { order: "asc" },
           include: {
-            ...(lang === "ES" && {
-              translations: { where: { language: "ES" }, select: { name: true, description: true } }
-            }),
+            translations: translationsFilter,
             lessons: {
               where: { isActive: true },
               orderBy: { position: "asc" },
-              select: {
-                id: true,
-                name: true,
-                description: true,
-                position: true,
-                unitId: true
-              },
-              ...(lang === "ES" && {
-                include: {
-                  translations: { where: { language: "ES" }, select: { name: true, description: true } }
-                }
-              })
+              include: {
+                translations: translationsFilter
+              }
             }
           }
         },
