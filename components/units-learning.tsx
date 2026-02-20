@@ -6,6 +6,7 @@ import { TestSystem } from "./test/TestSystem";
 import { FinalTestSystem } from "./test/FinalTestSystem";
 import { Curriculum, Unit } from "@/lib/types";
 import { useProgress } from "@/hooks/useProgress";
+import { computeUnitStates } from "@/lib/utils/compute-unit-states";
 
 type LearningPathProps = {
   curriculum: Curriculum;
@@ -97,15 +98,17 @@ const LearningPath: React.FC<LearningPathProps> = ({
         unit.position >= 0
     ) || [];
 
-  let finalApprovedUnits = progress.approvedUnits;
+  // Compute simulated approvedUnitIds for tutorial/preview modes
   const isInitialTutorialState =
     isTutorialMode &&
     !showAsCompleted &&
     !showOptionalAsAvailable &&
     !showAllCompletedExceptFirst;
 
+  let simulatedApprovedIds: number[] | null = null;
+
   if (isInitialTutorialState) {
-    finalApprovedUnits = [];
+    simulatedApprovedIds = [];
   } else if (showAsCompleted) {
     const mandatoryUnits = assignedUnits.filter((u) => u.mandatory);
     const highestPositionUnit =
@@ -118,73 +121,57 @@ const LearningPath: React.FC<LearningPathProps> = ({
               unit.position > max.position ? unit : max
             )
           : null;
-
-    if (highestPositionUnit) {
-      finalApprovedUnits = [highestPositionUnit.id];
-    }
+    simulatedApprovedIds = highestPositionUnit ? [highestPositionUnit.id] : [];
   } else if (showOptionalAsAvailable) {
+    let pivotNode: Unit | null = null;
+
     if (simulateOptionalNode && forcedOptionalNodeId) {
-      const simulatedNode = assignedUnits.find(
-        (u) => u.id === forcedOptionalNodeId
-      );
-
-      if (simulatedNode) {
-        const optionalRow = Math.floor(simulatedNode.position / 5);
-        const optionalCol = simulatedNode.position % 5;
-
-        const adjacentToApprove: number[] = [];
-
-        assignedUnits.forEach((unit) => {
-          const unitRow = Math.floor(unit.position / 5);
-          const unitCol = unit.position % 5;
-
-          const rowDiff = Math.abs(unitRow - optionalRow);
-          const colDiff = Math.abs(unitCol - optionalCol);
-
-          if (
-            (rowDiff === 0 && colDiff === 1) ||
-            (rowDiff === 1 && colDiff === 0)
-          ) {
-            adjacentToApprove.push(unit.id);
-          }
-        });
-
-        finalApprovedUnits = adjacentToApprove;
-      }
+      pivotNode = assignedUnits.find((u) => u.id === forcedOptionalNodeId) || null;
     } else {
       const optionalNodes = assignedUnits.filter((u) => !u.mandatory);
-      const highestOptionalNode =
+      pivotNode =
         optionalNodes.length > 0
           ? optionalNodes.reduce((max, node) =>
               node.position > max.position ? node : max
             )
           : null;
+    }
 
-      if (highestOptionalNode) {
-        const optionalRow = Math.floor(highestOptionalNode.position / 5);
-        const optionalCol = highestOptionalNode.position % 5;
-
-        const adjacentToApprove: number[] = [];
-
-        assignedUnits.forEach((unit) => {
-          const unitRow = Math.floor(unit.position / 5);
-          const unitCol = unit.position % 5;
-
-          const rowDiff = Math.abs(unitRow - optionalRow);
-          const colDiff = Math.abs(unitCol - optionalCol);
-
-          if (
+    if (pivotNode) {
+      const pivotRow = Math.floor(pivotNode.position / 5);
+      const pivotCol = pivotNode.position % 5;
+      simulatedApprovedIds = assignedUnits
+        .filter((unit) => {
+          const rowDiff = Math.abs(Math.floor(unit.position / 5) - pivotRow);
+          const colDiff = Math.abs((unit.position % 5) - pivotCol);
+          return (
             (rowDiff === 0 && colDiff === 1) ||
             (rowDiff === 1 && colDiff === 0)
-          ) {
-            adjacentToApprove.push(unit.id);
-          }
-        });
-
-        finalApprovedUnits = adjacentToApprove;
-      }
+          );
+        })
+        .map((u) => u.id);
     }
   }
+
+  // In tutorial/preview modes, compute states from simulated progress.
+  // In normal mode, use states computed by the backend.
+  const unitsWithState: Unit[] = (() => {
+    if (simulatedApprovedIds !== null) {
+      const states = computeUnitStates(
+        assignedUnits.map((u) => ({ id: u.id, position: u.position, mandatory: u.mandatory })),
+        simulatedApprovedIds
+      );
+      return assignedUnits.map((u) => ({ ...u, state: states[u.id] || "locked" as const }));
+    }
+    return assignedUnits.map((u) => ({
+      ...u,
+      state: progress.unitStates[u.id] || ("locked" as const)
+    }));
+  })();
+
+  // finalApprovedUnits kept only for getFinalTestState
+  const finalApprovedUnits =
+    simulatedApprovedIds !== null ? simulatedApprovedIds : progress.approvedUnits;
 
   const handleCloseTest = () => {
     setActiveUnit(null);
@@ -226,13 +213,11 @@ const LearningPath: React.FC<LearningPathProps> = ({
             <div>Cargando progreso...</div>
           ) : (
             <LessonGrid
-              units={assignedUnits}
-              approvedUnits={finalApprovedUnits}
+              units={unitsWithState}
               onStartUnit={setActiveUnit}
               onStartFinalTest={() => setShowFinalTest(true)}
               hearts={hearts}
               isTutorialMode={isTutorialMode}
-              showOptionalAsAvailable={showOptionalAsAvailable}
               curriculumId={curriculum.id}
               finalTestState={finalTestState}
               simulateOptionalNode={simulateOptionalNode}
@@ -283,13 +268,11 @@ const LearningPath: React.FC<LearningPathProps> = ({
           <div>Cargando progreso...</div>
         ) : (
           <LessonGrid
-            units={assignedUnits}
-            approvedUnits={finalApprovedUnits}
+            units={unitsWithState}
             onStartUnit={setActiveUnit}
             onStartFinalTest={() => setShowFinalTest(true)}
             hearts={hearts}
             isTutorialMode={isTutorialMode}
-            showOptionalAsAvailable={showOptionalAsAvailable}
             curriculumId={curriculum.id}
             finalTestState={finalTestState}
             simulateOptionalNode={simulateOptionalNode}
