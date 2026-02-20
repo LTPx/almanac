@@ -20,6 +20,7 @@ type LearningPathProps = {
   resumeTestAttemptId?: number;
   simulateOptionalNode?: boolean;
   forcedOptionalNodeId?: number;
+  lang?: string;
 };
 
 const LearningPath: React.FC<LearningPathProps> = ({
@@ -33,7 +34,8 @@ const LearningPath: React.FC<LearningPathProps> = ({
   isTutorialMode = false,
   resumeTestAttemptId,
   simulateOptionalNode = false,
-  forcedOptionalNodeId = undefined
+  forcedOptionalNodeId = undefined,
+  lang
 }) => {
   const [activeUnit, setActiveUnit] = useState<Unit | null>(null);
   const [showFinalTest, setShowFinalTest] = useState(false);
@@ -238,6 +240,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
             userId={userId}
             curriculumId={curriculum.id}
             onClose={handleCloseFinalTest}
+            lang={lang}
           />
         </div>
       </div>
@@ -255,6 +258,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
             curriculumId={curriculum.id}
             onClose={handleCloseTest}
             resumeTestAttemptId={resumeTestId}
+            lang={lang}
           />
         </div>
       </div>

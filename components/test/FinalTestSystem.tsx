@@ -19,6 +19,7 @@ interface FinalTestSystemProps {
   onClose: () => void;
   hearts: number;
   onHeartsChange?: (hearts: number) => void;
+  lang?: string;
 }
 
 export function FinalTestSystem(props: FinalTestSystemProps) {

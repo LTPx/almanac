@@ -28,6 +28,7 @@ function ContentsPage() {
   const user = useUser();
   const userId = user?.id || "";
   const isPremium = user?.isPremium || false;
+  const lang = user?.languagePreference ?? undefined;
   const { selectedCurriculumId, setSelectedCurriculumId } =
     useCurriculumStore();
   const { isLoading, fetchCurriculumWithUnitsUserMetrics } = useCurriculums();
@@ -238,6 +239,7 @@ function ContentsPage() {
             curriculumId={selectedCurriculumId}
             onClose={handleCloseTest}
             isReviewMode={activeTest.isReview}
+            lang={lang}
           />
         </div>
       </div>

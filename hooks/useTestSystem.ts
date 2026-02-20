@@ -26,6 +26,7 @@ interface UseTestSystemProps {
   onHeartsChange?: (hearts: number) => void;
   resumeTestAttemptId?: number;
   isReviewMode?: boolean;
+  lang?: string;
 }
 
 export function useTestSystem({
@@ -36,7 +37,8 @@ export function useTestSystem({
   hearts: initialHearts,
   onHeartsChange,
   resumeTestAttemptId,
-  isReviewMode
+  isReviewMode,
+  lang
 }: UseTestSystemProps) {
   const [state, setState] = useState<TestState>("testing");
   const [showStore, setShowStore] = useState(false);
@@ -166,7 +168,7 @@ export function useTestSystem({
 
   const handleStartTest = useCallback(
     async (lessonId: number) => {
-      const testData = await startTest(userId, lessonId);
+      const testData = await startTest(userId, lessonId, lang);
       if (testData) {
         setCurrentTest(testData);
         setCurrentQuestionIndex(0);
@@ -188,7 +190,7 @@ export function useTestSystem({
   useEffect(() => {
     if (!hasInitialized.current) {
       if (resumeTestAttemptId) {
-        resumeTest(resumeTestAttemptId, userId).then((data) => {
+        resumeTest(resumeTestAttemptId, userId, lang).then((data) => {
           if (data) {
             setCurrentTest(data);
             setCurrentQuestionIndex(data.currentQuestionIndex);
@@ -204,7 +206,7 @@ export function useTestSystem({
           }
         });
       } else if (isReviewMode) {
-        startReviewTest(userId, curriculumId).then((testData) => {
+        startReviewTest(userId, curriculumId, lang).then((testData) => {
           if (testData) {
             setCurrentTest(testData);
             setCurrentQuestionIndex(0);

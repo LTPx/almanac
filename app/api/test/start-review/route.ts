@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import {
+  toLangCode,
+  answerTranslationFilter,
+  applyQuestionTranslation
+} from "@/lib/apply-translation";
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, curriculumId } = await request.json();
+    const { userId, curriculumId, lang: langRaw } = await request.json();
+    const lang = toLangCode(langRaw);
 
     if (!userId || !curriculumId) {
       return NextResponse.json(
@@ -48,8 +54,16 @@ export async function POST(request: NextRequest) {
         isActive: true
       },
       include: {
+        translations:
+          lang === "ES"
+            ? {
+                where: { language: "ES" },
+                select: { title: true, content: true }
+              }
+            : false,
         answers: {
-          orderBy: { order: "asc" }
+          orderBy: { order: "asc" },
+          include: { translations: answerTranslationFilter(lang) }
         }
       }
     });
@@ -77,27 +91,20 @@ export async function POST(request: NextRequest) {
     });
 
     const questionsForClient = shuffle(
-      questions.map((question) => ({
-        id: question.id,
-        type: question.type,
-        title: question.title,
-        order: question.order,
-        content:
-          question.type === "ORDER_WORDS"
-            ? {
-                //@ts-expect-error spread error
-                ...question.content,
-                //@ts-expect-error no words type
-                words: shuffle(question.content?.words)
-              }
-            : question.content,
-        answers: shuffle(
-          question.answers.map((answer) => ({
-            id: answer.id,
-            text: answer.text
-          }))
-        )
-      }))
+      questions.map((question) => {
+        const { title, content, answers } = applyQuestionTranslation(question);
+        return {
+          id: question.id,
+          type: question.type,
+          title,
+          order: question.order,
+          content:
+            question.type === "ORDER_WORDS"
+              ? { ...content, words: shuffle(content?.words) }
+              : content,
+          answers: shuffle(answers ?? [])
+        };
+      })
     );
 
     const questionOrder = questionsForClient.map((q) => q.id);

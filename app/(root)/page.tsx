@@ -298,6 +298,7 @@ function HomePageContent() {
               userId={userId}
               onTestComplete={handleTestComplete}
               resumeTestAttemptId={resumeTestAttemptId ? Number(resumeTestAttemptId) : undefined}
+              lang={lang}
             />
           )}
         </div>

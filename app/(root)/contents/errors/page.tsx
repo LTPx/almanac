@@ -42,6 +42,7 @@ function ErrorsPage() {
   const user = useUser();
   const userId = userIdParam || user?.id || "";
   const isPremium = user?.isPremium || false;
+  const lang = user?.languagePreference ?? undefined;
   const { t } = useTranslation();
   const { gamification, refetch: refetchGamification } = useHome(userId);
 
@@ -225,6 +226,7 @@ function ErrorsPage() {
             curriculumId={curriculumId || ""}
             onClose={handleCloseTest}
             isReviewMode={activeTest.isReview}
+            lang={lang}
           />
         </div>
       </div>

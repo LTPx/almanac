@@ -23,6 +23,7 @@ interface UseFinalTestSystemProps {
   onClose: () => void;
   hearts: number;
   onHeartsChange?: (hearts: number) => void;
+  lang?: string;
 }
 
 export function useFinalTestSystem({
@@ -30,7 +31,8 @@ export function useFinalTestSystem({
   curriculumId,
   onClose,
   hearts: initialHearts,
-  onHeartsChange
+  onHeartsChange,
+  lang
 }: UseFinalTestSystemProps) {
   const [state, setState] = useState<FinalTestState>("testing");
   const [showStore, setShowStore] = useState(false);
@@ -153,7 +155,7 @@ export function useFinalTestSystem({
 
   const handleStartTest = useCallback(
     async (currId: string) => {
-      const testData = await startFinalTest(userId, currId);
+      const testData = await startFinalTest(userId, currId, lang);
       if (testData) {
         setCurrentTest(testData);
         setCurrentQuestionIndex(0);

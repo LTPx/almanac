@@ -43,7 +43,8 @@ export function useFinalTest() {
 
   const startFinalTest = async (
     userId: string,
-    curriculumId: string
+    curriculumId: string,
+    lang?: string
   ): Promise<FinalTestData | null> => {
     setIsLoading(true);
     setError(null);
@@ -54,7 +55,7 @@ export function useFinalTest() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ userId, curriculumId })
+        body: JSON.stringify({ userId, curriculumId, lang })
       });
 
       if (!response.ok) {
