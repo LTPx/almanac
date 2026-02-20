@@ -1,28 +1,31 @@
 import { Star, CheckCircle, Gift, Award } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function StatsGrid({ stats }: { stats: any }) {
+  const { t } = useTranslation();
+
   const items = [
     {
-      label: "Días de racha",
+      label: t("profile", "streakDays"),
       value: stats.streak,
       icon: <Star className="w-6 h-6 text-yellow-500 fill-current" />,
       bg: "bg-yellow-500/20"
     },
     {
-      label: "XP obtenidos",
+      label: t("profile", "xpEarned"),
       value: stats.xp,
       icon: <CheckCircle className="w-6 h-6 text-green-500" />,
       bg: "bg-green-500/20"
     },
     {
-      label: "Desafíos",
+      label: t("profile", "challenges"),
       value: stats.challenges,
       icon: <Gift className="w-6 h-6 text-blue-500" />,
       bg: "bg-blue-500/20"
     },
     {
-      label: "División actual",
+      label: t("profile", "currentDivision"),
       value: stats.division,
       icon: <Award className="w-6 h-6 text-purple-500" />,
       bg: "bg-purple-500/20"
@@ -31,7 +34,7 @@ export default function StatsGrid({ stats }: { stats: any }) {
 
   return (
     <div className="mb-8">
-      <h2 className="text-white text-xl font-bold mb-4">Resumen</h2>
+      <h2 className="text-white text-xl font-bold mb-4">{t("profile", "summary")}</h2>
       <div className="grid grid-cols-2 gap-4">
         {items.map((item, i) => (
           <Card key={i} className="bg-gray-800 border-gray-700">

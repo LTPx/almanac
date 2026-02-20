@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Lock, CheckCircle, BookOpen } from "lucide-react";
 import { StepPopover } from "./step-popover";
 import { useNoHeartsModal } from "@/store/no-hearts-modal";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type LessonNodeProps = {
   id: number;
@@ -37,7 +38,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
   onStartLesson
 }) => {
   const { open: openNoHeartsModal } = useNoHeartsModal();
-
+  const { t } = useTranslation();
   const hasNoHearts = hearts === 0;
 
   const getBackgroundColor = () => {
@@ -166,7 +167,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       unitId={unitId}
       title={name}
       message={description || ""}
-      buttonText="Empezar mi Prueba"
+      buttonText={t("general", "startTest")}
       onButtonClick={handleStartLesson}
       isLocked={false}
       isOptional={!mandatory}

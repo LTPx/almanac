@@ -1,6 +1,4 @@
-import type { Translations } from "./es";
-
-export const en: Translations = {
+export const en = {
   home: {
     loading: "Loading",
     loadingProgress: "Loading your progress",
@@ -88,5 +86,20 @@ export const en: Translations = {
     chatDesc: "Meet your personal tutor",
     nftTitle: "Create your NFT Medal",
     nftDesc: "Learn to mint your certificates"
+  },
+  general: {
+    startTest: "Start Test"
+  },
+  profile: {
+    addFriends: "Add Friends",
+    viewTutorial: "View Tutorial",
+    summary: "Summary",
+    streakDays: "Streak days",
+    xpEarned: "XP earned",
+    challenges: "Challenges",
+    currentDivision: "Current division",
+    achievementsTitle: "Achievements",
+    noAchievements: "No achievements yet",
+    completeToUnlock: "Complete challenges to unlock achievements"
   }
 };

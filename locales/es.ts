@@ -86,6 +86,21 @@ export const es = {
     chatDesc: "Conoce a tu tutor personal",
     nftTitle: "Crea tu Medalla NFT",
     nftDesc: "Aprende a mintear tus certificados"
+  },
+  general: {
+    startTest: "Empezar mi Prueba"
+  },
+  profile: {
+    addFriends: "Agrega Amigos",
+    viewTutorial: "Ver Tutorial",
+    summary: "Resumen",
+    streakDays: "Días de racha",
+    xpEarned: "XP obtenidos",
+    challenges: "Desafíos",
+    currentDivision: "División actual",
+    achievementsTitle: "Logros",
+    noAchievements: "No tienes logros aún",
+    completeToUnlock: "Completa desafíos para desbloquear logros"
   }
 } as const;
 
