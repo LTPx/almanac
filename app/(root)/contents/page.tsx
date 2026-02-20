@@ -16,11 +16,10 @@ import { useUser } from "@/context/UserContext";
 import { Lock, RotateCcw, Play } from "lucide-react";
 import { TestSystem } from "@/components/test/TestSystem";
 import { useHome } from "@/hooks/useHome";
-import { useLessonStatesStore } from "@/hooks/use-lessonsStates";
 import SubscriptionModal from "@/components/subscription-modal";
 import { useSubscriptionModal } from "@/hooks/useSubscriptionModal";
 
-function Contents() {
+function ContentsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const unitIdParam = searchParams?.get("unit");
@@ -31,8 +30,9 @@ function Contents() {
   const { selectedCurriculumId, setSelectedCurriculumId } =
     useCurriculumStore();
   const { isLoading, fetchCurriculumWithUnitsUserMetrics } = useCurriculums();
-  const { getLessonState } = useLessonStatesStore();
   const { gamification, refetch: refetchGamification } = useHome(userId);
+
+  const [unitStates, setUnitStates] = useState<Record<string, string>>({});
 
   const [curriculum, setCurriculum] = useState<Curriculum | null>(null);
   const [units, setUnits] = useState<Unit[]>([]);
@@ -122,9 +122,20 @@ function Contents() {
     router
   ]);
 
+  useEffect(() => {
+    if (!userId || !selectedCurriculumId) return;
+    fetch(`/api/users/${userId}/progress?curriculumId=${selectedCurriculumId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.unitStates) setUnitStates(data.unitStates);
+      })
+      .catch((err) => console.error("Error fetching progress:", err));
+  }, [userId, selectedCurriculumId]);
+
   const getUnitState = (unitId: number) => {
-    if (!selectedCurriculumId) return null;
-    return getLessonState(selectedCurriculumId, unitId);
+    const state = unitStates[String(unitId)];
+    if (!state) return null;
+    return { state };
   };
 
   const isUnitOpen = (unit: Unit) => {
@@ -344,9 +355,8 @@ function Contents() {
         hasUsedTrial={false}
         isLoading={isSubscribing}
       />
-
     </div>
   );
 }
 
-export default Contents;
+export default ContentsPage;
