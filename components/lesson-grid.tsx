@@ -14,12 +14,10 @@ import SpecialYellowNode from "./special-node";
 
 interface LessonGridProps {
   units: Unit[];
-  approvedUnits: number[];
   hearts: number;
   onStartUnit: (unit: Unit) => void;
   onStartFinalTest: () => void;
   isTutorialMode?: boolean;
-  showOptionalAsAvailable?: boolean;
   curriculumId: string | number;
   finalTestState: "locked" | "available" | "completed";
   simulateOptionalNode?: boolean;
@@ -28,12 +26,10 @@ interface LessonGridProps {
 
 export const LessonGrid: React.FC<LessonGridProps> = ({
   units,
-  approvedUnits,
   hearts,
   onStartUnit,
   onStartFinalTest,
   isTutorialMode = false,
-  showOptionalAsAvailable = false,
   curriculumId,
   finalTestState,
   simulateOptionalNode = false,
@@ -41,7 +37,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
 }) => {
   const { setLessonStates } = useLessonStatesStore();
 
-  useScrollToAvailableNode([units, approvedUnits], {
+  useScrollToAvailableNode([units], {
     enabled: !isTutorialMode,
     delay: 600,
     behavior: "smooth",
@@ -72,37 +68,6 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     });
 
     return grid.filter((rowData) => rowData.nodes.length > 0);
-  };
-
-  const isAdjacentToCompleted = (unit: Node): boolean => {
-    const pathLayout = generatePathLayout();
-    const completedNodes = pathLayout
-      .flatMap((rowData) => rowData.nodes)
-      .filter((node) => approvedUnits.includes(node.id));
-
-    if (completedNodes.length === 0) {
-      const mandatoryUnits = units.filter((u) => u.mandatory);
-      const firstLesson =
-        mandatoryUnits.length > 0
-          ? mandatoryUnits.reduce((max, u) =>
-              u.position > max.position ? u : max
-            )
-          : units.reduce(
-              (max, u) => (u.position > max.position ? u : max),
-              units[0]
-            );
-
-      return unit.id === firstLesson?.id;
-    }
-
-    return completedNodes.some((completed) => {
-      const rowDiff = Math.abs(completed.row - unit.row);
-      const colDiff = Math.abs(completed.col - unit.col);
-
-      return (
-        (rowDiff === 0 && colDiff === 1) || (rowDiff === 1 && colDiff === 0)
-      );
-    });
   };
 
   const getLockedColor = (mandatory: boolean) => {
@@ -137,43 +102,11 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     );
   }
 
-  const getLessonState = (unit: Node): "completed" | "available" | "locked" => {
-    if (isTutorialMode) {
-      if (approvedUnits.includes(unit.id)) return "completed";
-
-      if (approvedUnits.length === 0 && !showOptionalAsAvailable) {
-        const mandatoryUnits = units.filter((u) => u.mandatory);
-        const firstLesson =
-          mandatoryUnits.length > 0
-            ? mandatoryUnits.reduce((max, u) =>
-                u.position > max.position ? u : max
-              )
-            : units.reduce((max, u) => (u.position > max.position ? u : max));
-
-        if (unit.id === firstLesson.id) return "available";
-      }
-
-      if (
-        showOptionalAsAvailable &&
-        highestOptionalNode &&
-        unit.id === highestOptionalNode.id
-      ) {
-        return "available";
-      }
-
-      return "locked";
-    }
-
-    if (approvedUnits.includes(unit.id)) return "completed";
-    if (isAdjacentToCompleted(unit)) return "available";
-    return "locked";
-  };
-
   useEffect(() => {
     const lessonStatesInfo: LessonStateInfo[] = allNodes.map((node) => ({
       unitId: node.id,
       name: node.name,
-      state: getLessonState(node),
+      state: node.state || "locked",
       position: node.position,
       mandatory: node.mandatory,
       isFirstMandatory: false,
@@ -182,13 +115,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     }));
 
     setLessonStates(curriculumId, lessonStatesInfo);
-  }, [
-    units,
-    approvedUnits,
-    curriculumId,
-    isTutorialMode,
-    showOptionalAsAvailable
-  ]);
+  }, [units, curriculumId]);
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -272,9 +199,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
                     ? false
                     : nodeData.mandatory
                   : false;
-                const lessonState = nodeData
-                  ? getLessonState(nodeData)
-                  : "locked";
+                const lessonState = nodeData?.state || "locked";
                 const shouldFloat = lessonState === "available";
 
                 return (
