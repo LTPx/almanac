@@ -104,4 +104,8 @@ export const es = {
   }
 } as const;
 
-export type Translations = typeof es;
+export type Translations = {
+  [K in keyof typeof es]: {
+    [J in keyof (typeof es)[K]]: string;
+  };
+};
