@@ -44,7 +44,16 @@ export const en = {
     unlimitedLives: "Unlimited lives",
     loading: "Loading...",
     get: "GET",
-    recharge: "Recharge"
+    recharge: "Recharge",
+    reloading: "Reloading...",
+    loadingStore: "Loading store...",
+    successTitle: "Purchase successful! +",
+    watchAdReward2: "Watching ad...",
+    waiting: "Waiting...",
+    adCompleted: "Ad completed!",
+    completed: "completed",
+    watchAdsReward: "Watch an ad and earn up to",
+    availableIn: "Available in"
   },
   modals: {
     noHeartsTitle: "Out of Hearts!",

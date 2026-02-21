@@ -2,6 +2,7 @@
 
 import React from "react";
 import { X, Zap } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface AdScreenProps {
   show: boolean;
@@ -17,12 +18,15 @@ export default function AdScreen({
   onClose
 }: AdScreenProps) {
   if (!show) return null;
+  const { t } = useTranslation();
 
   return (
     <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border border-gray-700">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-white">Viendo anuncio...</h3>
+        <h3 className="text-lg font-semibold text-white">
+          {t("store", "watchAdReward2")}
+        </h3>
         {progress >= 100 && (
           <button onClick={onClose} className="text-gray-400 hover:text-white">
             <X className="w-6 h-6" />
@@ -35,7 +39,7 @@ export default function AdScreen({
         {progress < 100 ? (
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-400">Esperando...</p>
+            <p className="text-gray-400">{t("store", "waiting")}</p>
           </div>
         ) : (
           <div className="text-center">
@@ -59,8 +63,8 @@ export default function AdScreen({
 
       <p className="text-center text-sm text-gray-400 mt-2">
         {progress < 100
-          ? `${Math.round(progress)}% completado`
-          : "¡Anuncio completado!"}
+          ? `${Math.round(progress)}% ${t("store", "completed")}`
+          : t("store", "adCompleted")}
       </p>
     </div>
   );

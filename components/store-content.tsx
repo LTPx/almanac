@@ -129,7 +129,7 @@ export default function StoreContent({
 
         setMessage({
           type: "success",
-          text: `¡Compra exitosa! +${heartQuantity} ❤️`
+          text: `${t("store", "successTitle")} ${heartQuantity} ❤️`
         });
 
         setHeartQuantity(1);
@@ -159,7 +159,7 @@ export default function StoreContent({
       <div className="min-h-screen text-white flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
-          <p className="text-gray-400">Cargando tienda...</p>
+          <p className="text-gray-400">{t("store", "loadingStore")}</p>
         </div>
       </div>
     );
@@ -382,10 +382,10 @@ export default function StoreContent({
                         {isPurchasing ? (
                           <span className="flex items-center justify-center gap-2">
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            Recargando...
+                            {t("store", "reloading")}
                           </span>
                         ) : (
-                          "Recargar"
+                          t("store", "recharge")
                         )}
                       </button>
                     </div>
@@ -436,7 +436,7 @@ export default function StoreContent({
                         {isPurchasing ? (
                           <span className="flex items-center gap-2">
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            Recargando...
+                            {t("store", "reloading")}
                           </span>
                         ) : (
                           t("store", "recharge")

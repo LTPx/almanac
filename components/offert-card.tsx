@@ -217,9 +217,9 @@ export default function SpecialOfferCard({
                 </h4>
                 <p className="text-sm text-gray-400">
                   {adInfo?.canWatchAd
-                    ? `Mira un anuncio y gana hasta ${adInfo.zapReward} zaps`
+                    ? `${t("store", "watchAdsReward")} ${adInfo.zapReward} zaps`
                     : countdown > 0
-                      ? `Disponible en ${formatTime(countdown)}`
+                      ? `${t("store", "availableIn")} ${formatTime(countdown)}`
                       : t("store", "watchAdReward")}
                 </p>
               </div>

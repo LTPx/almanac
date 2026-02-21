@@ -45,7 +45,16 @@ export const es = {
     unlimitedLives: "Vidas ilimitadas",
     loading: "Cargando...",
     get: "OBTENER",
-    recharge: "Recargar"
+    recharge: "Recargar",
+    reloading: "Recargando...",
+    loadingStore: "Cargando tienda...",
+    successTitle: "¡Compra exitosa! +",
+    watchAdReward2: "Viendo anuncio...",
+    waiting: "Esperando...",
+    adCompleted: "¡Anuncio completado!",
+    completed: "completado",
+    watchAdsReward: "Mira un anuncio y gana hasta",
+    availableIn: "Disponible en"
   },
   modals: {
     noHeartsTitle: "¡Sin Corazones!",
