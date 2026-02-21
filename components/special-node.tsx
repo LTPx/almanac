@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Lock, Trophy, CheckCircle } from "lucide-react";
 import { StepPopover } from "./step-popover";
 import { useNoHeartsModal } from "@/store/no-hearts-modal";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type SpecialYellowNodeProps = {
   hearts: number;
@@ -18,6 +19,7 @@ const SpecialYellowNode: React.FC<SpecialYellowNodeProps> = ({
   onStartFinalTest
 }) => {
   const { open: openNoHeartsModal } = useNoHeartsModal();
+  const { t } = useTranslation();
 
   const handleClick = () => {
     if (state === "locked") return;
@@ -52,18 +54,18 @@ const SpecialYellowNode: React.FC<SpecialYellowNodeProps> = ({
 
   const getMessage = () => {
     if (state === "completed") {
-      return "¡Felicidades! Has completado el test final. Puedes volver a intentarlo para mejorar tu puntuación.";
+      return t("learningPath", "finalTestCompletedMessage");
     }
     if (state === "available") {
-      return "¡Has completado todas las unidades! Pon a prueba todos los conocimientos adquiridos en este test final.";
+      return t("learningPath", "finalTestReadyMessage");
     }
-    return "Completa todas las unidades obligatorias para desbloquear el test final.";
+    return t("learningPath", "finalTestLockedMessage");
   };
 
   const getButtonText = () => {
     if (state === "completed") return "Volver a Intentar";
     if (state === "available") return "Empezar Test Final";
-    return "BLOQUEADO";
+    return t("learningPath", "statusBlocked");
   };
 
   const nodeContent = (
@@ -118,7 +120,7 @@ const SpecialYellowNode: React.FC<SpecialYellowNodeProps> = ({
   return (
     <StepPopover
       unitId={-1}
-      title="Test Final"
+      title={t("learningPath", "finalTest")}
       message={getMessage()}
       buttonText={getButtonText()}
       onButtonClick={handleClick}

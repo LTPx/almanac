@@ -127,11 +127,8 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       <StepPopover
         unitId={unitId}
         title={name}
-        message={
-          description ||
-          "¡Nivel completado! Puedes volver a intentarlo para mejorar tu puntuación."
-        }
-        buttonText="Volver a Intentar"
+        message={description || t("learningPath", "levelCompletedMessage")}
+        buttonText={t("learningPath", "retryTest")}
         onButtonClick={handleStartLesson}
         isLocked={false}
         isCompleted={true}
@@ -150,8 +147,8 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       <StepPopover
         unitId={unitId}
         title={name}
-        message="¡Completa todos los niveles anteriores para habilitar este nivel!"
-        buttonText="CERRADA"
+        message={t("learningPath", "levelLockedMessage")}
+        buttonText={t("learningPath", "statusClosed")}
         onButtonClick={() => {}}
         isLocked={true}
         isHighestPosition={isHighestPosition}
@@ -167,7 +164,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       unitId={unitId}
       title={name}
       message={description || ""}
-      buttonText={t("general", "startTest")}
+      buttonText={t("learningPath", "startTest")}
       onButtonClick={handleStartLesson}
       isLocked={false}
       isOptional={!mandatory}

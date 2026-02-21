@@ -90,6 +90,22 @@ export const en = {
   general: {
     startTest: "Start Test"
   },
+  learningPath: {
+    startTest: "Start Test",
+    statusClosed: "CLOSED",
+    retryTest: "Try again",
+    statusBlocked: "LOCKED",
+    finalTest: "Final Test",
+    levelLockedMessage: "Complete all previous levels to unlock this level!",
+    levelCompletedMessage:
+      "Level completed! You can try again to improve your score.",
+    finalTestLockedMessage:
+      "Complete all required units to unlock the final test.",
+    finalTestReadyMessage:
+      "You’ve completed all the units! Put all the knowledge you’ve gained to the test in this final test.",
+    finalTestCompletedMessage:
+      "Congratulations! You’ve completed the final test. You can try again to improve your score."
+  },
   profile: {
     addFriends: "Add Friends",
     viewTutorial: "View Tutorial",
