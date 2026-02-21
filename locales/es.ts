@@ -19,6 +19,44 @@ export const es = {
     reviewRecentErrors: "Repasa tus errores recientes",
     startReview: "EMPEZAR MI REPASO"
   },
+  store: {
+    store: "Tienda",
+    backToExam: "Volver al examen",
+    premiumCardTitle: "Funciones\npara acelerar\ntu aprendizaje",
+    premiumCardBenefit:
+      "Disfruta de vidas ilimitadas\ny dile adiós a los anuncios",
+    activatePremium: "ACTIVA PREMIUM",
+    freeTrialOneWeek: "PRUEBA 1 SEMANA GRATIS",
+    premiumPrice: "7,99€/mes. Cancela cuando quieras.",
+    premiumPromoPrice: "Luego $1/mes. Cancela cuando quieras.",
+    specialOffers: "Ofertas especiales",
+    lives: "Vidas",
+    freeZaps: "Zaps gratis",
+    watchAdReward: "Mira un anuncio y gana hasta 20 zaps",
+    livesPack: "Set de vidas",
+    livesPackDescription:
+      "Recarga tus vidas para tener más oportunidades de continuar en tus pruebas.",
+    reactivateSubscription: "Reactivar suscripción",
+    cancelSubscription: "Cancelar suscripción",
+    viewAllBenefits: "Ver todos tus beneficios",
+    subscriptionEndsOn: "Tu suscripción finalizará el",
+    scheduledCancellation: "Cancelación programada",
+    noAds: "Sin anuncios",
+    unlimitedLives: "Vidas ilimitadas",
+    loading: "Cargando...",
+    get: "OBTENER",
+    recharge: "Recargar"
+  },
+  modals: {
+    noHeartsTitle: "¡Sin Corazones!",
+    noHeartsMessage:
+      "Te has quedado sin corazones. Visita la tienda para continuar aprendiendo.",
+    goToStore: "Ir a la Tienda",
+    exitExam: "Salir del Examen",
+    outOfHeartsMessage:
+      "Te quedaste sin corazones. ¡Completa otras lecciones o vuelve mañana para obtener más!",
+    getHearts: "Obtener Corazones"
+  },
   errorsPage: {
     backToContents: "Volver a Contenidos",
     yourErrors: "Tus Errores",

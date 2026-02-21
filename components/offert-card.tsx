@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Zap, Play, Loader2 } from "lucide-react";
 import AdScreen from "./ui/ad";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface AdInfo {
   currentZaps: number;
@@ -26,6 +27,7 @@ export default function SpecialOfferCard({
   onZapsUpdate
 }: SpecialOfferCardProps) {
   const [adInfo, setAdInfo] = useState<AdInfo | null>(null);
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [showAdModal, setShowAdModal] = useState(false);
   const [adProgress, setAdProgress] = useState(0);
@@ -210,13 +212,15 @@ export default function SpecialOfferCard({
             <div className="flex items-center gap-3">
               <Zap className="w-8 h-8 text-purple-500" />
               <div>
-                <h4 className="font-semibold text-white">Zaps gratis</h4>
+                <h4 className="font-semibold text-white">
+                  {t("store", "freeZaps")}
+                </h4>
                 <p className="text-sm text-gray-400">
                   {adInfo?.canWatchAd
                     ? `Mira un anuncio y gana hasta ${adInfo.zapReward} zaps`
                     : countdown > 0
                       ? `Disponible en ${formatTime(countdown)}`
-                      : "Mira un anuncio y gana hasta 20 zaps"}
+                      : t("store", "watchAdReward")}
                 </p>
               </div>
             </div>
@@ -229,12 +233,12 @@ export default function SpecialOfferCard({
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Cargando...
+                  {t("store", "loading")}
                 </>
               ) : (
                 <>
                   <Play className="w-4 h-4" />
-                  OBTENER
+                  {t("store", "get")}
                 </>
               )}
             </Button>

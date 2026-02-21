@@ -12,6 +12,7 @@ import type {
   SubscriptionData
 } from "@/lib/types";
 import { ZAPS_PER_HEART_PURCHASE } from "@/lib/constants/gamification";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function StoreContent({
   onBack,
@@ -22,6 +23,7 @@ export default function StoreContent({
   testAttemptId
 }: StoreContentProps) {
   const user = useUser();
+  const { t } = useTranslation();
   const [zapTokens, setZapTokens] = useState<number | null>(null);
   const [hearts, setHearts] = useState<number | null>(null);
   const [userStats, setUserStats] = useState<UserGamification | null>(null);
@@ -183,7 +185,9 @@ export default function StoreContent({
               className="flex items-center gap-2 px-3 sm:px-4 py-2 text-white"
             >
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-sm sm:text-base">Volver al examen</span>
+              <span className="text-sm sm:text-base">
+                {t("store", "store")}
+              </span>
             </button>
           )}
           {!showBackButton && (
@@ -260,7 +264,7 @@ export default function StoreContent({
           <>
             <div className="space-y-3 sm:space-y-4">
               <h3 className="text-base sm:text-lg font-semibold">
-                Ofertas especiales
+                {t("store", "specialOffers")}
               </h3>
               <SpecialOfferCard
                 userId={userId}
@@ -314,7 +318,9 @@ export default function StoreContent({
               </div>
             </div>
             <div className="space-y-3 sm:space-y-4">
-              <h3 className="text-base sm:text-lg font-semibold">Vidas</h3>
+              <h3 className="text-base sm:text-lg font-semibold">
+                {t("store", "lives")}
+              </h3>
               <div className="bg-background rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-gray-700">
                 <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
                   <div className="bg-red-500/20 p-2.5 sm:p-3 rounded-xl flex-shrink-0">
@@ -322,11 +328,10 @@ export default function StoreContent({
                   </div>
                   <div className="flex-1 w-full">
                     <h4 className="text-base sm:text-lg font-semibold mb-2">
-                      Set de vidas
+                      {t("store", "livesPack")}
                     </h4>
                     <p className="text-gray-400 text-xs sm:text-sm mb-3 sm:mb-4">
-                      Recarga tus vidas para tener más oportunidades de
-                      continuar en tus pruebas.
+                      {t("store", "livesPackDescription")}
                     </p>
 
                     <div className="sm:hidden space-y-3 mb-3">
@@ -434,7 +439,7 @@ export default function StoreContent({
                             Recargando...
                           </span>
                         ) : (
-                          "Recargar"
+                          t("store", "recharge")
                         )}
                       </button>
                     </div>

@@ -19,6 +19,43 @@ export const en = {
     reviewRecentErrors: "Review your recent errors",
     startReview: "START MY REVIEW"
   },
+  store: {
+    store: "Store",
+    backToExam: "Back to test",
+    premiumCardTitle: "Features\nto accelerate\nyour learning",
+    premiumCardBenefit: "Enjoy unlimited lives\nand say goodbye to ads",
+    activatePremium: "ACTIVATE PREMIUM",
+    freeTrialOneWeek: "1 WEEK FREE TRIAL",
+    premiumPrice: "€7.99/month. Cancel anytime.",
+    premiumPromoPrice: "Only $1/month after. Cancel anytime.",
+    specialOffers: "Special offers",
+    lives: "Lives",
+    freeZaps: "Get free zaps",
+    watchAdReward: "Watch an ad and earn up to 20 zaps",
+    livesPack: "Lives bundle",
+    livesPackDescription:
+      "Refill your lives and get more chances to keep taking your tests.",
+    reactivateSubscription: "Reactivate subscription",
+    cancelSubscription: "Cancel subscription",
+    viewAllBenefits: "View all your benefits",
+    subscriptionEndsOn: "Your subscription will end on",
+    scheduledCancellation: "Scheduled cancellation",
+    noAds: "No ads",
+    unlimitedLives: "Unlimited lives",
+    loading: "Loading...",
+    get: "GET",
+    recharge: "Recharge"
+  },
+  modals: {
+    noHeartsTitle: "Out of Hearts!",
+    noHeartsMessage:
+      "You’ve run out of hearts. Visit the store to continue learning.",
+    goToStore: "Go to Store",
+    exitExam: "Exit test",
+    outOfHeartsMessage:
+      "You’ve run out of hearts. Complete other lessons or come back tomorrow to get more!",
+    getHearts: "Get more hearts"
+  },
   errorsPage: {
     backToContents: "Back to Contents",
     yourErrors: "Your Errors",

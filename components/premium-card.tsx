@@ -20,6 +20,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface BenefitItem {
   icon: React.ReactNode;
@@ -38,6 +39,8 @@ export default function PremiumCard({
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showDetails, setShowDetails] = useState(true);
+  const { t } = useTranslation();
+
   const {
     showModal,
     isLoading: isSubscribing,
@@ -348,11 +351,13 @@ export default function PremiumCard({
             <div className="grid grid-cols-2 gap-2 mt-3">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
                 <CheckCircle2 className="w-4 h-4 mx-auto mb-1" />
-                <p className="text-xs font-medium">Vidas ilimitadas</p>
+                <p className="text-xs font-medium">
+                  {t("store", "unlimitedLives")}
+                </p>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
                 <CheckCircle2 className="w-4 h-4 mx-auto mb-1" />
-                <p className="text-xs font-medium">Sin anuncios</p>
+                <p className="text-xs font-medium">{t("store", "noAds")}</p>
               </div>
             </div>
           </div>
@@ -361,9 +366,11 @@ export default function PremiumCard({
             <div className="bg-red-500/20 backdrop-blur-sm rounded-lg p-3 mb-4 flex items-center gap-2">
               <X className="w-5 h-5 flex-shrink-0" />
               <div className="flex-1">
-                <p className="text-sm font-medium">Cancelación programada</p>
+                <p className="text-sm font-medium">
+                  {t("store", "scheduledCancellation")}
+                </p>
                 <p className="text-xs text-white/70">
-                  Tu suscripción finalizará el{" "}
+                  {t("store", "subscriptionEndsOn")}{" "}
                   {new Date(
                     subscription.subscriptionCurrentPeriodEnd
                   ).toLocaleDateString("es-ES")}
@@ -377,7 +384,7 @@ export default function PremiumCard({
             className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-3 flex items-center justify-between transition-colors mb-2 relative z-10"
           >
             <span className="text-sm font-medium">
-              Ver todos tus beneficios
+              {t("store", "viewAllBenefits")}
             </span>
             {showDetails ? (
               <ChevronUp className="w-5 h-5" />
@@ -438,7 +445,7 @@ export default function PremiumCard({
                     Procesando...
                   </>
                 ) : (
-                  "Cancelar suscripción"
+                  t("store", "cancelSubscription")
                 )}
               </Button>
             ) : (
@@ -453,7 +460,7 @@ export default function PremiumCard({
                     Procesando...
                   </>
                 ) : (
-                  "Reactivar suscripción"
+                  t("store", "reactivateSubscription")
                 )}
               </Button>
             )}
@@ -469,16 +476,11 @@ export default function PremiumCard({
         <CardContent className="p-6">
           <div className="flex justify-between items-start">
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold leading-tight">
-                Funciones
-                <br />
-                para acelerar tu
-                <br />
-                aprendizaje
+              <h2 className="text-2xl font-bold leading-tight whitespace-pre-line">
+                {t("store", "premiumCardTitle")}
               </h2>
-              <p className="text-blue-100 text-sm">
-                Disfruta de vidas ilimitadas
-                <br />y dile adiós a los anuncios
+              <p className="text-blue-100 text-sm whitespace-pre-line">
+                {t("store", "premiumCardBenefit")}
               </p>
               <div className="space-y-2">
                 <Button
@@ -487,12 +489,14 @@ export default function PremiumCard({
                   className="bg-white text-gray-900 hover:bg-gray-100 font-semibold px-8 py-3 rounded-full w-full sm:w-auto"
                   size="lg"
                 >
-                  {hasUsedTrial ? "ACTIVA PREMIUM" : "PRUEBA 1 SEMANA GRATIS"}
+                  {hasUsedTrial
+                    ? t("store", "activatePremium")
+                    : t("store", "freeTrialOneWeek")}
                 </Button>
                 <p className="text-xs text-white/80">
                   {hasUsedTrial
-                    ? "7,99€/mes. Cancela cuando quieras."
-                    : "Luego $1/mes. Cancela cuando quieras."}
+                    ? t("store", "premiumPrice")
+                    : t("store", "premiumPromoPrice")}
                 </p>
               </div>
             </div>

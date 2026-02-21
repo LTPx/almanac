@@ -3,6 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Heart, HeartCrack, ShoppingBag, X } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface HeartBreakAnimationProps {
   onComplete: () => void;
@@ -13,6 +14,8 @@ export const HeartBreakAnimation: React.FC<HeartBreakAnimationProps> = ({
   onComplete,
   onExit
 }) => {
+  const { t } = useTranslation();
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -100,11 +103,10 @@ export const HeartBreakAnimation: React.FC<HeartBreakAnimationProps> = ({
           className="text-center mt-8 z-10 space-y-3"
         >
           <h1 className="text-3xl font-bold text-destructive">
-            ¡Sin Corazones!
+            {t("modals", "noHeartsTitle")}
           </h1>
           <p className="text-foreground/80 font-medium text-lg max-w-md">
-            Te has quedado sin corazones. Visita la tienda para continuar
-            aprendiendo.
+            {t("modals", "noHeartsMessage")}
           </p>
         </motion.div>
 
@@ -121,7 +123,7 @@ export const HeartBreakAnimation: React.FC<HeartBreakAnimationProps> = ({
             className="w-full py-4 bg-primary hover:brightness-110 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary/30 flex items-center justify-center gap-3"
           >
             <ShoppingBag size={24} />
-            Ir a la Tienda
+            {t("modals", "goToStore")}
           </motion.button>
 
           {onExit && (
@@ -131,7 +133,7 @@ export const HeartBreakAnimation: React.FC<HeartBreakAnimationProps> = ({
               whileTap={{ scale: 0.98 }}
               className="w-full py-3 bg-card/50 hover:bg-card border border-border text-foreground/80 hover:text-foreground font-semibold rounded-xl transition-all"
             >
-              Salir del Examen
+              {t("modals", "exitExam")}
             </motion.button>
           )}
         </motion.div>
