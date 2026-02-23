@@ -67,21 +67,27 @@ export const es = {
     trialPeriod: "Período de Prueba",
     premiumActive: "Premium Activo",
     stripeSubscription: "Suscripción Stripe",
-    cancelConfirm: "¿Estás seguro que deseas cancelar tu suscripción? Mantendrás el acceso hasta el final del período actual.",
+    cancelConfirm:
+      "¿Estás seguro que deseas cancelar tu suscripción? Mantendrás el acceso hasta el final del período actual.",
     cancelSuccess: "Suscripción cancelada exitosamente",
     cancelError: "Error al cancelar suscripción",
     reactivateSuccess: "Suscripción reactivada exitosamente",
     reactivateError: "Error al reactivar suscripción",
     benefitLivesTitle: "Vidas Ilimitadas",
-    benefitLivesDesc: "Nunca te quedes sin oportunidades para practicar. Aprende a tu ritmo sin preocuparte por perder vidas en los exámenes.",
+    benefitLivesDesc:
+      "Nunca te quedes sin oportunidades para practicar. Aprende a tu ritmo sin preocuparte por perder vidas en los exámenes.",
     benefitZapsTitle: "Zaps Ilimitados",
-    benefitZapsDesc: "Acceso completo a todos los recursos de aprendizaje sin restricciones. Usa tus Zaps libremente para mejorar tu experiencia.",
+    benefitZapsDesc:
+      "Acceso completo a todos los recursos de aprendizaje sin restricciones. Usa tus Zaps libremente para mejorar tu experiencia.",
     benefitNoAdsTitle: "Sin Anuncios",
-    benefitNoAdsDesc: "Enfócate 100% en tu aprendizaje sin interrupciones. Una experiencia limpia y fluida para maximizar tu concentración.",
+    benefitNoAdsDesc:
+      "Enfócate 100% en tu aprendizaje sin interrupciones. Una experiencia limpia y fluida para maximizar tu concentración.",
     benefitNftsTitle: "NFTs Certificados Sin Límites",
-    benefitNftsDesc: "Mintea certificados NFT de cada currículum completado sin restricciones. Construye tu colección de logros blockchain ilimitadamente.",
+    benefitNftsDesc:
+      "Mintea certificados NFT de cada currículum completado sin restricciones. Construye tu colección de logros blockchain ilimitadamente.",
     benefitProgressTitle: "Progreso Acelerado",
-    benefitProgressDesc: "Sin preocuparte por las vidas, avanza más rápido. Practica intensivamente y completa currículums a tu propio ritmo."
+    benefitProgressDesc:
+      "Sin preocuparte por las vidas, avanza más rápido. Practica intensivamente y completa currículums a tu propio ritmo."
   },
   modals: {
     noHeartsTitle: "¡Sin Corazones!",
@@ -118,7 +124,34 @@ export const es = {
   achievements: {
     medals: "Medallas",
     available: "Disponible",
-    explore: "Explorar"
+    explore: "Explorar",
+    exploreCollection: "Explora la colección",
+    retry: "Reintentar",
+    createWallet: "Crea tu Wallet",
+    creatingWallet: "Creando Wallet...",
+    create: "Crear Wallet",
+    walletRequiredMessage:
+      "Necesitas una wallet para poder mintear y almacenar tus NFTs de forma segura en la blockchain.",
+    unlockCollectionMessage:
+      "Obtén tu primera medalla para explorar la colección completa",
+    walletAutoCreateMessage: "Tu wallet se creará de forma automática y segura",
+    saveRecoveryPhraseTitle: "¡Importante! Guarda tu Frase de Recuperación",
+    recoveryPhraseWarning:
+      "Esta es la ÚNICA vez que verás esta frase. Si la pierdes, no podrás recuperar tu wallet.",
+    recoveryPhraseLabel: "Frase de Recuperación (12 palabras)",
+    copied: "Copiado",
+    copy: "Copiar",
+    download: "Descargar",
+    confirmRecoveryPhrase:
+      "Confirmo que he guardado mi frase de recuperación en un lugar seguro y entiendo que no podré recuperarla después.",
+    continue: "Continuar",
+    walletCreated: "¡Wallet Creada!",
+    walletCreatedMessage:
+      "Tu wallet ha sido creada exitosamente. Ya puedes empezar a mintear tus NFTs.",
+    walletAddress: "Dirección de tu Wallet",
+    start: "Comenzar",
+    nftMedal: "Medalla NFT",
+    normal: "NORMAL"
   },
   payments: {
     successTitle: "¡Pago completado! 🎉",

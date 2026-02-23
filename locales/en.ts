@@ -66,21 +66,27 @@ export const en = {
     trialPeriod: "Trial Period",
     premiumActive: "Premium Active",
     stripeSubscription: "Stripe Subscription",
-    cancelConfirm: "Are you sure you want to cancel your subscription? You will keep access until the end of the current period.",
+    cancelConfirm:
+      "Are you sure you want to cancel your subscription? You will keep access until the end of the current period.",
     cancelSuccess: "Subscription cancelled successfully",
     cancelError: "Error cancelling subscription",
     reactivateSuccess: "Subscription reactivated successfully",
     reactivateError: "Error reactivating subscription",
     benefitLivesTitle: "Unlimited Lives",
-    benefitLivesDesc: "Never run out of opportunities to practice. Learn at your own pace without worrying about losing lives in exams.",
+    benefitLivesDesc:
+      "Never run out of opportunities to practice. Learn at your own pace without worrying about losing lives in exams.",
     benefitZapsTitle: "Unlimited Zaps",
-    benefitZapsDesc: "Full access to all learning resources without restrictions. Use your Zaps freely to enhance your experience.",
+    benefitZapsDesc:
+      "Full access to all learning resources without restrictions. Use your Zaps freely to enhance your experience.",
     benefitNoAdsTitle: "No Ads",
-    benefitNoAdsDesc: "Focus 100% on your learning without interruptions. A clean and smooth experience to maximize your concentration.",
+    benefitNoAdsDesc:
+      "Focus 100% on your learning without interruptions. A clean and smooth experience to maximize your concentration.",
     benefitNftsTitle: "Unlimited Certified NFTs",
-    benefitNftsDesc: "Mint NFT certificates for every completed curriculum without restrictions. Build your blockchain achievement collection without limits.",
+    benefitNftsDesc:
+      "Mint NFT certificates for every completed curriculum without restrictions. Build your blockchain achievement collection without limits.",
     benefitProgressTitle: "Accelerated Progress",
-    benefitProgressDesc: "Without worrying about lives, advance faster. Practice intensively and complete curriculums at your own pace."
+    benefitProgressDesc:
+      "Without worrying about lives, advance faster. Practice intensively and complete curriculums at your own pace."
   },
   modals: {
     noHeartsTitle: "Out of Hearts!",
@@ -117,7 +123,35 @@ export const en = {
   achievements: {
     medals: "Medals",
     available: "Available",
-    explore: "Explore"
+    explore: "Explore",
+    exploreCollection: "Explore the collection",
+    retry: "Retry",
+    createWallet: "Create your Wallet",
+    creatingWallet: "Creating Wallet...",
+    create: "Create Wallet",
+    walletRequiredMessage:
+      "You need a wallet to mint and securely store your NFTs on the blockchain.",
+    unlockCollectionMessage:
+      "Get your first medal to explore the full collection",
+    walletAutoCreateMessage:
+      "Your wallet will be created automatically and securely",
+    saveRecoveryPhraseTitle: "Important! Save your Recovery Phrase",
+    recoveryPhraseWarning:
+      "This is the ONLY time you will see this phrase. If you lose it, you will not be able to recover your wallet.",
+    recoveryPhraseLabel: "Recovery Phrase (12 words)",
+    copied: "Copied",
+    copy: "Copy",
+    download: "Download",
+    confirmRecoveryPhrase:
+      "I confirm that I have saved my recovery phrase in a secure place and understand that I will not be able to recover it later.",
+    continue: "Continue",
+    walletCreated: "Wallet Created!",
+    walletCreatedMessage:
+      "Your wallet has been successfully created. You can now start minting your NFTs.",
+    walletAddress: "Your Wallet Address",
+    start: "Start",
+    nftMedal: "NFT Medal",
+    normal: "NORMAL"
   },
   payments: {
     successTitle: "Payment complete! 🎉",

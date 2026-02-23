@@ -15,6 +15,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type WalletStep = "create" | "backup" | "complete";
 
@@ -34,6 +35,7 @@ export default function MyNftsTab({
   const [step, setStep] = useState<WalletStep>("create");
   const [creatingWallet, setCreatingWallet] = useState(false);
   const [walletError, setWalletError] = useState<string | null>(null);
+  const { t } = useTranslation();
   const [walletData, setWalletData] = useState<{
     address: string;
     mnemonic?: string;
@@ -140,7 +142,7 @@ Fecha: ${new Date().toLocaleString()}
                 onClick={refetch}
                 className="ml-3"
               >
-                Reintentar
+                {t("achievements", "retry")}
               </Button>
             </AlertDescription>
           </Alert>
@@ -158,10 +160,10 @@ Fecha: ${new Date().toLocaleString()}
 
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-white">
-                  Explora la colección
+                  {t("achievements", "exploreCollection")}
                 </h3>
                 <p className="text-sm text-gray-400 leading-relaxed">
-                  Obtén tu primera medalla para explorar la colección completa
+                  {t("achievements", "unlockCollectionMessage")}
                 </p>
               </div>
             </div>
@@ -175,8 +177,8 @@ Fecha: ${new Date().toLocaleString()}
                 key={nft.id}
                 id={nft.id}
                 image={nft.imageUrl || ""}
-                title={nft.name || "Medalla NFT"}
-                rarity={nft.rarity || "NORMAL"}
+                title={nft.name || t("achievements", "nftMedal")}
+                rarity={nft.rarity || t("achievements", "normal")}
                 description=""
               />
             ))}
@@ -198,12 +200,11 @@ Fecha: ${new Date().toLocaleString()}
           </div>
 
           <h2 className="text-2xl font-bold text-foreground mb-3">
-            Crea tu Wallet
+            {t("achievements", "createWallet")}
           </h2>
 
           <p className="text-muted-foreground mb-6">
-            Necesitas una wallet para poder mintear y almacenar tus NFTs de
-            forma segura en la blockchain.
+            {t("achievements", "walletRequiredMessage")}
           </p>
 
           {walletError && (
@@ -221,15 +222,15 @@ Fecha: ${new Date().toLocaleString()}
             {creatingWallet ? (
               <span className="flex items-center gap-2">
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Creando Wallet...
+                {t("achievements", "creatingWallet")}
               </span>
             ) : (
-              "Crear Wallet"
+              t("achievements", "create")
             )}
           </Button>
 
           <p className="text-sm text-muted-foreground mt-4">
-            Tu wallet se creará de forma automática y segura
+            {t("achievements", "walletAutoCreateMessage")}
           </p>
         </div>
       </div>
@@ -248,21 +249,20 @@ Fecha: ${new Date().toLocaleString()}
           </div>
 
           <h2 className="text-2xl font-bold text-foreground mb-3 text-center">
-            ¡Importante! Guarda tu Frase de Recuperación
+            {t("achievements", "saveRecoveryPhraseTitle")}
           </h2>
 
           <Alert className="mb-6 bg-primary/10 border-primary">
             <AlertCircle className="h-4 w-4 text-primary" />
             <AlertDescription className="text-foreground">
-              Esta es la ÚNICA vez que verás esta frase. Si la pierdes, no
-              podrás recuperar tu wallet.
+              {t("achievements", "recoveryPhraseWarning")}
             </AlertDescription>
           </Alert>
 
           <div className="bg-background rounded-lg p-6 mb-6 border border-border">
             <div className="flex justify-between items-center mb-4">
               <span className="text-sm text-muted-foreground">
-                Frase de Recuperación (12 palabras)
+                {t("achievements", "recoveryPhraseLabel")}
               </span>
               <Button
                 size="sm"
@@ -294,12 +294,12 @@ Fecha: ${new Date().toLocaleString()}
                 {copied ? (
                   <>
                     <CheckCircle2 className="w-4 h-4 mr-2 text-primary" />
-                    Copiado
+                    {t("achievements", "copied")}
                   </>
                 ) : (
                   <>
                     <Copy className="w-4 h-4 mr-2" />
-                    Copiar
+                    {t("achievements", "copy")}
                   </>
                 )}
               </Button>
@@ -310,7 +310,7 @@ Fecha: ${new Date().toLocaleString()}
                 disabled={!showMnemonic}
               >
                 <Download className="w-4 h-4 mr-2" />
-                Descargar
+                {t("achievements", "download")}
               </Button>
             </div>
           </div>
@@ -327,8 +327,7 @@ Fecha: ${new Date().toLocaleString()}
               htmlFor="confirm"
               className="text-sm text-muted-foreground cursor-pointer"
             >
-              Confirmo que he guardado mi frase de recuperación en un lugar
-              seguro y entiendo que no podré recuperarla después.
+              {t("achievements", "confirmRecoveryPhrase")}
             </label>
           </div>
 
@@ -337,7 +336,7 @@ Fecha: ${new Date().toLocaleString()}
             disabled={!confirmed}
             className="w-full h-12 bg-[#1983DD] hover:bg-[#1666B0] text-white font-medium rounded-lg disabled:opacity-50 transition-colors"
           >
-            Continuar
+            {t("achievements", "continue")}
           </Button>
         </div>
       </div>
@@ -355,18 +354,17 @@ Fecha: ${new Date().toLocaleString()}
         </div>
 
         <h2 className="text-2xl font-bold text-foreground mb-3">
-          ¡Wallet Creada!
+          {t("achievements", "walletCreated")}
         </h2>
 
         <p className="text-muted-foreground mb-4">
-          Tu wallet ha sido creada exitosamente. Ya puedes empezar a mintear tus
-          NFTs.
+          {t("achievements", "walletCreatedMessage")}
         </p>
 
         {walletData && (
           <div className="bg-background rounded-lg p-4 mb-6 border border-border">
             <p className="text-xs text-muted-foreground mb-1">
-              Dirección de tu Wallet
+              {t("achievements", "walletAddress")}
             </p>
             <p className="text-sm text-foreground font-mono break-all">
               {walletData.address}
@@ -378,7 +376,7 @@ Fecha: ${new Date().toLocaleString()}
           onClick={() => refetch()}
           className="w-full h-12 bg-[#1983DD] hover:bg-[#1666B0] text-white font-medium rounded-lg transition-colors"
         >
-          Comenzar
+          {t("achievements", "start")}
         </Button>
       </div>
     </div>
