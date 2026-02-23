@@ -452,7 +452,7 @@ export const getUnitsByCurriculumIdAndUserStats = cache(
       return {
         curriculum: null,
         units: [],
-        stats: { totalAnswerErrors: 0 }
+        stats: { totalAnswerErrors: 0, totalUnitsLearnt: 0 }
       };
     }
 
@@ -472,6 +472,13 @@ export const getUnitsByCurriculumIdAndUserStats = cache(
       0
     );
 
+    const totalUnitsLearnt = await prisma.userUnitProgress.count({
+      where: {
+        userId,
+        unit: { curriculumId }
+      }
+    });
+
     return {
       curriculum: {
         id: curriculum.id,
@@ -481,7 +488,8 @@ export const getUnitsByCurriculumIdAndUserStats = cache(
       },
       units: unitsWithStats,
       stats: {
-        totalAnswerErrors
+        totalAnswerErrors,
+        totalUnitsLearnt
       }
     };
   }

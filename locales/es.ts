@@ -105,6 +105,15 @@ export const es = {
     missingParams: "Faltan parámetros requeridos",
     errorFetching: "Error al obtener errores"
   },
+  conceptsPage: {
+    backToContents: "Volver a Contenidos",
+    yourConcepts: "Tus Conceptos",
+    unit: "unidad",
+    units: "unidades",
+    noConcepts: "No tienes unidades aprendidas",
+    missingParams: "Faltan parámetros requeridos",
+    errorFetching: "Error al obtener conceptos"
+  },
   leaderboard: {
     loading: "Cargando leaderboard...",
     division: "División Papel",

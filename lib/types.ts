@@ -238,7 +238,7 @@ export interface PurchaseResponse {
 export interface ContentsResponse {
   curriculum: Curriculum;
   units: Unit[];
-  stats: { totalAnswerErrors: number };
+  stats: { totalAnswerErrors: number; totalUnitsLearnt: number };
 }
 
 export interface SubscriptionData {
