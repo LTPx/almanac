@@ -32,6 +32,7 @@ function ConceptsPage() {
   const userIdParam = searchParams?.get("userId");
   const user = useUser();
   const userId = userIdParam || user?.id || "";
+  const lang = user?.languagePreference ?? undefined;
   const { t } = useTranslation();
 
   const [units, setUnits] = useState<LearnedUnit[]>([]);
@@ -50,8 +51,9 @@ function ConceptsPage() {
       setIsLoading(true);
       setError(null);
       try {
+        const langParam = lang ? `&lang=${lang}` : "";
         const res = await fetch(
-          `/api/app/concepts?userId=${userId}&curriculumId=${curriculumId}`
+          `/api/app/concepts?userId=${userId}&curriculumId=${curriculumId}${langParam}`
         );
         const data = await res.json();
 
@@ -68,7 +70,7 @@ function ConceptsPage() {
     };
 
     fetchConcepts();
-  }, [userId, curriculumId]);
+  }, [userId, curriculumId, lang]);
 
   if (isLoading) {
     return (
