@@ -7,6 +7,7 @@ import { Trophy, Loader2, ChevronLeft, Zap } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import Link from "next/link";
 import { NFTRevealCard } from "@/components/ui/mint-nft-card";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CompletedUnit {
   unitId: string;
@@ -47,6 +48,7 @@ interface NFT {
 export default function CreateCertificatePage() {
   const { data: session } = useSession();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [curriculumTokens, setCurriculumTokens] = useState<CompletedUnit[]>([]);
   const [collectionNfts, setCollectionNfts] = useState<NFTCollection[]>([]);
@@ -143,10 +145,10 @@ export default function CreateCertificatePage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center p-8">
           <Trophy className="mx-auto text-gray-400 mb-4" size={64} />
-          <h1 className="text-2xl font-bold text-white mb-4">Inicia Sesión</h1>
-          <p className="text-gray-400">
-            Necesitas estar logueado para crear tus certificados.
-          </p>
+          <h1 className="text-2xl font-bold text-white mb-4">
+            {t("achievements", "login")}
+          </h1>
+          <p className="text-gray-400">{t("achievements", "mustBeLoggedIn")}</p>
         </div>
       </div>
     );
@@ -181,7 +183,7 @@ export default function CreateCertificatePage() {
             <>
               <div className="text-center mb-6">
                 <h2 className="text-[22px] font-bold text-white">
-                  Crea tu Medalla NFT
+                  {t("achievements", "createYourNftMedal")}
                 </h2>
               </div>
 
@@ -202,7 +204,7 @@ export default function CreateCertificatePage() {
                           value=""
                           className="bg-card text-muted-foreground"
                         >
-                          Selecciona un token...
+                          {t("achievements", "selectTokenMessage")}
                         </option>
                         {availableUnits.map((unit) => (
                           <option
@@ -220,7 +222,7 @@ export default function CreateCertificatePage() {
 
                   <div>
                     <label className="block text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">
-                      Colección
+                      {t("achievements", "collection")}
                     </label>
                     <div className="relative">
                       <select
@@ -235,7 +237,7 @@ export default function CreateCertificatePage() {
                           value=""
                           className="bg-card text-muted-foreground"
                         >
-                          Selecciona una colección...
+                          {t("achievements", "selectCollectionMessage")}
                         </option>
                         {collectionNfts.map((collection) => (
                           <option
@@ -253,12 +255,15 @@ export default function CreateCertificatePage() {
 
                   <div>
                     <label className="block text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">
-                      Descripción
+                      {t("achievements", "description")}
                     </label>
                     <textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Dedico este logro a..."
+                      placeholder={t(
+                        "achievements",
+                        "dedicateAchievementMessage"
+                      )}
                       className="w-full p-4 border border-border rounded-lg text-foreground bg-card/50 backdrop-blur-sm resize-none placeholder:text-muted-foreground/50 transition-all hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
                       rows={4}
                       maxLength={250}
@@ -273,12 +278,12 @@ export default function CreateCertificatePage() {
                   {selectedUnitId && selectedCollectionId && (
                     <div className="bg-card/50 rounded-lg p-5 border border-border backdrop-blur-sm">
                       <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wide">
-                        Resumen de Transacción
+                        {t("achievements", "transactionSummary")}
                       </h3>
                       <div className="space-y-3">
                         <div className="flex justify-between items-start gap-4">
                           <span className="text-muted-foreground text-sm">
-                            Token seleccionado
+                            {t("achievements", "transactionSummary")}
                           </span>
                           <span className="text-foreground text-sm font-medium text-right">
                             {selectedUnit?.unitName}
@@ -287,7 +292,7 @@ export default function CreateCertificatePage() {
                         <div className="h-px bg-border"></div>
                         <div className="flex justify-between items-center pt-1">
                           <span className="text-foreground text-base font-medium">
-                            Costo total
+                            {t("achievements", "totalCost")}
                           </span>
                           <div className="flex items-center gap-2">
                             <div className="flex items-center gap-1.5 bg-primary/10 px-3 py-1.5 rounded-md border border-primary/20">
@@ -311,7 +316,7 @@ export default function CreateCertificatePage() {
                   {availableUnits.length === 0 ? (
                     <Link href="/">
                       <button className="w-full bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2 font-medium">
-                        Obtener tokens de minteo
+                        {t("achievements", "getMintTokens")}
                       </button>
                     </Link>
                   ) : (
@@ -325,11 +330,11 @@ export default function CreateCertificatePage() {
                       {loading ? (
                         <>
                           <Loader2 className="animate-spin" size={20} />
-                          Minting...
+                          {t("achievements", "minting")}
                         </>
                       ) : (
                         <>
-                          Crear NFT
+                          {t("achievements", "createNFT")}
                           <Zap size={20} />
                         </>
                       )}

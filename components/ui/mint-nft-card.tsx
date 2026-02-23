@@ -6,6 +6,7 @@ import { Award, Calendar, ExternalLink, Share2, Sparkles } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface NFTMetadata {
   name?: string;
@@ -105,6 +106,7 @@ export const NFTRevealCard = ({
   const [showInitialAnimation, setShowInitialAnimation] = useState(true);
   const [canInteract, setCanInteract] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   const handleReveal = () => {
     if (!canInteract || isFlipped) return;
@@ -214,7 +216,7 @@ export const NFTRevealCard = ({
                 transition={{ delay: 0.5 }}
                 className="text-center mt-4 text-white font-semibold"
               >
-                Preparando tu NFT...
+                {t("achievements", "preparingNFT")}
               </motion.p>
             </motion.div>
           </motion.div>
@@ -289,7 +291,9 @@ export const NFTRevealCard = ({
                   animate={{ opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  {canInteract ? "Toca para revelar..." : "Preparando..."}
+                  {canInteract
+                    ? t("achievements", "tapToReveal")
+                    : t("achievements", "preparing")}
                 </motion.p>
               </div>
 

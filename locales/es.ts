@@ -193,9 +193,26 @@ export const es = {
     earnMintTokensMessage:
       "Completa más unidades para obtener tokens de minteo",
     exploreCourses: "Explorar cursos",
-    cost: "Cost",
+    cost: "Costo",
     certificate: "Certificado",
-    mintNow: "Mint now"
+    mintNow: "Mintear ahora",
+    createYourNftMedal: "Crea tu Medalla NFT",
+    collection: "COLECCIÓN",
+    description: "DESCRIPCIÓN",
+    selectTokenMessage: "Selecciona un token...",
+    selectCollectionMessage: "Selecciona una colección...",
+    dedicateAchievementMessage: "Dedico este logro a...",
+    transactionSummary: "Resumen de Transacción",
+    selectedToken: "Token seleccionado",
+    totalCost: "Costo total",
+    getMintTokens: "Obtener tokens de minteo",
+    createNFT: "Crear NFT",
+    minting: "Minteando...",
+    preparingNFT: "Preparando tu NFT...",
+    login: "Inicia Sesión",
+    mustBeLoggedIn: "Necesitas estar logueado para crear tus certificados.",
+    tapToReveal: "Toca para revelar...",
+    preparing: "Preparando..."
   },
   payments: {
     successTitle: "¡Pago completado! 🎉",
