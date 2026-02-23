@@ -2,10 +2,9 @@
 
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { NFTCollectionForm } from "@/components/admin/nft-collection-form";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/admin/back-button";
 
 export default function EditCollectionPage() {
   const router = useRouter();
@@ -76,12 +75,7 @@ export default function EditCollectionPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
-        <Link href="/admin/nfts">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver
-          </Button>
-        </Link>
+        <BackButton fallback="/admin/nfts" />
         <div>
           <h1 className="text-3xl font-bold">Editar Colección</h1>
           <p>

@@ -3,9 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { BackButton } from "@/components/admin/back-button";
 import QuestionForm, {
   QuestionInput,
   QuestionData
@@ -109,12 +107,7 @@ export default function EditQuestionPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
-        <Link href="/admin/questions">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver
-          </Button>
-        </Link>
+        <BackButton fallback="/admin/questions" />
         <div>
           <h1 className="text-3xl font-bold text-foreground">
             Editar Pregunta

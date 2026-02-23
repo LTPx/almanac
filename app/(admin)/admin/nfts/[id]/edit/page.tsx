@@ -2,10 +2,8 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import { BackButton } from "@/components/admin/back-button";
 import { NFTAssetForm } from "@/components/admin/nft-asset-form";
 import { NFTAsset } from "@/lib/types";
 
@@ -55,12 +53,7 @@ export default function EditNFTPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
-        <Link href="/admin/nfts">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver
-          </Button>
-        </Link>
+        <BackButton fallback="/admin/nfts" />
         <div>
           <h1 className="text-3xl font-bold">Editar NFT Asset</h1>
           <p>Actualiza los datos del NFT</p>

@@ -2,10 +2,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { NFTAssetForm } from "@/components/admin/nft-asset-form";
+import { BackButton } from "@/components/admin/back-button";
 
 export default function CreateNFTPage() {
   const router = useRouter();
@@ -43,12 +41,7 @@ export default function CreateNFTPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
-        <Link href="/admin/nfts">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver
-          </Button>
-        </Link>
+        <BackButton fallback="/admin/nfts" />
         <div>
           <h1 className="text-3xl font-bold">Nuevo NFT Asset</h1>
           <p>Crea un nuevo NFT para recompensas educativas</p>

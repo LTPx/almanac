@@ -5,9 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Lesson } from "@/lib/types";
 
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { BackButton } from "@/components/admin/back-button";
 import {
   Card,
   CardContent,
@@ -65,12 +63,7 @@ export default function EditUnitPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
-        <Link href="/admin/units">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver
-          </Button>
-        </Link>
+        <BackButton fallback="/admin/units" />
         <div>
           <h1 className="text-3xl font-bold">Editar Unidad</h1>
         </div>

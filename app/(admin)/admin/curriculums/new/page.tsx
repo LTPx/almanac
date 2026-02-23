@@ -6,9 +6,7 @@ import { toast } from "sonner";
 import CurriculumForm, {
   CurriculumInput
 } from "@/components/admin/curriculum-form";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { BackButton } from "@/components/admin/back-button";
 
 export default function NewCurriculumPage() {
   const router = useRouter();
@@ -37,12 +35,7 @@ export default function NewCurriculumPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center space-x-4">
-        <Link href="/admin/curriculums">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver
-          </Button>
-        </Link>
+        <BackButton fallback="/admin/curriculums" />
         <div>
           <h1 className="text-3xl font-bold">Nuevo Curriculum</h1>
           <p className="text-muted-foreground">Crear curriculum educativo</p>

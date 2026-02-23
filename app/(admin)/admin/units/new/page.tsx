@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,9 +10,8 @@ import {
   CardTitle
 } from "@/components/ui/card";
 
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import UnitForm, { UnitInput } from "@/components/admin/unit-form";
+import { BackButton } from "@/components/admin/back-button";
 import { toast } from "sonner";
 
 export default function CreateUnitPage() {
@@ -43,12 +41,7 @@ export default function CreateUnitPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
-        <Link href="/admin/units">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver
-          </Button>
-        </Link>
+        <BackButton fallback="/admin/units" />
         <div>
           <h1 className="text-3xl font-bold">Nueva Unidad</h1>
           <p className="text-muted-foreground">

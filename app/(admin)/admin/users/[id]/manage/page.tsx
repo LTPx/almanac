@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/admin/back-button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import {
@@ -21,7 +22,6 @@ import {
   User,
   Calendar,
   TrendingUp,
-  ArrowLeft,
   BookOpen,
   CheckCircle2,
   Circle,
@@ -283,15 +283,7 @@ export default function UserManagePage() {
     <div className="container mx-auto py-8 px-4 max-w-7xl space-y-6">
       {/* Header with Back Button */}
       <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push("/admin/users")}
-          className="gap-2"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Volver
-        </Button>
+        <BackButton fallback="/admin/users" className="gap-2" />
         <div>
           <h1 className="text-3xl font-bold">Gestión de Usuario</h1>
           <p className="text-muted-foreground mt-1">{user.name}</p>
