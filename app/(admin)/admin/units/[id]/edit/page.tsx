@@ -7,7 +7,6 @@ import { Unit } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import UnitForm, { UnitInput } from "@/components/admin/unit-form";
 import {
   Card,
@@ -65,12 +64,18 @@ export default function EditUnitPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
-        <Link href="/admin/units">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver
-          </Button>
-        </Link>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() =>
+            window.history.length > 1
+              ? router.back()
+              : router.push("/admin/units")
+          }
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Volver
+        </Button>
         <div>
           <h1 className="text-3xl font-bold">Editar Unidad</h1>
         </div>
