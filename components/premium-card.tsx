@@ -39,7 +39,8 @@ export default function PremiumCard({
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showDetails, setShowDetails] = useState(true);
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
+  const dateLocale = lang === "en" ? "en-US" : "es-ES";
 
   const {
     showModal,
@@ -52,42 +53,33 @@ export default function PremiumCard({
   const premiumBenefits: BenefitItem[] = [
     {
       icon: <Infinity className="w-6 h-6 text-cyan-400" />,
-      title: "Vidas Ilimitadas",
-      description:
-        "Nunca te quedes sin oportunidades para practicar. Aprende a tu ritmo sin preocuparte por perder vidas en los exámenes."
+      title: t("store", "benefitLivesTitle"),
+      description: t("store", "benefitLivesDesc")
     },
     {
       icon: <Infinity className="w-6 h-6 text-purple-400" />,
-      title: "Zaps Ilimitados",
-      description:
-        "Acceso completo a todos los recursos de aprendizaje sin restricciones. Usa tus Zaps libremente para mejorar tu experiencia."
+      title: t("store", "benefitZapsTitle"),
+      description: t("store", "benefitZapsDesc")
     },
     {
       icon: <Shield className="w-6 h-6 text-green-400" />,
-      title: "Sin Anuncios",
-      description:
-        "Enfócate 100% en tu aprendizaje sin interrupciones. Una experiencia limpia y fluida para maximizar tu concentración."
+      title: t("store", "benefitNoAdsTitle"),
+      description: t("store", "benefitNoAdsDesc")
     },
     {
       icon: <Award className="w-6 h-6 text-amber-400" />,
-      title: "NFTs Certificados Sin Límites",
-      description:
-        "Mintea certificados NFT de cada currículum completado sin restricciones. Construye tu colección de logros blockchain ilimitadamente."
+      title: t("store", "benefitNftsTitle"),
+      description: t("store", "benefitNftsDesc")
     },
     {
       icon: <TrendingUp className="w-6 h-6 text-blue-400" />,
-      title: "Progreso Acelerado",
-      description:
-        "Sin preocuparte por las vidas, avanza más rápido. Practica intensivamente y completa currículums a tu propio ritmo."
+      title: t("store", "benefitProgressTitle"),
+      description: t("store", "benefitProgressDesc")
     }
   ];
 
   const handleCancelSubscription = async () => {
-    if (
-      !confirm(
-        "¿Estás seguro que deseas cancelar tu suscripción? Mantendrás el acceso hasta el final del período actual."
-      )
-    ) {
+    if (!confirm(t("store", "cancelConfirm"))) {
       return;
     }
 
@@ -105,13 +97,13 @@ export default function PremiumCard({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al cancelar suscripción");
+        throw new Error(data.error || t("store", "cancelError"));
       }
 
-      alert(data.message || "Suscripción cancelada exitosamente");
+      alert(data.message || t("store", "cancelSuccess"));
     } catch (error: any) {
       console.error("Error:", error);
-      alert(error.message || "Error al cancelar suscripción");
+      alert(error.message || t("store", "cancelError"));
     } finally {
       setIsLoading(false);
     }
@@ -135,13 +127,13 @@ export default function PremiumCard({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al reactivar suscripción");
+        throw new Error(data.error || t("store", "reactivateError"));
       }
 
-      alert(data.message || "Suscripción reactivada exitosamente");
+      alert(data.message || t("store", "reactivateSuccess"));
     } catch (error: any) {
       console.error("Error:", error);
-      alert(error.message || "Error al reactivar suscripción");
+      alert(error.message || t("store", "reactivateError"));
     } finally {
       setIsLoading(false);
     }
@@ -174,11 +166,11 @@ export default function PremiumCard({
                 </div>
                 <div>
                   <h3 className="text-xl font-bold flex items-center gap-2">
-                    Prueba Gratuita
+                    {t("store", "freeTrial")}
                     <CheckCircle2 className="w-5 h-5" />
                   </h3>
                   <p className="text-sm text-white/80">
-                    Disfruta de todos los beneficios premium
+                    {t("store", "allPremiumBenefits")}
                   </p>
                 </div>
               </div>
@@ -190,15 +182,15 @@ export default function PremiumCard({
                 <div className="flex-1">
                   <p className="text-sm font-medium">
                     {subscription.daysLeft}{" "}
-                    {subscription.daysLeft === 1 ? "día" : "días"} restantes de
-                    prueba
+                    {subscription.daysLeft === 1 ? t("store", "day") : t("store", "days")}{" "}
+                    {t("store", "trialDaysLeft")}
                   </p>
                   {subscription.subscriptionTrialEnd && (
                     <p className="text-xs text-white/70">
-                      Termina el{" "}
+                      {t("store", "endsOn")}{" "}
                       {new Date(
                         subscription.subscriptionTrialEnd
-                      ).toLocaleDateString("es-ES", {
+                      ).toLocaleDateString(dateLocale, {
                         day: "numeric",
                         month: "long"
                       })}
@@ -210,11 +202,11 @@ export default function PremiumCard({
               <div className="grid grid-cols-2 gap-2 mt-3">
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
                   <CheckCircle2 className="w-4 h-4 mx-auto mb-1" />
-                  <p className="text-xs font-medium">Vidas ilimitadas</p>
+                  <p className="text-xs font-medium">{t("store", "unlimitedLives")}</p>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
                   <CheckCircle2 className="w-4 h-4 mx-auto mb-1" />
-                  <p className="text-xs font-medium">Sin anuncios</p>
+                  <p className="text-xs font-medium">{t("store", "noAds")}</p>
                 </div>
               </div>
             </div>
@@ -224,7 +216,7 @@ export default function PremiumCard({
               className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-3 flex items-center justify-between transition-colors relative z-10"
             >
               <span className="text-sm font-medium">
-                Ver todos los beneficios
+                {t("store", "viewAllBenefits")}
               </span>
               {showDetails ? (
                 <ChevronUp className="w-5 h-5" />
@@ -292,12 +284,12 @@ export default function PremiumCard({
               <div>
                 <h3 className="text-xl font-bold flex items-center gap-2">
                   {subscription.isTrialing
-                    ? "Período de Prueba"
-                    : "Premium Activo"}
+                    ? t("store", "trialPeriod")
+                    : t("store", "premiumActive")}
                   <CheckCircle2 className="w-5 h-5" />
                 </h3>
                 <p className="text-sm text-white/80">
-                  {subscription.platform === "STRIPE" && "Suscripción Stripe"}
+                  {subscription.platform === "STRIPE" && t("store", "stripeSubscription")}
                 </p>
               </div>
             </div>
@@ -310,14 +302,14 @@ export default function PremiumCard({
                 <div className="flex-1">
                   <p className="text-sm font-medium">
                     {subscription.daysLeft}{" "}
-                    {subscription.daysLeft === 1 ? "día" : "días"} restantes de
-                    prueba
+                    {subscription.daysLeft === 1 ? t("store", "day") : t("store", "days")}{" "}
+                    {t("store", "trialDaysLeft")}
                   </p>
                   <p className="text-xs text-white/70">
-                    Termina el{" "}
+                    {t("store", "endsOn")}{" "}
                     {new Date(
                       subscription.subscriptionTrialEnd!
-                    ).toLocaleDateString("es-ES", {
+                    ).toLocaleDateString(dateLocale, {
                       day: "numeric",
                       month: "long"
                     })}
@@ -331,14 +323,14 @@ export default function PremiumCard({
                 <Sparkles className="w-5 h-5 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-medium">
-                    Renovación en {subscription.daysLeft}{" "}
-                    {subscription.daysLeft === 1 ? "día" : "días"}
+                    {t("store", "renewalIn")} {subscription.daysLeft}{" "}
+                    {subscription.daysLeft === 1 ? t("store", "day") : t("store", "days")}
                   </p>
                   <p className="text-xs text-white/70">
-                    Próximo pago:{" "}
+                    {t("store", "nextPayment")}{" "}
                     {new Date(
                       subscription.subscriptionCurrentPeriodEnd
-                    ).toLocaleDateString("es-ES", {
+                    ).toLocaleDateString(dateLocale, {
                       day: "numeric",
                       month: "long",
                       year: "numeric"
@@ -373,7 +365,7 @@ export default function PremiumCard({
                   {t("store", "subscriptionEndsOn")}{" "}
                   {new Date(
                     subscription.subscriptionCurrentPeriodEnd
-                  ).toLocaleDateString("es-ES")}
+                  ).toLocaleDateString(dateLocale)}
                 </p>
               </div>
             </div>
@@ -442,7 +434,7 @@ export default function PremiumCard({
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Procesando...
+                    {t("store", "processing")}
                   </>
                 ) : (
                   t("store", "cancelSubscription")
@@ -457,7 +449,7 @@ export default function PremiumCard({
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Procesando...
+                    {t("store", "processing")}
                   </>
                 ) : (
                   t("store", "reactivateSubscription")
