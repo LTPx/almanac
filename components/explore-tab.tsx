@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface NFTAsset {
   id: number;
@@ -37,6 +38,7 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
   const [availableNFTs, setAvailableNFTs] = useState<NFTAsset[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (isActive && !hasFetched) {
@@ -88,10 +90,10 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
           </div>
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-white">
-              ¡Explora la colección!
+              {t("achievements", "exploreCollectionTitle")}
             </h3>
             <p className="text-sm text-gray-400 leading-relaxed">
-              Obtén tu primera medalla para explorar la colección completa
+              {t("achievements", "unlockCollectionMessage")}
             </p>
           </div>
         </div>
@@ -109,10 +111,10 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
 
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-white">
-              ¡Completaste todas las medallas!
+              {t("achievements", "allMedalsCompleted")}
             </h3>
             <p className="text-sm text-gray-400 leading-relaxed">
-              Has obtenido todas las medallas disponibles
+              {t("achievements", "allMedalsObtainedMessage")}
             </p>
           </div>
         </div>
@@ -124,8 +126,10 @@ export function ExploreTab({ nfts, isActive }: ExploreTabProps) {
     <div className="px-4 pt-6 pb-4">
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         {availableNFTs.map((nft) => {
-          const rarityColor = rarityColors[nft.rarity || "NORMAL"];
-          const rarityLabel = rarityLabels[nft.rarity || "NORMAL"];
+          const rarityColor =
+            rarityColors[nft.rarity || t("achievements", "normal")];
+          const rarityLabel =
+            rarityLabels[nft.rarity || t("achievements", "normal")];
 
           return (
             <button

@@ -151,7 +151,10 @@ export const en = {
     walletAddress: "Your Wallet Address",
     start: "Start",
     nftMedal: "NFT Medal",
-    normal: "NORMAL"
+    normal: "NORMAL",
+    exploreCollectionTitle: "Explore the collection!",
+    allMedalsCompleted: "You completed all the medals!",
+    allMedalsObtainedMessage: "You have obtained all available medals"
   },
   payments: {
     successTitle: "Payment complete! 🎉",
