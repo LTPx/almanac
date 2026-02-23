@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Unit, Curriculum } from "@/lib/types";
 import { toast } from "sonner";
 
@@ -29,14 +30,17 @@ interface UseAdminUnitsReturn {
 const PAGE_SIZE = 15;
 
 export function useAdminUnits(): UseAdminUnitsReturn {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [units, setUnits] = useState<Unit[]>([]);
   const [curriculums, setCurriculums] = useState<Curriculum[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchName, setSearchName] = useState("");
-  const [curriculumId, setCurriculumId] = useState("");
+  const [searchName, setSearchName] = useState(searchParams.get("search") ?? "");
+  const [curriculumId, setCurriculumId] = useState(searchParams.get("curriculumId") ?? "");
   const [pagination, setPagination] = useState<Pagination>({
     total: 0,
-    page: 1,
+    page: Number(searchParams.get("page")) || 1,
     pageSize: PAGE_SIZE,
     totalPages: 1
   });
@@ -95,22 +99,36 @@ export function useAdminUnits(): UseAdminUnitsReturn {
     []
   );
 
+  const updateUrl = useCallback(
+    (page: number, name: string, curriculum: string) => {
+      const params = new URLSearchParams();
+      if (name) params.set("search", name);
+      if (curriculum) params.set("curriculumId", curriculum);
+      if (page > 1) params.set("page", page.toString());
+      const query = params.toString();
+      router.replace(query ? `?${query}` : "?", { scroll: false });
+    },
+    [router]
+  );
+
   const search = useCallback(
     async (page: number = 1) => {
+      updateUrl(page, searchName, curriculumId);
       await fetchUnits(
         page,
         searchName || undefined,
         curriculumId || undefined
       );
     },
-    [fetchUnits, searchName, curriculumId]
+    [fetchUnits, searchName, curriculumId, updateUrl]
   );
 
   const goToPage = useCallback(
     (page: number) => {
+      updateUrl(page, searchName, curriculumId);
       fetchUnits(page, searchName || undefined, curriculumId || undefined);
     },
-    [fetchUnits, searchName, curriculumId]
+    [fetchUnits, searchName, curriculumId, updateUrl]
   );
 
   const deleteUnit = useCallback(
@@ -146,9 +164,13 @@ export function useAdminUnits(): UseAdminUnitsReturn {
   }, []);
 
   useEffect(() => {
+    const initialPage = Number(searchParams.get("page")) || 1;
+    const initialSearch = searchParams.get("search") ?? undefined;
+    const initialCurriculum = searchParams.get("curriculumId") ?? undefined;
     fetchCurriculums();
-    fetchUnits(1);
-  }, [fetchCurriculums, fetchUnits]);
+    fetchUnits(initialPage, initialSearch, initialCurriculum);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     units,
