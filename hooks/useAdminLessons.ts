@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { LessonAdmin, Unit } from "@/lib/types";
 import { toast } from "sonner";
 
@@ -29,14 +30,17 @@ interface UseAdminLessonsReturn {
 const PAGE_SIZE = 15;
 
 export function useAdminLessons(): UseAdminLessonsReturn {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [lessons, setLessons] = useState<LessonAdmin[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchName, setSearchName] = useState("");
-  const [unitId, setUnitId] = useState("");
+  const [searchName, setSearchName] = useState(searchParams.get("search") ?? "");
+  const [unitId, setUnitId] = useState(searchParams.get("unitId") ?? "");
   const [pagination, setPagination] = useState<Pagination>({
     total: 0,
-    page: 1,
+    page: Number(searchParams.get("page")) || 1,
     pageSize: PAGE_SIZE,
     totalPages: 1
   });
@@ -95,18 +99,32 @@ export function useAdminLessons(): UseAdminLessonsReturn {
     []
   );
 
+  const updateUrl = useCallback(
+    (page: number, name: string, unit: string) => {
+      const params = new URLSearchParams();
+      if (name) params.set("search", name);
+      if (unit) params.set("unitId", unit);
+      if (page > 1) params.set("page", page.toString());
+      const query = params.toString();
+      router.replace(query ? `?${query}` : "?", { scroll: false });
+    },
+    [router]
+  );
+
   const search = useCallback(
     async (page: number = 1) => {
+      updateUrl(page, searchName, unitId);
       await fetchLessons(page, searchName || undefined, unitId || undefined);
     },
-    [fetchLessons, searchName, unitId]
+    [fetchLessons, searchName, unitId, updateUrl]
   );
 
   const goToPage = useCallback(
     (page: number) => {
+      updateUrl(page, searchName, unitId);
       fetchLessons(page, searchName || undefined, unitId || undefined);
     },
-    [fetchLessons, searchName, unitId]
+    [fetchLessons, searchName, unitId, updateUrl]
   );
 
   const deleteLesson = useCallback(async (id: number) => {
@@ -137,9 +155,13 @@ export function useAdminLessons(): UseAdminLessonsReturn {
   }, []);
 
   useEffect(() => {
+    const initialPage = Number(searchParams.get("page")) || 1;
+    const initialSearch = searchParams.get("search") ?? undefined;
+    const initialUnit = searchParams.get("unitId") ?? undefined;
     fetchUnits();
-    fetchLessons(1);
-  }, [fetchUnits, fetchLessons]);
+    fetchLessons(initialPage, initialSearch, initialUnit);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     lessons,
