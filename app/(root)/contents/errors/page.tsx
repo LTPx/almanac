@@ -74,8 +74,9 @@ function ErrorsPage() {
       setIsLoading(true);
       setError(null);
       try {
+        const langParam = lang ? `&lang=${lang}` : "";
         const res = await fetch(
-          `/api/app/errors?userId=${userId}&curriculumId=${curriculumId}`
+          `/api/app/errors?userId=${userId}&curriculumId=${curriculumId}${langParam}`
         );
         const data = await res.json();
 
@@ -92,7 +93,7 @@ function ErrorsPage() {
     };
 
     fetchErrors();
-  }, [userId, curriculumId]);
+  }, [userId, curriculumId, lang]);
 
   const questionsByUnit: QuestionsByUnit = questions.reduce((acc, q) => {
     if (!acc[q.unitName]) acc[q.unitName] = [];
