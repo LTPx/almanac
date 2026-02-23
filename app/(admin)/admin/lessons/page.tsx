@@ -23,6 +23,8 @@ export default function LessonsPage() {
     setSearchName,
     unitId,
     setUnitId,
+    language,
+    setLanguage,
     units,
     search,
     goToPage,
@@ -41,6 +43,19 @@ export default function LessonsPage() {
           </p>
         </div>
         <div className="flex gap-3">
+          <Select
+            value={language || "all"}
+            onValueChange={(value) => setLanguage(value === "all" ? "" : value)}
+          >
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Filtrar por idioma" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los idiomas</SelectItem>
+              <SelectItem value="ES">Español</SelectItem>
+              <SelectItem value="EN">Inglés</SelectItem>
+            </SelectContent>
+          </Select>
           <Select
             value={unitId}
             onValueChange={(value) => {

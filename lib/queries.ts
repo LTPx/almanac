@@ -231,7 +231,7 @@ export const getUnits = cache(async (search: string) => {
 // ============== LESSON QUERIES ==============
 
 export const getAllLessons = cache(
-  async (search = "", page = 1, pageSize = 20, unitId?: number) => {
+  async (search = "", page = 1, pageSize = 20, unitId?: number, language?: string) => {
     const whereClause = {
       ...(search
         ? {
@@ -251,7 +251,8 @@ export const getAllLessons = cache(
             ]
           }
         : {}),
-      ...(unitId ? { unitId } : {})
+      ...(unitId ? { unitId } : {}),
+      ...(language ? { translations: { some: { language } } } : {})
     };
 
     const skip = (page - 1) * pageSize;

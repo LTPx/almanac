@@ -20,6 +20,8 @@ interface UseAdminLessonsReturn {
   setSearchName: (name: string) => void;
   unitId: string;
   setUnitId: (id: string) => void;
+  language: string;
+  setLanguage: (lang: string) => void;
   units: Unit[];
   search: (page?: number) => Promise<void>;
   goToPage: (page: number) => void;
@@ -38,6 +40,7 @@ export function useAdminLessons(): UseAdminLessonsReturn {
   const [loading, setLoading] = useState(false);
   const [searchName, setSearchName] = useState(searchParams.get("search") ?? "");
   const [unitId, setUnitId] = useState(searchParams.get("unitId") ?? "");
+  const [language, setLanguage] = useState(searchParams.get("language") ?? "");
   const [pagination, setPagination] = useState<Pagination>({
     total: 0,
     page: Number(searchParams.get("page")) || 1,
@@ -58,7 +61,7 @@ export function useAdminLessons(): UseAdminLessonsReturn {
   }, []);
 
   const fetchLessons = useCallback(
-    async (page: number, search?: string, unit?: string) => {
+    async (page: number, search?: string, unit?: string, lang?: string) => {
       setLoading(true);
       try {
         const params = new URLSearchParams({
@@ -72,6 +75,10 @@ export function useAdminLessons(): UseAdminLessonsReturn {
 
         if (unit) {
           params.append("unitId", unit);
+        }
+
+        if (lang) {
+          params.append("language", lang);
         }
 
         const response = await fetch(`/api/lessons?${params}`);
@@ -100,10 +107,11 @@ export function useAdminLessons(): UseAdminLessonsReturn {
   );
 
   const updateUrl = useCallback(
-    (page: number, name: string, unit: string) => {
+    (page: number, name: string, unit: string, lang: string) => {
       const params = new URLSearchParams();
       if (name) params.set("search", name);
       if (unit) params.set("unitId", unit);
+      if (lang) params.set("language", lang);
       if (page > 1) params.set("page", page.toString());
       const query = params.toString();
       router.replace(query ? `?${query}` : "?", { scroll: false });
@@ -113,18 +121,18 @@ export function useAdminLessons(): UseAdminLessonsReturn {
 
   const search = useCallback(
     async (page: number = 1) => {
-      updateUrl(page, searchName, unitId);
-      await fetchLessons(page, searchName || undefined, unitId || undefined);
+      updateUrl(page, searchName, unitId, language);
+      await fetchLessons(page, searchName || undefined, unitId || undefined, language || undefined);
     },
-    [fetchLessons, searchName, unitId, updateUrl]
+    [fetchLessons, searchName, unitId, language, updateUrl]
   );
 
   const goToPage = useCallback(
     (page: number) => {
-      updateUrl(page, searchName, unitId);
-      fetchLessons(page, searchName || undefined, unitId || undefined);
+      updateUrl(page, searchName, unitId, language);
+      fetchLessons(page, searchName || undefined, unitId || undefined, language || undefined);
     },
-    [fetchLessons, searchName, unitId, updateUrl]
+    [fetchLessons, searchName, unitId, language, updateUrl]
   );
 
   const deleteLesson = useCallback(async (id: number) => {
@@ -158,8 +166,9 @@ export function useAdminLessons(): UseAdminLessonsReturn {
     const initialPage = Number(searchParams.get("page")) || 1;
     const initialSearch = searchParams.get("search") ?? undefined;
     const initialUnit = searchParams.get("unitId") ?? undefined;
+    const initialLanguage = searchParams.get("language") ?? undefined;
     fetchUnits();
-    fetchLessons(initialPage, initialSearch, initialUnit);
+    fetchLessons(initialPage, initialSearch, initialUnit, initialLanguage);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -171,6 +180,8 @@ export function useAdminLessons(): UseAdminLessonsReturn {
     setSearchName,
     unitId,
     setUnitId,
+    language,
+    setLanguage,
     units,
     search,
     goToPage,
