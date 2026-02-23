@@ -86,11 +86,29 @@ export async function runBatches<T extends { id: number | string }>(
         try {
           const { name, translated } = await processItem(item);
           processed++;
-          send({ type: "progress", processed, total, errors, current: { id: item.id, name, translated } });
+          send({
+            type: "progress",
+            processed,
+            total,
+            errors,
+            current: { id: item.id, name, translated }
+          });
         } catch (err: any) {
           errors++;
           processed++;
-          send({ type: "error", processed, total, errors, current: { id: item.id, name: String((item as any).title ?? (item as any).name ?? item.id), error: err.message } });
+          send({
+            type: "error",
+            processed,
+            total,
+            errors,
+            current: {
+              id: item.id,
+              name: String(
+                (item as any).title ?? (item as any).name ?? item.id
+              ),
+              error: err.message
+            }
+          });
         }
       })
     );
@@ -130,15 +148,23 @@ export async function translateCurriculums(send: SendFn, onlyMissing: boolean) {
 
   const result = await runBatches(items, send, async (item) => {
     const enT = await prisma.curriculumTranslation.findUnique({
-      where: { curriculumId_language: { curriculumId: item.id, language: "EN" } }
+      where: {
+        curriculumId_language: { curriculumId: item.id, language: "EN" }
+      }
     });
     const sourceTitle = enT?.title || item.title;
     const { title } = await callGemini({ title: sourceTitle }, "EN", "ES");
 
     await prisma.curriculumTranslation.upsert({
-      where: { curriculumId_language: { curriculumId: item.id, language: "ES" } },
+      where: {
+        curriculumId_language: { curriculumId: item.id, language: "ES" }
+      },
       update: { title: title || sourceTitle },
-      create: { curriculumId: item.id, language: "ES", title: title || sourceTitle }
+      create: {
+        curriculumId: item.id,
+        language: "ES",
+        title: title || sourceTitle
+      }
     });
 
     return { name: sourceTitle, translated: title };
@@ -184,8 +210,16 @@ export async function translateUnits(send: SendFn, onlyMissing: boolean) {
 
     await prisma.unitTranslation.upsert({
       where: { unitId_language: { unitId: item.id, language: "ES" } },
-      update: { name: t.name || sourceName, description: t.description || null },
-      create: { unitId: item.id, language: "ES", name: t.name || sourceName, description: t.description || null }
+      update: {
+        name: t.name || sourceName,
+        description: t.description || null
+      },
+      create: {
+        unitId: item.id,
+        language: "ES",
+        name: t.name || sourceName,
+        description: t.description || null
+      }
     });
 
     return { name: sourceName, translated: t.name };
@@ -231,8 +265,16 @@ export async function translateLessons(send: SendFn, onlyMissing: boolean) {
 
     await prisma.lessonTranslation.upsert({
       where: { lessonId_language: { lessonId: item.id, language: "ES" } },
-      update: { name: t.name || sourceName, description: t.description || null },
-      create: { lessonId: item.id, language: "ES", name: t.name || sourceName, description: t.description || null }
+      update: {
+        name: t.name || sourceName,
+        description: t.description || null
+      },
+      create: {
+        lessonId: item.id,
+        language: "ES",
+        name: t.name || sourceName,
+        description: t.description || null
+      }
     });
 
     return { name: sourceName, translated: t.name };
@@ -245,24 +287,58 @@ export async function translateQuestions(send: SendFn, onlyMissing: boolean) {
   let items: QItem[];
 
   if (onlyMissing) {
-    const translated = await prisma.questionTranslation.findMany({
+    // Questions without QuestionTranslation
+    const translatedQ = await prisma.questionTranslation.findMany({
       where: { language: "ES" },
       select: { questionId: true }
     });
-    const ids = translated.map((t) => t.questionId);
+    const translatedQIds = new Set(translatedQ.map((t) => t.questionId));
+
+    // MULTIPLE_CHOICE questions that have answers without AnswerTranslation
+    const translatedA = await prisma.answerTranslation.findMany({
+      where: { language: "ES" },
+      select: { answerId: true }
+    });
+    const translatedAIds = new Set(translatedA.map((t) => t.answerId));
+
+    const mcWithAnswers = await prisma.question.findMany({
+      where: { type: "MULTIPLE_CHOICE", id: { in: [...translatedQIds] } },
+      select: { id: true, answers: { select: { id: true } } }
+    });
+    const mcMissingAnswerIds = mcWithAnswers
+      .filter((q) => q.answers.some((a) => !translatedAIds.has(a.id)))
+      .map((q) => q.id);
+
     items = (await prisma.question.findMany({
-      where: { id: { notIn: ids } },
+      where: {
+        OR: [
+          { id: { notIn: [...translatedQIds] } },
+          { id: { in: mcMissingAnswerIds } }
+        ]
+      },
       select: {
-        id: true, title: true, type: true, content: true,
-        answers: { select: { id: true, text: true, order: true }, orderBy: { order: "asc" } }
+        id: true,
+        title: true,
+        type: true,
+        content: true,
+        answers: {
+          select: { id: true, text: true, order: true },
+          orderBy: { order: "asc" }
+        }
       },
       orderBy: { id: "asc" }
     })) as QItem[];
   } else {
     items = (await prisma.question.findMany({
       select: {
-        id: true, title: true, type: true, content: true,
-        answers: { select: { id: true, text: true, order: true }, orderBy: { order: "asc" } }
+        id: true,
+        title: true,
+        type: true,
+        content: true,
+        answers: {
+          select: { id: true, text: true, order: true },
+          orderBy: { order: "asc" }
+        }
       },
       orderBy: { id: "asc" }
     })) as QItem[];
@@ -278,25 +354,45 @@ export async function translateQuestions(send: SendFn, onlyMissing: boolean) {
     const sourceContent = enT?.content ?? item.content;
 
     const fields: Record<string, string> = { title: sourceTitle };
-    Object.assign(fields, getTranslatableContentFields(item.type as any, sourceContent));
+    Object.assign(
+      fields,
+      getTranslatableContentFields(item.type as any, sourceContent)
+    );
 
     const t = await callGemini(fields, "EN", "ES");
-    const translatedContent = buildTranslatedContent(item.type as any, sourceContent, t);
+    const translatedContent = buildTranslatedContent(
+      item.type as any,
+      sourceContent,
+      t
+    );
 
     // Save ES and EN QuestionTranslation
     await prisma.questionTranslation.upsert({
       where: { questionId_language: { questionId: item.id, language: "ES" } },
       update: { title: t.title || sourceTitle, content: translatedContent },
-      create: { questionId: item.id, language: "ES", title: t.title || sourceTitle, content: translatedContent }
+      create: {
+        questionId: item.id,
+        language: "ES",
+        title: t.title || sourceTitle,
+        content: translatedContent
+      }
     });
     await prisma.questionTranslation.upsert({
       where: { questionId_language: { questionId: item.id, language: "EN" } },
       update: { title: sourceTitle, content: sourceContent },
-      create: { questionId: item.id, language: "EN", title: sourceTitle, content: sourceContent }
+      create: {
+        questionId: item.id,
+        language: "EN",
+        title: sourceTitle,
+        content: sourceContent
+      }
     });
 
     // Save AnswerTranslation for MULTIPLE_CHOICE
-    if (item.type === "MULTIPLE_CHOICE" && Array.isArray(translatedContent?.options)) {
+    if (
+      item.type === "MULTIPLE_CHOICE" &&
+      Array.isArray(translatedContent?.options)
+    ) {
       for (let j = 0; j < item.answers.length; j++) {
         const ans = item.answers[j];
         const esText = translatedContent.options[j];

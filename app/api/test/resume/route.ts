@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import {
+  toLangCode,
+  answerTranslationFilter,
+  applyQuestionTranslation
+} from "@/lib/apply-translation";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const testAttemptId = searchParams.get("testAttemptId");
     const userId = searchParams.get("userId");
+    const lang = toLangCode(searchParams.get("lang"));
 
     if (!testAttemptId || !userId) {
       return NextResponse.json(
@@ -26,8 +32,16 @@ export async function GET(request: NextRequest) {
             questions: {
               where: { isActive: true },
               include: {
+                translations:
+                  lang === "ES"
+                    ? {
+                        where: { language: "ES" },
+                        select: { title: true, content: true }
+                      }
+                    : false,
                 answers: {
-                  orderBy: { order: "asc" }
+                  orderBy: { order: "asc" },
+                  include: { translations: answerTranslationFilter(lang) }
                 }
               }
             }
@@ -63,17 +77,17 @@ export async function GET(request: NextRequest) {
       .filter((q) => q !== undefined);
 
     // Preparar preguntas para el cliente
-    const questionsForClient = orderedQuestions.map((question) => ({
-      id: question!.id,
-      type: question!.type,
-      title: question!.title,
-      order: question!.order,
-      content: question!.content,
-      answers: question!.answers.map((answer) => ({
-        id: answer.id,
-        text: answer.text
-      }))
-    }));
+    const questionsForClient = orderedQuestions.map((question) => {
+      const { title, content, answers } = applyQuestionTranslation(question!);
+      return {
+        id: question!.id,
+        type: question!.type,
+        title,
+        order: question!.order,
+        content,
+        answers: answers ?? []
+      };
+    });
 
     // Calcular el índice de la pregunta actual basado en las respuestas
     const answeredQuestionIds = new Set(
@@ -91,7 +105,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Reconstruir respuestas previas
-    const previousAnswers: Record<number, { answer: string; isCorrect: boolean }> = {};
+    const previousAnswers: Record<
+      number,
+      { answer: string; isCorrect: boolean }
+    > = {};
     testAttempt.answers.forEach((a) => {
       previousAnswers[a.questionId] = {
         answer: a.userAnswer,

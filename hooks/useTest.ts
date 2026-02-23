@@ -9,7 +9,8 @@ export function useTest() {
 
   const startTest = async (
     userId: string,
-    unitId: number
+    unitId: number,
+    lang?: string
   ): Promise<TestData | null> => {
     setIsLoading(true);
     setError(null);
@@ -20,7 +21,7 @@ export function useTest() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ userId, unitId })
+        body: JSON.stringify({ userId, unitId, lang })
       });
 
       if (!response.ok) {
@@ -92,14 +93,16 @@ export function useTest() {
 
   const resumeTest = async (
     testAttemptId: number,
-    userId: string
+    userId: string,
+    lang?: string
   ): Promise<(TestData & { currentQuestionIndex: number; previousAnswers: Record<number, { answer: string; isCorrect: boolean }> }) | null> => {
     setIsLoading(true);
     setError(null);
 
     try {
+      const langParam = lang ? `&lang=${lang}` : "";
       const response = await fetch(
-        `/api/test/resume?testAttemptId=${testAttemptId}&userId=${userId}`
+        `/api/test/resume?testAttemptId=${testAttemptId}&userId=${userId}${langParam}`
       );
 
       if (!response.ok) {
@@ -119,7 +122,8 @@ export function useTest() {
 
   const startReviewTest = async (
     userId: string,
-    curriculumId: string
+    curriculumId: string,
+    lang?: string
   ): Promise<TestData | null> => {
     setIsLoading(true);
     setError(null);
@@ -130,7 +134,7 @@ export function useTest() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ userId, curriculumId })
+        body: JSON.stringify({ userId, curriculumId, lang })
       });
 
       if (!response.ok) {

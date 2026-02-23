@@ -8,8 +8,10 @@ import ExploreTabContent from "./nft/tabs/ExploreTabContent";
 import { useState } from "react";
 import TokenAvailableCard from "./nft/tabs/ready-tab";
 import { useSearchParams } from "next/navigation";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function AchievementsContent({ user }: { user: User }) {
+  const { t } = useTranslation();
   const { nfts, loading, error, refetch } = useNFTs(user.id);
   const searchParams = useSearchParams();
   const [tab, setTab] = useState(searchParams.get("tab") || "medallas");
@@ -26,19 +28,19 @@ export default function AchievementsContent({ user }: { user: User }) {
             value="medallas"
             className="flex-1 h-full text-gray-400 data-[state=active]:text-white data-[state=active]:bg-transparent shadow-none border-0 border-b-4 border-b-transparent data-[state=active]:border-b-[#32C781] rounded-none font-semibold transition-all duration-300 relative z-10 data-[state=active]:scale-105"
           >
-            Medallas
+            {t("achievements", "medals")}
           </TabsTrigger>
           <TabsTrigger
             value="disponible"
             className="flex-1 h-full text-gray-400 data-[state=active]:text-white data-[state=active]:bg-transparent shadow-none border-0 border-b-4 border-b-transparent data-[state=active]:border-b-[#32C781] rounded-none font-semibold transition-all duration-300 relative z-10 data-[state=active]:scale-105"
           >
-            Disponible
+            {t("achievements", "available")}
           </TabsTrigger>
           <TabsTrigger
             value="explorar"
             className="flex-1 h-full text-gray-400 data-[state=active]:text-white data-[state=active]:bg-transparent shadow-none border-0 border-b-4 border-b-transparent data-[state=active]:border-b-[#32C781] rounded-none font-semibold transition-all duration-300 relative z-10 data-[state=active]:scale-105"
           >
-            Explorar
+            {t("achievements", "explore")}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="medallas" className="min-h-screen py-[20px] flex-1">

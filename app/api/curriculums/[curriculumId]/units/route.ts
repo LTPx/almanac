@@ -1,51 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { applyTranslation, toLangCode } from "@/lib/apply-translation";
 
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ curriculumId: string }> }
 ) {
   const { curriculumId } = await context.params;
+  const lang = toLangCode(request.nextUrl.searchParams.get("lang"));
 
   try {
+    const translationsFilter = lang === "ES"
+      ? { where: { language: "ES" as const }, select: { name: true, description: true } }
+      : false as const;
+
     const curriculum = await prisma.curriculum.findUnique({
-      where: {
-        id: curriculumId
-      },
+      where: { id: curriculumId },
       include: {
         units: {
-          where: {
-            isActive: true
-          },
+          where: { isActive: true },
+          orderBy: { order: "asc" },
           include: {
+            translations: translationsFilter,
             lessons: {
-              where: {
-                isActive: true
-              },
-              orderBy: {
-                position: "asc"
-              },
-              select: {
-                id: true,
-                name: true,
-                description: true,
-                position: true,
-                unitId: true
+              where: { isActive: true },
+              orderBy: { position: "asc" },
+              include: {
+                translations: translationsFilter
               }
             }
-          },
-          orderBy: {
-            order: "asc"
           }
         },
-        _count: {
-          select: {
-            units: true
-          }
-        }
+        _count: { select: { units: true } }
       }
     });
-    return NextResponse.json(curriculum?.units || []);
+
+    const units = (curriculum?.units ?? []).map((unit) => {
+      const { translations: uT, lessons, ...uRest } = unit as any;
+      const translatedUnit = applyTranslation(uRest, uT?.[0], ["name", "description"]);
+
+      const translatedLessons = lessons.map((lesson: any) => {
+        const { translations: lT, ...lRest } = lesson;
+        return applyTranslation(lRest, lT?.[0], ["name", "description"]);
+      });
+
+      return { ...translatedUnit, lessons: translatedLessons };
+    });
+
+    return NextResponse.json(units);
   } catch (error) {
     console.error("Error fetching lessons:", error);
     return NextResponse.json(

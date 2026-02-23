@@ -2,26 +2,24 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function SuccessPage() {
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const testAttemptId = searchParams.get("testAttemptId");
 
-  const textTokens =
-    "Gracias por tu compra. Tus tokens estarán disponibles en tu cuenta en unos momentos.";
-
-  const textSubscription =
-    "Hemos activado tu subscription. No mas anuncios y vidas sin limites.";
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center p-6">
       <h1 className="text-3xl font-bold text-green-500 mb-4">
-        ¡Pago completado! 🎉
+        {t("payments", "successTitle")}
       </h1>
 
       <p className="text-gray-300 max-w-md mb-6">
-        {sessionId ? textSubscription : textTokens}
+        {sessionId
+          ? t("payments", "subscriptionText")
+          : t("payments", "tokensText")}
       </p>
 
       {testAttemptId ? (
@@ -29,14 +27,14 @@ export default function SuccessPage() {
           href={`/?resumeTest=${testAttemptId}`}
           className="px-6 py-3 bg-green-600 rounded-lg text-white hover:bg-green-700 transition font-semibold"
         >
-          Volver al examen
+          {t("payments", "backToExam")}
         </Link>
       ) : (
         <Link
           href="/"
           className="px-6 py-3 bg-purple-600 rounded-lg text-white hover:bg-purple-700 transition"
         >
-          Volver al inicio
+          {t("payments", "backToHome")}
         </Link>
       )}
     </div>

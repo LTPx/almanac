@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { applyTranslation, toLangCode } from "@/lib/apply-translation";
 
 export async function GET(
   request: NextRequest,
@@ -7,28 +8,16 @@ export async function GET(
 ) {
   try {
     const { curriculumId } = await context.params;
+    const lang = toLangCode(new URL(request.url).searchParams.get("lang"));
+
     const curriculum = await prisma.curriculum.findUnique({
       where: { id: curriculumId },
       include: {
-        units: {
-          orderBy: { order: "asc" }
-          // include: {
-          //   lessons: {
-          //     where: { isActive: true },
-          //     orderBy: { position: "asc" },
-          //     select: {
-          //       id: true,
-          //       name: true
-          //     }
-          //   },
-          //   _count: {
-          //     select: { lessons: true }
-          //   }
-          // }
-        },
-        _count: {
-          select: { units: true }
-        }
+        translations: lang === "ES"
+          ? { where: { language: "ES" }, select: { title: true } }
+          : false,
+        units: { orderBy: { order: "asc" } },
+        _count: { select: { units: true } }
       }
     });
 
@@ -39,7 +28,10 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(curriculum);
+    const { translations, ...rest } = curriculum as any;
+    const result = applyTranslation(rest, translations?.[0], ["title"]);
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Error al obtener curriculum:", error);
     return NextResponse.json(

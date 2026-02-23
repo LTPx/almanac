@@ -15,11 +15,13 @@ import {
 import { Heart, ShoppingBag, Sparkles } from "lucide-react";
 import { useNoHeartsModal } from "@/store/no-hearts-modal";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export const NoHeartsModal = () => {
   const [isClient, setIsClient] = useState(false);
   const { isOpen, close } = useNoHeartsModal();
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => setIsClient(true), []);
 
@@ -98,12 +100,11 @@ export const NoHeartsModal = () => {
             className="space-y-2 sm:space-y-3"
           >
             <DialogTitle className="text-center text-xl sm:text-2xl md:text-3xl font-bold text-foreground leading-tight">
-              ¡Sin Corazones!
+              {t("modals", "noHeartsTitle")}
             </DialogTitle>
 
             <DialogDescription className="text-center text-xs sm:text-sm md:text-base text-muted-foreground leading-relaxed">
-              Te quedaste sin corazones. ¡Completa otras lecciones o vuelve
-              mañana para obtener más!
+              {t("modals", "outOfHeartsMessage")}
             </DialogDescription>
           </motion.div>
         </DialogHeader>
@@ -121,7 +122,7 @@ export const NoHeartsModal = () => {
               onClick={handleGetHearts}
             >
               <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 group-hover:rotate-12 transition-transform flex-shrink-0" />
-              <span className="truncate">Obtener Corazones</span>
+              <span className="truncate">{t("modals", "getHearts")}</span>
               <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-primary-foreground/70 group-hover:text-primary-foreground transition-colors flex-shrink-0" />
             </Button>
           </motion.div>

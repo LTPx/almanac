@@ -2,8 +2,10 @@ import { UserPlus, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTutorial } from "@/components/tutorial/tutorial-provider";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function ProfileInfo({ user }: { user: any }) {
+  const { t } = useTranslation();
   const { resetTutorial } = useTutorial();
   const router = useRouter();
 
@@ -26,7 +28,7 @@ export default function ProfileInfo({ user }: { user: any }) {
             className="flex-1 bg-transparent border-gray-600 text-white hover:bg-gray-800"
           >
             <UserPlus className="w-4 h-4 mr-2" />
-            Agrega Amigos
+            {t("profile", "addFriends")}
           </Button>
           <Button
             variant="outline"
@@ -55,7 +57,7 @@ export default function ProfileInfo({ user }: { user: any }) {
           className="w-full max-w-xs bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white border-0 shadow-lg shadow-purple-500/20"
         >
           <GraduationCap className="w-4 h-4 mr-2" />
-          Ver Tutorial
+          {t("profile", "viewTutorial")}
         </Button>
       </div>
     </div>

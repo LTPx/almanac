@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Lock, CheckCircle, BookOpen } from "lucide-react";
 import { StepPopover } from "./step-popover";
 import { useNoHeartsModal } from "@/store/no-hearts-modal";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type LessonNodeProps = {
   id: number;
@@ -37,7 +38,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
   onStartLesson
 }) => {
   const { open: openNoHeartsModal } = useNoHeartsModal();
-
+  const { t } = useTranslation();
   const hasNoHearts = hearts === 0;
 
   const getBackgroundColor = () => {
@@ -126,11 +127,8 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       <StepPopover
         unitId={unitId}
         title={name}
-        message={
-          description ||
-          "¡Nivel completado! Puedes volver a intentarlo para mejorar tu puntuación."
-        }
-        buttonText="Volver a Intentar"
+        message={description || t("learningPath", "levelCompletedMessage")}
+        buttonText={t("learningPath", "retryTest")}
         onButtonClick={handleStartLesson}
         isLocked={false}
         isCompleted={true}
@@ -149,8 +147,8 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       <StepPopover
         unitId={unitId}
         title={name}
-        message="¡Completa todos los niveles anteriores para habilitar este nivel!"
-        buttonText="CERRADA"
+        message={t("learningPath", "levelLockedMessage")}
+        buttonText={t("learningPath", "statusClosed")}
         onButtonClick={() => {}}
         isLocked={true}
         isHighestPosition={isHighestPosition}
@@ -166,7 +164,7 @@ const LessonNode: React.FC<LessonNodeProps> = ({
       unitId={unitId}
       title={name}
       message={description || ""}
-      buttonText="Empezar mi Prueba"
+      buttonText={t("learningPath", "startTest")}
       onButtonClick={handleStartLesson}
       isLocked={false}
       isOptional={!mandatory}

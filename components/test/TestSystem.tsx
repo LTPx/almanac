@@ -22,6 +22,7 @@ interface TestSystemProps {
   onHeartsChange?: (hearts: number) => void;
   resumeTestAttemptId?: number;
   isReviewMode?: boolean;
+  lang?: string;
 }
 
 export function TestSystem(props: TestSystemProps) {

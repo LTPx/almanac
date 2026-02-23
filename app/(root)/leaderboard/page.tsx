@@ -2,6 +2,7 @@
 
 import { Clock, Award, TrendingUp, TrendingDown } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface LeaderboardUser {
   rank: number;
@@ -27,6 +28,7 @@ interface LeaderboardResponse {
 }
 
 function Leaderboard() {
+  const { t } = useTranslation();
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +43,7 @@ function Leaderboard() {
       const response = await fetch("/api/leaderboard?limit=10");
 
       if (!response.ok) {
-        throw new Error("Error al cargar el leaderboard");
+        throw new Error(t("leaderboard", "errorLoading"));
       }
 
       const result: LeaderboardResponse = await response.json();
@@ -49,10 +51,10 @@ function Leaderboard() {
       if (result.success) {
         setLeaderboardData(result.data);
       } else {
-        throw new Error("Error en la respuesta del servidor");
+        throw new Error(t("leaderboard", "serverError"));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : t("leaderboard", "unknownError"));
       console.error("Error fetching leaderboard:", err);
     } finally {
       setLoading(false);
@@ -93,7 +95,7 @@ function Leaderboard() {
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-900 text-white p-6 flex items-center justify-center">
-        <div className="text-xl">Cargando leaderboard...</div>
+        <div className="text-xl">{t("leaderboard", "loading")}</div>
       </div>
     );
   }
@@ -109,10 +111,10 @@ function Leaderboard() {
   return (
     <div className="min-h-screen bg-neutral-900 text-white p-6">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-[22px] font-bold">División Papel</h1>
+        <h1 className="text-[22px] font-bold">{t("leaderboard", "division")}</h1>
         <div className="flex items-center gap-2 text-yellow-400">
           <Clock className="w-6 h-6" />
-          <span className="text-xl font-semibold">3 Días</span>
+          <span className="text-xl font-semibold">{t("leaderboard", "days")}</span>
         </div>
       </div>
 
@@ -147,7 +149,7 @@ function Leaderboard() {
         <div className="flex items-center gap-2 mb-3 text-green-400">
           <TrendingUp className="w-5 h-5" />
           <span className="text-sm font-semibold uppercase tracking-wider">
-            Zona de Ascenso
+            {t("leaderboard", "promotionZone")}
           </span>
         </div>
         <div className="space-y-3 border-l-4 border-green-500/50 pl-4">
@@ -243,7 +245,7 @@ function Leaderboard() {
             <div className="flex items-center gap-2 mb-3 text-red-400">
               <TrendingDown className="w-5 h-5" />
               <span className="text-sm font-semibold uppercase tracking-wider">
-                Zona de Descenso
+                {t("leaderboard", "demotionZone")}
               </span>
             </div>
             <div className="space-y-3 border-l-4 border-red-500/50 pl-4">
