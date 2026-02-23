@@ -130,7 +130,7 @@ export const getUserProgressByUnit = cache(
 // ============== UNIT QUERIES ==============
 
 export const getUnitsPagination = cache(
-  async (search: string, page = 1, pageSize = 15, curriculumId?: string) => {
+  async (search: string, page = 1, pageSize = 15, curriculumId?: string, language?: string) => {
     const whereClause = {
       // isActive: true,
       ...(search
@@ -141,7 +141,8 @@ export const getUnitsPagination = cache(
             }
           }
         : {}),
-      ...(curriculumId ? { curriculumId } : {})
+      ...(curriculumId ? { curriculumId } : {}),
+      ...(language ? { translations: { some: { language } } } : {})
     };
 
     const skip = (page - 1) * pageSize;
@@ -231,7 +232,7 @@ export const getUnits = cache(async (search: string) => {
 // ============== LESSON QUERIES ==============
 
 export const getAllLessons = cache(
-  async (search = "", page = 1, pageSize = 20, unitId?: number) => {
+  async (search = "", page = 1, pageSize = 20, unitId?: number, language?: string) => {
     const whereClause = {
       ...(search
         ? {
@@ -251,7 +252,8 @@ export const getAllLessons = cache(
             ]
           }
         : {}),
-      ...(unitId ? { unitId } : {})
+      ...(unitId ? { unitId } : {}),
+      ...(language ? { translations: { some: { language } } } : {})
     };
 
     const skip = (page - 1) * pageSize;
@@ -343,7 +345,7 @@ export const getLessonsByUnitId = cache(async (unitId: number) => {
 // ============== QUESTION QUERIES ==============
 
 export const getQuestions = cache(
-  async (search: string, page = 1, pageSize = 10, type?: string) => {
+  async (search: string, page = 1, pageSize = 10, type?: string, language?: string) => {
     const whereClause = {
       isActive: true,
       ...(search
@@ -358,7 +360,8 @@ export const getQuestions = cache(
         ? {
             type: type
           }
-        : {})
+        : {}),
+      ...(language ? { translations: { some: { language } } } : {})
     };
 
     const skip = (page - 1) * pageSize;
@@ -378,7 +381,7 @@ export const getQuestions = cache(
             select: { answers: true }
           },
           translations: {
-            select: { language: true }
+            select: { language: true, title: true }
           }
         },
         orderBy: { createdAt: "asc" },
@@ -452,7 +455,7 @@ export const getUnitsByCurriculumIdAndUserStats = cache(
       return {
         curriculum: null,
         units: [],
-        stats: { totalAnswerErrors: 0 }
+        stats: { totalAnswerErrors: 0, totalUnitsLearnt: 0 }
       };
     }
 
@@ -472,6 +475,13 @@ export const getUnitsByCurriculumIdAndUserStats = cache(
       0
     );
 
+    const totalUnitsLearnt = await prisma.userUnitProgress.count({
+      where: {
+        userId,
+        unit: { curriculumId }
+      }
+    });
+
     return {
       curriculum: {
         id: curriculum.id,
@@ -481,7 +491,8 @@ export const getUnitsByCurriculumIdAndUserStats = cache(
       },
       units: unitsWithStats,
       stats: {
-        totalAnswerErrors
+        totalAnswerErrors,
+        totalUnitsLearnt
       }
     };
   }

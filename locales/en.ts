@@ -110,6 +110,15 @@ export const en = {
     missingParams: "Missing required parameters",
     errorFetching: "Error fetching errors"
   },
+  conceptsPage: {
+    backToContents: "Back to Contents",
+    yourConcepts: "Your Concepts",
+    unit: "unit",
+    units: "units",
+    noConcepts: "You have no learned units",
+    missingParams: "Missing required parameters",
+    errorFetching: "Error fetching concepts"
+  },
   leaderboard: {
     loading: "Loading leaderboard...",
     division: "Paper Division",

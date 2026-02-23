@@ -128,7 +128,8 @@ const LearningPath: React.FC<LearningPathProps> = ({
     let pivotNode: Unit | null = null;
 
     if (simulateOptionalNode && forcedOptionalNodeId) {
-      pivotNode = assignedUnits.find((u) => u.id === forcedOptionalNodeId) || null;
+      pivotNode =
+        assignedUnits.find((u) => u.id === forcedOptionalNodeId) || null;
     } else {
       const optionalNodes = assignedUnits.filter((u) => !u.mandatory);
       pivotNode =
@@ -147,8 +148,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
           const rowDiff = Math.abs(Math.floor(unit.position / 5) - pivotRow);
           const colDiff = Math.abs((unit.position % 5) - pivotCol);
           return (
-            (rowDiff === 0 && colDiff === 1) ||
-            (rowDiff === 1 && colDiff === 0)
+            (rowDiff === 0 && colDiff === 1) || (rowDiff === 1 && colDiff === 0)
           );
         })
         .map((u) => u.id);
@@ -160,10 +160,17 @@ const LearningPath: React.FC<LearningPathProps> = ({
   const unitsWithState: Unit[] = (() => {
     if (simulatedApprovedIds !== null) {
       const states = computeUnitStates(
-        assignedUnits.map((u) => ({ id: u.id, position: u.position, mandatory: u.mandatory })),
+        assignedUnits.map((u) => ({
+          id: u.id,
+          position: u.position,
+          mandatory: u.mandatory
+        })),
         simulatedApprovedIds
       );
-      return assignedUnits.map((u) => ({ ...u, state: states[u.id] || "locked" as const }));
+      return assignedUnits.map((u) => ({
+        ...u,
+        state: states[u.id] || ("locked" as const)
+      }));
     }
     return assignedUnits.map((u) => ({
       ...u,
@@ -173,7 +180,9 @@ const LearningPath: React.FC<LearningPathProps> = ({
 
   // finalApprovedUnits kept only for getFinalTestState
   const finalApprovedUnits =
-    simulatedApprovedIds !== null ? simulatedApprovedIds : progress.approvedUnits;
+    simulatedApprovedIds !== null
+      ? simulatedApprovedIds
+      : progress.approvedUnits;
 
   const handleCloseTest = () => {
     setActiveUnit(null);
@@ -220,7 +229,6 @@ const LearningPath: React.FC<LearningPathProps> = ({
               onStartFinalTest={() => setShowFinalTest(true)}
               hearts={hearts}
               isTutorialMode={isTutorialMode}
-              curriculumId={curriculum.id}
               finalTestState={finalTestState}
               simulateOptionalNode={simulateOptionalNode}
               forcedOptionalNodeId={forcedOptionalNodeId}
@@ -277,7 +285,6 @@ const LearningPath: React.FC<LearningPathProps> = ({
             onStartFinalTest={() => setShowFinalTest(true)}
             hearts={hearts}
             isTutorialMode={isTutorialMode}
-            curriculumId={curriculum.id}
             finalTestState={finalTestState}
             simulateOptionalNode={simulateOptionalNode}
             forcedOptionalNodeId={forcedOptionalNodeId}

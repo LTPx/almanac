@@ -30,6 +30,8 @@ export default function QuestionsPage() {
     setSearchTitle,
     questionType,
     setQuestionType,
+    language,
+    setLanguage,
     search,
     goToPage,
     deleteQuestion,
@@ -46,55 +48,68 @@ export default function QuestionsPage() {
             Gestiona las preguntas de las lecciones
           </p>
         </div>
-        <div className="flex gap-3">
-          <Select
-            value={questionType}
-            onValueChange={(value) => {
-              setQuestionType(value === "all" ? "" : value);
-            }}
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Filtrar por tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los tipos</SelectItem>
-              {Object.entries(questionTypeLabels).map(([key, label]) => (
-                <SelectItem key={key} value={key}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Input
-            type="text"
-            placeholder="Buscar por título..."
-            value={searchTitle}
-            onChange={(e) => setSearchTitle(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && search(1)}
-            className="w-64"
-          />
-          <Button
-            onClick={() => search(1)}
-            disabled={loading}
-            variant="outline"
-            className="gap-2"
-          >
-            <Search className="w-4 h-4" />
-            Buscar
+        <Link href="/admin/questions/new">
+          <Button className="gap-2">
+            <Plus className="w-4 h-4" />
+            Nueva Pregunta
           </Button>
-          <Link href="/admin/questions/new">
-            <Button className="gap-2">
-              <Plus className="w-4 h-4" />
-              Nueva Pregunta
-            </Button>
-          </Link>
-        </div>
+        </Link>
       </div>
-
+      <div className="flex gap-3 w-full justify-end">
+        <Select
+          value={language || "all"}
+          onValueChange={(value) => setLanguage(value === "all" ? "" : value)}
+        >
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="Filtrar por idioma" />
+          </SelectTrigger>
+          <SelectContent>
+            {/* <SelectItem value="all">Todos los idiomas</SelectItem> */}
+            <SelectItem value="ES">Español</SelectItem>
+            <SelectItem value="EN">Inglés</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
+          value={questionType}
+          onValueChange={(value) => {
+            setQuestionType(value === "all" ? "" : value);
+          }}
+        >
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filtrar por tipo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los tipos</SelectItem>
+            {Object.entries(questionTypeLabels).map(([key, label]) => (
+              <SelectItem key={key} value={key}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Input
+          type="text"
+          placeholder="Buscar por título..."
+          value={searchTitle}
+          onChange={(e) => setSearchTitle(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && search(1)}
+          className="w-64"
+        />
+        <Button
+          onClick={() => search(1)}
+          disabled={loading}
+          variant="outline"
+          className="gap-2"
+        >
+          <Search className="w-4 h-4" />
+          Buscar
+        </Button>
+      </div>
       {/* Questions Table */}
       <QuestionsTable
         questions={questions}
         loading={loading}
+        language={language}
         onDelete={deleteQuestion}
         onToggleStatus={toggleQuestionStatus}
       />

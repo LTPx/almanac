@@ -21,8 +21,7 @@ import {
   MoreHorizontal,
   Eye,
   Search,
-  Star,
-  ArrowLeft
+  Star
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -45,6 +44,7 @@ import {
 import { toast } from "sonner";
 import { LessonAdmin } from "@/lib/types";
 import { useParams } from "next/navigation";
+import { BackButton } from "@/components/admin/back-button";
 
 export default function UnitLessonsPage() {
   const { id } = useParams();
@@ -111,12 +111,7 @@ export default function UnitLessonsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <Link href={`/admin/units`}>
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver
-            </Button>
-          </Link>
+          <BackButton fallback="/admin/units" />
           <div>
             <h1 className="text-3xl font-bold">Lecciones</h1>
             <p className="text-muted-foreground">

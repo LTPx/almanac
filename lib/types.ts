@@ -21,7 +21,7 @@ export interface SessionApp {
 
 export interface Question {
   id: number;
-  translations?: { language: string }[];
+  translations?: { language: string; title: string }[];
   type:
     | "MULTIPLE_CHOICE"
     | "FILL_IN_BLANK"
@@ -238,7 +238,7 @@ export interface PurchaseResponse {
 export interface ContentsResponse {
   curriculum: Curriculum;
   units: Unit[];
-  stats: { totalAnswerErrors: number };
+  stats: { totalAnswerErrors: number; totalUnitsLearnt: number };
 }
 
 export interface SubscriptionData {

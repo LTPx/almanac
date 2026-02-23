@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import LessonForm, { LessonInput } from "@/components/admin/lesson-form";
+import { BackButton } from "@/components/admin/back-button";
 import { toast } from "sonner";
 
 export default function CreateLessonPage() {
@@ -36,12 +34,7 @@ export default function CreateLessonPage() {
   return (
     <div className="space-y-6 text-foreground">
       <div className="flex items-center space-x-4">
-        <Link href="/admin/lessons">
-          <Button variant="ghost" size="sm" className="text-foreground">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver
-          </Button>
-        </Link>
+        <BackButton fallback="/admin/lessons" className="text-foreground" />
         <div>
           <h1 className="text-3xl font-bold text-foreground">Nueva Lección</h1>
           <p className="text-muted-foreground">

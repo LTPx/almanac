@@ -1,14 +1,10 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { motion, Variants } from "framer-motion";
 import { Unit } from "@/lib/types";
 import LessonNode from "./lesson-node";
 import { NoHeartsModal } from "./modals/hearts-modal";
-import {
-  LessonStateInfo,
-  useLessonStatesStore
-} from "@/hooks/use-lessonsStates";
 import { useScrollToAvailableNode } from "@/hooks/use-scroll-lesson";
 import SpecialYellowNode from "./special-node";
 
@@ -18,7 +14,6 @@ interface LessonGridProps {
   onStartUnit: (unit: Unit) => void;
   onStartFinalTest: () => void;
   isTutorialMode?: boolean;
-  curriculumId: string | number;
   finalTestState: "locked" | "available" | "completed";
   simulateOptionalNode?: boolean;
   forcedOptionalNodeId?: number;
@@ -30,13 +25,10 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
   onStartUnit,
   onStartFinalTest,
   isTutorialMode = false,
-  curriculumId,
   finalTestState,
   simulateOptionalNode = false,
   forcedOptionalNodeId = undefined
 }) => {
-  const { setLessonStates } = useLessonStatesStore();
-
   useScrollToAvailableNode([units], {
     enabled: !isTutorialMode,
     delay: 600,
@@ -101,21 +93,6 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
       node.position > max.position ? node : max
     );
   }
-
-  useEffect(() => {
-    const lessonStatesInfo: LessonStateInfo[] = allNodes.map((node) => ({
-      unitId: node.id,
-      name: node.name,
-      state: node.state || "locked",
-      position: node.position,
-      mandatory: node.mandatory,
-      isFirstMandatory: false,
-      isHighestPosition: highestPositionNode?.id === node.id,
-      isOptionalHighest: highestOptionalNode?.id === node.id
-    }));
-
-    setLessonStates(curriculumId, lessonStatesInfo);
-  }, [units, curriculumId]);
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },

@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import {
+  toLangCode,
+  questionTranslationFilters,
+  answerTranslationFilter,
+  applyTranslation
+} from "@/lib/apply-translation";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
     const curriculumId = searchParams.get("curriculumId");
+    const lang = toLangCode(searchParams.get("lang"));
 
     if (!userId || !curriculumId) {
       return NextResponse.json(
@@ -13,6 +20,16 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const qTFilters = questionTranslationFilters(lang);
+    const answerTFilter = answerTranslationFilter(lang);
+    const unitTFilter =
+      lang === "ES"
+        ? {
+            where: { language: "ES" as const },
+            select: { name: true }
+          }
+        : (false as const);
 
     const incorrectAnswers = await prisma.testAnswer.findMany({
       where: {
@@ -33,18 +50,19 @@ export async function GET(request: NextRequest) {
             title: true,
             type: true,
             content: true,
+            translations: qTFilters.translations,
             unit: {
               select: {
-                name: true
+                name: true,
+                translations: unitTFilter
               }
             },
             answers: {
-              where: {
-                isCorrect: true
-              },
+              where: { isCorrect: true },
               select: {
                 text: true,
-                order: true
+                order: true,
+                translations: answerTFilter
               }
             }
           }
@@ -53,14 +71,35 @@ export async function GET(request: NextRequest) {
       distinct: ["questionId"]
     });
 
-    const questions = incorrectAnswers.map((a) => ({
-      id: a.question.id,
-      title: a.question.title,
-      type: a.question.type,
-      content: a.question.content,
-      unitName: a.question.unit.name,
-      correctAnswers: a.question.answers
-    }));
+    const questions = incorrectAnswers.map((a) => {
+      const q = a.question as any;
+      const qT = q.translations?.[0];
+      const title = qT?.title || q.title;
+      const content =
+        qT?.content && Object.keys(qT.content).length > 0
+          ? qT.content
+          : q.content;
+
+      const translatedUnit = applyTranslation(
+        { name: q.unit.name },
+        q.unit.translations?.[0],
+        ["name"]
+      );
+
+      const correctAnswers = q.answers.map((ans: any) => ({
+        text: ans.translations?.[0]?.text || ans.text,
+        order: ans.order
+      }));
+
+      return {
+        id: q.id,
+        title,
+        type: q.type,
+        content,
+        unitName: translatedUnit.name,
+        correctAnswers
+      };
+    });
 
     return NextResponse.json({ questions });
   } catch (error) {

@@ -19,8 +19,9 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const pageSize = parseInt(searchParams.get("pageSize") || "15", 10);
     const curriculumId = searchParams.get("curriculumId") || undefined;
+    const language = searchParams.get("language") || undefined;
 
-    const result = await getUnitsPagination(search, page, pageSize, curriculumId);
+    const result = await getUnitsPagination(search, page, pageSize, curriculumId, language);
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error fetching units:", error);

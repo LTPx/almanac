@@ -17,8 +17,8 @@ export default function AdScreen({
   message,
   onClose
 }: AdScreenProps) {
-  if (!show) return null;
   const { t } = useTranslation();
+  if (!show) return null;
 
   return (
     <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border border-gray-700">

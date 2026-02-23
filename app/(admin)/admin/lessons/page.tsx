@@ -23,6 +23,8 @@ export default function LessonsPage() {
     setSearchName,
     unitId,
     setUnitId,
+    language,
+    setLanguage,
     units,
     search,
     goToPage,
@@ -40,49 +42,63 @@ export default function LessonsPage() {
             Gestiona las lecciones del curso
           </p>
         </div>
-        <div className="flex gap-3">
-          <Select
-            value={unitId}
-            onValueChange={(value) => {
-              setUnitId(value === "all" ? "" : value);
-            }}
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Filtrar por unidad" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas las unidades</SelectItem>
-              {units.map((unit) => (
-                <SelectItem key={unit.id} value={unit.id.toString()}>
-                  {unit.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Input
-            type="text"
-            placeholder="Buscar por nombre..."
-            value={searchName}
-            onChange={(e) => setSearchName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && search(1)}
-            className="w-64"
-          />
-          <Button
-            onClick={() => search(1)}
-            disabled={loading}
-            variant="outline"
-            className="gap-2"
-          >
-            <Search className="w-4 h-4" />
-            Buscar
+        <Link href="/admin/lessons/new">
+          <Button className="gap-2">
+            <Plus className="w-4 h-4" />
+            Nueva Lección
           </Button>
-          <Link href="/admin/lessons/new">
-            <Button className="gap-2">
-              <Plus className="w-4 h-4" />
-              Nueva Lección
-            </Button>
-          </Link>
-        </div>
+        </Link>
+      </div>
+
+      <div className="flex gap-3 w-full justify-end">
+        <Select
+          value={language || "all"}
+          onValueChange={(value) => setLanguage(value === "all" ? "" : value)}
+        >
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="Filtrar por idioma" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los idiomas</SelectItem>
+            <SelectItem value="ES">Español</SelectItem>
+            <SelectItem value="EN">Inglés</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
+          value={unitId}
+          onValueChange={(value) => {
+            setUnitId(value === "all" ? "" : value);
+          }}
+        >
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filtrar por unidad" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las unidades</SelectItem>
+            {units.map((unit) => (
+              <SelectItem key={unit.id} value={unit.id.toString()}>
+                {unit.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Input
+          type="text"
+          placeholder="Buscar por nombre..."
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && search(1)}
+          className="w-64"
+        />
+        <Button
+          onClick={() => search(1)}
+          disabled={loading}
+          variant="outline"
+          className="gap-2"
+        >
+          <Search className="w-4 h-4" />
+          Buscar
+        </Button>
       </div>
 
       {/* Lessons Table */}

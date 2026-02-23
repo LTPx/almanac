@@ -39,9 +39,10 @@ function ContentsPage() {
 
   const [curriculum, setCurriculum] = useState<Curriculum | null>(null);
   const [units, setUnits] = useState<Unit[]>([]);
-  const [stats, setStats] = useState<{ totalAnswerErrors: number } | null>(
-    null
-  );
+  const [stats, setStats] = useState<{
+    totalAnswerErrors: number;
+    totalUnitsLearnt: number;
+  } | null>(null);
   const [openAccordion, setOpenAccordion] = useState<string>("");
   const [activeTest, setActiveTest] = useState<{
     unitId: number;
@@ -213,7 +214,9 @@ function ContentsPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-neutral-900 text-white flex items-center justify-center">
-        <div className="text-gray-400 text-lg">{t("contents", "loadingUnits")}</div>
+        <div className="text-gray-400 text-lg">
+          {t("contents", "loadingUnits")}
+        </div>
       </div>
     );
   }
@@ -250,7 +253,9 @@ function ContentsPage() {
     <div className="min-h-screen bg-neutral-900 text-white p-6 pb-20">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">{curriculum.title}</h1>
-        <h2 className="text-[22px] font-bold mb-6">{t("contents", "topics")}</h2>
+        <h2 className="text-[22px] font-bold mb-6">
+          {t("contents", "topics")}
+        </h2>
         {units.map((unit: Unit) => (
           <div
             key={unit.id}
@@ -288,13 +293,30 @@ function ContentsPage() {
           </div>
         ))}
         <div className="mt-8">
-          <h2 className="text-[22px] font-bold mb-4">{t("contents", "yourHistory")}</h2>
-          <div className="border-2 border-neutral-600 rounded-2xl p-5 mb-4 flex items-center justify-between">
-            <span className="text-lg font-semibold">{t("contents", "concepts")}</span>
-            <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-              +25
+          <h2 className="text-[22px] font-bold mb-4">
+            {t("contents", "yourHistory")}
+          </h2>
+          <button
+            onClick={() =>
+              stats?.totalUnitsLearnt &&
+              router.push(
+                `/contents/concepts?curriculumid=${selectedCurriculumId}&userId=${userId}`
+              )
+            }
+            disabled={!stats?.totalUnitsLearnt}
+            className={`w-full border-2 border-neutral-600 rounded-2xl p-5 mb-4 flex items-center justify-between ${
+              stats?.totalUnitsLearnt
+                ? "hover:border-neutral-400 transition-colors cursor-pointer"
+                : "cursor-default"
+            }`}
+          >
+            <span className="text-lg font-semibold">
+              {t("contents", "concepts")}
             </span>
-          </div>
+            <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+              {stats?.totalUnitsLearnt ?? 0}
+            </span>
+          </button>
           <button
             onClick={() =>
               stats?.totalAnswerErrors &&
@@ -309,7 +331,9 @@ function ContentsPage() {
                 : "cursor-default"
             }`}
           >
-            <span className="text-lg font-semibold">{t("contents", "errors")}</span>
+            <span className="text-lg font-semibold">
+              {t("contents", "errors")}
+            </span>
             <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
               {stats?.totalAnswerErrors}
             </span>

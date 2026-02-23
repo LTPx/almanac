@@ -11,8 +11,9 @@ export async function GET(request: Request) {
     const pageSize = parseInt(searchParams.get("pageSize") || "20", 10);
     const unitIdParam = searchParams.get("unitId");
     const unitId = unitIdParam ? parseInt(unitIdParam, 10) : undefined;
+    const language = searchParams.get("language") || undefined;
 
-    const result = await getAllLessons(search, page, pageSize, unitId);
+    const result = await getAllLessons(search, page, pageSize, unitId, language);
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error fetching lessons:", error);
