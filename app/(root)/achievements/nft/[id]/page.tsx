@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ChevronLeft, ChevronDown, AlertCircle, Lock } from "lucide-react";
 import Image from "next/image";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface NFTAssetDetail {
   id: number;
@@ -50,6 +51,7 @@ export default function NFTAssetDetailPage() {
   const params = useParams();
   const router = useRouter();
   const assetId = params?.id as string;
+  const { t } = useTranslation();
 
   const [nftAsset, setNftAsset] = useState<NFTAssetDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -131,7 +133,7 @@ export default function NFTAssetDetailPage() {
               onClick={() => router.back()}
               className="ml-3"
             >
-              Volver
+              {t("achievements", "back")}
             </Button>
           </AlertDescription>
         </Alert>
@@ -166,7 +168,9 @@ export default function NFTAssetDetailPage() {
           />
           <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-lg flex items-center gap-1.5">
             <Lock className="w-3.5 h-3.5" />
-            <span className="text-xs font-semibold">No minteado</span>
+            <span className="text-xs font-semibold">
+              {t("achievements", "notMinted")}
+            </span>
           </div>
         </div>
       </div>
@@ -177,7 +181,7 @@ export default function NFTAssetDetailPage() {
             {nftAsset.name || "NFT Asset"}
           </h1>
           <p className="text-gray-400 text-sm">
-            {nftAsset.collection?.name || "Sin colección"}
+            {nftAsset.collection?.name || t("achievements", "noCollection")}
           </p>
         </div>
 
@@ -194,7 +198,9 @@ export default function NFTAssetDetailPage() {
             onClick={() => setAboutExpanded(!aboutExpanded)}
             className="flex items-center justify-between w-full mb-3"
           >
-            <h2 className="text-lg font-semibold">Acerca de</h2>
+            <h2 className="text-lg font-semibold">
+              {t("achievements", "about")}
+            </h2>
             <ChevronDown
               className={`w-5 h-5 transition-transform ${
                 aboutExpanded ? "rotate-180" : ""
@@ -208,25 +214,27 @@ export default function NFTAssetDetailPage() {
                   {nftAsset.name || "NFT Asset"}
                 </p>
                 <p className="text-gray-400 text-sm leading-relaxed">
-                  Este NFT está disponible para mintear. Completa las unidades o
-                  cursos requeridos para obtenerlo y añadirlo a tu colección
-                  permanentemente en la blockchain.
+                  {t("achievements", "nftAvailableMessage")}
                 </p>
               </div>
 
               <div>
-                <p className="font-semibold mb-1">Creado:</p>
+                <p className="font-semibold mb-1">
+                  {t("achievements", "created")}
+                </p>
                 <p className="text-gray-400 text-sm">
                   {formatDate(nftAsset.createdAt)}
                 </p>
               </div>
 
               <div>
-                <p className="font-semibold mb-1">Estado:</p>
+                <p className="font-semibold mb-1">
+                  {t("achievements", "status")}
+                </p>
                 <p className="text-gray-400 text-sm">
                   {nftAsset.isUsed
-                    ? "Asignado a usuario"
-                    : "Disponible para mintear"}
+                    ? t("achievements", "assignedToUser")
+                    : t("achievements", "availableToMint")}
                 </p>
               </div>
             </div>
@@ -238,7 +246,9 @@ export default function NFTAssetDetailPage() {
             onClick={() => setRarityExpanded(!rarityExpanded)}
             className="flex items-center justify-between w-full"
           >
-            <h2 className="text-lg font-semibold">Rareza</h2>
+            <h2 className="text-lg font-semibold">
+              {t("achievements", "rarity")}
+            </h2>
             <ChevronDown
               className={`w-5 h-5 transition-transform ${
                 rarityExpanded ? "rotate-180" : ""
@@ -252,13 +262,13 @@ export default function NFTAssetDetailPage() {
               </div>
               <p className="text-gray-400 text-sm leading-relaxed">
                 {nftAsset.rarity === "NORMAL" &&
-                  "Los NFTs normales son los más comunes y accesibles."}
+                  t("achievements", "normalNftDescription")}
                 {nftAsset.rarity === "RARE" &&
-                  "Los NFTs raros tienen características especiales que los hacen menos comunes."}
+                  t("achievements", "rareNftDescription")}
                 {nftAsset.rarity === "EPIC" &&
-                  "Los NFTs épicos son difíciles de conseguir y tienen propiedades únicas."}
+                  t("achievements", "epicNftDescription")}
                 {nftAsset.rarity === "UNIQUE" &&
-                  "Los NFTs únicos son ediciones limitadas y extremadamente valiosos."}
+                  t("achievements", "uniqueNftDescription")}
               </p>
             </div>
           )}
@@ -271,7 +281,7 @@ export default function NFTAssetDetailPage() {
               className="flex items-center justify-between w-full"
             >
               <h2 className="text-lg font-semibold">
-                Acerca de {nftAsset.collection.name}
+                {t("achievements", "about")} {nftAsset.collection.name}
               </h2>
               <ChevronDown
                 className={`w-5 h-5 transition-transform ${
@@ -283,10 +293,12 @@ export default function NFTAssetDetailPage() {
               <div className="mt-3 space-y-2">
                 <p className="text-gray-400 text-sm leading-relaxed">
                   {nftAsset.collection.description ||
-                    "Sin descripción disponible"}
+                    t("achievements", "noDescriptionAvailable")}
                 </p>
                 <div className="flex justify-between text-sm pt-2">
-                  <span className="text-gray-400">Total de items:</span>
+                  <span className="text-gray-400">
+                    {t("achievements", "totalItems")}
+                  </span>
                   <span className="font-medium">
                     {nftAsset.collectionStats}
                   </span>
@@ -301,11 +313,10 @@ export default function NFTAssetDetailPage() {
             <Lock className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
               <h3 className="font-semibold text-white mb-1">
-                ¿Cómo obtener este NFT?
+                {t("achievements", "howToGetNft")}
               </h3>
               <p className="text-sm text-gray-300 leading-relaxed">
-                Completa las unidades o cursos asociados para mintear este NFT y
-                agregarlo permanentemente a tu colección.
+                {t("achievements", "howToGetNftDescription")}
               </p>
             </div>
           </div>
@@ -313,7 +324,7 @@ export default function NFTAssetDetailPage() {
             onClick={() => router.push("/")}
             className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white py-6 text-base font-semibold rounded-lg"
           >
-            Ver Cursos Disponibles
+            {t("achievements", "viewAvailableCourses")}
           </Button>
         </div>
 
@@ -321,7 +332,9 @@ export default function NFTAssetDetailPage() {
           nftAsset.moreFromCollection.length > 0 && (
             <div className="border-t border-gray-800 pt-4">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">Más de esta colección</h2>
+                <h2 className="text-lg font-semibold">
+                  {t("achievements", "moreFromCollection")}
+                </h2>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 {nftAsset.moreFromCollection.map((item) => {

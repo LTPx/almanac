@@ -163,7 +163,38 @@ export const en = {
     normal: "NORMAL",
     exploreCollectionTitle: "Explore the collection!",
     allMedalsCompleted: "You completed all the medals!",
-    allMedalsObtainedMessage: "You have obtained all available medals"
+    allMedalsObtainedMessage: "You have obtained all available medals",
+    notMinted: "Not minted",
+    noCollection: "No collection",
+    about: "About",
+    nftAvailableMessage:
+      "This NFT is available to mint. Complete the required units or courses to obtain it and permanently add it to your collection on the blockchain.",
+    created: "Created:",
+    status: "Status:",
+    assignedToUser: "Assigned to user",
+    availableToMint: "Available to mint",
+    rarity: "Rarity",
+    normalNftDescription: "Normal NFTs are the most common and accessible.",
+    rareNftDescription:
+      "Rare NFTs have special characteristics that make them less common.",
+    epicNftDescription:
+      "Epic NFTs are difficult to obtain and have unique properties.",
+    uniqueNftDescription:
+      "Unique NFTs are limited editions and extremely valuable.",
+    noDescriptionAvailable: "No description available",
+    totalItems: "Total items:",
+    howToGetNft: "How to get this NFT?",
+    howToGetNftDescription:
+      "Complete the associated units or courses to mint this NFT and permanently add it to your collection.",
+    viewAvailableCourses: "View Available Courses",
+    moreFromCollection: "More from this collection",
+    back: "Back",
+    noTokensAvailable: "No tokens available",
+    earnMintTokensMessage: "Complete more units to earn minting tokens",
+    exploreCourses: "Explore courses",
+    cost: "Cost",
+    certificate: "Certificate",
+    mintNow: "Mint now"
   },
   payments: {
     successTitle: "Payment complete! 🎉",

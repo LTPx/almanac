@@ -163,7 +163,39 @@ export const es = {
     normal: "NORMAL",
     exploreCollectionTitle: "¡Explora la colección!",
     allMedalsCompleted: "¡Completaste todas las medallas!",
-    allMedalsObtainedMessage: "Has obtenido todas las medallas disponibles"
+    allMedalsObtainedMessage: "Has obtenido todas las medallas disponibles",
+    notMinted: "No minteado",
+    noCollection: "Sin colección",
+    about: "Acerca de",
+    nftAvailableMessage:
+      "Este NFT está disponible para mintear. Completa las unidades o cursos requeridos para obtenerlo y añadirlo a tu colección permanentemente en la blockchain.",
+    created: "Creado:",
+    status: "Estado:",
+    assignedToUser: "Asignado a usuario",
+    availableToMint: "Disponible para mintear",
+    rarity: "Rareza",
+    normalNftDescription: "Los NFTs normales son los más comunes y accesibles.",
+    rareNftDescription:
+      "Los NFTs raros tienen características especiales que los hacen menos comunes.",
+    epicNftDescription:
+      "Los NFTs épicos son difíciles de conseguir y tienen propiedades únicas.",
+    uniqueNftDescription:
+      "Los NFTs únicos son ediciones limitadas y extremadamente valiosos.",
+    noDescriptionAvailable: "Sin descripción disponible",
+    totalItems: "Total de items:",
+    howToGetNft: "¿Cómo obtener este NFT?",
+    howToGetNftDescription:
+      "Completa las unidades o cursos asociados para mintear este NFT y agregarlo permanentemente a tu colección.",
+    viewAvailableCourses: "Ver Cursos Disponibles",
+    moreFromCollection: "Más de esta colección",
+    back: "Volver",
+    noTokensAvailable: "No hay tokens disponibles",
+    earnMintTokensMessage:
+      "Completa más unidades para obtener tokens de minteo",
+    exploreCourses: "Explorar cursos",
+    cost: "Cost",
+    certificate: "Certificado",
+    mintNow: "Mint now"
   },
   payments: {
     successTitle: "¡Pago completado! 🎉",

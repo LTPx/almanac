@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Zap, HelpCircle } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CompletedUnit {
   unitId: string;
@@ -16,6 +17,7 @@ interface CompletedUnit {
 export default function TokenAvailableCard() {
   const { data: session } = useSession();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [availableUnits, setAvailableUnits] = useState<CompletedUnit[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,10 +65,10 @@ export default function TokenAvailableCard() {
 
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-white">
-              No hay tokens disponibles
+              {t("achievements", "noTokensAvailable")}
             </h3>
             <p className="text-sm text-gray-400 leading-relaxed">
-              Completa más unidades para obtener tokens de minteo
+              {t("achievements", "earnMintTokensMessage")}
             </p>
           </div>
 
@@ -74,7 +76,7 @@ export default function TokenAvailableCard() {
             onClick={() => router.push("/")}
             className="mt-2 bg-primary hover:bg-primary/90 text-primary-foreground py-2.5 px-6 rounded-md font-medium transition-colors"
           >
-            Explorar cursos
+            {t("achievements", "exploreCourses")}
           </button>
         </div>
       </div>
@@ -96,12 +98,12 @@ export default function TokenAvailableCard() {
             </div>
             <div className="w-32 text-center">
               <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-                Cost
+                {t("achievements", "cost")}
               </p>
             </div>
             <div className="w-20 text-center">
               <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-                Certificate
+                {t("achievements", "certificate")}
               </p>
             </div>
           </div>
@@ -117,7 +119,7 @@ export default function TokenAvailableCard() {
             <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6">
               <div className="flex flex-col sm:w-32 sm:items-center">
                 <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-1.5 sm:hidden">
-                  Costo
+                  {t("achievements", "cost")}
                 </p>
                 <div className="flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-md px-3 py-2 sm:px-4 sm:py-2.5">
                   <Zap className="text-primary" size={18} fill="currentColor" />
@@ -129,7 +131,7 @@ export default function TokenAvailableCard() {
 
               <div className="flex flex-col items-center sm:w-20">
                 <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-1.5 sm:hidden">
-                  Certificado
+                  {t("achievements", "certificate")}
                 </p>
                 <div className="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-muted/30 border border-border rounded-md">
                   <HelpCircle
@@ -147,7 +149,7 @@ export default function TokenAvailableCard() {
             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 sm:py-3.5 px-6 rounded-md font-medium transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             <Zap size={18} fill="currentColor" />
-            Mintear ahora
+            {t("achievements", "mintNow")}
           </button>
         </div>
       ))}
