@@ -20,6 +20,8 @@ interface UseAdminUnitsReturn {
   setSearchName: (name: string) => void;
   curriculumId: string;
   setCurriculumId: (id: string) => void;
+  language: string;
+  setLanguage: (lang: string) => void;
   curriculums: Curriculum[];
   search: (page?: number) => Promise<void>;
   goToPage: (page: number) => void;
@@ -38,6 +40,7 @@ export function useAdminUnits(): UseAdminUnitsReturn {
   const [loading, setLoading] = useState(false);
   const [searchName, setSearchName] = useState(searchParams.get("search") ?? "");
   const [curriculumId, setCurriculumId] = useState(searchParams.get("curriculumId") ?? "");
+  const [language, setLanguage] = useState(searchParams.get("language") ?? "");
   const [pagination, setPagination] = useState<Pagination>({
     total: 0,
     page: Number(searchParams.get("page")) || 1,
@@ -58,7 +61,7 @@ export function useAdminUnits(): UseAdminUnitsReturn {
   }, []);
 
   const fetchUnits = useCallback(
-    async (page: number, search?: string, curriculum?: string) => {
+    async (page: number, search?: string, curriculum?: string, lang?: string) => {
       setLoading(true);
       try {
         const params = new URLSearchParams({
@@ -72,6 +75,10 @@ export function useAdminUnits(): UseAdminUnitsReturn {
 
         if (curriculum) {
           params.append("curriculumId", curriculum);
+        }
+
+        if (lang) {
+          params.append("language", lang);
         }
 
         const response = await fetch(`/api/admin/units?${params}`);
@@ -100,10 +107,11 @@ export function useAdminUnits(): UseAdminUnitsReturn {
   );
 
   const updateUrl = useCallback(
-    (page: number, name: string, curriculum: string) => {
+    (page: number, name: string, curriculum: string, lang: string) => {
       const params = new URLSearchParams();
       if (name) params.set("search", name);
       if (curriculum) params.set("curriculumId", curriculum);
+      if (lang) params.set("language", lang);
       if (page > 1) params.set("page", page.toString());
       const query = params.toString();
       router.replace(query ? `?${query}` : "?", { scroll: false });
@@ -113,22 +121,23 @@ export function useAdminUnits(): UseAdminUnitsReturn {
 
   const search = useCallback(
     async (page: number = 1) => {
-      updateUrl(page, searchName, curriculumId);
+      updateUrl(page, searchName, curriculumId, language);
       await fetchUnits(
         page,
         searchName || undefined,
-        curriculumId || undefined
+        curriculumId || undefined,
+        language || undefined
       );
     },
-    [fetchUnits, searchName, curriculumId, updateUrl]
+    [fetchUnits, searchName, curriculumId, language, updateUrl]
   );
 
   const goToPage = useCallback(
     (page: number) => {
-      updateUrl(page, searchName, curriculumId);
-      fetchUnits(page, searchName || undefined, curriculumId || undefined);
+      updateUrl(page, searchName, curriculumId, language);
+      fetchUnits(page, searchName || undefined, curriculumId || undefined, language || undefined);
     },
-    [fetchUnits, searchName, curriculumId, updateUrl]
+    [fetchUnits, searchName, curriculumId, language, updateUrl]
   );
 
   const deleteUnit = useCallback(
@@ -167,8 +176,9 @@ export function useAdminUnits(): UseAdminUnitsReturn {
     const initialPage = Number(searchParams.get("page")) || 1;
     const initialSearch = searchParams.get("search") ?? undefined;
     const initialCurriculum = searchParams.get("curriculumId") ?? undefined;
+    const initialLanguage = searchParams.get("language") ?? undefined;
     fetchCurriculums();
-    fetchUnits(initialPage, initialSearch, initialCurriculum);
+    fetchUnits(initialPage, initialSearch, initialCurriculum, initialLanguage);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -180,6 +190,8 @@ export function useAdminUnits(): UseAdminUnitsReturn {
     setSearchName,
     curriculumId,
     setCurriculumId,
+    language,
+    setLanguage,
     curriculums,
     search,
     goToPage,

@@ -23,6 +23,8 @@ export default function UnitsPage() {
     setSearchName,
     curriculumId,
     setCurriculumId,
+    language,
+    setLanguage,
     curriculums,
     search,
     goToPage,
@@ -40,49 +42,63 @@ export default function UnitsPage() {
             Gestiona las unidades del curso
           </p>
         </div>
-        <div className="flex gap-3">
-          <Select
-            value={curriculumId}
-            onValueChange={(value) => {
-              setCurriculumId(value === "all" ? "" : value);
-            }}
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Filtrar por curriculum" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los curriculums</SelectItem>
-              {curriculums.map((curriculum) => (
-                <SelectItem key={curriculum.id} value={curriculum.id}>
-                  {curriculum.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Input
-            type="text"
-            placeholder="Buscar por nombre..."
-            value={searchName}
-            onChange={(e) => setSearchName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && search(1)}
-            className="w-64"
-          />
-          <Button
-            onClick={() => search(1)}
-            disabled={loading}
-            variant="outline"
-            className="gap-2"
-          >
-            <Search className="w-4 h-4" />
-            Buscar
+        <Link href="/admin/units/new">
+          <Button className="gap-2">
+            <Plus className="w-4 h-4" />
+            Nueva Unidad
           </Button>
-          <Link href="/admin/units/new">
-            <Button className="gap-2">
-              <Plus className="w-4 h-4" />
-              Nueva Unidad
-            </Button>
-          </Link>
-        </div>
+        </Link>
+      </div>
+
+      <div className="flex gap-3 w-full justify-end">
+        <Select
+          value={language || "all"}
+          onValueChange={(value) => setLanguage(value === "all" ? "" : value)}
+        >
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="Filtrar por idioma" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los idiomas</SelectItem>
+            <SelectItem value="ES">Español</SelectItem>
+            <SelectItem value="EN">Inglés</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
+          value={curriculumId}
+          onValueChange={(value) => {
+            setCurriculumId(value === "all" ? "" : value);
+          }}
+        >
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filtrar por curriculum" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los curriculums</SelectItem>
+            {curriculums.map((curriculum) => (
+              <SelectItem key={curriculum.id} value={curriculum.id}>
+                {curriculum.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Input
+          type="text"
+          placeholder="Buscar por nombre..."
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && search(1)}
+          className="w-64"
+        />
+        <Button
+          onClick={() => search(1)}
+          disabled={loading}
+          variant="outline"
+          className="gap-2"
+        >
+          <Search className="w-4 h-4" />
+          Buscar
+        </Button>
       </div>
 
       {/* Units Table */}
