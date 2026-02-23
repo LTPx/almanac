@@ -345,7 +345,7 @@ export const getLessonsByUnitId = cache(async (unitId: number) => {
 // ============== QUESTION QUERIES ==============
 
 export const getQuestions = cache(
-  async (search: string, page = 1, pageSize = 10, type?: string) => {
+  async (search: string, page = 1, pageSize = 10, type?: string, language?: string) => {
     const whereClause = {
       isActive: true,
       ...(search
@@ -360,7 +360,8 @@ export const getQuestions = cache(
         ? {
             type: type
           }
-        : {})
+        : {}),
+      ...(language ? { translations: { some: { language } } } : {})
     };
 
     const skip = (page - 1) * pageSize;
@@ -380,7 +381,7 @@ export const getQuestions = cache(
             select: { answers: true }
           },
           translations: {
-            select: { language: true }
+            select: { language: true, title: true }
           }
         },
         orderBy: { createdAt: "asc" },

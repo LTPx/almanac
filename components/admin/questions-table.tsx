@@ -43,6 +43,7 @@ const questionTypeLabels: Record<string, string> = {
 interface QuestionsTableProps {
   questions: Question[];
   loading: boolean;
+  language?: string;
   onDelete: (id: number) => Promise<void>;
   onToggleStatus: (id: number) => void;
 }
@@ -50,6 +51,7 @@ interface QuestionsTableProps {
 export function QuestionsTable({
   questions,
   loading,
+  language,
   onDelete,
   onToggleStatus
 }: QuestionsTableProps) {
@@ -103,7 +105,7 @@ export function QuestionsTable({
                       href={`/admin/questions/${question.id}/edit`}
                       className="hover:underline"
                     >
-                      {question.title}
+                      {(language && question.translations?.find(t => t.language === language)?.title) ?? question.title}
                     </Link>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
