@@ -168,7 +168,7 @@ export function FinalTestSystem(props: FinalTestSystemProps) {
               <StoreContent
                 onBack={handleCloseStore}
                 showBackButton={true}
-                title="Tienda"
+                title="Volver a Examen"
                 backButtonVariant="button"
                 onHeartsUpdate={handleHeartsUpdate}
               />

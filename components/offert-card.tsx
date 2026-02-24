@@ -159,7 +159,7 @@ export default function SpecialOfferCard({
       if (response.ok) {
         setMessage({
           type: "success",
-          text: `¡Has ganado ${data.data.earnedZaps} Zaps! 🎉`
+          text: `${t("store", "adEarnedZaps").replace("{zaps}", data.data.earnedZaps)} 🎉`
         });
 
         // Notificar al componente padre

@@ -88,7 +88,18 @@ export const es = {
       "Mintea certificados NFT de cada currículum completado sin restricciones. Construye tu colección de logros blockchain ilimitadamente.",
     benefitProgressTitle: "Progreso Acelerado",
     benefitProgressDesc:
-      "Sin preocuparte por las vidas, avanza más rápido. Practica intensivamente y completa currículums a tu propio ritmo."
+      "Sin preocuparte por las vidas, avanza más rápido. Practica intensivamente y completa currículums a tu propio ritmo.",
+    adEarnedZaps: "¡Has ganado {zaps} Zaps!",
+    adStartError: "Error al iniciar anuncio",
+    adCompleteError: "Error al completar anuncio",
+    connectionError: "Error de conexión. Intenta nuevamente.",
+    notEnoughZaps: "No tienes suficientes Zaps",
+    buyLivesError: "Error al comprar vidas",
+    connectionError2: "Error de conexión. Intenta nuevamente.",
+    youHave: "Tienes:",
+    lives2: "vidas",
+    canBuy: "Puedes comprar:",
+    zapsSection: "Zaps"
   },
   modals: {
     noHeartsTitle: "¡Sin Corazones!",

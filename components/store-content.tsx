@@ -18,7 +18,7 @@ export default function StoreContent({
   onBack,
   showBackButton = true,
   onHeartsUpdate,
-  title = "Tienda",
+  title,
   backButtonVariant = "icon",
   testAttemptId
 }: StoreContentProps) {
@@ -30,6 +30,7 @@ export default function StoreContent({
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [heartQuantity, setHeartQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const storeTitle = title ?? t("store", "store");
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -94,7 +95,7 @@ export default function StoreContent({
     if (!userStats || userStats.canPurchase < heartQuantity) {
       setMessage({
         type: "error",
-        text: "No tienes suficientes Zaps"
+        text: t("store", "notEnoughZaps")
       });
       setTimeout(() => setMessage(null), 3000);
       return;
@@ -137,7 +138,7 @@ export default function StoreContent({
       } else {
         setMessage({
           type: "error",
-          text: data.error || "Error al comprar vidas"
+          text: data.error || t("store", "buyLivesError")
         });
         setTimeout(() => setMessage(null), 3000);
       }
@@ -145,7 +146,7 @@ export default function StoreContent({
       console.error("Error en la compra:", error);
       setMessage({
         type: "error",
-        text: "Error de conexión. Intenta nuevamente."
+        text: t("store", "connectionError")
       });
       setTimeout(() => setMessage(null), 3000);
     } finally {
@@ -185,19 +186,17 @@ export default function StoreContent({
               className="flex items-center gap-2 px-3 sm:px-4 py-2 text-white"
             >
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-sm sm:text-base">
-                {t("store", "store")}
-              </span>
+              <span className="text-sm sm:text-base">{storeTitle}</span>
             </button>
           )}
           {!showBackButton && (
             <h1 className="text-lg sm:text-xl font-semibold truncate">
-              {title}
+              {storeTitle}
             </h1>
           )}
           {showBackButton && backButtonVariant === "icon" && (
             <h1 className="text-lg sm:text-xl font-semibold truncate">
-              {title}
+              {storeTitle}
             </h1>
           )}
         </div>
@@ -447,9 +446,13 @@ export default function StoreContent({
                     {userStats && (
                       <div className="text-xs sm:text-sm text-gray-400 space-y-1">
                         <p>
-                          Tienes: {hearts ?? 0}/{userStats.maxHearts} vidas
+                          {t("store", "youHave")} {hearts ?? 0}/
+                          {userStats.maxHearts} {t("store", "lives")}
                         </p>
-                        <p>Puedes comprar: {userStats.canPurchase} vida(s)</p>
+                        <p>
+                          {t("store", "canBuy")} {userStats.canPurchase}{" "}
+                          {t("store", "lives")}
+                        </p>
                       </div>
                     )}
                   </div>

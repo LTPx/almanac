@@ -12,6 +12,7 @@ import InterstitialAd from "../interstitialAd";
 import { SuccessCompletion } from "./SuccessCompletion";
 import { MistakeAnalyzerOverlay } from "./MistakeAnalyzerOverlay";
 import { useTestSystem } from "@/hooks/useTestSystem";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface TestSystemProps {
   userId: string;
@@ -26,6 +27,8 @@ interface TestSystemProps {
 }
 
 export function TestSystem(props: TestSystemProps) {
+  const { t } = useTranslation();
+
   const {
     // State
     state,
@@ -171,7 +174,7 @@ export function TestSystem(props: TestSystemProps) {
               <StoreContent
                 onBack={handleCloseStore}
                 showBackButton={true}
-                title="Tienda"
+                title={t("store", "backToExam")}
                 backButtonVariant="button"
                 onHeartsUpdate={handleHeartsUpdate}
                 testAttemptId={currentTest?.testAttemptId}

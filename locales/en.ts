@@ -87,7 +87,18 @@ export const en = {
       "Mint NFT certificates for every completed curriculum without restrictions. Build your blockchain achievement collection without limits.",
     benefitProgressTitle: "Accelerated Progress",
     benefitProgressDesc:
-      "Without worrying about lives, advance faster. Practice intensively and complete curriculums at your own pace."
+      "Without worrying about lives, advance faster. Practice intensively and complete curriculums at your own pace.",
+    adEarnedZaps: "You've earned {zaps} Zaps!",
+    adStartError: "Error starting ad",
+    adCompleteError: "Error completing ad",
+    connectionError: "Connection error. Please try again.",
+    notEnoughZaps: "You don't have enough Zaps",
+    buyLivesError: "Error purchasing lives",
+    connectionError2: "Connection error. Please try again.",
+    youHave: "You have:",
+    lives2: "lives",
+    canBuy: "You can buy:",
+    zapsSection: "Zaps"
   },
   modals: {
     noHeartsTitle: "Out of Hearts!",
