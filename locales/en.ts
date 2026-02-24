@@ -210,8 +210,20 @@ export const en = {
     preparingNFT: "Preparing your NFT...",
     login: "Log In",
     mustBeLoggedIn: "You need to be logged in to create your certificates.",
-    tapToReveal: "Toca para revelar...",
-    preparing: "Preparing..."
+    tapToReveal: "Tap to reveal...",
+    preparing: "Preparing...",
+    achievementDuration: "Achievement Duration",
+    startDate: "Start Date",
+    endDate: "End Date",
+    totalTime: "Total Time",
+    achievements: "Achievements",
+    minted: "Minted:",
+    contractAddress: "Contract Address",
+    chain: "Chain",
+    share: "Share",
+    blockchainDetails: "Blockchain Details",
+    day: "day",
+    days: "days"
   },
   payments: {
     successTitle: "Payment complete! 🎉",

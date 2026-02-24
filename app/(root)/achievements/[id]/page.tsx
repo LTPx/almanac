@@ -9,6 +9,7 @@ import { ChevronLeft, ChevronDown, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { useUser } from "@/context/UserContext";
 import { getExplorerUrl } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 // interface NFTMetadata {
 //   name: string;
@@ -68,6 +69,7 @@ export default function NFTDetailPage() {
   const [moreFromCollection, setMoreFromCollection] = useState<any[]>([]);
   const searchParams = useSearchParams();
   const fromTab = searchParams.get("from") || "medallas";
+  const { t } = useTranslation();
 
   const rarityColors: Record<string, { bg: string; text: string }> = {
     NORMAL: { bg: "from-gray-400 to-gray-600", text: "text-gray-400" },
@@ -271,7 +273,9 @@ export default function NFTDetailPage() {
             onClick={() => setAboutExpanded(!aboutExpanded)}
             className="flex items-center justify-between w-full mb-3"
           >
-            <h2 className="text-lg font-semibold">About</h2>
+            <h2 className="text-lg font-semibold">
+              {t("achievements", "about")}
+            </h2>
             <ChevronDown
               className={`w-5 h-5 transition-transform ${
                 aboutExpanded ? "rotate-180" : ""
@@ -282,18 +286,21 @@ export default function NFTDetailPage() {
             <div className="space-y-3">
               <div>
                 <p className="text-xl font-bold mb-2">
-                  About {nft.nftAsset?.name} #{nft.tokenId}
+                  {t("achievements", "about")} {nft.nftAsset?.name} #
+                  {nft.tokenId}
                 </p>
                 <p className="text-gray-400 text-sm leading-relaxed">
                   {nft.nftAsset?.collection?.description}
                 </p>
               </div>
               <div className="">
-                <p className="font-semibold mb-2">Duración del logro</p>
+                <p className="font-semibold mb-2">
+                  {t("achievements", "achievementDuration")}
+                </p>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400 text-sm">
-                      Fecha de inicio
+                      {t("achievements", "startDate")}
                     </span>
                     <span className="text-white text-sm font-medium">
                       {nft.curriculumStartedAt
@@ -303,7 +310,7 @@ export default function NFTDetailPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400 text-sm">
-                      Fecha de finalización
+                      {t("achievements", "endDate")}
                     </span>
                     <span className="text-white text-sm font-medium">
                       {nft.curriculumFinishedAt
@@ -314,7 +321,7 @@ export default function NFTDetailPage() {
                   <div className="pt-2 mt-2 border-t border-gray-700">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-400 text-sm">
-                        Tiempo total
+                        {t("achievements", "totalTime")}
                       </span>
                       <span className="text-[#32C781] text-sm font-bold">
                         {(() => {
@@ -323,7 +330,7 @@ export default function NFTDetailPage() {
                             nft.curriculumFinishedAt
                           );
                           return days !== null
-                            ? `${days} ${days === 1 ? "día" : "días"}`
+                            ? `${days} ${days === 1 ? t("achievements", "day") : t("achievements", "days")}`
                             : "N/A";
                         })()}
                       </span>
@@ -335,7 +342,9 @@ export default function NFTDetailPage() {
               {/* Achievements */}
               {achievements.length > 0 && (
                 <div>
-                  <p className="font-semibold mb-2">Achievements</p>
+                  <p className="font-semibold mb-2">
+                    {t("achievements", "achievements")}
+                  </p>
                   <div className="space-y-1">
                     {achievements.map((achievement, index) => (
                       <div
@@ -354,7 +363,9 @@ export default function NFTDetailPage() {
 
               {/* Minted Date */}
               <div>
-                <p className="font-semibold mb-1">Minted:</p>
+                <p className="font-semibold mb-1">
+                  {t("achievements", "minted")}
+                </p>
                 <p className="text-gray-400 text-sm">
                   {formatDate(nft.mintedAt)}
                 </p>
@@ -370,7 +381,7 @@ export default function NFTDetailPage() {
             className="flex items-center justify-between w-full"
           >
             <h2 className="text-lg font-semibold">
-              About {nft.collectionName}
+              {t("achievements", "about")} {nft.collectionName}
             </h2>
             <ChevronDown
               className={`w-5 h-5 transition-transform ${
@@ -393,7 +404,9 @@ export default function NFTDetailPage() {
             onClick={() => setBlockchainExpanded(!blockchainExpanded)}
             className="flex items-center justify-between w-full"
           >
-            <h2 className="text-lg font-semibold">Blockchain details</h2>
+            <h2 className="text-lg font-semibold">
+              {t("achievements", "blockchainDetails")}
+            </h2>
             <ChevronDown
               className={`w-5 h-5 transition-transform ${
                 blockchainExpanded ? "rotate-180" : ""
@@ -403,7 +416,9 @@ export default function NFTDetailPage() {
           {blockchainExpanded && (
             <div className="mt-3 space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-400">Contract address</span>
+                <span className="text-gray-400">
+                  {t("achievements", "contractAddress")} {nft.collectionName}
+                </span>
                 <a
                   href={getExplorerUrl(nft.contractAddress, nft.tokenId)}
                   target="_blank"
@@ -422,7 +437,9 @@ export default function NFTDetailPage() {
                 <span>{nft.tokenStandard}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Chain</span>
+                <span className="text-gray-400">
+                  {t("achievements", "chain")}
+                </span>
                 <span>{nft.chain}</span>
               </div>
             </div>
@@ -434,7 +451,7 @@ export default function NFTDetailPage() {
           onClick={handleShare}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-base font-semibold rounded-xl"
         >
-          Share
+          {t("achievements", "share")}
         </Button>
 
         {/* More from Collection */}
@@ -442,7 +459,7 @@ export default function NFTDetailPage() {
           <div className="border-t border-gray-800 pt-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">
-                More from this collection
+                {t("achievements", "moreFromCollection")}
               </h2>
               <ChevronDown className="w-5 h-5" />
             </div>

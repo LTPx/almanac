@@ -51,7 +51,7 @@ export default function NFTAssetDetailPage() {
   const params = useParams();
   const router = useRouter();
   const assetId = params?.id as string;
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
 
   const [nftAsset, setNftAsset] = useState<NFTAssetDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -94,7 +94,7 @@ export default function NFTAssetDetailPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("es-ES", {
+    return date.toLocaleDateString(lang, {
       year: "numeric",
       month: "long",
       day: "numeric"

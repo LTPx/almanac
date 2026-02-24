@@ -212,7 +212,19 @@ export const es = {
     login: "Inicia Sesión",
     mustBeLoggedIn: "Necesitas estar logueado para crear tus certificados.",
     tapToReveal: "Toca para revelar...",
-    preparing: "Preparando..."
+    preparing: "Preparando...",
+    achievementDuration: "Duración del logro",
+    startDate: "Fecha de inicio",
+    endDate: "Fecha de finalización",
+    totalTime: "Tiempo total",
+    achievements: "Logros",
+    minted: "Minteado:",
+    contractAddress: "Dirección del contrato",
+    chain: "Cadena",
+    share: "Compartir",
+    blockchainDetails: "Detalles de la blockchain",
+    day: "día",
+    days: "días"
   },
   payments: {
     successTitle: "¡Pago completado! 🎉",
