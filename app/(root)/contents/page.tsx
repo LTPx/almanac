@@ -71,7 +71,8 @@ function ContentsPage() {
       try {
         const data = await fetchCurriculumWithUnitsUserMetrics(
           selectedCurriculumId,
-          userId
+          userId,
+          lang
         );
 
         if (!data) return;

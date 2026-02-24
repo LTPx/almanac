@@ -1,6 +1,7 @@
 import { cache } from "react";
 import prisma from "./prisma";
 import { computeUnitStates } from "@/lib/utils/compute-unit-states";
+import { applyTranslation } from "@/lib/apply-translation";
 
 export const getUnitsByCurriculumId = cache(async (curriculumId: string) => {
   const data = await prisma.curriculum.findUnique({
@@ -414,7 +415,15 @@ export const getQuestions = cache(
 
 // ============== SEARCH QUERIES ==============
 export const getUnitsByCurriculumIdAndUserStats = cache(
-  async (curriculumId: string, userId: string) => {
+  async (curriculumId: string, userId: string, lang: "EN" | "ES" = "EN") => {
+    const translationsFilter =
+      lang === "ES"
+        ? {
+            where: { language: "ES" as const },
+            select: { name: true, description: true }
+          }
+        : (false as const);
+
     const curriculum = await prisma.curriculum.findUnique({
       where: { id: curriculumId },
       include: {
@@ -425,12 +434,14 @@ export const getUnitsByCurriculumIdAndUserStats = cache(
             id: true,
             name: true,
             description: true,
+            translations: translationsFilter,
             lessons: {
               where: { isActive: true },
               select: {
                 id: true,
                 name: true,
-                description: true
+                description: true,
+                translations: translationsFilter
               }
             },
             testAttempt: {
@@ -460,12 +471,23 @@ export const getUnitsByCurriculumIdAndUserStats = cache(
     }
 
     const unitsWithStats = curriculum.units.map((unit) => {
-      const incorrectAnswersCount = unit.testAttempt.reduce(
-        (sum, attempt) => sum + attempt.answers.length,
+      const { translations: uT, lessons, testAttempt, ...uRest } = unit as any;
+      const translatedUnit = applyTranslation(uRest, uT?.[0], ["name", "description"]);
+
+      const translatedLessons = lessons.map((lesson: any) => {
+        const { translations: lT, ...lRest } = lesson;
+        return applyTranslation(lRest, lT?.[0], ["name", "description"]);
+      });
+
+      const incorrectAnswersCount = testAttempt.reduce(
+        (sum: number, attempt: any) => sum + attempt.answers.length,
         0
       );
+
       return {
-        ...unit,
+        ...translatedUnit,
+        lessons: translatedLessons,
+        testAttempt,
         incorrectAnswersCount
       };
     });

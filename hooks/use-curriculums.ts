@@ -68,14 +68,16 @@ export function useCurriculums() {
   const fetchCurriculumWithUnitsUserMetrics = useCallback(
     async (
       curriculumId: string,
-      userId: string
+      userId: string,
+      lang?: string
     ): Promise<ContentsResponse | null> => {
       setIsLoading(true);
       setError(null);
 
       try {
+        const langParam = lang ? `&lang=${lang}` : "";
         const contentsRes = await fetch(
-          `/api/app/contents?curriculumId=${curriculumId}&userId=${userId}`
+          `/api/app/contents?curriculumId=${curriculumId}&userId=${userId}${langParam}`
         );
         if (!contentsRes.ok) throw new Error("Error al cargar contents");
         return await contentsRes.json();

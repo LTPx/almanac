@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUnitsByCurriculumIdAndUserStats } from "@/lib/queries";
+import { toLangCode } from "@/lib/apply-translation";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const curriculumId = searchParams.get("curriculumId");
   const userId = searchParams.get("userId");
+  const lang = toLangCode(searchParams.get("lang"));
 
   if (!curriculumId) {
     return NextResponse.json(
@@ -20,7 +22,8 @@ export async function GET(request: NextRequest) {
   try {
     const units = await getUnitsByCurriculumIdAndUserStats(
       curriculumId,
-      userId
+      userId,
+      lang
     );
     return NextResponse.json(units);
   } catch (error) {
