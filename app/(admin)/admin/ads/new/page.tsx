@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AdForm } from "@/components/admin/ad-form";
-import { ChevronLeft } from "lucide-react";
+import { BackButton } from "@/components/admin/back-button";
 
 export default function NewAdPage() {
   const formRef = useRef<HTMLFormElement>(null);
@@ -28,17 +28,13 @@ export default function NewAdPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <div>
-        <Link
-          href="/admin/ads"
-          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          Volver a anuncios
-        </Link>
-        <h1 className="text-3xl font-bold">Nuevo Anuncio</h1>
-        <p className="text-muted-foreground">Crea un nuevo anuncio</p>
+    <div className="space-y-6">
+      <div className="flex items-center space-x-4">
+        <BackButton fallback="/admin/ads" />
+        <div>
+          <h1 className="text-3xl font-bold">Nuevo Anuncio</h1>
+          <p className="text-muted-foreground">Crea un nuevo anuncio</p>
+        </div>
       </div>
 
       <AdForm ref={formRef} editingAd={null} onSubmit={handleSubmit} />
