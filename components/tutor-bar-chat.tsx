@@ -4,6 +4,7 @@ import React, { useState, useRef, useMemo } from "react";
 import { ArrowRight, X, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface ChatTutorBarProps {
   curriculumTitle?: string;
@@ -16,22 +17,23 @@ export default function ChatTutorBar({ curriculumTitle }: ChatTutorBarProps) {
   const [inputValue, setInputValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
   const defaultQuestions = [
-    "¿Qué temas puedo aprender aquí?",
-    "Ayúdame a repasar lo que he aprendido",
-    "Explícame un concepto que no entiendo",
-    "¿Puedes darme ejemplos prácticos?"
+    t("tutorBar", "defaultQ1"),
+    t("tutorBar", "defaultQ2"),
+    t("tutorBar", "defaultQ3"),
+    t("tutorBar", "defaultQ4")
   ];
 
   const suggestedQuestions = useMemo(() => {
     if (!curriculumTitle) return defaultQuestions;
 
     return [
-      `¿Qué voy a aprender en ${curriculumTitle}?`,
-      `Dame un resumen de ${curriculumTitle}`,
-      `¿Cuáles son los conceptos clave de ${curriculumTitle}?`,
-      `Ayúdame a entender mejor ${curriculumTitle}`
+      `${t("tutorBar", "suggestedQ1")} ${curriculumTitle}?`,
+      `${t("tutorBar", "suggestedQ2")} ${curriculumTitle}`,
+      `${t("tutorBar", "suggestedQ3")} ${curriculumTitle}?`,
+      `${t("tutorBar", "suggestedQ4")} ${curriculumTitle}`
     ];
   }, [curriculumTitle]);
 
@@ -106,7 +108,7 @@ export default function ChatTutorBar({ curriculumTitle }: ChatTutorBarProps) {
             onKeyPress={handleKeyPress}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-            placeholder="What would you like to learn today?"
+            placeholder={t("tutorBar", "placeholder")}
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
           />
 
@@ -132,8 +134,8 @@ export default function ChatTutorBar({ curriculumTitle }: ChatTutorBarProps) {
               <Sparkles className="h-4 w-4 text-purple-400" />
               <span className="text-xs font-medium text-purple-400">
                 {curriculumTitle
-                  ? "Suggested for this topic"
-                  : "Suggested questions"}
+                  ? t("tutorBar", "suggestedForTopic")
+                  : t("tutorBar", "suggestedLabel")}
               </span>
             </div>
             <div className="space-y-1">

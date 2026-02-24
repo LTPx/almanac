@@ -6,6 +6,7 @@ import { Loader2, Send, BookOpen, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 import Link from "next/link";
 import { renderMessageWithLinks } from "@/lib/render-markdown";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface Message {
   role: "user" | "assistant";
@@ -55,6 +56,7 @@ function TypingMessage({ content }: { content: string }) {
 export default function AlmanacTutorPage() {
   const user = useUser();
   const userId = user?.id || "";
+  const { t } = useTranslation();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -110,11 +112,9 @@ export default function AlmanacTutorPage() {
       setInitialLoading(false);
       return;
     }
-
     loadActiveSession();
   }, [userId]);
 
-  // Procesar query de URL
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const question = searchParams.get("q");
@@ -134,24 +134,15 @@ export default function AlmanacTutorPage() {
 
       fetch("/api/almanac/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          userId,
-          message: userMessage
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, message: userMessage })
       })
         .then((response) => response.json())
         .then((data) => {
           if (data.response) {
             setMessages((prev) => [
               ...prev,
-              {
-                role: "assistant",
-                content: data.response,
-                isTyping: true
-              }
+              { role: "assistant", content: data.response, isTyping: true }
             ]);
             setCurrentTopicData(data.currentTopicData);
             setSessionId(data.sessionId);
@@ -200,13 +191,8 @@ export default function AlmanacTutorPage() {
     try {
       const response = await fetch("/api/almanac/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          userId,
-          message: userMessage
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, message: userMessage })
       });
 
       const data = await response.json();
@@ -214,11 +200,7 @@ export default function AlmanacTutorPage() {
       if (response.ok) {
         setMessages((prev) => [
           ...prev,
-          {
-            role: "assistant",
-            content: data.response,
-            isTyping: true
-          }
+          { role: "assistant", content: data.response, isTyping: true }
         ]);
         setCurrentTopicData(data.currentTopicData);
         setSessionId(data.sessionId);
@@ -267,9 +249,7 @@ export default function AlmanacTutorPage() {
     try {
       await fetch("/api/almanac/chat", {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, wasHelpful })
       });
       setMessages([]);
@@ -301,7 +281,7 @@ export default function AlmanacTutorPage() {
         <div className="max-w-4xl mx-auto flex items-center justify-center h-[500px]">
           <div className="text-center">
             <Loader2 className="w-12 h-12 animate-spin text-purple-500 mx-auto mb-4" />
-            <p className="text-gray-400">Cargando...</p>
+            <p className="text-gray-400">{t("tutorPage", "loading")}</p>
           </div>
         </div>
       </div>
@@ -348,7 +328,7 @@ export default function AlmanacTutorPage() {
                     </p>
                   ) : (
                     <p className="text-xs sm:text-sm text-gray-400">
-                      Tu tutor de IA basado en tus lecciones de Almanac
+                      {t("tutorPage", "aiTutor")}
                     </p>
                   )}
                 </div>
@@ -361,8 +341,12 @@ export default function AlmanacTutorPage() {
                   disabled={messages.length === 0}
                   className="border-neutral-600 hover:bg-neutral-800 text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2"
                 >
-                  <span className="hidden sm:inline">Nuevo Chat</span>
-                  <span className="sm:hidden">Nuevo</span>
+                  <span className="hidden sm:inline">
+                    {t("tutorPage", "newChat")}
+                  </span>
+                  <span className="sm:hidden">
+                    {t("tutorPage", "newChatShort")}
+                  </span>
                 </Button>
               </div>
             </div>
@@ -378,26 +362,23 @@ export default function AlmanacTutorPage() {
                 <div className="text-center text-gray-400 mt-10 sm:mt-20 px-2">
                   <BookOpen className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 text-purple-500 opacity-50" />
                   <p className="text-base sm:text-lg font-semibold mb-2 text-white">
-                    ¡Bienvenido a Almanac Tutor!
+                    {t("tutorPage", "welcome")}
                   </p>
                   <p className="text-xs sm:text-sm mb-4 sm:mb-6">
-                    Comienza una conversación preguntando sobre cualquier
-                    lección de tu currículum
+                    {t("tutorPage", "welcomeDesc")}
                   </p>
                   <div className="max-w-md mx-auto space-y-2 sm:space-y-3">
                     <button
-                      onClick={() =>
-                        setInput("¿Sobre qué temas puedes ayudarme a aprender?")
-                      }
+                      onClick={() => setInput(t("tutorPage", "suggestion1"))}
                       className="block w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm bg-neutral-700 text-white rounded-lg sm:rounded-xl hover:bg-neutral-600 transition-colors border border-neutral-600"
                     >
-                      ¿Sobre qué temas puedes ayudarme a aprender?
+                      {t("tutorPage", "suggestion1")}
                     </button>
                     <button
-                      onClick={() => setInput("Quiero aprender algo nuevo")}
+                      onClick={() => setInput(t("tutorPage", "suggestion2"))}
                       className="block w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm bg-neutral-700 text-white rounded-lg sm:rounded-xl hover:bg-neutral-600 transition-colors border border-neutral-600"
                     >
-                      Quiero aprender algo nuevo
+                      {t("tutorPage", "suggestion2")}
                     </button>
                   </div>
                 </div>
@@ -473,7 +454,7 @@ export default function AlmanacTutorPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Escribe tu mensaje..."
+              placeholder={t("tutorPage", "typeMessage")}
               disabled={loading}
               className="flex-1 px-3 sm:px-5 py-3 sm:py-4 text-sm sm:text-base bg-neutral-800 border-2 border-neutral-600 rounded-lg sm:rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 disabled:opacity-50 transition-colors"
             />
@@ -493,7 +474,9 @@ export default function AlmanacTutorPage() {
           {questionLimit && (
             <div className="text-left mt-2 sm:mt-3 px-1">
               <p className="text-[10px] sm:text-xs text-gray-500">
-                {questionLimit.isPremium ? "Plan Premium" : "Plan Gratuito"}
+                {questionLimit.isPremium
+                  ? t("tutorPage", "premiumPlan")
+                  : t("tutorPage", "freePlan")}
               </p>
               <div className="flex gap-1 items-baseline">
                 <p
@@ -508,46 +491,44 @@ export default function AlmanacTutorPage() {
                   {questionLimit.remaining} / {questionLimit.limit}
                 </p>
                 <p className="text-[10px] sm:text-xs text-gray-500">
-                  preguntas máximo
+                  {t("tutorPage", "questionsLimit")}
                 </p>
               </div>
             </div>
           )}
         </div>
       </div>
+
       {showFeedbackModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-neutral-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 max-w-md w-full border-2 border-neutral-600">
             <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-white">
-              ¿Cómo fue tu experiencia?
+              {t("tutorPage", "feedbackTitle")}
             </h3>
             <p className="text-gray-400 mb-4 sm:mb-6 text-xs sm:text-sm">
-              Tu feedback nos ayuda a mejorar el tutor
+              {t("tutorPage", "feedbackDesc")}
             </p>
-
             <div className="flex flex-col gap-2 sm:gap-3">
               <Button
                 onClick={() => handleFeedback(true)}
                 className="w-full bg-green-600 hover:bg-green-700 text-white py-3 sm:py-4 rounded-lg sm:rounded-xl flex items-center justify-center gap-2 transition-colors text-sm sm:text-base"
               >
                 <ThumbsUp className="w-4 h-4 sm:w-5 sm:h-5" />
-                Fue útil
+                {t("tutorPage", "helpful")}
               </Button>
-
               <Button
                 onClick={() => handleFeedback(false)}
                 className="w-full bg-red-600 hover:bg-red-700 text-white py-3 sm:py-4 rounded-lg sm:rounded-xl flex items-center justify-center gap-2 transition-colors text-sm sm:text-base"
               >
                 <ThumbsDown className="w-4 h-4 sm:w-5 sm:h-5" />
-                No fue útil
+                {t("tutorPage", "notHelpful")}
               </Button>
-
               <Button
                 onClick={() => handleFeedback()}
                 variant="outline"
                 className="w-full border-neutral-600 hover:bg-neutral-700 text-gray-300 py-3 sm:py-4 rounded-lg sm:rounded-xl transition-colors text-sm sm:text-base"
               >
-                Omitir
+                {t("tutorPage", "skip")}
               </Button>
             </div>
           </div>

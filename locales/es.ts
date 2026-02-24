@@ -130,6 +130,39 @@ export const es = {
     errorLoading: "Error al cargar el leaderboard",
     serverError: "Error en la respuesta del servidor"
   },
+  tutorBar: {
+    defaultQ1: "¿Qué temas puedo aprender aquí?",
+    defaultQ2: "Ayúdame a repasar lo que he aprendido",
+    defaultQ3: "Explícame un concepto que no entiendo",
+    defaultQ4: "¿Puedes darme ejemplos prácticos?",
+    suggestedQ1: "¿Qué voy a aprender en",
+    suggestedQ2: "Dame un resumen de",
+    suggestedQ3: "¿Cuáles son los conceptos clave de",
+    suggestedQ4: "Ayúdame a entender mejor",
+    placeholder: "¿Qué te gustaría aprender hoy?",
+    suggestedLabel: "Preguntas sugeridas",
+    suggestedForTopic: "Sugeridas para este tema"
+  },
+  tutorPage: {
+    loading: "Cargando...",
+    aiTutor: "Tu tutor de IA basado en tus lecciones de Almanac",
+    newChat: "Nuevo Chat",
+    newChatShort: "Nuevo",
+    welcome: "¡Bienvenido a Almanac Tutor!",
+    welcomeDesc:
+      "Comienza una conversación preguntando sobre cualquier lección de tu currículum",
+    suggestion1: "¿Sobre qué temas puedes ayudarme a aprender?",
+    suggestion2: "Quiero aprender algo nuevo",
+    typeMessage: "Escribe tu mensaje...",
+    freePlan: "Plan Gratuito",
+    premiumPlan: "Plan Premium",
+    questionsLimit: "preguntas máximo",
+    feedbackTitle: "¿Cómo fue tu experiencia?",
+    feedbackDesc: "Tu feedback nos ayuda a mejorar el tutor",
+    helpful: "Fue útil",
+    notHelpful: "No fue útil",
+    skip: "Omitir"
+  },
   achievements: {
     medals: "Medallas",
     available: "Disponible",

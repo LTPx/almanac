@@ -129,6 +129,39 @@ export const en = {
     errorLoading: "Error loading leaderboard",
     serverError: "Server response error"
   },
+  tutorBar: {
+    defaultQ1: "What topics can I learn here?",
+    defaultQ2: "Help me review what I've learned",
+    defaultQ3: "Explain a concept I don't understand",
+    defaultQ4: "Can you give me practical examples?",
+    suggestedQ1: "What will I learn in",
+    suggestedQ2: "Give me a summary of",
+    suggestedQ3: "What are the key concepts of",
+    suggestedQ4: "Help me better understand",
+    placeholder: "What would you like to learn today?",
+    suggestedLabel: "Suggested questions",
+    suggestedForTopic: "Suggested for this topic"
+  },
+  tutorPage: {
+    loading: "Loading...",
+    aiTutor: "Your AI tutor based on your Almanac lessons",
+    newChat: "New Chat",
+    newChatShort: "New",
+    welcome: "Welcome to Almanac Tutor!",
+    welcomeDesc:
+      "Start a conversation by asking about any lesson from your curriculum",
+    suggestion1: "What topics can you help me learn?",
+    suggestion2: "I want to learn something new",
+    typeMessage: "Type your message...",
+    freePlan: "Free Plan",
+    premiumPlan: "Premium Plan",
+    questionsLimit: "questions limit",
+    feedbackTitle: "How was your experience?",
+    feedbackDesc: "Your feedback helps us improve the tutor",
+    helpful: "It was helpful",
+    notHelpful: "Not helpful",
+    skip: "Skip"
+  },
   achievements: {
     medals: "Medals",
     available: "Available",
