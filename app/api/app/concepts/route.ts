@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { applyTranslation, toLangCode } from "@/lib/apply-translation";
+import {
+  toLangCode,
+  questionTranslationFilters,
+  answerTranslationFilter,
+  applyTranslation
+} from "@/lib/apply-translation";
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,56 +21,87 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const translationsFilter =
+    const qTFilters = questionTranslationFilters(lang);
+    const answerTFilter = answerTranslationFilter(lang);
+    const unitTFilter =
       lang === "ES"
         ? {
             where: { language: "ES" as const },
-            select: { name: true, description: true }
+            select: { name: true }
           }
         : (false as const);
 
-    const learnedUnits = await prisma.userUnitProgress.findMany({
+    const correctAnswers = await prisma.testAnswer.findMany({
       where: {
-        userId,
-        unit: { curriculumId }
+        isCorrect: true,
+        testAttempt: {
+          userId,
+          isReviewTest: { not: true },
+          unit: {
+            curriculum: { id: curriculumId }
+          }
+        }
       },
       select: {
-        unit: {
+        questionId: true,
+        question: {
           select: {
             id: true,
-            name: true,
-            translations: translationsFilter,
-            lessons: {
-              where: { isActive: true },
-              orderBy: { position: "asc" },
+            title: true,
+            type: true,
+            content: true,
+            translations: qTFilters.translations,
+            unit: {
               select: {
-                id: true,
                 name: true,
-                description: true,
-                translations: translationsFilter
+                translations: unitTFilter
+              }
+            },
+            answers: {
+              where: { isCorrect: true },
+              select: {
+                text: true,
+                order: true,
+                translations: answerTFilter
               }
             }
           }
         }
-      }
+      },
+      distinct: ["questionId"]
     });
 
-    const units = learnedUnits.map((p) => {
-      const { translations: uT, lessons, ...uRest } = p.unit as any;
-      const translatedUnit = applyTranslation(uRest, uT?.[0], [
-        "name",
-        "description"
-      ]);
+    const questions = correctAnswers.map((a) => {
+      const q = a.question as any;
+      const qT = q.translations?.[0];
+      const title = qT?.title || q.title;
+      const content =
+        qT?.content && Object.keys(qT.content).length > 0
+          ? qT.content
+          : q.content;
 
-      const translatedLessons = lessons.map((lesson: any) => {
-        const { translations: lT, ...lRest } = lesson;
-        return applyTranslation(lRest, lT?.[0], ["name", "description"]);
-      });
+      const translatedUnit = applyTranslation(
+        { name: q.unit.name },
+        q.unit.translations?.[0],
+        ["name"]
+      );
 
-      return { ...translatedUnit, lessons: translatedLessons };
+      const correctAnswers = q.answers.map((ans: any) => ({
+        text: ans.translations?.[0]?.text || ans.text,
+        order: ans.order
+      }));
+
+      return {
+        id: q.id,
+        title,
+        type: q.type,
+        content,
+        unitName: translatedUnit.name,
+        correctAnswers
+      };
     });
 
-    return NextResponse.json({ units });
+    return NextResponse.json({ questions });
   } catch (error) {
     console.error("Error al obtener conceptos:", error);
     return NextResponse.json(

@@ -125,9 +125,11 @@ export const en = {
   conceptsPage: {
     backToContents: "Back to Contents",
     yourConcepts: "Your Concepts",
-    unit: "unit",
-    units: "units",
-    noConcepts: "You have no learned units",
+    question: "question",
+    questions: "questions",
+    noConcepts: "You have no correctly answered questions",
+    correctAnswer: "Correct answer:",
+    correctOrder: "Correct order:",
     missingParams: "Missing required parameters",
     errorFetching: "Error fetching concepts"
   },

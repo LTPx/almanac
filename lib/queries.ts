@@ -475,12 +475,17 @@ export const getUnitsByCurriculumIdAndUserStats = cache(
       0
     );
 
-    const totalUnitsLearnt = await prisma.userUnitProgress.count({
+    const totalUnitsLearnt = await prisma.testAnswer.groupBy({
+      by: ["questionId"],
       where: {
-        userId,
-        unit: { curriculumId }
+        isCorrect: true,
+        testAttempt: {
+          userId,
+          isReviewTest: { not: true },
+          unit: { curriculumId }
+        }
       }
-    });
+    }).then((rows) => rows.length);
 
     return {
       curriculum: {

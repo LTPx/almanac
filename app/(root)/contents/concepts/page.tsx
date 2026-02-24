@@ -11,18 +11,23 @@ import {
 import { BookOpen, Loader2, ArrowLeft, AlertTriangle } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 import { useTranslation } from "@/hooks/useTranslation";
-import { FormattedTextDisplay } from "@/components/formatted-text-display";
 
-interface Lesson {
-  id: number;
-  name: string;
-  description: string | null;
+interface CorrectAnswer {
+  text: string;
+  order: number;
 }
 
-interface LearnedUnit {
+interface CorrectQuestion {
   id: number;
-  name: string;
-  lessons: Lesson[];
+  title: string;
+  type: string;
+  content: any;
+  unitName: string;
+  correctAnswers: CorrectAnswer[];
+}
+
+interface QuestionsByUnit {
+  [unitName: string]: CorrectQuestion[];
 }
 
 function ConceptsPage() {
@@ -35,7 +40,7 @@ function ConceptsPage() {
   const lang = user?.languagePreference ?? undefined;
   const { t } = useTranslation();
 
-  const [units, setUnits] = useState<LearnedUnit[]>([]);
+  const [questions, setQuestions] = useState<CorrectQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openAccordion, setOpenAccordion] = useState<string>("");
@@ -61,7 +66,7 @@ function ConceptsPage() {
           throw new Error(data.error || t("conceptsPage", "errorFetching"));
         }
 
-        setUnits(data.units);
+        setQuestions(data.questions);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -71,6 +76,58 @@ function ConceptsPage() {
 
     fetchConcepts();
   }, [userId, curriculumId, lang]);
+
+  const questionsByUnit: QuestionsByUnit = questions.reduce((acc, q) => {
+    if (!acc[q.unitName]) acc[q.unitName] = [];
+    acc[q.unitName].push(q);
+    return acc;
+  }, {} as QuestionsByUnit);
+
+  const renderCorrectAnswer = (question: CorrectQuestion) => {
+    const sortedAnswers = [...question.correctAnswers].sort(
+      (a, b) => a.order - b.order
+    );
+
+    switch (question.type) {
+      case "ORDER_WORDS":
+        return (
+          <div className="space-y-2">
+            <p className="text-sm font-semibold text-green-400">
+              {t("conceptsPage", "correctOrder")}
+            </p>
+            <div className="space-y-1">
+              {sortedAnswers.map((answer, idx) => (
+                <div
+                  key={idx}
+                  className="bg-green-500/10 border border-green-500/30 rounded-lg p-2 flex items-center gap-2"
+                >
+                  <span className="bg-green-500/20 text-green-400 font-bold px-2 py-1 rounded text-xs">
+                    {idx + 1}
+                  </span>
+                  <p className="text-sm text-white">{answer.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div className="space-y-2">
+            <p className="text-sm font-semibold text-green-400">
+              {t("conceptsPage", "correctAnswer")}
+            </p>
+            {sortedAnswers.map((answer, idx) => (
+              <div
+                key={idx}
+                className="bg-green-500/10 border border-green-500/30 rounded-lg p-3"
+              >
+                <p className="text-sm text-white">{answer.text}</p>
+              </div>
+            ))}
+          </div>
+        );
+    }
+  };
 
   if (isLoading) {
     return (
@@ -114,28 +171,28 @@ function ConceptsPage() {
                 {t("conceptsPage", "yourConcepts")}
               </h1>
               <p className="text-sm text-gray-400">
-                {units.length}{" "}
-                {units.length === 1
-                  ? t("conceptsPage", "unit")
-                  : t("conceptsPage", "units")}
+                {questions.length}{" "}
+                {questions.length === 1
+                  ? t("conceptsPage", "question")
+                  : t("conceptsPage", "questions")}
               </p>
             </div>
           </div>
         </div>
 
         {/* Empty State */}
-        {units.length === 0 && (
+        {questions.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-400">{t("conceptsPage", "noConcepts")}</p>
           </div>
         )}
 
-        {/* Units with lessons */}
-        {units.length > 0 && (
+        {/* Questions by Unit */}
+        {Object.keys(questionsByUnit).length > 0 && (
           <div className="space-y-6">
-            {units.map((unit) => (
-              <div key={unit.id}>
-                <h2 className="text-xl font-bold mb-3">{unit.name}</h2>
+            {Object.entries(questionsByUnit).map(([unitName, unitQuestions]) => (
+              <div key={unitName}>
+                <h2 className="text-xl font-bold mb-3">{unitName}</h2>
                 <div className="border-2 border-neutral-600 rounded-2xl overflow-hidden">
                   <Accordion
                     type="single"
@@ -144,17 +201,17 @@ function ConceptsPage() {
                     value={openAccordion}
                     onValueChange={setOpenAccordion}
                   >
-                    {unit.lessons.map((lesson) => (
+                    {unitQuestions.map((question) => (
                       <AccordionItem
-                        key={lesson.id}
-                        value={`lesson-${lesson.id}`}
+                        key={question.id}
+                        value={`question-${question.id}`}
                         className="border-neutral-600 last:border-0"
                       >
                         <AccordionTrigger className="text-white text-base font-semibold px-5 py-5 hover:bg-neutral-750 hover:no-underline">
-                          {lesson.name}
+                          {question.title}
                         </AccordionTrigger>
                         <AccordionContent className="px-5 pb-5 pt-2 border-t border-neutral-700">
-                          <FormattedTextDisplay text={lesson.description} />
+                          {renderCorrectAnswer(question)}
                         </AccordionContent>
                       </AccordionItem>
                     ))}

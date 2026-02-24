@@ -126,9 +126,11 @@ export const es = {
   conceptsPage: {
     backToContents: "Volver a Contenidos",
     yourConcepts: "Tus Conceptos",
-    unit: "unidad",
-    units: "unidades",
-    noConcepts: "No tienes unidades aprendidas",
+    question: "pregunta",
+    questions: "preguntas",
+    noConcepts: "No tienes preguntas respondidas correctamente",
+    correctAnswer: "Respuesta correcta:",
+    correctOrder: "Orden correcto:",
     missingParams: "Faltan parámetros requeridos",
     errorFetching: "Error al obtener conceptos"
   },
