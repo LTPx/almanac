@@ -162,6 +162,44 @@ export const en = {
     notHelpful: "Not helpful",
     skip: "Skip"
   },
+  testQuestion: {
+    reportProblem: "Report a problem",
+    report: "Report",
+    correct: "Correct!",
+    incorrect: "Incorrect",
+    correctAnswer: "Correct answer:",
+    checkSpelling: "Check the correct spelling",
+    submitAnswer: "Submit Answer",
+    checkAnswer: "Check Answer →",
+    continue: "Continue →"
+  },
+  reportModal: {
+    reportSent: "Report sent!",
+    thankYou: "Thank you for helping us improve",
+    reportError: "Report Error",
+    question: "Question:",
+    whatsTheProblem: "What is the problem? *",
+    reason1: "The question is poorly worded",
+    reason2: "The correct answer is wrong",
+    reason3: "There is a spelling error",
+    reason4: "Other",
+    additionalDetails: "Additional details (optional)",
+    placeholder: "Tell us more about the problem...",
+    cancel: "Cancel",
+    sending: "Sending...",
+    send: "Send Report"
+  },
+  streakCelebration: {
+    streak: "{count} In a Row!",
+    unstoppable: "Unstoppable! 🔥"
+  },
+  exitModal: {
+    title: "Wait, don't leave!",
+    description:
+      "You're about to exit the lesson. Are you sure you want to abandon your progress?",
+    continueLearning: "Continue Learning",
+    endSession: "End Session"
+  },
   achievements: {
     medals: "Medals",
     available: "Available",
@@ -316,7 +354,9 @@ export const en = {
     finalTestReadyMessage:
       "You’ve completed all the units! Put all the knowledge you’ve gained to the test in this final test.",
     finalTestCompletedMessage:
-      "Congratulations! You’ve completed the final test. You can try again to improve your score."
+      "Congratulations! You’ve completed the final test. You can try again to improve your score.",
+    retryFinalTest: "Try Again",
+    startFinalTest: "Start Final Test"
   },
   profile: {
     addFriends: "Add Friends",

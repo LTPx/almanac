@@ -163,6 +163,44 @@ export const es = {
     notHelpful: "No fue útil",
     skip: "Omitir"
   },
+  testQuestion: {
+    reportProblem: "Reportar un problema",
+    report: "Reportar",
+    correct: "¡Correcto!",
+    incorrect: "Incorrecto",
+    correctAnswer: "Respuesta correcta:",
+    checkSpelling: "Revisa la ortografía correcta",
+    submitAnswer: "Enviar Respuesta",
+    checkAnswer: "Verificar Respuesta →",
+    continue: "Continuar →"
+  },
+  reportModal: {
+    reportSent: "¡Reporte enviado!",
+    thankYou: "Gracias por ayudarnos a mejorar",
+    reportError: "Reportar Error",
+    question: "Pregunta:",
+    whatsTheProblem: "¿Cuál es el problema? *",
+    reason1: "La pregunta está mal redactada",
+    reason2: "La respuesta correcta es incorrecta",
+    reason3: "Hay un error ortográfico",
+    reason4: "Otro",
+    additionalDetails: "Detalles adicionales (opcional)",
+    placeholder: "Cuéntanos más sobre el problema...",
+    cancel: "Cancelar",
+    sending: "Enviando...",
+    send: "Enviar Reporte"
+  },
+  streakCelebration: {
+    streak: "¡{count} Seguidas!",
+    unstoppable: "¡Imparable! 🔥"
+  },
+  exitModal: {
+    title: "¡Espera, no te vayas!",
+    description:
+      "Estás a punto de salir de la lección. ¿Estás seguro de que quieres abandonar tu progreso?",
+    continueLearning: "Continuar Aprendiendo",
+    endSession: "Terminar Sesión"
+  },
   achievements: {
     medals: "Medallas",
     available: "Disponible",
@@ -318,7 +356,9 @@ export const es = {
     finalTestReadyMessage:
       "¡Has completado todas las unidades! Pon a prueba todos los conocimientos adquiridos en este test final.",
     finalTestCompletedMessage:
-      "¡Felicidades! Has completado el test final. Puedes volver a intentarlo para mejorar tu puntuación."
+      "¡Felicidades! Has completado el test final. Puedes volver a intentarlo para mejorar tu puntuación.",
+    retryFinalTest: "Volver a Intentar",
+    startFinalTest: "Empezar Test Final"
   },
   profile: {
     addFriends: "Agrega Amigos",

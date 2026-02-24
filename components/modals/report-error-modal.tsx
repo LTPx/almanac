@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X, AlertCircle, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface ReportErrorModalProps {
   isOpen: boolean;
@@ -21,32 +22,25 @@ export function ReportErrorModal({
   questionText,
   onSubmit
 }: ReportErrorModalProps) {
+  const { t } = useTranslation();
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const reasons = [
-    "La pregunta está mal redactada",
-    "La respuesta correcta es incorrecta",
-    "Hay un error ortográfico",
-    "Otro"
+    t("reportModal", "reason1"),
+    t("reportModal", "reason2"),
+    t("reportModal", "reason3"),
+    t("reportModal", "reason4")
   ];
 
   const handleSubmit = async () => {
     if (!reason) return;
-
     setIsSubmitting(true);
-
     try {
-      await onSubmit({
-        questionId,
-        reason,
-        description
-      });
-
+      await onSubmit({ questionId, reason, description });
       setSubmitted(true);
-
       setTimeout(() => {
         handleClose();
       }, 2000);
@@ -73,7 +67,6 @@ export function ReportErrorModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[300] flex items-center justify-center bg-black/70 p-4"
-        // onClick={handleClose}
       >
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
@@ -89,9 +82,9 @@ export function ReportErrorModal({
                 <Send className="w-8 h-8 text-[#32c781]" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">
-                ¡Reporte enviado!
+                {t("reportModal", "reportSent")}
               </h3>
-              <p className="text-gray-400">Gracias por ayudarnos a mejorar</p>
+              <p className="text-gray-400">{t("reportModal", "thankYou")}</p>
             </div>
           ) : (
             <>
@@ -101,7 +94,7 @@ export function ReportErrorModal({
                     <AlertCircle className="w-5 h-5 text-orange-500" />
                   </div>
                   <h2 className="text-xl font-bold text-white">
-                    Reportar Error
+                    {t("reportModal", "reportError")}
                   </h2>
                 </div>
                 <button
@@ -111,15 +104,18 @@ export function ReportErrorModal({
                   <X className="w-6 h-6" />
                 </button>
               </div>
+
               <div className="p-6 space-y-6 overflow-y-auto flex-1">
                 <div className="bg-[#1f1f1f] rounded-lg p-4 border border-[#3a3a3a]">
-                  <p className="text-sm text-gray-400 mb-1">Pregunta:</p>
+                  <p className="text-sm text-gray-400 mb-1">
+                    {t("reportModal", "question")}
+                  </p>
                   <p className="text-white font-medium">{questionText}</p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-3">
-                    ¿Cuál es el problema? *
+                    {t("reportModal", "whatsTheProblem")}
                   </label>
                   <div className="space-y-2">
                     {reasons.map((r) => (
@@ -147,17 +143,18 @@ export function ReportErrorModal({
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-2">
-                    Detalles adicionales (opcional)
+                    {t("reportModal", "additionalDetails")}
                   </label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Cuéntanos más sobre el problema..."
+                    placeholder={t("reportModal", "placeholder")}
                     className="w-full px-4 py-3 border-2 border-[#3a3a3a] rounded-lg focus:border-[#32c781] focus:ring-2 focus:ring-[#32c781]/20 outline-none resize-none bg-[#1f1f1f] text-white placeholder:text-gray-500"
                     rows={4}
                   />
                 </div>
               </div>
+
               <div className="p-6 border-t border-[#3a3a3a] flex-shrink-0 bg-[#2a2a2a]">
                 <div className="flex gap-3">
                   <button
@@ -165,7 +162,7 @@ export function ReportErrorModal({
                     onClick={handleClose}
                     className="flex-1 px-4 py-3 border-2 border-[#3a3a3a] text-gray-300 font-semibold rounded-lg hover:bg-[#3a3a3a] transition-colors"
                   >
-                    Cancelar
+                    {t("reportModal", "cancel")}
                   </button>
                   <button
                     type="button"
@@ -176,12 +173,12 @@ export function ReportErrorModal({
                     {isSubmitting ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Enviando...
+                        {t("reportModal", "sending")}
                       </>
                     ) : (
                       <>
                         <Send className="w-4 h-4" />
-                        Enviar Reporte
+                        {t("reportModal", "send")}
                       </>
                     )}
                   </button>

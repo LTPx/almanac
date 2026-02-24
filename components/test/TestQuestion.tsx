@@ -9,6 +9,7 @@ import { FillInBlankQuestion } from "./fill-in-blank-question";
 import { OrderWordsQuestion } from "./order-words-question";
 import { motion } from "framer-motion";
 import { useAudio } from "react-use";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface TestQuestionProps {
   question: any;
@@ -31,6 +32,7 @@ export function TestQuestion({
   isDisabled = false,
   onReportError
 }: TestQuestionProps) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<string>(selectedAnswer || "");
   const [hasAnswered, setHasAnswered] = useState(showResult);
 
@@ -167,8 +169,10 @@ export function TestQuestion({
                 className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-400 hover:text-orange-500 hover:bg-orange-500/10 rounded-lg transition-all duration-200"
               >
                 <Flag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Reportar un problema</span>
-                <span className="sm:hidden">Reportar</span>
+                <span className="hidden sm:inline">
+                  {t("testQuestion", "reportProblem")}
+                </span>
+                <span className="sm:hidden">{t("testQuestion", "report")}</span>
               </button>
             </div>
           )}
@@ -193,7 +197,9 @@ export function TestQuestion({
                 <span
                   className={`font-medium text-sm sm:text-base ${isCorrect ? "text-[#32C781]" : "text-[#FFB040]"}`}
                 >
-                  {isCorrect ? "¡Correcto!" : "Incorrecto"}
+                  {isCorrect
+                    ? t("testQuestion", "correct")
+                    : t("testQuestion", "incorrect")}
                 </span>
               </motion.div>
 
@@ -208,7 +214,7 @@ export function TestQuestion({
                     <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-[#FFB040] mt-0.5 flex-shrink-0" />
                     <div className="min-w-0">
                       <p className="text-xs sm:text-sm font-semibold text-[#FFB040] mb-1">
-                        Respuesta correcta:
+                        {t("testQuestion", "correctAnswer")}
                       </p>
                       <p className="text-white font-medium text-sm sm:text-base break-words">
                         {getCorrectAnswer()}
@@ -237,7 +243,7 @@ export function TestQuestion({
                       <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-[#32C781] mt-0.5 flex-shrink-0" />
                       <div className="min-w-0">
                         <p className="text-white mb-1 text-sm sm:text-base">
-                          Revisa la ortografía correcta
+                          {t("testQuestion", "checkSpelling")}
                         </p>
                         <p className="text-white text-xs sm:text-sm break-words">
                           {getCorrectAnswer()}
@@ -269,14 +275,11 @@ export function TestQuestion({
                     return usedWords < requiredWords;
                   })())
               }
-              className="
-                w-full py-5 sm:py-6 md:py-8 text-base sm:text-lg md:text-xl font-semibold rounded-xl sm:rounded-2xl shadow-lg
-                bg-[#32C781] hover:bg-[#28a36a] text-white disabled:opacity-50 disabled:cursor-not-allowed
-              "
+              className="w-full py-5 sm:py-6 md:py-8 text-base sm:text-lg md:text-xl font-semibold rounded-xl sm:rounded-2xl shadow-lg bg-[#32C781] hover:bg-[#28a36a] text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {question.type === "FILL_IN_BLANK"
-                ? "Enviar Respuesta"
-                : "Check Answer →"}
+                ? t("testQuestion", "submitAnswer")
+                : t("testQuestion", "checkAnswer")}
             </Button>
           )}
 
@@ -288,13 +291,14 @@ export function TestQuestion({
             >
               <Button
                 onClick={onNext}
-                className={`
-                  w-full text-white py-5 sm:py-6 md:py-8 text-base sm:text-lg md:text-xl font-medium rounded-xl sm:rounded-2xl shadow-md
-                  ${isCorrect ? "bg-[#32C781] hover:bg-[#28a36a]" : "bg-[#FFB040] hover:bg-[#e09a2f]"}
-                `}
+                className={`w-full text-white py-5 sm:py-6 md:py-8 text-base sm:text-lg md:text-xl font-medium rounded-xl sm:rounded-2xl shadow-md ${
+                  isCorrect
+                    ? "bg-[#32C781] hover:bg-[#28a36a]"
+                    : "bg-[#FFB040] hover:bg-[#e09a2f]"
+                }`}
                 disabled={isDisabled}
               >
-                Continuar →
+                {t("testQuestion", "continue")}
               </Button>
             </motion.div>
           )}

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Flame, Sparkles } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface StreakCelebrationProps {
   count: number;
@@ -13,17 +14,12 @@ export const StreakCelebration: React.FC<StreakCelebrationProps> = ({
   count = 5,
   onComplete
 }) => {
+  const { t } = useTranslation();
   const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
-    const exitTimer = setTimeout(() => {
-      setIsExiting(true);
-    }, 1000);
-
-    const completeTimer = setTimeout(() => {
-      onComplete();
-    }, 1500);
-
+    const exitTimer = setTimeout(() => setIsExiting(true), 1000);
+    const completeTimer = setTimeout(() => onComplete(), 1500);
     return () => {
       clearTimeout(exitTimer);
       clearTimeout(completeTimer);
@@ -55,11 +51,7 @@ export const StreakCelebration: React.FC<StreakCelebrationProps> = ({
             x: [0, Math.cos((i * 30 * Math.PI) / 180) * 150],
             y: [0, Math.sin((i * 30 * Math.PI) / 180) * 150]
           }}
-          transition={{
-            duration: 1.5,
-            delay: i * 0.05,
-            ease: "easeOut"
-          }}
+          transition={{ duration: 1.5, delay: i * 0.05, ease: "easeOut" }}
           className="absolute"
         >
           <Sparkles size={16} className="text-yellow-400" fill="currentColor" />
@@ -68,10 +60,7 @@ export const StreakCelebration: React.FC<StreakCelebrationProps> = ({
 
       <div className="relative">
         <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.15, 0.3, 0.15]
-          }}
+          animate={{ scale: [1, 1.3, 1], opacity: [0.15, 0.3, 0.15] }}
           transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
           className="absolute inset-0 bg-gradient-to-tr from-orange-500 via-yellow-400 to-red-500 blur-3xl rounded-full w-64 h-64 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"
         />
@@ -91,10 +80,7 @@ export const StreakCelebration: React.FC<StreakCelebrationProps> = ({
             className="relative"
           >
             <motion.div
-              animate={{
-                opacity: [0.6, 1, 0.6],
-                scale: [1, 1.2, 1]
-              }}
+              animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.2, 1] }}
               transition={{ repeat: Infinity, duration: 0.8 }}
               className="absolute inset-0 -inset-4 text-yellow-300 blur-xl"
             >
@@ -116,7 +102,10 @@ export const StreakCelebration: React.FC<StreakCelebrationProps> = ({
               transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
             >
               <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-orange-300 to-red-400 italic uppercase tracking-tight drop-shadow-lg">
-                ¡{count} Seguidas!
+                {t("streakCelebration", "streak").replace(
+                  "{count}",
+                  String(count)
+                )}
               </h2>
             </motion.div>
 
@@ -126,7 +115,7 @@ export const StreakCelebration: React.FC<StreakCelebrationProps> = ({
               transition={{ delay: 0.4 }}
               className="text-orange-200 font-bold text-lg drop-shadow-md"
             >
-              ¡Imparable! 🔥
+              {t("streakCelebration", "unstoppable")}
             </motion.p>
           </div>
         </div>
@@ -146,9 +135,7 @@ export const StreakCelebration: React.FC<StreakCelebrationProps> = ({
               ease: "easeOut"
             }}
             className="absolute left-1/2 bottom-0"
-            style={{
-              marginLeft: `${(i - 3) * 15}px`
-            }}
+            style={{ marginLeft: `${(i - 3) * 15}px` }}
           >
             <div className="w-2 h-2 bg-yellow-400 rounded-full shadow-lg shadow-yellow-400/50" />
           </motion.div>

@@ -63,8 +63,8 @@ const SpecialYellowNode: React.FC<SpecialYellowNodeProps> = ({
   };
 
   const getButtonText = () => {
-    if (state === "completed") return "Volver a Intentar";
-    if (state === "available") return "Empezar Test Final";
+    if (state === "completed") return t("learningPath", "retryFinalTest");
+    if (state === "available") return t("learningPath", "startFinalTest");
     return t("learningPath", "statusBlocked");
   };
 

@@ -14,6 +14,7 @@ import {
 import { useExitModal } from "@/store/use-exit-modal";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, LogOut, Sparkles, AlertCircle } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface ExitModalProps {
   onEndSession?: () => void;
@@ -22,6 +23,7 @@ interface ExitModalProps {
 export const ExitModal = ({ onEndSession }: ExitModalProps) => {
   const [isClient, setIsClient] = useState(false);
   const { isOpen, close } = useExitModal();
+  const { t } = useTranslation();
 
   useEffect(() => setIsClient(true), []);
 
@@ -50,9 +52,7 @@ export const ExitModal = ({ onEndSession }: ExitModalProps) => {
                 >
                   <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
                   <motion.div
-                    animate={{
-                      rotate: [0, -10, 10, -10, 0]
-                    }}
+                    animate={{ rotate: [0, -10, 10, -10, 0] }}
                     transition={{
                       duration: 2.5,
                       repeat: Infinity,
@@ -97,12 +97,10 @@ export const ExitModal = ({ onEndSession }: ExitModalProps) => {
             className="space-y-2 sm:space-y-3"
           >
             <DialogTitle className="text-center text-xl sm:text-2xl md:text-3xl font-bold text-foreground leading-tight">
-              ¡Espera, no te vayas!
+              {t("exitModal", "title")}
             </DialogTitle>
-
             <DialogDescription className="text-center text-xs sm:text-sm md:text-base text-muted-foreground leading-relaxed">
-              Estás a punto de salir de la lección. ¿Estás seguro de que quieres
-              abandonar tu progreso?
+              {t("exitModal", "description")}
             </DialogDescription>
           </motion.div>
         </DialogHeader>
@@ -120,7 +118,9 @@ export const ExitModal = ({ onEndSession }: ExitModalProps) => {
               onClick={close}
             >
               <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 group-hover:scale-110 transition-transform flex-shrink-0" />
-              <span className="truncate">Continuar Aprendiendo</span>
+              <span className="truncate">
+                {t("exitModal", "continueLearning")}
+              </span>
               <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-primary-foreground/70 group-hover:text-primary-foreground transition-colors flex-shrink-0" />
             </Button>
 
@@ -130,13 +130,11 @@ export const ExitModal = ({ onEndSession }: ExitModalProps) => {
               size="lg"
               onClick={() => {
                 close();
-                if (onEndSession) {
-                  onEndSession();
-                }
+                if (onEndSession) onEndSession();
               }}
             >
               <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform flex-shrink-0" />
-              <span>Terminar Sesión</span>
+              <span>{t("exitModal", "endSession")}</span>
             </Button>
           </motion.div>
         </DialogFooter>
