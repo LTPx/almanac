@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -10,17 +11,8 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Eye, MousePointerClick } from "lucide-react";
-import { AdForm } from "@/components/admin/ad-form";
+import { Plus, Pencil, Trash2, Eye, MousePointerClick, Globe } from "lucide-react";
 
 interface Ad {
   id: number;
@@ -30,10 +22,10 @@ interface Ad {
   targetUrl: string;
   isActive: boolean;
   position: number;
-  curriculum: {
+  curriculum?: {
     id: string;
     title: string;
-  };
+  } | null;
   _count: {
     views: number;
     clicks: number;
@@ -41,11 +33,9 @@ interface Ad {
 }
 
 export default function AdsPage() {
+  const router = useRouter();
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingAd, setEditingAd] = useState<Ad | null>(null);
-  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     fetchAds();
@@ -60,29 +50,6 @@ export default function AdsPage() {
       console.error("Error fetching ads:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (formData: any) => {
-    try {
-      const url = editingAd
-        ? `/api/admin/ads/${editingAd.id}`
-        : "/api/admin/ads";
-      const method = editingAd ? "PATCH" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      });
-
-      if (response.ok) {
-        await fetchAds();
-        setIsDialogOpen(false);
-        resetForm();
-      }
-    } catch (error) {
-      console.error("Error saving ad:", error);
     }
   };
 
@@ -102,24 +69,9 @@ export default function AdsPage() {
     }
   };
 
-  const handleEdit = (ad: Ad) => {
-    setEditingAd(ad);
-    setIsDialogOpen(true);
-  };
-
-  const resetForm = () => {
-    setEditingAd(null);
-  };
-
   const getCTR = (views: number, clicks: number) => {
     if (views === 0) return "0.00";
     return ((clicks / views) * 100).toFixed(2);
-  };
-
-  const handleFormSubmit = () => {
-    if (formRef.current) {
-      formRef.current.requestSubmit();
-    }
   };
 
   if (loading) {
@@ -135,46 +87,10 @@ export default function AdsPage() {
             Gestiona los anuncios de las unidades
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="mr-2 h-4 w-4" />
-              Nuevo Anuncio
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden p-0">
-            <DialogHeader className="shrink-0 px-6 pt-6 pb-4">
-              <DialogTitle>
-                {editingAd ? "Editar Anuncio" : "Nuevo Anuncio"}
-              </DialogTitle>
-              <DialogDescription>
-                {editingAd
-                  ? "Modifica los datos del anuncio"
-                  : "Crea un nuevo anuncio para una unidad"}
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="flex-1 overflow-y-auto px-6 min-h-0">
-              <AdForm
-                ref={formRef}
-                editingAd={editingAd}
-                onSubmit={handleSubmit}
-              />
-            </div>
-            <div className="shrink-0 flex justify-end gap-2 px-6 py-4 border-t bg-background">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsDialogOpen(false)}
-              >
-                Cancelar
-              </Button>
-              <Button type="button" onClick={handleFormSubmit}>
-                {editingAd ? "Actualizar" : "Crear"}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={() => router.push("/admin/ads/new")}>
+          <Plus className="mr-2 h-4 w-4" />
+          Nuevo Anuncio
+        </Button>
       </div>
 
       <div className="rounded-md border">
@@ -210,7 +126,16 @@ export default function AdsPage() {
               ads.map((ad) => (
                 <TableRow key={ad.id}>
                   <TableCell className="font-medium">{ad.title}</TableCell>
-                  <TableCell>{ad.curriculum.title}</TableCell>
+                  <TableCell>
+                    {ad.curriculum ? (
+                      ad.curriculum.title
+                    ) : (
+                      <span className="flex items-center gap-1 text-blue-600 text-sm">
+                        <Globe className="h-3 w-3" />
+                        Global
+                      </span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     {ad.isActive ? (
                       <Badge variant="default">Activo</Badge>
@@ -232,7 +157,7 @@ export default function AdsPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleEdit(ad)}
+                        onClick={() => router.push(`/admin/ads/${ad.id}/edit`)}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>

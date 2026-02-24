@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Search, Upload, Link as LinkIcon } from "lucide-react";
+import { Search, Upload, Link as LinkIcon, Globe } from "lucide-react";
 import { Curriculum } from "@/lib/types";
 
 interface Ad {
@@ -16,10 +16,10 @@ interface Ad {
   targetUrl: string;
   isActive: boolean;
   position: number;
-  curriculum: {
+  curriculum?: {
     id: string;
     title: string;
-  };
+  } | null;
 }
 
 interface AdFormProps {
@@ -55,8 +55,8 @@ export const AdForm = forwardRef<HTMLFormElement, AdFormProps>(function AdForm(
   useEffect(() => {
     if (editingAd) {
       setFormData({
-        curriculumId: editingAd.curriculum.id.toString(),
-        curriculumTitle: editingAd.curriculum.title,
+        curriculumId: editingAd.curriculum?.id?.toString() ?? "",
+        curriculumTitle: editingAd.curriculum?.title ?? "",
         title: editingAd.title,
         description: editingAd.description || "",
         imageUrl: editingAd.imageUrl,
@@ -64,7 +64,7 @@ export const AdForm = forwardRef<HTMLFormElement, AdFormProps>(function AdForm(
         position: editingAd.position,
         isActive: editingAd.isActive
       });
-      setSearchQuery(editingAd.curriculum.title);
+      setSearchQuery(editingAd.curriculum?.title ?? "");
       setUseImageUpload(false);
       setSelectedFile(null);
       setImagePreview("");
@@ -111,6 +111,12 @@ export const AdForm = forwardRef<HTMLFormElement, AdFormProps>(function AdForm(
     setShowResults(false);
   };
 
+  const handleClearCurriculum = () => {
+    setFormData({ ...formData, curriculumId: "", curriculumTitle: "" });
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -126,18 +132,15 @@ export const AdForm = forwardRef<HTMLFormElement, AdFormProps>(function AdForm(
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.curriculumId) {
-      alert("Por favor selecciona un curriculum");
-      return;
-    }
-
     let finalImageUrl = formData.imageUrl;
 
     if (useImageUpload && selectedFile) {
       try {
         const uploadFormData = new FormData();
         uploadFormData.append("file", selectedFile);
-        uploadFormData.append("curriculumId", formData.curriculumId);
+        if (formData.curriculumId) {
+          uploadFormData.append("curriculumId", formData.curriculumId);
+        }
 
         const response = await fetch("/api/admin/ads/upload", {
           method: "POST",
@@ -166,6 +169,7 @@ export const AdForm = forwardRef<HTMLFormElement, AdFormProps>(function AdForm(
 
     onSubmit({
       ...formData,
+      curriculumId: formData.curriculumId || null,
       imageUrl: finalImageUrl
     });
   };
@@ -182,12 +186,14 @@ export const AdForm = forwardRef<HTMLFormElement, AdFormProps>(function AdForm(
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
+                if (formData.curriculumId) {
+                  setFormData({ ...formData, curriculumId: "", curriculumTitle: "" });
+                }
                 setShowResults(true);
               }}
               onFocus={() => setShowResults(true)}
-              placeholder="Buscar curriculum..."
+              placeholder="Buscar curriculum... (opcional)"
               className="pl-9"
-              required
             />
           </div>
 
@@ -217,10 +223,28 @@ export const AdForm = forwardRef<HTMLFormElement, AdFormProps>(function AdForm(
             </div>
           )}
         </div>
-        {formData.curriculumTitle && (
-          <div className="text-sm text-gray-600">
-            Seleccionado:{" "}
-            <span className="font-medium">{formData.curriculumTitle}</span>
+
+        {formData.curriculumTitle ? (
+          <div className="flex items-center justify-between text-sm text-gray-600">
+            <span>
+              Seleccionado:{" "}
+              <span className="font-medium">{formData.curriculumTitle}</span>
+            </span>
+            <button
+              type="button"
+              onClick={handleClearCurriculum}
+              className="text-xs text-red-500 hover:text-red-700"
+            >
+              Quitar
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+            <Globe className="h-4 w-4 shrink-0" />
+            <span>
+              Global ads do not need a curriculum — leave blank to apply to all
+              curriculums.
+            </span>
           </div>
         )}
       </div>
