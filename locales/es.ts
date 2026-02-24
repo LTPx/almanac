@@ -213,6 +213,16 @@ export const es = {
     continueLearning: "Continuar Aprendiendo",
     endSession: "Terminar Sesión"
   },
+  mistakeAnalyzer: {
+    analyzing: "Analizando Resultados",
+    evaluating: "Evaluando tu progreso...",
+    wellDone: "¡Bien Hecho!",
+    reinforceDesc:
+      "Reforcemos algunos conceptos para\ndominar completamente esta lección",
+    conceptNeedsWork: "Concepto necesita refuerzo",
+    conceptsNeedWork: "Conceptos necesitan refuerzo",
+    reviewErrors: "Revisar Errores"
+  },
   achievements: {
     medals: "Medallas",
     available: "Disponible",

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScanEye, AlertCircle, BrainCircuit } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface MistakeAnalyzerOverlayProps {
   errorCount: number;
@@ -14,6 +15,7 @@ export const MistakeAnalyzerOverlay = ({
   onComplete
 }: MistakeAnalyzerOverlayProps) => {
   const [scanState, setScanState] = useState<"scanning" | "found">("scanning");
+  const { t } = useTranslation();
 
   useEffect(() => {
     setTimeout(() => setScanState("found"), 2000);
@@ -76,10 +78,10 @@ export const MistakeAnalyzerOverlay = ({
 
               <div className="text-center space-y-2">
                 <h2 className="text-xl font-semibold text-foreground">
-                  Analizando Resultados
+                  {t("mistakeAnalyzer", "analyzing")}
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Evaluando tu progreso...
+                  {t("mistakeAnalyzer", "evaluating")}
                 </p>
               </div>
             </motion.div>
@@ -126,12 +128,10 @@ export const MistakeAnalyzerOverlay = ({
                     className="space-y-3"
                   >
                     <h2 className="text-3xl font-bold text-primary">
-                      ¡Bien Hecho!
+                      {t("mistakeAnalyzer", "wellDone")}
                     </h2>
                     <p className="text-base text-foreground/80">
-                      Reforcemos algunos conceptos para
-                      <br />
-                      dominar completamente esta lección
+                      {t("mistakeAnalyzer", "reinforceDesc")}
                     </p>
                   </motion.div>
 
@@ -163,9 +163,8 @@ export const MistakeAnalyzerOverlay = ({
                         <p className="text-destructive font-semibold text-base">
                           {errorCount}{" "}
                           {errorCount === 1
-                            ? "Concepto necesita"
-                            : "Conceptos necesitan"}{" "}
-                          refuerzo
+                            ? t("mistakeAnalyzer", "conceptNeedsWork")
+                            : t("mistakeAnalyzer", "conceptsNeedWork")}
                         </p>
                       </div>
                     </div>
@@ -185,7 +184,7 @@ export const MistakeAnalyzerOverlay = ({
                   whileTap={{ scale: 0.99 }}
                   className="w-full py-3.5 bg-primary hover:brightness-110 text-white font-semibold rounded-lg transition-all duration-200 shadow-md shadow-primary/30"
                 >
-                  Revisar Errores
+                  {t("mistakeAnalyzer", "reviewErrors")}
                 </motion.button>
               </motion.div>
             </motion.div>
