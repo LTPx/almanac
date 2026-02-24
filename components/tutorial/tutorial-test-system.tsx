@@ -7,6 +7,7 @@ import { CheckSquare, PenLine, ArrowDownUp } from "lucide-react";
 import { TestResults } from "../test/TestResults";
 import { TestQuestion } from "../test/TestQuestion";
 import { TutorialInlineCard } from "./tutorial-overlay";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface TutorialTestSystemProps {
   onClose: () => void;
@@ -14,70 +15,74 @@ interface TutorialTestSystemProps {
   onBack?: () => void;
 }
 
-const DEMO_QUESTIONS = [
-  {
-    id: 1,
-    type: "MULTIPLE_CHOICE",
-    title: "¿Cuál es la capital de Francia?",
-    answers: [
-      { id: 1, text: "Londres", isCorrect: false },
-      { id: 2, text: "París", isCorrect: true },
-      { id: 3, text: "Berlín", isCorrect: false },
-      { id: 4, text: "Madrid", isCorrect: false }
-    ],
-    content: {
-      options: ["Londres", "París", "Berlín", "Madrid"],
-      correctAnswer: "París",
-      explanation: "París es la capital y ciudad más poblada de Francia."
-    }
-  },
-  {
-    id: 2,
-    type: "FILL_IN_BLANK",
-    title: "Completa la frase: El sol sale por el ____",
-    content: {
-      correctAnswer: "este",
-      explanation: "El sol siempre sale por el este y se pone por el oeste."
-    }
-  },
-  {
-    id: 3,
-    type: "ORDER_WORDS",
-    title: "Ordena las palabras para formar una oración correcta",
-    content: {
-      words: ["gato", "el", "ratón", "persigue", "al"],
-      correctOrder: ["el", "gato", "persigue", "al", "ratón"],
-      explanation: "La estructura correcta es: sujeto + verbo + complemento."
-    }
-  }
-];
-
-const TUTORIAL_MESSAGES = [
-  {
-    icon: <CheckSquare className="w-6 h-6" />,
-    title: "Preguntas de Opción Múltiple",
-    description:
-      "Selecciona la respuesta correcta entre las opciones disponibles. ¡Tómate tu tiempo para leer cada opción!"
-  },
-  {
-    icon: <PenLine className="w-6 h-6" />,
-    title: "Preguntas de Completar",
-    description:
-      "Escribe la palabra o frase que complete correctamente la oración. La ortografía es importante."
-  },
-  {
-    icon: <ArrowDownUp className="w-6 h-6" />,
-    title: "Ordenar Palabras",
-    description:
-      "Arrastra las palabras para formar una oración con sentido. El orden correcto es clave."
-  }
-];
-
 export function TutorialTestSystem({
   onClose,
   hearts,
   onBack
 }: TutorialTestSystemProps) {
+  const { t } = useTranslation();
+
+  const DEMO_QUESTIONS = [
+    {
+      id: 1,
+      type: "MULTIPLE_CHOICE",
+      title: t("tutorialTest", "q1Title"),
+      answers: [
+        { id: 1, text: t("tutorialTest", "q1Opt1"), isCorrect: false },
+        { id: 2, text: t("tutorialTest", "q1Opt2"), isCorrect: true },
+        { id: 3, text: t("tutorialTest", "q1Opt3"), isCorrect: false },
+        { id: 4, text: t("tutorialTest", "q1Opt4"), isCorrect: false }
+      ],
+      content: {
+        options: [
+          t("tutorialTest", "q1Opt1"),
+          t("tutorialTest", "q1Opt2"),
+          t("tutorialTest", "q1Opt3"),
+          t("tutorialTest", "q1Opt4")
+        ],
+        correctAnswer: t("tutorialTest", "q1CorrectAnswer"),
+        explanation: t("tutorialTest", "q1Explanation")
+      }
+    },
+    {
+      id: 2,
+      type: "FILL_IN_BLANK",
+      title: t("tutorialTest", "q2Title"),
+      content: {
+        correctAnswer: t("tutorialTest", "q2CorrectAnswer"),
+        explanation: t("tutorialTest", "q2Explanation")
+      }
+    },
+    {
+      id: 3,
+      type: "ORDER_WORDS",
+      title: t("tutorialTest", "q3Title"),
+      content: {
+        words: t("tutorialTest", "q3Words").split(","),
+        correctOrder: t("tutorialTest", "q3CorrectOrder").split(","),
+        explanation: t("tutorialTest", "q3Explanation")
+      }
+    }
+  ];
+
+  const TUTORIAL_MESSAGES = [
+    {
+      icon: <CheckSquare className="w-6 h-6" />,
+      title: t("tutorialTest", "multipleChoiceTitle"),
+      description: t("tutorialTest", "multipleChoiceDesc")
+    },
+    {
+      icon: <PenLine className="w-6 h-6" />,
+      title: t("tutorialTest", "fillBlankTitle"),
+      description: t("tutorialTest", "fillBlankDesc")
+    },
+    {
+      icon: <ArrowDownUp className="w-6 h-6" />,
+      title: t("tutorialTest", "orderWordsTitle"),
+      description: t("tutorialTest", "orderWordsDesc")
+    }
+  ];
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [answers, setAnswers] = useState<{
@@ -193,7 +198,7 @@ export function TutorialTestSystem({
             <TestResults
               hearts={hearts}
               results={demoResults}
-              lessonName="Tutorial Demo"
+              lessonName={t("tutorialTest", "lessonName")}
               onReturnToLessons={onClose}
               isTutorialMode={true}
             />

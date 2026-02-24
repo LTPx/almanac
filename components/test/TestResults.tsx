@@ -4,6 +4,7 @@ import { TestResultsInterface } from "@/lib/types";
 import { useAudio } from "react-use";
 import { ResultCard } from "../result-card";
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface TestResultsProps {
   results: TestResultsInterface;
@@ -19,6 +20,7 @@ export function TestResults({
   isTutorialMode = false
 }: TestResultsProps) {
   const isPassed = results.passed;
+  const { t } = useTranslation();
 
   const [finishAudio, , finishControls] = useAudio({
     src: "/finish.mp3",
@@ -54,12 +56,12 @@ export function TestResults({
   };
 
   const getAccuracyLabel = (score: number): string => {
-    if (score === 100) return "Exacto";
-    if (score >= 90) return "Excelente";
-    if (score >= 80) return "Muy Bien";
-    if (score >= 70) return "Bien";
-    if (score >= 60) return "Aceptable";
-    return "Mejorable";
+    if (score === 100) return t("testResults", "accuracyExact");
+    if (score >= 90) return t("testResults", "accuracyExcellent");
+    if (score >= 80) return t("testResults", "accuracyVeryGood");
+    if (score >= 70) return t("testResults", "accuracyGood");
+    if (score >= 60) return t("testResults", "accuracyAcceptable");
+    return t("testResults", "accuracyImprovable");
   };
 
   const speed = calculateSpeed();
@@ -70,7 +72,11 @@ export function TestResults({
     <div className="bg-background w-full max-w-[650px] min-h-screen lg:p-6 flex flex-col items-center justify-center">
       <div className="mx-auto flex h-full max-w-lg flex-col items-center justify-center gap-y-4 text-center lg:gap-y-8">
         <h1 className="text-lg font-bold text-[#EFFF0A] lg:text-3xl">
-          {isPassed ? <>Completaste la prueba!</> : <>Completaste la prueba!</>}
+          {isPassed ? (
+            <>{t("testResults", "completedTest")}</>
+          ) : (
+            <>{t("testResults", "completedTest")}</>
+          )}
         </h1>
 
         <div className="grid grid-cols-3 gap-3 w-full px-4">
@@ -96,10 +102,10 @@ export function TestResults({
             bg-[#1983DD] hover:bg-[#1666B0] text-white transition-all hover:scale-105"
         >
           {isTutorialMode
-            ? "Continuar"
+            ? t("testResults", "continueButton")
             : isPassed
-              ? "Recibir Experiencia"
-              : "Recibir Experiencia"}
+              ? t("testResults", "receiveExperience")
+              : t("testResults", "receiveExperience")}
         </Button>
       </div>
       {finishAudio}

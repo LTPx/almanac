@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { BookOpen, ArrowRight, ArrowLeft, Send } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface TutorialChatDemoProps {
   onClose: () => void;
@@ -22,38 +23,37 @@ interface DemoMessage extends ChatMessage {
 
 const TYPING_SPEED = 30;
 
-const DEMO_MESSAGES: DemoMessage[] = [
-  {
-    role: "assistant",
-    content:
-      "¡Hola! Soy tu tutor personal de Almanac. Estoy aquí para ayudarte con cualquier duda sobre tus lecciones.",
-    delay: 500
-  },
-  {
-    role: "user",
-    content: "¿Puedes explicarme más sobre el tema que estoy estudiando?",
-    delay: 2000
-  },
-  {
-    role: "assistant",
-    content:
-      "¡Por supuesto! Puedo explicarte cualquier concepto de tus lecciones, resolver dudas específicas, y ayudarte a prepararte para tus pruebas. ¿Qué te gustaría aprender hoy?",
-    delay: 3500
-  },
-  {
-    role: "user",
-    content: "¿Cómo funciona el sistema de evaluación?",
-    delay: 5500
-  },
-  {
-    role: "assistant",
-    content:
-      "El sistema de evaluación incluye diferentes tipos de preguntas: opción múltiple, completar espacios y ordenar palabras. Cada prueba te ayuda a reforzar lo aprendido. ¡Siempre estaré aquí para guiarte!",
-    delay: 7000
-  }
-];
-
 export function TutorialChatDemo({ onClose, onBack }: TutorialChatDemoProps) {
+  const { t } = useTranslation();
+
+  const DEMO_MESSAGES: DemoMessage[] = [
+    {
+      role: "assistant",
+      content: t("tutorialChat", "demoMsg1"),
+      delay: 500
+    },
+    {
+      role: "user",
+      content: t("tutorialChat", "demoMsg2"),
+      delay: 2000
+    },
+    {
+      role: "assistant",
+      content: t("tutorialChat", "demoMsg3"),
+      delay: 3500
+    },
+    {
+      role: "user",
+      content: t("tutorialChat", "demoMsg4"),
+      delay: 5500
+    },
+    {
+      role: "assistant",
+      content: t("tutorialChat", "demoMsg5"),
+      delay: 7000
+    }
+  ];
+
   const [displayedMessages, setDisplayedMessages] = useState<ChatMessage[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [typingText, setTypingText] = useState("");
@@ -150,10 +150,10 @@ export function TutorialChatDemo({ onClose, onBack }: TutorialChatDemoProps) {
             </div>
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-white">
-                Almanac Tutor
+                {t("tutorialChat", "title")}
               </h1>
               <p className="text-xs md:text-sm text-gray-400">
-                Tu tutor de IA personal - Siempre dispuesto a ayudarte
+                {t("tutorialChat", "subtitle")}
               </p>
             </div>
           </div>
@@ -166,12 +166,10 @@ export function TutorialChatDemo({ onClose, onBack }: TutorialChatDemoProps) {
           >
             <h3 className="text-base md:text-lg font-semibold text-white mb-1 md:mb-2 flex items-center gap-2">
               <BookOpen className="w-4 h-4 md:w-5 md:h-5" />
-              ¿Cómo funciona?
+              {t("tutorialChat", "howItWorksTitle")}
             </h3>
             <p className="text-xs md:text-sm text-gray-300">
-              El tutor siempre está disponible para responder tus preguntas,
-              explicar conceptos difíciles y guiarte en tu aprendizaje. Solo
-              escribe tu pregunta y recibe ayuda personalizada.
+              {t("tutorialChat", "howItWorksDesc")}
             </p>
           </motion.div>
         </div>
@@ -238,11 +236,7 @@ export function TutorialChatDemo({ onClose, onBack }: TutorialChatDemoProps) {
                   <div className="flex space-x-2">
                     <motion.div
                       animate={{ scale: [1, 1.2, 1] }}
-                      transition={{
-                        duration: 0.6,
-                        repeat: Infinity,
-                        delay: 0
-                      }}
+                      transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
                       className="w-2 h-2 bg-purple-500 rounded-full"
                     />
                     <motion.div
@@ -275,7 +269,7 @@ export function TutorialChatDemo({ onClose, onBack }: TutorialChatDemoProps) {
         <div className="flex-shrink-0 flex gap-2 md:gap-3 mb-3 md:mb-4">
           <input
             type="text"
-            placeholder="Escribe tu mensaje..."
+            placeholder={t("tutorialChat", "inputPlaceholder")}
             disabled
             className="flex-1 px-4 md:px-5 py-2 md:py-3 text-sm bg-neutral-800 border-2 border-neutral-600 rounded-xl text-white placeholder-gray-500 opacity-50 cursor-not-allowed"
           />
@@ -294,13 +288,13 @@ export function TutorialChatDemo({ onClose, onBack }: TutorialChatDemoProps) {
             className="border-neutral-600 hover:bg-neutral-800 text-white text-sm md:text-base"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Atrás
+            {t("tutorialChat", "backButton")}
           </Button>
           <Button
             onClick={onClose}
             className="bg-purple-600 hover:bg-purple-700 text-white text-sm md:text-base"
           >
-            Continuar Tutorial
+            {t("tutorialChat", "continueButton")}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>

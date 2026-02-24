@@ -3,7 +3,8 @@ import { Sparkles, ChevronLeft } from "lucide-react";
 import { AlmanacSlot } from "./almanac-componets";
 import { FloatingParticles } from "./animation-components";
 import { MintingAnimation, NFTCard } from "./minting-components";
-import { MOCK_MINTED_NFT } from "./mock-data";
+import { MOCK_MINTED_NFT, MockNFT } from "./mock-data";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface TutorialNFTMintingProps {
   onClose: () => void;
@@ -21,6 +22,21 @@ export default function TutorialNFTMinting({
   onClose,
   onBack
 }: TutorialNFTMintingProps) {
+  const { t } = useTranslation();
+
+  const mockNft: MockNFT = {
+    ...MOCK_MINTED_NFT,
+    metadata: {
+      ...MOCK_MINTED_NFT.metadata,
+      name: t("mintingComponents", "mockNftName"),
+      description: t("mintingComponents", "mockNftDescription"),
+      attributes: [
+        { trait_type: "Nivel", value: t("mintingComponents", "mockNftLevel") },
+        { trait_type: "Año", value: "2024" }
+      ]
+    }
+  };
+
   const [step, setStep] = useState<Step>("ready-to-mint");
   const [isFlipped, setIsFlipped] = useState(false);
   const [showInitialAnimation, setShowInitialAnimation] = useState(false);
@@ -32,7 +48,7 @@ export default function TutorialNFTMinting({
     { id: 1, filled: true },
     { id: 2, filled: true },
     { id: 3, filled: true },
-    { id: 4, filled: true }, // Este es el recién completado
+    { id: 4, filled: true },
     { id: 5, filled: false },
     { id: 6, filled: false }
   ];
@@ -69,7 +85,9 @@ export default function TutorialNFTMinting({
           >
             <ChevronLeft className="w-6 h-6 text-white" />
           </button>
-          <h1 className="text-xl font-semibold text-white">Minteo NFT</h1>
+          <h1 className="text-xl font-semibold text-white">
+            {t("tutorialNFT", "pageTitle")}
+          </h1>
           <div className="w-10" />
         </div>
       </div>
@@ -81,10 +99,10 @@ export default function TutorialNFTMinting({
 
             <div className="z-10 text-center mb-12 opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]">
               <h2 className="text-gray-400 text-sm uppercase tracking-widest mb-2">
-                Curriculum Completo
+                {t("tutorialNFT", "curriculumComplete")}
               </h2>
               <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#32c781] to-[#1983DD]">
-                Conocimiento Asegurado
+                {t("tutorialNFT", "knowledgeSecured")}
               </h1>
             </div>
 
@@ -107,7 +125,7 @@ export default function TutorialNFTMinting({
                 onClick={handleMint}
                 className="bg-gradient-to-r from-[#32c781] to-[#1983DD] text-white font-bold py-4 px-12 rounded-xl shadow-xl text-lg flex items-center gap-2 ring-4 ring-[#32c781]/20 animate-[scaleIn_0.3s_ease-out]"
               >
-                <Sparkles size={20} /> Mintear Token NFT
+                <Sparkles size={20} /> {t("tutorialNFT", "mintButton")}
               </button>
             </div>
           </div>
@@ -123,7 +141,7 @@ export default function TutorialNFTMinting({
               <NFTCard
                 isFlipped={isFlipped}
                 onReveal={handleReveal}
-                nft={MOCK_MINTED_NFT}
+                nft={mockNft}
                 onClose={onClose}
               />
             )}

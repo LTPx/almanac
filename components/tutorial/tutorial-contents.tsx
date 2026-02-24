@@ -14,6 +14,7 @@ import { useCurriculums } from "@/hooks/use-curriculums";
 import { useCurriculumStore } from "@/store/useCurriculumStore";
 import { useUser } from "@/context/UserContext";
 import { Lesson, Unit, Curriculum } from "@/lib/types";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface TutorialContentsProps {
   onClose: () => void;
@@ -26,6 +27,7 @@ export function TutorialContentsDemo({
   onBack,
   targetUnitId
 }: TutorialContentsProps) {
+  const { t } = useTranslation();
   const user = useUser();
   const userId = user?.id || "";
   const { selectedCurriculumId } = useCurriculumStore();
@@ -78,7 +80,9 @@ export function TutorialContentsDemo({
       <div className="fixed inset-0 z-[9999] bg-neutral-900 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-12 h-12 animate-spin text-purple-500" />
-          <p className="text-white text-lg">Cargando contenidos...</p>
+          <p className="text-white text-lg">
+            {t("tutorialContents", "loading")}
+          </p>
         </div>
       </div>
     );
@@ -87,7 +91,9 @@ export function TutorialContentsDemo({
   if (!curriculum || !units.length) {
     return (
       <div className="fixed inset-0 z-[9999] bg-neutral-900 flex items-center justify-center">
-        <p className="text-gray-400 text-lg">No se encontraron contenidos</p>
+        <p className="text-gray-400 text-lg">
+          {t("tutorialContents", "noContents")}
+        </p>
       </div>
     );
   }
@@ -104,9 +110,10 @@ export function TutorialContentsDemo({
               className="flex items-center gap-1.5 text-gray-400 hover:text-white transition-colors group"
             >
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-              <span className="text-sm font-medium">Atrás</span>
+              <span className="text-sm font-medium">
+                {t("tutorialContents", "back")}
+              </span>
             </button>
-
             <button
               onClick={onClose}
               className="p-2 text-gray-400 hover:text-white transition-colors"
@@ -116,12 +123,14 @@ export function TutorialContentsDemo({
           </div>
 
           <div className="flex items-center justify-between">
-            <h1 className="text-white text-lg font-bold">Contenidos</h1>
+            <h1 className="text-white text-lg font-bold">
+              {t("tutorialContents", "contents")}
+            </h1>
             <button
               onClick={onClose}
               className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg transition-colors text-sm font-medium"
             >
-              Continuar
+              {t("tutorialContents", "continue")}
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -134,18 +143,20 @@ export function TutorialContentsDemo({
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
           >
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-sm font-medium">Atrás</span>
+            <span className="text-sm font-medium">
+              {t("tutorialContents", "back")}
+            </span>
           </button>
 
           <h1 className="absolute left-1/2 -translate-x-1/2 text-white text-xl font-bold">
-            Contenidos
+            {t("tutorialContents", "contents")}
           </h1>
 
           <button
             onClick={onClose}
             className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
           >
-            Continuar
+            {t("tutorialContents", "continue")}
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -164,11 +175,10 @@ export function TutorialContentsDemo({
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-white font-semibold text-sm md:text-base mb-1">
-              Explora el Contenido
+              {t("tutorialContents", "exploreContent")}
             </h2>
             <p className="text-white/80 text-xs md:text-sm leading-relaxed">
-              Revisa las explicaciones detalladas de cada lección. Haz clic en
-              cualquier tema para ver su contenido completo.
+              {t("tutorialContents", "exploreDesc")}
             </p>
           </div>
         </div>
@@ -183,7 +193,7 @@ export function TutorialContentsDemo({
             transition={{ delay: 0.2 }}
             className="text-base md:text-lg font-bold text-white mb-3 md:mb-4"
           >
-            Temas
+            {t("tutorialContents", "topics")}
           </motion.h2>
           <h2 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">
             {curriculum.title}

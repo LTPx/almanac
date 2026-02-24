@@ -3,6 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Sparkles, X } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface TutorialInlineCardProps {
   icon: React.ReactNode;
@@ -21,6 +22,8 @@ export function TutorialInlineCard({
   totalQuestions,
   onDismiss
 }: TutorialInlineCardProps) {
+  const { t } = useTranslation();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -10, scale: 0.98 }}
@@ -59,7 +62,9 @@ export function TutorialInlineCard({
         <div className="inline-flex items-center gap-2 bg-primary/15 backdrop-blur-sm rounded-full px-4 py-2 border border-primary/30 shadow-sm">
           <Sparkles className="w-4 h-4 text-primary" />
           <span className="text-primary text-sm font-bold tracking-tight">
-            Pregunta {questionNumber} de {totalQuestions}
+            {t("tutorialTest", "questionOf")
+              .replace("{current}", String(questionNumber))
+              .replace("{total}", String(totalQuestions))}
           </span>
         </div>
 
@@ -69,7 +74,7 @@ export function TutorialInlineCard({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-lg hover:bg-muted/50"
-            aria-label="Cerrar explicación"
+            aria-label={t("tutorialTest", "closeExplanation")}
           >
             <X className="w-4 h-4" />
           </motion.button>

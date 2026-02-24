@@ -2,6 +2,7 @@ import React from "react";
 import { Sparkles, Award } from "lucide-react";
 import { MockNFT } from "./mock-data";
 import { EnergyRings } from "./animation-components";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const DAYS_DURATION = 10;
 
@@ -22,58 +23,70 @@ const calculateDaysDuration = (start: Date, end: Date): number => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-export const MintingAnimation: React.FC = () => (
-  <div
-    className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md"
-    style={{ animation: "fadeOut 0.5s ease-out 2s forwards" }}
-  >
+export const MintingAnimation: React.FC = () => {
+  const { t } = useTranslation();
+
+  return (
     <div
-      className="relative flex flex-col items-center"
-      style={{
-        animation:
-          "mint-entrance 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards"
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md"
+      style={{ animation: "fadeOut 0.5s ease-out 2s forwards" }}
     >
       <div
-        className="w-32 h-32 rounded-full bg-gradient-to-br from-[#32C781] to-[#1983DD] flex items-center justify-center relative"
-        style={{ animation: "glow-pulse 1.5s ease-in-out infinite" }}
-      >
-        <Sparkles className="w-16 h-16 text-white" />
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-2 h-2 rounded-full bg-[#32C781]"
-            style={{
-              animation: `particle-burst-${i} 1s ease-out forwards`,
-              top: "50%",
-              left: "50%"
-            }}
-          />
-        ))}
-      </div>
-      <p
-        className="text-center mt-6 text-white font-semibold text-xl"
+        className="relative flex flex-col items-center"
         style={{
-          animation: "fadeInUp 0.5s ease-out 0.5s forwards",
-          opacity: 0
+          animation:
+            "mint-entrance 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards"
         }}
       >
-        ¡NFT Creado Exitosamente!
+        <div
+          className="w-32 h-32 rounded-full bg-gradient-to-br from-[#32C781] to-[#1983DD] flex items-center justify-center relative"
+          style={{ animation: "glow-pulse 1.5s ease-in-out infinite" }}
+        >
+          <Sparkles className="w-16 h-16 text-white" />
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 rounded-full bg-[#32C781]"
+              style={{
+                animation: `particle-burst-${i} 1s ease-out forwards`,
+                top: "50%",
+                left: "50%"
+              }}
+            />
+          ))}
+        </div>
+        <p
+          className="text-center mt-6 text-white font-semibold text-xl"
+          style={{
+            animation: "fadeInUp 0.5s ease-out 0.5s forwards",
+            opacity: 0
+          }}
+        >
+          {t("mintingComponents", "nftCreated")}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export const MintingLoader: React.FC = () => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-[#0a0a0a]">
+      <div
+        className="w-16 h-16 border-4 border-[#1983DD] border-t-transparent rounded-full"
+        style={{ animation: "spin 2s linear infinite" }}
+      />
+      <p className="text-white font-semibold mt-6">
+        {t("mintingComponents", "minting")}
+      </p>
+      <p className="text-gray-400 text-sm mt-2">
+        {t("mintingComponents", "mintingWait")}
       </p>
     </div>
-  </div>
-);
-
-export const MintingLoader: React.FC = () => (
-  <div className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-[#0a0a0a]">
-    <div
-      className="w-16 h-16 border-4 border-[#1983DD] border-t-transparent rounded-full"
-      style={{ animation: "spin 2s linear infinite" }}
-    />
-    <p className="text-white font-semibold mt-6">Minteando tu NFT...</p>
-    <p className="text-gray-400 text-sm mt-2">Esto puede tomar unos segundos</p>
-  </div>
-);
+  );
+};
 
 interface NFTCardProps {
   isFlipped: boolean;
@@ -107,6 +120,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
   onClose,
   nft
 }) => {
+  const { t, lang } = useTranslation();
   const [aboutExpanded, setAboutExpanded] = React.useState(true);
   const [collectionExpanded, setCollectionExpanded] = React.useState(false);
   const [blockchainExpanded, setBlockchainExpanded] = React.useState(false);
@@ -119,7 +133,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
   };
 
   const formatDate = (date: Date) =>
-    date.toLocaleDateString("es-ES", {
+    date.toLocaleDateString(lang, {
       year: "numeric",
       month: "long",
       day: "numeric"
@@ -168,7 +182,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
                 className="mt-4 font-bold text-lg"
                 style={{ animation: "pulse-opacity 2s ease-in-out infinite" }}
               >
-                Toca para revelar...
+                {t("mintingComponents", "tapToReveal")}
               </p>
             </div>
             {!isFlipped && (
@@ -216,7 +230,6 @@ export const NFTCard: React.FC<NFTCardProps> = ({
               opacity: isFlipped ? 1 : 0,
               transition:
                 "transform 0.4s ease-out 0.5s, opacity 0.4s ease-out 0.5s"
-              // maxHeight: "220px"
             }}
           >
             <div>
@@ -224,7 +237,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
                 {nft.metadata.name}
               </h3>
               <p className="text-gray-400 text-sm">
-                Tutorial Collection · Owned by{" "}
+                {t("mintingComponents", "ownedBy")}{" "}
                 {formatAddress(nft.contractAddress)}
               </p>
             </div>
@@ -243,7 +256,9 @@ export const NFTCard: React.FC<NFTCardProps> = ({
                 }}
                 className="flex items-center justify-between w-full mb-3"
               >
-                <h2 className="text-lg font-semibold">About</h2>
+                <h2 className="text-lg font-semibold">
+                  {t("mintingComponents", "about")}
+                </h2>
                 <ChevronDown
                   className={`w-5 h-5 transition-transform ${
                     aboutExpanded ? "rotate-180" : ""
@@ -254,7 +269,8 @@ export const NFTCard: React.FC<NFTCardProps> = ({
                 <div className="space-y-3">
                   <div>
                     <p className="text-xl font-bold mb-2">
-                      About {nft.metadata.name} #{nft.tokenId}
+                      {t("mintingComponents", "about")} {nft.metadata.name} #
+                      {nft.tokenId}
                     </p>
                     <p className="text-gray-400 text-sm leading-relaxed">
                       {nft.metadata.description}
@@ -262,12 +278,14 @@ export const NFTCard: React.FC<NFTCardProps> = ({
                   </div>
 
                   <div>
-                    <p className="font-semibold mb-2">Duración del logro</p>
+                    <p className="font-semibold mb-2">
+                      {t("mintingComponents", "achievementDuration")}
+                    </p>
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-gray-400 text-sm">
-                          Fecha de inicio
+                          {t("mintingComponents", "startDate")}
                         </span>
                         <span className="text-white text-sm font-medium">
                           {formatDate(start)}
@@ -276,7 +294,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
 
                       <div className="flex items-center justify-between">
                         <span className="text-gray-400 text-sm">
-                          Fecha de finalización
+                          {t("mintingComponents", "endDate")}
                         </span>
                         <span className="text-white text-sm font-medium">
                           {formatDate(end)}
@@ -286,10 +304,13 @@ export const NFTCard: React.FC<NFTCardProps> = ({
                       <div className="pt-2 mt-2 border-t border-gray-700">
                         <div className="flex items-center justify-between">
                           <span className="text-gray-400 text-sm">
-                            Tiempo total
+                            {t("mintingComponents", "totalTime")}
                           </span>
                           <span className="text-[#32C781] text-sm font-bold">
-                            {days} {days === 1 ? "día" : "días"}
+                            {days}{" "}
+                            {days === 1
+                              ? t("mintingComponents", "day")
+                              : t("mintingComponents", "days")}
                           </span>
                         </div>
                       </div>
@@ -297,7 +318,9 @@ export const NFTCard: React.FC<NFTCardProps> = ({
                   </div>
 
                   <div>
-                    <p className="font-semibold mb-1">Minted:</p>
+                    <p className="font-semibold mb-1">
+                      {t("mintingComponents", "minted")}
+                    </p>
                     <p className="text-gray-400 text-sm">
                       {formatDate(new Date(nft.mintedAt))}
                     </p>
@@ -315,7 +338,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
                 className="flex items-center justify-between w-full"
               >
                 <h2 className="text-lg font-semibold">
-                  About Tutorial Collection
+                  {t("mintingComponents", "aboutCollection")}
                 </h2>
                 <ChevronDown
                   className={`w-5 h-5 transition-transform ${
@@ -326,8 +349,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
               {collectionExpanded && (
                 <div className="mt-3">
                   <p className="text-gray-400 text-sm leading-relaxed">
-                    Colección educativa de NFTs que certifica el progreso y
-                    logros en diferentes áreas del aprendizaje.
+                    {t("mintingComponents", "collectionDesc")}
                   </p>
                 </div>
               )}
@@ -341,7 +363,9 @@ export const NFTCard: React.FC<NFTCardProps> = ({
                 }}
                 className="flex items-center justify-between w-full"
               >
-                <h2 className="text-lg font-semibold">Blockchain details</h2>
+                <h2 className="text-lg font-semibold">
+                  {t("mintingComponents", "blockchainDetails")}
+                </h2>
                 <ChevronDown
                   className={`w-5 h-5 transition-transform ${
                     blockchainExpanded ? "rotate-180" : ""
@@ -351,26 +375,35 @@ export const NFTCard: React.FC<NFTCardProps> = ({
               {blockchainExpanded && (
                 <div className="mt-3 space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Contract address</span>
+                    <span className="text-gray-400">
+                      {t("mintingComponents", "contractAddress")}
+                    </span>
                     <span className="text-blue-400">
                       {formatAddress(nft.contractAddress)}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Token ID</span>
+                    <span className="text-gray-400">
+                      {t("mintingComponents", "tokenId")}
+                    </span>
                     <span>{nft.tokenId}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Token Standard</span>
+                    <span className="text-gray-400">
+                      {t("mintingComponents", "tokenStandard")}
+                    </span>
                     <span>ERC721</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Chain</span>
+                    <span className="text-gray-400">
+                      {t("mintingComponents", "chain")}
+                    </span>
                     <span>Polygon</span>
                   </div>
                 </div>
               )}
             </div>
+
             {isFlipped && (
               <div
                 className="w-full max-w-md space-y-4 z-[10001] relative"
@@ -384,7 +417,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
                   className="w-full bg-[#1983DD] hover:bg-[#1A73E8] text-white py-4 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors"
                   onClick={onClose}
                 >
-                  Empezar
+                  {t("mintingComponents", "start")}
                 </button>
               </div>
             )}

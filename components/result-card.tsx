@@ -2,6 +2,7 @@ import { InfinityIcon, Clock, Target, Star } from "lucide-react";
 import Image from "next/image";
 
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type ResultCardProps = {
   value: number | string;
@@ -16,20 +17,23 @@ export const ResultCard = ({
   speed,
   accuracyLabel
 }: ResultCardProps) => {
+  const { t } = useTranslation();
+
   const getImageSrc = () => {
     if (variant === "hearts") return "/heart.svg";
     return null;
   };
 
   const getTitle = () => {
-    if (variant === "hearts") return "Hearts Left";
-    if (variant === "points") return "Experiencia";
+    if (variant === "hearts") return t("resultCard", "hearts");
+    if (variant === "points") return t("resultCard", "experience");
     if (variant === "speed") {
-      if (speed === "rapid") return "Rápido";
-      if (speed === "slow") return "Lento";
-      return "Normal";
+      if (speed === "rapid") return t("resultCard", "rapid");
+      if (speed === "slow") return t("resultCard", "slow");
+      return t("resultCard", "normal");
     }
-    if (variant === "accuracy") return accuracyLabel || "Exacto";
+    if (variant === "accuracy")
+      return accuracyLabel || t("resultCard", "exact");
     return "";
   };
 

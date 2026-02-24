@@ -39,8 +39,6 @@ function HomePageContent() {
   const searchParams = useSearchParams();
   const resumeTestAttemptId = searchParams.get("resumeTest");
 
-  console.log("🏠 Page - resumeTest param:", resumeTestAttemptId);
-
   const [curriculums, setCurriculums] = useState<Curriculum[]>([]);
   const [selectedCurriculum, setSelectedCurriculum] =
     useState<Curriculum | null>(null);
@@ -74,7 +72,7 @@ function HomePageContent() {
 
   const tutorialSteps = useMemo(
     () => [
-      ...createTutorialSteps(courseHeaderRef).slice(0, 3),
+      ...createTutorialSteps(courseHeaderRef, t).slice(0, 3),
       {
         id: "contents-demo",
         title: t("tutorial", "contentsTitle"),
@@ -83,16 +81,12 @@ function HomePageContent() {
         customContent: (
           <TutorialContentsDemo
             key="tutorial-contents-demo"
-            onClose={() => {
-              nextStep();
-            }}
-            onBack={() => {
-              prevStep();
-            }}
+            onClose={() => nextStep()}
+            onBack={() => prevStep()}
           />
         )
       },
-      ...createTutorialSteps(courseHeaderRef).slice(3, 4),
+      ...createTutorialSteps(courseHeaderRef, t).slice(3, 4),
       {
         id: "test-demo",
         title: t("tutorial", "testTitle"),
@@ -102,16 +96,12 @@ function HomePageContent() {
           <TutorialTestSystem
             key="tutorial-test-system"
             hearts={gamification?.hearts ?? 0}
-            onClose={() => {
-              nextStep();
-            }}
-            onBack={() => {
-              prevStep();
-            }}
+            onClose={() => nextStep()}
+            onBack={() => prevStep()}
           />
         )
       },
-      ...createTutorialSteps(courseHeaderRef).slice(4, 7),
+      ...createTutorialSteps(courseHeaderRef, t).slice(4, 7),
       {
         id: "chat-demo",
         title: t("tutorial", "chatTitle"),
@@ -120,16 +110,12 @@ function HomePageContent() {
         customContent: (
           <TutorialChatDemo
             key="tutorial-chat-demo"
-            onClose={() => {
-              nextStep();
-            }}
-            onBack={() => {
-              prevStep();
-            }}
+            onClose={() => nextStep()}
+            onBack={() => prevStep()}
           />
         )
       },
-      ...createTutorialSteps(courseHeaderRef).slice(7, 8),
+      ...createTutorialSteps(courseHeaderRef, t).slice(7, 8),
       {
         id: "nft-minting",
         title: t("tutorial", "nftTitle"),
@@ -138,17 +124,13 @@ function HomePageContent() {
         customContent: (
           <TutorialNFTMinting
             key="tutorial-nft-minting"
-            onClose={() => {
-              nextStep();
-            }}
-            onBack={() => {
-              prevStep();
-            }}
+            onClose={() => nextStep()}
+            onBack={() => prevStep()}
           />
         )
       }
     ],
-    [nextStep, prevStep, gamification?.hearts, courseHeaderRef]
+    [nextStep, prevStep, gamification?.hearts, courseHeaderRef, t]
   );
 
   const lang = user?.languagePreference ?? undefined;
@@ -168,7 +150,6 @@ function HomePageContent() {
 
   useEffect(() => {
     if (!selectedCurriculumId) return;
-
     const loadUnit = async () => {
       const unit = await fetchCurriculumWithUnits(selectedCurriculumId, lang);
       if (unit) setSelectedCurriculum(unit);
@@ -213,9 +194,7 @@ function HomePageContent() {
   };
 
   const handleTutorialStepChange = (step: number) => {
-    console.log(`📌 Tutorial cambió a paso: ${step}`);
     setStep(step);
-
     const stepConfig = tutorialSteps[step];
     if (stepConfig?.id !== "review-units" && stepConfig?.id !== "start-test") {
       courseHeaderRef.current?.closeSelect();
@@ -297,7 +276,9 @@ function HomePageContent() {
               curriculum={selectedCurriculum}
               userId={userId}
               onTestComplete={handleTestComplete}
-              resumeTestAttemptId={resumeTestAttemptId ? Number(resumeTestAttemptId) : undefined}
+              resumeTestAttemptId={
+                resumeTestAttemptId ? Number(resumeTestAttemptId) : undefined
+              }
               lang={lang}
             />
           )}
@@ -305,7 +286,7 @@ function HomePageContent() {
       ) : (
         <div className="flex items-center justify-center min-h-[400px]">
           <p className="text-gray-500 dark:text-gray-400">
-            No se encontraron datos
+            {t("home", "noDataFound")}
           </p>
         </div>
       )}

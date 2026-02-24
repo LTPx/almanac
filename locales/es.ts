@@ -2,7 +2,8 @@ export const es = {
   home: {
     loading: "Cargando",
     loadingProgress: "Cargando tu progreso",
-    preparingAll: "Preparando todo para ti..."
+    preparingAll: "Preparando todo para ti...",
+    noDataFound: "No se encontraron datos"
   },
   contents: {
     loadingUnits: "Cargando unidades...",
@@ -337,6 +338,154 @@ export const es = {
     chatDesc: "Conoce a tu tutor personal",
     nftTitle: "Crea tu Medalla NFT",
     nftDesc: "Aprende a mintear tus certificados"
+  },
+  tutorialSteps: {
+    welcomeTitle: "¡Bienvenido a Almanac! 🎉",
+    welcomeDesc:
+      "Aquí puedes elegir el curriculum que quieres estudiar. Cada curriculum tiene diferentes unidades de aprendizaje.",
+    reviewUnitsTitle: "Revisa las unidades 📚",
+    reviewUnitsDesc:
+      "Explora todas las unidades disponibles. Cada una contiene diferentes lecciones que te ayudarán a aprender paso a paso.",
+    unitExplanationsTitle: "Aprende con explicaciones",
+    unitExplanationsDesc:
+      "Cada unidad tiene explicaciones detalladas que puedes revisar antes de hacer las pruebas. ¡Tómate tu tiempo para aprender!",
+    startTestTitle: "¡Hora de practicar!",
+    startTestDesc:
+      "Cuando estés listo, empieza una prueba. Ahora te mostraremos un ejemplo con los tipos de preguntas que encontrarás.",
+    completedUnitTitle: "¡Unidad Completada! 🎉",
+    completedUnitDesc:
+      "Si apruebas la unidad, puedes continuar a la siguiente. ¡Sigue aprendiendo para completar todo el curriculum!",
+    optionalUnitTitle: "Unidades Opcionales 🌟",
+    optionalUnitDesc:
+      "Algunas unidades son obligatorias y otras son opcionales. Las opcionales te permiten practicar más y mejorar tus habilidades, pero no son necesarias para avanzar.",
+    tutorChatTitle: "Tu Tutor Personal 🤖",
+    tutorChatDesc:
+      "Si tienes preguntas o necesitas ayuda, puedes conversar con tu tutor personal. Escribe y envía tu mensaje para obtener asistencia.",
+    finalUnitTitle: "¡Unidad Final! 🏆",
+    finalUnitDesc:
+      "Cuando superes la unidad final, recibirás un token que te permitirá crear tu certificado digital único."
+  },
+  tutorialSpotlight: {
+    getToken: "Obtener token",
+    start: "¡Empezar!",
+    next: "Siguiente",
+    clickHere: "Click aquí",
+    back: "Atras",
+    of: "de"
+  },
+  tutorialContents: {
+    loading: "Cargando contenidos...",
+    noContents: "No se encontraron contenidos",
+    back: "Atrás",
+    continue: "Continuar",
+    contents: "Contenidos",
+    exploreContent: "Explora el Contenido",
+    exploreDesc:
+      "Revisa las explicaciones detalladas de cada lección. Haz clic en cualquier tema para ver su contenido completo.",
+    topics: "Temas"
+  },
+  tutorialTest: {
+    q1Title: "¿Cuál es la capital de Francia?",
+    q1Opt1: "Londres",
+    q1Opt2: "París",
+    q1Opt3: "Berlín",
+    q1Opt4: "Madrid",
+    q1CorrectAnswer: "París",
+    q1Explanation: "París es la capital y ciudad más poblada de Francia.",
+    q2Title: "Completa la frase: El sol sale por el ____",
+    q2CorrectAnswer: "este",
+    q2Explanation: "El sol siempre sale por el este y se pone por el oeste.",
+    q3Title: "Ordena las palabras para formar una oración correcta",
+    q3Explanation: "La estructura correcta es: sujeto + verbo + complemento.",
+    multipleChoiceTitle: "Preguntas de Opción Múltiple",
+    multipleChoiceDesc:
+      "Selecciona la respuesta correcta entre las opciones disponibles. ¡Tómate tu tiempo para leer cada opción!",
+    fillBlankTitle: "Preguntas de Completar",
+    fillBlankDesc:
+      "Escribe la palabra o frase que complete correctamente la oración. La ortografía es importante.",
+
+    orderWordsTitle: "Ordenar Palabras",
+    orderWordsDesc:
+      "Arrastra las palabras para formar una oración con sentido. El orden correcto es clave.",
+    lessonName: "Tutorial Demo",
+    questionOf: "Pregunta {current} de {total}",
+    closeExplanation: "Cerrar explicación",
+    q3Words: "gato,el,ratón,persigue,al",
+    q3CorrectOrder: "el,gato,persigue,al,ratón",
+    completedTest: "¡Completaste la prueba!",
+    continueButton: "Continuar",
+    receiveExperience: "Recibir Experiencia"
+  },
+  testResults: {
+    completedTest: "¡Completaste la prueba!",
+    continueButton: "Continuar",
+    receiveExperience: "Recibir Experiencia",
+    accuracyExact: "Exacto",
+    accuracyExcellent: "Excelente",
+    accuracyVeryGood: "Muy Bien",
+    accuracyGood: "Bien",
+    accuracyAcceptable: "Aceptable",
+    accuracyImprovable: "Mejorable"
+  },
+  resultCard: {
+    hearts: "Corazones",
+    experience: "Experiencia",
+    rapid: "Rápido",
+    slow: "Lento",
+    normal: "Normal",
+    exact: "Exacto"
+  },
+  tutorialChat: {
+    title: "Almanac Tutor",
+    subtitle: "Tu tutor de IA personal - Siempre dispuesto a ayudarte",
+    howItWorksTitle: "¿Cómo funciona?",
+    howItWorksDesc:
+      "El tutor siempre está disponible para responder tus preguntas, explicar conceptos difíciles y guiarte en tu aprendizaje. Solo escribe tu pregunta y recibe ayuda personalizada.",
+    inputPlaceholder: "Escribe tu mensaje...",
+    backButton: "Atrás",
+    continueButton: "Continuar Tutorial",
+    demoMsg1:
+      "¡Hola! Soy tu tutor personal de Almanac. Estoy aquí para ayudarte con cualquier duda sobre tus lecciones.",
+    demoMsg2: "¿Puedes explicarme más sobre el tema que estoy estudiando?",
+    demoMsg3:
+      "¡Por supuesto! Puedo explicarte cualquier concepto de tus lecciones, resolver dudas específicas, y ayudarte a prepararte para tus pruebas. ¿Qué te gustaría aprender hoy?",
+    demoMsg4: "¿Cómo funciona el sistema de evaluación?",
+    demoMsg5:
+      "El sistema de evaluación incluye diferentes tipos de preguntas: opción múltiple, completar espacios y ordenar palabras. Cada prueba te ayuda a reforzar lo aprendido. ¡Siempre estaré aquí para guiarte!"
+  },
+  tutorialNFT: {
+    pageTitle: "Minteo NFT",
+    curriculumComplete: "Curriculum Completo",
+    knowledgeSecured: "Conocimiento Asegurado",
+    mintButton: "Mintear Token NFT"
+  },
+  mintingComponents: {
+    nftCreated: "¡NFT Creado Exitosamente!",
+    minting: "Minteando tu NFT...",
+    mintingWait: "Esto puede tomar unos segundos",
+    tapToReveal: "Toca para revelar...",
+    ownedBy: "Tutorial Collection · Owned by",
+    achievementDuration: "Duración del logro",
+    startDate: "Fecha de inicio",
+    endDate: "Fecha de finalización",
+    totalTime: "Tiempo total",
+    day: "día",
+    days: "días",
+    minted: "Minted:",
+    aboutCollection: "About Tutorial Collection",
+    collectionDesc:
+      "Colección educativa de NFTs que certifica el progreso y logros en diferentes áreas del aprendizaje.",
+    blockchainDetails: "Blockchain details",
+    contractAddress: "Contract address",
+    tokenId: "Token ID",
+    tokenStandard: "Token Standard",
+    chain: "Chain",
+    about: "About",
+    start: "Empezar",
+    mockNftName: "Certificado de Educación Básica",
+    mockNftDescription:
+      "Logro obtenido por completar exitosamente la unidad de Educación Básica",
+    mockNftLevel: "Básico"
   },
   general: {
     startTest: "Empezar mi Prueba"
