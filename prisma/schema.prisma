@@ -718,8 +718,8 @@ model Ad {
   views  AdView[]
   clicks AdClick[]
 
-  curriculum   Curriculum @relation(fields: [curriculumId], references: [id])
-  curriculumId String
+  curriculum   Curriculum? @relation(fields: [curriculumId], references: [id])
+  curriculumId String?     // null = global ad (applies to all curriculums)
 
   @@map("ad")
 }
