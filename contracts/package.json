@@ -1,0 +1,23 @@
+{
+  "name": "almanac-contracts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:amoy": "hardhat run scripts/deploy.ts --network amoy",
+    "grant-roles": "hardhat run scripts/grant-roles.ts --network amoy",
+    "verify": "hardhat verify --network amoy",
+    "copy-abi": "node scripts/copy-abi.js"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/hardhat-upgrades": "^3.9.1",
+    "hardhat": "^2.22.19",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts-upgradeable": "^5.2.0"
+  }
+}

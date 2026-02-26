@@ -2,6 +2,12 @@
 
 # dependencies
 /node_modules
+/contracts/node_modules
+/contracts/artifacts
+/contracts/cache
+/contracts/typechain-types
+/contracts/deployments
+/contracts/dist
 /.pnp
 .pnp.*
 .yarn/*
