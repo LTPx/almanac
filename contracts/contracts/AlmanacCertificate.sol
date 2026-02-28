@@ -203,4 +203,10 @@ contract AlmanacCertificate is
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
     {}
+
+    // =========================================================================
+    // Storage gap para upgrades futuros
+    // =========================================================================
+
+    uint256[50] private __gap;
 }

@@ -8,22 +8,33 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 /**
+ * @title IAlmanacCertificate
+ * @dev Interfaz minima para verificar ownership de certificados on-chain.
+ */
+interface IAlmanacCertificate {
+    function ownerOf(uint256 tokenId) external view returns (address);
+}
+
+/**
  * @title AlmanacCollectible
  * @dev Contrato de NFTs coleccionables con royalties.
  *
  * Cada coleccionable:
- *   - Se mintea directo como tradeable (la autorización se verifica off-chain en el backend)
+ *   - Se mintea directo como tradeable (la autorizacion se verifica off-chain en el backend)
  *   - Tiene royalties ERC-2981 que apuntan al authorWallet
  *   - Comparte MAX_SUPPLY con AlmanacCertificate (1 coleccionable por cada certificado)
  *   - Es libremente transferible desde el momento del mint
+ *   - Verifica on-chain que el usuario posee el certificado asociado
+ *   - Garantiza relacion 1:1 (un coleccionable por certificado)
  *
  * Flujo:
  *   1. Usuario tiene un certificado soulbound y solicita el coleccionable
- *   2. Backend verifica autorización (menor: guardian aprueba / mayor: directo)
- *   3. Backend llama mint() — NFT va directo a la wallet del usuario, ya tradeable
- *   4. En ventas secundarias, royalties van al authorWallet
+ *   2. Backend verifica autorizacion (menor: guardian aprueba / mayor: directo)
+ *   3. Backend llama mint() — el contrato verifica ownership del certificado on-chain
+ *   4. NFT va directo a la wallet del usuario, ya tradeable
+ *   5. En ventas secundarias, royalties van al authorWallet
  *
- * Estándares: ERC-721, ERC-2981 (Royalties), AccessControl, UUPS.
+ * Estandares: ERC-721, ERC-2981 (Royalties), AccessControl, UUPS.
  */
 contract AlmanacCollectible is
     ERC721URIStorageUpgradeable,
@@ -51,8 +62,11 @@ contract AlmanacCollectible is
     /// @notice Mapeo de tokenId del coleccionable al tokenId del certificado asociado
     mapping(uint256 => uint256) public certificateTokenId;
 
-    /// @notice Direccion del contrato de certificados (para referencia)
+    /// @notice Direccion del contrato de certificados (para verificacion on-chain)
     address public certificateContract;
+
+    /// @notice Indica si un certificado ya fue usado para mintear un coleccionable (1:1)
+    mapping(uint256 => bool) public certificateClaimed;
 
     // =========================================================================
     // Eventos
@@ -116,6 +130,10 @@ contract AlmanacCollectible is
      * @notice Mintea un coleccionable tradeable a la wallet del usuario
      * @dev Solo MINTER_ROLE. La autorizacion (KYC/guardian) se verifica off-chain.
      *      El gas lo paga el relayer/admin wallet.
+     *      Verifica on-chain que:
+     *        - El usuario posee el certificado asociado
+     *        - El certificado no ha sido usado para otro coleccionable (1:1)
+     *        - El linkedCertId esta en rango valido
      * @param to Wallet del usuario
      * @param uri Metadata URI del coleccionable (IPFS)
      * @param linkedCertId Token ID del certificado asociado en AlmanacCertificate
@@ -140,14 +158,27 @@ contract AlmanacCollectible is
         require(authorWallet != address(0), "AlmanacCollectible: author cannot be zero address");
         require(royaltyBps <= 1000, "AlmanacCollectible: royalty cannot exceed 10%");
 
+        // (C) Validar que linkedCertId esta en rango
+        require(linkedCertId < MAX_SUPPLY, "AlmanacCollectible: invalid certificate id");
+
+        // (B) Asegurar 1:1 — un coleccionable por certificado
+        require(!certificateClaimed[linkedCertId], "AlmanacCollectible: certificate already claimed");
+
+        // (A) Verificar que el usuario posee el certificado on-chain
+        require(
+            IAlmanacCertificate(certificateContract).ownerOf(linkedCertId) == to,
+            "AlmanacCollectible: user does not own certificate"
+        );
+
         tokenId = totalMinted;
         totalMinted++;
+
+        certificateClaimed[linkedCertId] = true;
+        certificateTokenId[tokenId] = linkedCertId;
 
         _mint(to, tokenId);
         _setTokenURI(tokenId, uri);
         _setTokenRoyalty(tokenId, authorWallet, royaltyBps);
-
-        certificateTokenId[tokenId] = linkedCertId;
 
         emit CollectibleMinted(to, tokenId, linkedCertId, authorWallet, royaltyBps);
     }
@@ -183,4 +214,14 @@ contract AlmanacCollectible is
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
     {}
+
+    // =========================================================================
+    // (E) Storage gap para upgrades futuros
+    // =========================================================================
+
+    /**
+     * @dev Reserva 50 slots de storage para variables futuras sin colisionar
+     *      con contratos heredados en upgrades.
+     */
+    uint256[50] private __gap;
 }

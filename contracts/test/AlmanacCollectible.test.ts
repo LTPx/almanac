@@ -26,7 +26,7 @@ describe("AlmanacCollectible", function () {
   beforeEach(async function () {
     [admin, minter, user1, user2, author] = await ethers.getSigners();
 
-    // Deploy certificado primero (para obtener su address)
+    // Deploy certificado primero
     const CertFactory = await ethers.getContractFactory("AlmanacCertificate");
     certificate = (await upgrades.deployProxy(
       CertFactory,
@@ -102,11 +102,11 @@ describe("AlmanacCollectible", function () {
 
   describe("mint", function () {
     beforeEach(async function () {
-      // Primero mintear un certificado para el usuario
+      // Mintear certificado para user1
       await certificate.connect(minter).mint(user1.address, CERT_URI);
     });
 
-    it("debe mintear un coleccionable al usuario", async function () {
+    it("debe mintear un coleccionable al usuario que posee el certificado", async function () {
       await collectible.connect(minter).mint(
         user1.address, COL_URI, 0, author.address, ROYALTY_BPS
       );
@@ -144,6 +144,13 @@ describe("AlmanacCollectible", function () {
       );
     });
 
+    it("debe marcar certificado como claimed", async function () {
+      await collectible.connect(minter).mint(
+        user1.address, COL_URI, 0, author.address, ROYALTY_BPS
+      );
+      expect(await collectible.certificateClaimed(0)).to.be.true;
+    });
+
     it("debe revertir si no tiene MINTER_ROLE", async function () {
       await expect(
         collectible.connect(user1).mint(
@@ -166,6 +173,104 @@ describe("AlmanacCollectible", function () {
           user1.address, COL_URI, 0, author.address, 1001
         )
       ).to.be.revertedWith("AlmanacCollectible: royalty cannot exceed 10%");
+    });
+  });
+
+  // ===========================================================================
+  // (A) Verificacion de ownership del certificado on-chain
+  // ===========================================================================
+
+  describe("Verificacion de ownership del certificado", function () {
+    it("debe revertir si el usuario NO posee el certificado", async function () {
+      // Certificado pertenece a user1, intentamos mintear coleccionable a user2
+      await certificate.connect(minter).mint(user1.address, CERT_URI);
+
+      await expect(
+        collectible.connect(minter).mint(
+          user2.address, COL_URI, 0, author.address, ROYALTY_BPS
+        )
+      ).to.be.revertedWith("AlmanacCollectible: user does not own certificate");
+    });
+
+    it("debe permitir mint al dueno correcto del certificado", async function () {
+      await certificate.connect(minter).mint(user1.address, CERT_URI);
+
+      await expect(
+        collectible.connect(minter).mint(
+          user1.address, COL_URI, 0, author.address, ROYALTY_BPS
+        )
+      ).to.not.be.reverted;
+    });
+
+    it("debe revertir si el certificado no existe", async function () {
+      // No se ha minteado ningun certificado
+      await expect(
+        collectible.connect(minter).mint(
+          user1.address, COL_URI, 0, author.address, ROYALTY_BPS
+        )
+      ).to.be.reverted; // ownerOf reverts for nonexistent token
+    });
+  });
+
+  // ===========================================================================
+  // (B) Relacion 1:1 — un coleccionable por certificado
+  // ===========================================================================
+
+  describe("Relacion 1:1 (un coleccionable por certificado)", function () {
+    beforeEach(async function () {
+      await certificate.connect(minter).mint(user1.address, CERT_URI);
+    });
+
+    it("debe revertir si el certificado ya fue reclamado", async function () {
+      await collectible.connect(minter).mint(
+        user1.address, COL_URI, 0, author.address, ROYALTY_BPS
+      );
+
+      await expect(
+        collectible.connect(minter).mint(
+          user1.address, COL_URI, 0, author.address, ROYALTY_BPS
+        )
+      ).to.be.revertedWith("AlmanacCollectible: certificate already claimed");
+    });
+
+    it("certificados diferentes pueden mintear coleccionables independientes", async function () {
+      await certificate.connect(minter).mint(user2.address, CERT_URI); // cert #1
+
+      await collectible.connect(minter).mint(
+        user1.address, COL_URI, 0, author.address, ROYALTY_BPS
+      );
+      await collectible.connect(minter).mint(
+        user2.address, COL_URI, 1, author.address, ROYALTY_BPS
+      );
+
+      expect(await collectible.ownerOf(0)).to.equal(user1.address);
+      expect(await collectible.ownerOf(1)).to.equal(user2.address);
+    });
+  });
+
+  // ===========================================================================
+  // (C) Validacion de rango de linkedCertId
+  // ===========================================================================
+
+  describe("Validacion de rango de linkedCertId", function () {
+    it("debe revertir si linkedCertId >= MAX_SUPPLY", async function () {
+      await certificate.connect(minter).mint(user1.address, CERT_URI);
+
+      await expect(
+        collectible.connect(minter).mint(
+          user1.address, COL_URI, MAX_SUPPLY, author.address, ROYALTY_BPS
+        )
+      ).to.be.revertedWith("AlmanacCollectible: invalid certificate id");
+    });
+
+    it("debe revertir si linkedCertId es un numero muy grande", async function () {
+      await certificate.connect(minter).mint(user1.address, CERT_URI);
+
+      await expect(
+        collectible.connect(minter).mint(
+          user1.address, COL_URI, 999999, author.address, ROYALTY_BPS
+        )
+      ).to.be.revertedWith("AlmanacCollectible: invalid certificate id");
     });
   });
 
@@ -196,7 +301,6 @@ describe("AlmanacCollectible", function () {
     it("el certificado sigue soulbound despues de transferir el coleccionable", async function () {
       await collectible.connect(user1).transferFrom(user1.address, user2.address, 0);
 
-      // El certificado sigue en user1 y sigue soulbound
       expect(await certificate.ownerOf(0)).to.equal(user1.address);
       await expect(
         certificate.connect(user1).transferFrom(user1.address, user2.address, 0)
@@ -222,15 +326,23 @@ describe("AlmanacCollectible", function () {
         { kind: "uups" }
       )) as unknown as AlmanacCollectible;
 
-      await smallCol.connect(admin).mint(user1.address, COL_URI, 0, author.address, ROYALTY_BPS);
-      await smallCol.connect(admin).mint(user1.address, COL_URI, 1, author.address, ROYALTY_BPS);
+      // Mintear certificados primero
+      await smallCert.connect(admin).mint(user1.address, CERT_URI);
+      await smallCert.connect(admin).mint(user2.address, CERT_URI);
 
+      // Mintear coleccionables
+      await smallCol.connect(admin).mint(user1.address, COL_URI, 0, author.address, ROYALTY_BPS);
+      await smallCol.connect(admin).mint(user2.address, COL_URI, 1, author.address, ROYALTY_BPS);
+
+      // Tercer intento debe fallar
       await expect(
         smallCol.connect(admin).mint(user1.address, COL_URI, 2, author.address, ROYALTY_BPS)
       ).to.be.revertedWith("AlmanacCollectible: max supply reached");
     });
 
     it("remainingSupply debe decrementar", async function () {
+      await certificate.connect(minter).mint(user1.address, CERT_URI);
+
       expect(await collectible.remainingSupply()).to.equal(MAX_SUPPLY);
       await collectible.connect(minter).mint(
         user1.address, COL_URI, 0, author.address, ROYALTY_BPS
@@ -245,6 +357,7 @@ describe("AlmanacCollectible", function () {
 
   describe("Royalties (ERC-2981)", function () {
     beforeEach(async function () {
+      await certificate.connect(minter).mint(user1.address, CERT_URI);
       await collectible.connect(minter).mint(
         user1.address, COL_URI, 0, author.address, ROYALTY_BPS
       );
@@ -291,6 +404,7 @@ describe("AlmanacCollectible", function () {
     });
 
     it("admin puede upgradear y el estado persiste", async function () {
+      await certificate.connect(minter).mint(user1.address, CERT_URI);
       await collectible.connect(minter).mint(
         user1.address, COL_URI, 0, author.address, ROYALTY_BPS
       );
