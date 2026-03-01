@@ -32,19 +32,20 @@ const config: HardhatUserConfig = {
     },
   },
   etherscan: {
-    apiKey: {
-      polygonAmoy: POLYGONSCAN_API_KEY,
-    },
+    apiKey: POLYGONSCAN_API_KEY,
     customChains: [
       {
-        network: "polygonAmoy",
+        network: "amoy",
         chainId: 80002,
         urls: {
-          apiURL: "https://api-amoy.polygonscan.com/api",
+          apiURL: `https://api.etherscan.io/v2/api?chainid=80002`,
           browserURL: "https://amoy.polygonscan.com",
         },
       },
     ],
+  },
+  sourcify: {
+    enabled: true,
   },
   paths: {
     sources: "./contracts",
