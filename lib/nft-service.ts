@@ -4,6 +4,11 @@ import { privateKeyToAccount } from "thirdweb/wallets";
 import { polygonAmoy } from "thirdweb/chains";
 import { getRpcClient, eth_getTransactionReceipt } from "thirdweb/rpc";
 import prisma from "./prisma";
+import {
+  mintCertificate,
+  mintCollectible,
+  type ContractMintResult
+} from "./contracts/almanac-contract";
 
 const ADMIN_PRIVATE_KEY = process.env.ADMIN_WALLET_PRIVATE_KEY;
 const THIRDWEB_SECRET_KEY = process.env.THIRDWEB_SECRET_KEY;
@@ -99,7 +104,7 @@ export function createNFTMetadata({
   const attributes: Array<{ trait_type: string; value: string }> = [
     { trait_type: "Rarity", value: rarity },
     { trait_type: "Course", value: courseName },
-    { trait_type: "Type", value: "Educational Certificate" },
+    { trait_type: "Type", value: "Educational Certificate" }
   ];
 
   // Agregar fecha de inicio si está disponible
@@ -325,4 +330,96 @@ export function getRandomRarity(): Rarity {
   if (random < 99) return "RARE";
   if (random < 99.8) return "EPIC";
   return "UNIQUE";
+}
+
+// ─── Custom Contract Functions (AlmanacCertificate / AlmanacCollectible) ───
+
+export interface CertificateMintParams {
+  walletAddress: string;
+  metadata: NFTMetadata;
+  collectionId: string;
+}
+
+export interface CollectibleMintParams {
+  walletAddress: string;
+  metadata: NFTMetadata;
+  collectionId: string;
+  linkedCertTokenId: number;
+  authorWallet: string;
+  royaltyBps: number;
+}
+
+export interface CustomMintResult {
+  tokenId: string;
+  transactionHash: string;
+  metadataUri: string;
+  collectionId: string;
+  collectionName: string;
+}
+
+/**
+ * Mintea un certificado soulbound via contrato custom AlmanacCertificate
+ */
+export async function mintCertificateNFT(
+  params: CertificateMintParams
+): Promise<CustomMintResult> {
+  const collection = await getCollectionById(params.collectionId);
+
+  const contractAddress =
+    collection.certificateContractAddress || collection.contractAddress;
+
+  console.log(
+    `🎓 Minteando CERTIFICADO en: ${collection.name} (${contractAddress})`
+  );
+
+  const metadataUri = JSON.stringify(params.metadata);
+
+  const result: ContractMintResult = await mintCertificate(
+    contractAddress,
+    params.walletAddress,
+    metadataUri
+  );
+
+  return {
+    tokenId: result.tokenId,
+    transactionHash: result.transactionHash,
+    metadataUri,
+    collectionId: collection.id,
+    collectionName: collection.name
+  };
+}
+
+/**
+ * Mintea un coleccionable tradeable via contrato custom AlmanacCollectible
+ */
+export async function mintCollectibleNFT(
+  params: CollectibleMintParams
+): Promise<CustomMintResult> {
+  const collection = await getCollectionById(params.collectionId);
+
+  const contractAddress =
+    collection.collectibleContractAddress || collection.contractAddress;
+
+  console.log(
+    `🎨 Minteando COLECCIONABLE en: ${collection.name} (${contractAddress})`
+  );
+
+  const metadataUri = JSON.stringify(params.metadata);
+
+  const result: ContractMintResult = await mintCollectible(
+    contractAddress,
+    params.walletAddress,
+    metadataUri,
+    params.linkedCertTokenId,
+    params.authorWallet,
+    params.royaltyBps
+  );
+
+  return {
+    tokenId: result.tokenId,
+    transactionHash: result.transactionHash,
+    metadataUri,
+    collectionId: collection.id,
+    collectionName: collection.name
+  };
 }

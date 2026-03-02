@@ -24,6 +24,10 @@ export async function GET(
       select: {
         id: true,
         nftAssetId: true,
+        tokenType: true,
+        isTradeable: true,
+        linkedCertTokenId: true,
+        tokenId: true,
         curriculum: {
           select: {
             id: true,
@@ -76,10 +80,14 @@ export async function GET(
       nfts: nfts.map((nft) => {
         return {
           id: nft.id,
+          tokenId: nft.tokenId,
           nftAssetId: nft.nftAssetId,
           name: nft.curriculum.title || nft.nftAsset?.name,
           imageUrl: nft.nftAsset?.imageUrl || null,
-          rarity: nft.nftAsset?.rarity
+          rarity: nft.nftAsset?.rarity,
+          tokenType: nft.tokenType,
+          isTradeable: nft.isTradeable,
+          linkedCertTokenId: nft.linkedCertTokenId
         };
       }),
       total: nfts.length,

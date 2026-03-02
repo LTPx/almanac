@@ -4,12 +4,14 @@ import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { verifyAdminSession } from "@/lib/admin-auth";
 import {
-  mintEducationalNFT,
+  mintCertificateNFT,
+  mintCollectibleNFT,
   createNFTMetadata,
   getAvailableNFTImage
 } from "@/lib/nft-service";
 
-const CONTRACT_ADDRESS = process.env.THIRDWEB_CONTRACT_ADDRESS!;
+const CERTIFICATE_CONTRACT_ADDRESS = process.env.CERTIFICATE_CONTRACT_ADDRESS!;
+const COLLECTIBLE_CONTRACT_ADDRESS = process.env.COLLECTIBLE_CONTRACT_ADDRESS!;
 
 interface TestMintRequestBody {
   userId: string;
@@ -17,6 +19,8 @@ interface TestMintRequestBody {
   collectionId: string;
   description?: string;
   rarity?: "NORMAL" | "RARE" | "EPIC" | "UNIQUE";
+  tokenType?: "CERTIFICATE" | "COLLECTIBLE";
+  certificateNftId?: string; // required when tokenType is COLLECTIBLE
 }
 
 /**
@@ -39,7 +43,9 @@ export async function POST(request: NextRequest) {
       curriculumId,
       collectionId,
       description,
-      rarity
+      rarity,
+      tokenType = "CERTIFICATE",
+      certificateNftId
     }: TestMintRequestBody = await request.json();
 
     // Validar parámetros requeridos
@@ -96,8 +102,7 @@ export async function POST(request: NextRequest) {
       orderBy: { createdAt: "asc" }
     });
 
-    const startDate =
-      userProgressRecords[0]?.createdAt || new Date();
+    const startDate = userProgressRecords[0]?.createdAt || new Date();
 
     const completedRecords = userProgressRecords
       .filter((r) => r.completedAt)
@@ -117,19 +122,77 @@ export async function POST(request: NextRequest) {
     // Crear metadatos del NFT
     const metadata = createNFTMetadata({
       courseName: curriculum.title,
-      customDescription: description || "NFT de prueba creado por admin",
+      customDescription:
+        description || `NFT de prueba (${tokenType}) creado por admin`,
       rarity: rarityUsed,
       imageUrl: nftImage,
       startDate,
       endDate
     });
 
-    // Mintear el NFT
-    const mintResult = await mintEducationalNFT(
-      user.walletAddress,
-      metadata,
-      collectionId
-    );
+    // Obtener coleccion para datos de artista
+    const collection = await prisma.nFTCollection.findUnique({
+      where: { id: collectionId }
+    });
+
+    if (!collection) {
+      return NextResponse.json(
+        { error: "Colección no encontrada" },
+        { status: 404 }
+      );
+    }
+
+    let mintResult;
+    let contractAddress: string;
+    let linkedCertTokenId: string | null = null;
+
+    if (tokenType === "COLLECTIBLE") {
+      // Para coleccionable: se necesita certificateNftId
+      if (!certificateNftId) {
+        return NextResponse.json(
+          {
+            error: "certificateNftId es requerido para mintear un coleccionable"
+          },
+          { status: 400 }
+        );
+      }
+
+      const certificate = await prisma.educationalNFT.findFirst({
+        where: { id: certificateNftId, tokenType: "CERTIFICATE" }
+      });
+
+      if (!certificate) {
+        return NextResponse.json(
+          { error: "Certificado no encontrado" },
+          { status: 404 }
+        );
+      }
+
+      const artistAddress =
+        collection.defaultArtistAddress || user.walletAddress;
+      const royaltyBps = collection.defaultRoyaltyBps ?? 500;
+
+      mintResult = await mintCollectibleNFT({
+        walletAddress: user.walletAddress,
+        metadata,
+        collectionId,
+        linkedCertTokenId: parseInt(certificate.tokenId),
+        authorWallet: artistAddress,
+        royaltyBps
+      });
+
+      contractAddress = COLLECTIBLE_CONTRACT_ADDRESS;
+      linkedCertTokenId = certificate.tokenId;
+    } else {
+      // Certificado soulbound
+      mintResult = await mintCertificateNFT({
+        walletAddress: user.walletAddress,
+        metadata,
+        collectionId
+      });
+
+      contractAddress = CERTIFICATE_CONTRACT_ADDRESS;
+    }
 
     // Guardar en base de datos
     const savedNFT = await prisma.educationalNFT.create({
@@ -137,11 +200,19 @@ export async function POST(request: NextRequest) {
         tokenId: mintResult.tokenId ?? "",
         userId,
         curriculumId,
-        contractAddress: CONTRACT_ADDRESS,
+        contractAddress,
         transactionHash: mintResult.transactionHash,
         metadataUri: mintResult.metadataUri ?? JSON.stringify(metadata),
         mintedAt: new Date(),
-        nftAssetId: nftImageId
+        nftAssetId: nftImageId,
+        collectionId,
+        tokenType,
+        isTradeable: tokenType === "COLLECTIBLE",
+        linkedCertTokenId,
+        artistAddress:
+          tokenType === "COLLECTIBLE" ? collection.defaultArtistAddress : null,
+        royaltyBps:
+          tokenType === "COLLECTIBLE" ? collection.defaultRoyaltyBps : null
       }
     });
 
@@ -150,7 +221,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "NFT de prueba minteado exitosamente (sin deducir ZAPs)",
+      message: `NFT de prueba (${tokenType}) minteado exitosamente (sin deducir ZAPs)`,
       nft: {
         ...savedNFT,
         metadata

@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import {
-  mintEducationalNFT,
+  mintCertificateNFT,
   createNFTMetadata,
   getAvailableNFTImage,
   getRandomRarity
 } from "@/lib/nft-service";
 import { MINT_NFT_ZAPS } from "@/lib/constants/gamification";
 
-const CONTRACT_ADDRESS = process.env.THIRDWEB_CONTRACT_ADDRESS!;
+const CERTIFICATE_CONTRACT_ADDRESS = process.env.CERTIFICATE_CONTRACT_ADDRESS!;
 
 interface MintRequestBody {
   curriculumTokenId?: string;
@@ -102,12 +102,12 @@ export async function POST(
       endDate
     });
 
-    // 3) Mintear el NFT
-    const mintResult = await mintEducationalNFT(
-      user.walletAddress!,
+    // 3) Mintear el NFT (certificado soulbound via contrato custom)
+    const mintResult = await mintCertificateNFT({
+      walletAddress: user.walletAddress!,
       metadata,
       collectionId
-    );
+    });
 
     // 4) Guardar en base de datos
     const savedNFT = await saveNFTToDatabase({
@@ -249,13 +249,15 @@ async function saveNFTToDatabase({
         tokenId: mintResult.tokenId ?? "",
         userId,
         curriculumId,
-        contractAddress: CONTRACT_ADDRESS,
+        contractAddress: CERTIFICATE_CONTRACT_ADDRESS,
         transactionHash: mintResult.transactionHash,
         metadataUri: mintResult.metadataUri ?? JSON.stringify(metadata),
         mintedAt: now,
         nftAssetId: nftImageId,
         curriculumStartedAt: startDate,
-        curriculumFinishedAt: endDate
+        curriculumFinishedAt: endDate,
+        tokenType: "CERTIFICATE",
+        isTradeable: false
       }
     });
   });

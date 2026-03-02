@@ -1,9 +1,11 @@
 # Plan: NFT Certificados + Coleccionables en Polygon Amoy
 
 ## Contexto
+
 La app Almanac actualmente mintea NFTs ERC-721 simples en Polygon Amoy via ThirdWeb SDK. El cliente requiere: seguridad reforzada, royalties para el artista, tokens soulbound (certificados), coleccionables tradeables, y supply fijo.
 
 Se implementaron **2 contratos custom** (no dual mint en un solo contrato):
+
 - **AlmanacCertificate**: soulbound permanente, no burn, sin royalties
 - **AlmanacCollectible**: tradeable desde mint, con royalties ERC-2981
 
@@ -11,14 +13,14 @@ Se implementaron **2 contratos custom** (no dual mint en un solo contrato):
 
 ## Actores
 
-| Actor | Rol |
-|-------|-----|
-| **Admin / Content Manager** | Carga colecciones e imagenes (off-chain) |
-| **Author** | Creador de la imagen, tiene wallet para royalties |
-| **Usuario** | Nino/adolescente/adulto que aprende y gana ZAPs |
-| **Representante/Guardian** | Solo menores: autoriza que el NFT tradeable se mintee |
-| **Backend App** | Orquesta ZAPs, random, autorizacion, transacciones |
-| **Relayer/Minter Wallet** | Wallet con MATIC que paga gas y llama al contrato |
+| Actor                       | Rol                                                   |
+| --------------------------- | ----------------------------------------------------- |
+| **Admin / Content Manager** | Carga colecciones e imagenes (off-chain)              |
+| **Author**                  | Creador de la imagen, tiene wallet para royalties     |
+| **Usuario**                 | Nino/adolescente/adulto que aprende y gana ZAPs       |
+| **Representante/Guardian**  | Solo menores: autoriza que el NFT tradeable se mintee |
+| **Backend App**             | Orquesta ZAPs, random, autorizacion, transacciones    |
+| **Relayer/Minter Wallet**   | Wallet con MATIC que paga gas y llama al contrato     |
 
 ---
 
@@ -57,22 +59,22 @@ Se implementaron **2 contratos custom** (no dual mint en un solo contrato):
 
 ## Arquitectura de contratos
 
-| | AlmanacCertificate | AlmanacCollectible |
-|---|---|---|
-| **Transferible** | No (soulbound permanente) | Si (tradeable desde mint) |
-| **Quemable** | No | Si (ERC-721 default) |
-| **Royalties** | No | Si (ERC-2981, al authorWallet) |
-| **Supply** | MAX_SUPPLY fijo | Mismo MAX_SUPPLY |
-| **Cuando se mintea** | Al completar test | Cuando usuario solicita + autorizacion |
-| **ERC-5192** | Si (locked = true siempre) | No |
-| **Verificacion on-chain** | - | Verifica ownership del certificado |
-| **Relacion 1:1** | - | Un coleccionable por certificado (certificateClaimed) |
-| **Storage gap** | Si (__gap[50]) | Si (__gap[50]) |
+|                           | AlmanacCertificate         | AlmanacCollectible                                    |
+| ------------------------- | -------------------------- | ----------------------------------------------------- |
+| **Transferible**          | No (soulbound permanente)  | Si (tradeable desde mint)                             |
+| **Quemable**              | No                         | Si (ERC-721 default)                                  |
+| **Royalties**             | No                         | Si (ERC-2981, al authorWallet)                        |
+| **Supply**                | MAX_SUPPLY fijo            | Mismo MAX_SUPPLY                                      |
+| **Cuando se mintea**      | Al completar test          | Cuando usuario solicita + autorizacion                |
+| **ERC-5192**              | Si (locked = true siempre) | No                                                    |
+| **Verificacion on-chain** | -                          | Verifica ownership del certificado                    |
+| **Relacion 1:1**          | -                          | Un coleccionable por certificado (certificateClaimed) |
+| **Storage gap**           | Si (\_\_gap[50])           | Si (\_\_gap[50])                                      |
 
 ### Contratos desplegados (Polygon Amoy Testnet)
 
-| Contrato | Proxy | Implementation |
-|----------|-------|---------------|
+| Contrato           | Proxy                                        | Implementation                               |
+| ------------------ | -------------------------------------------- | -------------------------------------------- |
 | AlmanacCertificate | `0x24d9F34fEfdc33d218814769D3b262E107C24D65` | `0x9F4DFaAa03E4592F24679876A259708A4873dA89` |
 | AlmanacCollectible | `0x83fDe568E22f22e04c7EcB3232aB685855a963f1` | `0xF591c9Be88827F76701e6c6051c832161c756DFF` |
 
@@ -85,6 +87,7 @@ Se implementaron **2 contratos custom** (no dual mint en un solo contrato):
 ## Fase 1: Smart Contracts — COMPLETADA
 
 ### Lo que se hizo
+
 - Directorio `/contracts/` con Hardhat, OpenZeppelin v5, UUPS proxy
 - `AlmanacCertificate.sol`: soulbound, no burn, no royalties, ERC-5192, AccessControl
 - `AlmanacCollectible.sol`: tradeable, ERC-2981 royalties, verificacion on-chain de ownership del certificado, relacion 1:1 (certificateClaimed), validacion de rango
@@ -94,28 +97,31 @@ Se implementaron **2 contratos custom** (no dual mint en un solo contrato):
 - Contratos verificados en Polygonscan/Sourcify
 
 ### Archivos creados
-| Archivo | Descripcion |
-|---------|-------------|
-| `/contracts/package.json` | Config Hardhat |
-| `/contracts/hardhat.config.ts` | Config Hardhat + Polygon Amoy + Etherscan V2 |
-| `/contracts/contracts/AlmanacCertificate.sol` | Contrato certificado soulbound |
-| `/contracts/contracts/AlmanacCollectible.sol` | Contrato coleccionable tradeable |
-| `/contracts/test/AlmanacCertificate.test.ts` | 23 tests |
-| `/contracts/test/AlmanacCollectible.test.ts` | 33 tests |
-| `/contracts/scripts/deploy.ts` | Deploy ambos contratos via UUPS |
-| `/contracts/scripts/grant-roles.ts` | Otorga MINTER_ROLE al admin wallet |
-| `/contracts/scripts/copy-abi.js` | Copia ABIs a /lib/contracts/ |
-| `/lib/contracts/AlmanacCertificate.json` | ABI compilado |
-| `/lib/contracts/AlmanacCollectible.json` | ABI compilado |
+
+| Archivo                                       | Descripcion                                  |
+| --------------------------------------------- | -------------------------------------------- |
+| `/contracts/package.json`                     | Config Hardhat                               |
+| `/contracts/hardhat.config.ts`                | Config Hardhat + Polygon Amoy + Etherscan V2 |
+| `/contracts/contracts/AlmanacCertificate.sol` | Contrato certificado soulbound               |
+| `/contracts/contracts/AlmanacCollectible.sol` | Contrato coleccionable tradeable             |
+| `/contracts/test/AlmanacCertificate.test.ts`  | 23 tests                                     |
+| `/contracts/test/AlmanacCollectible.test.ts`  | 33 tests                                     |
+| `/contracts/scripts/deploy.ts`                | Deploy ambos contratos via UUPS              |
+| `/contracts/scripts/grant-roles.ts`           | Otorga MINTER_ROLE al admin wallet           |
+| `/contracts/scripts/copy-abi.js`              | Copia ABIs a /lib/contracts/                 |
+| `/lib/contracts/AlmanacCertificate.json`      | ABI compilado                                |
+| `/lib/contracts/AlmanacCollectible.json`      | ABI compilado                                |
 
 ---
 
-## Fase 2: Schema de Base de Datos — PENDIENTE
+## Fase 2: Schema de Base de Datos — COMPLETADA
 
 ### 2.1 Actualizar Prisma schema
+
 **Modificar:** `/prisma/schema.prisma`
 
 Nuevos enums:
+
 ```prisma
 enum NFTTokenType {
   CERTIFICATE
@@ -125,6 +131,7 @@ enum NFTTokenType {
 ```
 
 Nuevos campos en `EducationalNFT`:
+
 ```prisma
 tokenType           NFTTokenType    @default(CERTIFICATE)
 linkedCertTokenId   String?         // tokenId del certificado en el contrato (para coleccionables)
@@ -134,6 +141,7 @@ royaltyBps          Int?            // basis points: 500 = 5%
 ```
 
 Nuevos campos en `NFTCollection`:
+
 ```prisma
 defaultArtistAddress  String?
 defaultRoyaltyBps     Int?    @default(500)  // 5% default
@@ -143,6 +151,7 @@ collectibleContractAddress  String?          // address del contrato de coleccio
 ```
 
 ### 2.2 Ejecutar migracion
+
 ```bash
 npx prisma migrate dev --name add_nft_contract_fields
 ```
@@ -151,67 +160,36 @@ Los registros NFT existentes quedan con defaults seguros (`CERTIFICATE`, `isTrad
 
 ---
 
-## Fase 3: Backend — PENDIENTE
+## Fase 3: Backend — COMPLETADA
 
-### 3.1 Capa de interaccion con los contratos
-**Nuevo archivo:** `/lib/contracts/almanac-contract.ts`
+### Lo que se hizo
 
-Usa ethers.js (v5.8.0, ya en el proyecto) para llamar a los contratos custom:
+- **`/lib/contracts/almanac-contract.ts`** (nuevo): capa de interaccion con contratos custom via ethers.js v5. Exporta `mintCertificate()` y `mintCollectible()` que llaman directamente a los contratos desplegados.
+- **`/lib/nft-service.ts`** (modificado): nuevas funciones `mintCertificateNFT()` y `mintCollectibleNFT()` que orquestan coleccion + metadata + llamada al contrato. Se mantiene `mintEducationalNFT()` para backward compatibility.
+- **`/app/api/users/[userId]/nfts/mint/route.ts`** (modificado): usa `mintCertificateNFT()` en vez de `mintEducationalNFT()`. Guarda con `tokenType: CERTIFICATE`, `isTradeable: false`.
+- **`/app/api/users/[userId]/nfts/mint-collectible/route.ts`** (nuevo): endpoint POST que verifica ownership del certificado, relacion 1:1, obtiene datos del artista, mintea coleccionable y guarda con `tokenType: COLLECTIBLE`, `isTradeable: true`.
+- **`/app/api/admin/nfts/test-mint/route.ts`** (modificado): acepta `tokenType` ("CERTIFICATE" | "COLLECTIBLE") y `certificateNftId` para mintear ambos tipos en modo test.
+- **`/app/api/users/[userId]/nfts/route.ts`** (modificado): incluye `tokenType`, `isTradeable`, `linkedCertTokenId`, `tokenId` en la respuesta del listado.
 
-```typescript
-// Funciones a exportar:
+### Archivos creados/modificados
 
-// Certificado — se llama cuando el usuario completa un test
-mintCertificate(contractAddress, to, uri)
-  → { tokenId, transactionHash }
-
-// Coleccionable — se llama cuando el usuario solicita + autorizacion
-mintCollectible(contractAddress, to, uri, linkedCertId, authorWallet, royaltyBps)
-  → { tokenId, transactionHash }
-```
-
-### 3.2 Actualizar nft-service.ts
-**Modificar:** `/lib/nft-service.ts`
-
-- Nueva funcion `mintCertificateNFT(params)`: obtiene coleccion, crea metadata, llama mintCertificate()
-- Nueva funcion `mintCollectibleNFT(params)`: obtiene coleccion, crea metadata, llama mintCollectible()
-- Mantener `mintEducationalNFT()` existente para backward compatibility
-
-### 3.3 Actualizar API de mint (certificado)
-**Modificar:** `/app/api/users/[userId]/nfts/mint/route.ts`
-
-- Llamar `mintCertificateNFT()` en vez de `mintEducationalNFT()`
-- Guardar 1 registro en DB con `tokenType: CERTIFICATE`, `isTradeable: false`
-
-### 3.4 Crear API de mint (coleccionable)
-**Nuevo archivo:** `/app/api/users/[userId]/nfts/mint-collectible/route.ts`
-
-```
-POST { certificateNftId: string }
-1. Verificar que el usuario posee el certificado en la DB
-2. Verificar autorizacion (menor: guardian aprobado / mayor: directo)
-3. Obtener coleccion y datos del artista
-4. Llamar mintCollectibleNFT()
-5. Guardar registro en DB con tokenType: COLLECTIBLE, isTradeable: true
-6. Retornar resultado
-```
-
-### 3.5 Actualizar admin test-mint
-**Modificar:** `/app/api/admin/nfts/test-mint/route.ts`
-
-Agregar soporte para mintear certificados y coleccionables de test.
-
-### 3.6 Actualizar endpoint de listado de NFTs
-**Modificar:** `/app/api/users/[userId]/nfts/route.ts`
-
-Agregar al `select`: `tokenType`, `isTradeable`, `linkedCertTokenId`.
+| Archivo                                                  | Accion     |
+| -------------------------------------------------------- | ---------- |
+| `/lib/contracts/almanac-contract.ts`                     | Creado     |
+| `/lib/nft-service.ts`                                    | Modificado |
+| `/app/api/users/[userId]/nfts/mint/route.ts`             | Modificado |
+| `/app/api/users/[userId]/nfts/mint-collectible/route.ts` | Creado     |
+| `/app/api/admin/nfts/test-mint/route.ts`                 | Modificado |
+| `/app/api/users/[userId]/nfts/route.ts`                  | Modificado |
 
 ---
 
 ## Fase 4: Frontend / Admin — PENDIENTE
 
 ### 4.1 Actualizar tipos TypeScript
+
 Agregar a los tipos de NFT:
+
 ```typescript
 tokenType: "CERTIFICATE" | "COLLECTIBLE"
 isTradeable: boolean
@@ -221,9 +199,11 @@ royaltyBps?: number
 ```
 
 ### 4.2 Formulario de colecciones (admin)
+
 **Modificar:** `/components/admin/nft-collection-form.tsx`
 
 Agregar campos:
+
 - `defaultArtistAddress` — wallet del artista (0x...)
 - `defaultRoyaltyBps` — porcentaje de royalties (ej: 500 = 5%)
 - `maxSupply` — total de NFTs a emitir
@@ -233,7 +213,9 @@ Agregar campos:
 Actualizar API en `/app/api/nft-collections/route.ts`.
 
 ### 4.3 Componentes de display de NFTs
+
 **Modificar:** Componentes de NFT cards y paginas de detalle para mostrar:
+
 - Badge de tipo: "Certificado" (soulbound) o "Coleccionable" (tradeable)
 - Info de royalties en coleccionables
 - Boton "Solicitar coleccionable" en la vista del certificado
@@ -243,6 +225,7 @@ Actualizar API en `/app/api/nft-collections/route.ts`.
 ## Fase 5: Testing de integracion — PENDIENTE
 
 ### 5.1 Testing de integracion
+
 - [ ] Flujo certificado: completar curriculum → mint → verificar token en blockchain + registro en DB
 - [ ] Certificado NO se puede transferir (revert en blockchain)
 - [ ] Certificado NO se puede quemar (revert en blockchain)
@@ -257,24 +240,24 @@ Actualizar API en `/app/api/nft-collections/route.ts`.
 
 ## Orden de ejecucion
 
-| # | Tarea | Estado | Archivos |
-|---|-------|--------|----------|
-| 1 | Inicializar Hardhat | COMPLETADO | `/contracts/` |
-| 2 | Escribir contratos Solidity | COMPLETADO | `AlmanacCertificate.sol`, `AlmanacCollectible.sol` |
-| 3 | Escribir tests | COMPLETADO | 56 tests pasando |
-| 4 | Scripts de deploy | COMPLETADO | `deploy.ts`, `grant-roles.ts` |
-| 5 | Deploy a Polygon Amoy | COMPLETADO | Ambos contratos desplegados y verificados |
-| 6 | Copiar ABIs | COMPLETADO | `/lib/contracts/*.json` |
-| 7 | Migracion Prisma | PENDIENTE | `schema.prisma` |
-| 8 | Crear `almanac-contract.ts` | PENDIENTE | `/lib/contracts/almanac-contract.ts` |
-| 9 | Actualizar `nft-service.ts` | PENDIENTE | `/lib/nft-service.ts` |
-| 10 | Actualizar API de mint (certificado) | PENDIENTE | `mint/route.ts` |
-| 11 | Crear API de mint (coleccionable) | PENDIENTE | `mint-collectible/route.ts` |
-| 12 | Actualizar admin test-mint | PENDIENTE | `test-mint/route.ts` |
-| 13 | Actualizar tipos TS | PENDIENTE | Tipos de NFT |
-| 14 | Actualizar frontend | PENDIENTE | NFT components |
-| 15 | Actualizar admin | PENDIENTE | Admin forms/pages |
-| 16 | Testing de integracion | PENDIENTE | — |
+| #   | Tarea                                | Estado     | Archivos                                           |
+| --- | ------------------------------------ | ---------- | -------------------------------------------------- |
+| 1   | Inicializar Hardhat                  | COMPLETADO | `/contracts/`                                      |
+| 2   | Escribir contratos Solidity          | COMPLETADO | `AlmanacCertificate.sol`, `AlmanacCollectible.sol` |
+| 3   | Escribir tests                       | COMPLETADO | 56 tests pasando                                   |
+| 4   | Scripts de deploy                    | COMPLETADO | `deploy.ts`, `grant-roles.ts`                      |
+| 5   | Deploy a Polygon Amoy                | COMPLETADO | Ambos contratos desplegados y verificados          |
+| 6   | Copiar ABIs                          | COMPLETADO | `/lib/contracts/*.json`                            |
+| 7   | Migracion Prisma                     | COMPLETADO | `schema.prisma`                                    |
+| 8   | Crear `almanac-contract.ts`          | COMPLETADO | `/lib/contracts/almanac-contract.ts`               |
+| 9   | Actualizar `nft-service.ts`          | COMPLETADO | `/lib/nft-service.ts`                              |
+| 10  | Actualizar API de mint (certificado) | COMPLETADO | `mint/route.ts`                                    |
+| 11  | Crear API de mint (coleccionable)    | COMPLETADO | `mint-collectible/route.ts`                        |
+| 12  | Actualizar admin test-mint           | COMPLETADO | `test-mint/route.ts`                               |
+| 13  | Actualizar tipos TS                  | PENDIENTE  | Tipos de NFT                                       |
+| 14  | Actualizar frontend                  | PENDIENTE  | NFT components                                     |
+| 15  | Actualizar admin                     | PENDIENTE  | Admin forms/pages                                  |
+| 16  | Testing de integracion               | PENDIENTE  | —                                                  |
 
 ---
 
@@ -283,6 +266,7 @@ Actualizar API en `/app/api/nft-collections/route.ts`.
 ERC-2981 acepta UN solo receptor de royalties. Se eligio:
 
 **Opcion B — Treasury unico + split off-chain** (mas simple)
+
 - El `authorWallet` en el contrato recibe todos los royalties
 - Si se necesita split Almanac + Artista, se maneja off-chain
 - Se puede migrar a PaymentSplitter on-chain en iteracion futura
@@ -292,6 +276,7 @@ ERC-2981 acepta UN solo receptor de royalties. Se eligio:
 ## Variables de entorno requeridas
 
 ### App (.env del root)
+
 ```env
 # Contratos nuevos (agregar)
 CERTIFICATE_CONTRACT_ADDRESS=0x24d9F34fEfdc33d218814769D3b262E107C24D65
@@ -303,6 +288,7 @@ THIRDWEB_SECRET_KEY=...
 ```
 
 ### Contracts (.env en /contracts/)
+
 ```env
 DEPLOYER_PRIVATE_KEY=...
 POLYGON_AMOY_RPC_URL=https://rpc-amoy.polygon.technology/
@@ -329,4 +315,4 @@ ADMIN_WALLET_ADDRESS=...
 - [x] Roles: DEFAULT_ADMIN_ROLE en deployer (migrar a multisig en mainnet)
 - [x] Supply fijo: MAX_SUPPLY inmutable
 - [x] UUPS proxy upgradeable
-- [x] Storage gap (__gap[50]) en ambos contratos
+- [x] Storage gap (\_\_gap[50]) en ambos contratos
