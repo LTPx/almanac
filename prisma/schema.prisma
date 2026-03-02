@@ -486,6 +486,13 @@ model EducationalNFT {
   curriculumStartedAt  DateTime?
   curriculumFinishedAt DateTime?
 
+  // NFT contract type fields
+  tokenType         NFTTokenType @default(CERTIFICATE)
+  linkedCertTokenId String?      // tokenId del certificado en el contrato (para coleccionables)
+  isTradeable       Boolean      @default(false)
+  artistAddress     String?
+  royaltyBps        Int?         // basis points: 500 = 5%
+
   // relationships
   nftAsset     NFTAsset?      @relation(fields: [nftAssetId], references: [id])
   nftAssetId   Int?           @unique
@@ -525,6 +532,13 @@ model NFTCollection {
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  // NFT contract fields
+  defaultArtistAddress        String?
+  defaultRoyaltyBps           Int?    @default(500) // 5% default
+  maxSupply                   Int?    // coincide con MAX_SUPPLY del contrato
+  certificateContractAddress  String? // address del contrato de certificados
+  collectibleContractAddress  String? // address del contrato de coleccionables
 
   // relationships
   educationalNFTs EducationalNFT[]
@@ -639,6 +653,13 @@ enum QuestionType {
   DRAG_DROP // Arrastrar y soltar
 
   @@map("question_type")
+}
+
+enum NFTTokenType {
+  CERTIFICATE
+  COLLECTIBLE
+
+  @@map("nft_token_type")
 }
 
 enum NFTRarity {
