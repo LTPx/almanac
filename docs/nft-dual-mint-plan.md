@@ -184,41 +184,26 @@ Los registros NFT existentes quedan con defaults seguros (`CERTIFICATE`, `isTrad
 
 ---
 
-## Fase 4: Frontend / Admin — PENDIENTE
+## Fase 4: Frontend / Admin — COMPLETADA
 
-### 4.1 Actualizar tipos TypeScript
+### Lo que se hizo
 
-Agregar a los tipos de NFT:
+- **`/lib/types.ts`** (modificado): nuevo tipo `NFTTokenType`, campos `tokenType`, `isTradeable`, `linkedCertTokenId` en `EducationalNFT` y `EducationalNFTAsset`.
+- **`/components/admin/nft-collection-form.tsx`** (modificado): nuevos campos `certificateContractAddress`, `collectibleContractAddress`, `defaultArtistAddress`, `defaultRoyaltyBps`, `maxSupply` con validacion de addresses.
+- **`/app/api/nft-collections/route.ts`** (modificado): POST acepta y guarda los nuevos campos de coleccion.
+- **`/app/api/nft-collections/[collectionId]/route.ts`** (modificado): PUT acepta y guarda los nuevos campos.
+- **`/components/car-nft.tsx`** (modificado): badge de tipo "Certificado" (verde) / "Coleccionable" (naranja) en esquina superior izquierda.
+- **`/app/(root)/achievements/nft/tabs/nfts-tab.tsx`** (modificado): pasa `rarity` y `tokenType` al componente CardNFT.
 
-```typescript
-tokenType: "CERTIFICATE" | "COLLECTIBLE"
-isTradeable: boolean
-linkedCertTokenId?: string
-artistAddress?: string
-royaltyBps?: number
-```
-
-### 4.2 Formulario de colecciones (admin)
-
-**Modificar:** `/components/admin/nft-collection-form.tsx`
-
-Agregar campos:
-
-- `defaultArtistAddress` — wallet del artista (0x...)
-- `defaultRoyaltyBps` — porcentaje de royalties (ej: 500 = 5%)
-- `maxSupply` — total de NFTs a emitir
-- `certificateContractAddress` — address del contrato de certificados
-- `collectibleContractAddress` — address del contrato de coleccionables
-
-Actualizar API en `/app/api/nft-collections/route.ts`.
-
-### 4.3 Componentes de display de NFTs
-
-**Modificar:** Componentes de NFT cards y paginas de detalle para mostrar:
-
-- Badge de tipo: "Certificado" (soulbound) o "Coleccionable" (tradeable)
-- Info de royalties en coleccionables
-- Boton "Solicitar coleccionable" en la vista del certificado
+### Archivos modificados
+| Archivo | Accion |
+|---------|--------|
+| `/lib/types.ts` | Modificado |
+| `/components/admin/nft-collection-form.tsx` | Modificado |
+| `/app/api/nft-collections/route.ts` | Modificado |
+| `/app/api/nft-collections/[collectionId]/route.ts` | Modificado |
+| `/components/car-nft.tsx` | Modificado |
+| `/app/(root)/achievements/nft/tabs/nfts-tab.tsx` | Modificado |
 
 ---
 
@@ -254,9 +239,9 @@ Actualizar API en `/app/api/nft-collections/route.ts`.
 | 10  | Actualizar API de mint (certificado) | COMPLETADO | `mint/route.ts`                                    |
 | 11  | Crear API de mint (coleccionable)    | COMPLETADO | `mint-collectible/route.ts`                        |
 | 12  | Actualizar admin test-mint           | COMPLETADO | `test-mint/route.ts`                               |
-| 13  | Actualizar tipos TS                  | PENDIENTE  | Tipos de NFT                                       |
-| 14  | Actualizar frontend                  | PENDIENTE  | NFT components                                     |
-| 15  | Actualizar admin                     | PENDIENTE  | Admin forms/pages                                  |
+| 13  | Actualizar tipos TS                  | COMPLETADO | `lib/types.ts`                                     |
+| 14  | Actualizar frontend (CardNFT, tabs)  | COMPLETADO | `car-nft.tsx`, `nfts-tab.tsx`                      |
+| 15  | Actualizar admin (form + API)        | COMPLETADO | `nft-collection-form.tsx`, API routes              |
 | 16  | Testing de integracion               | PENDIENTE  | —                                                  |
 
 ---

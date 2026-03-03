@@ -10,6 +10,7 @@ interface CardNFTProps {
   onClick?: () => void;
   id: string;
   rarity?: string;
+  tokenType?: "CERTIFICATE" | "COLLECTIBLE";
 }
 
 const rarityColors: Record<string, string> = {
@@ -31,7 +32,8 @@ export const CardNFT: React.FC<CardNFTProps> = ({
   title,
   onClick,
   id,
-  rarity = "NORMAL"
+  rarity = "NORMAL",
+  tokenType
 }) => {
   const rarityColor = rarityColors[rarity];
   const rarityLabel = rarityLabels[rarity];
@@ -57,6 +59,17 @@ export const CardNFT: React.FC<CardNFTProps> = ({
             className={`absolute top-2 right-2 ${rarityColor} bg-black/70 backdrop-blur-sm px-2 py-1 rounded text-[10px] font-semibold`}
           >
             {rarityLabel}
+          </div>
+        )}
+        {tokenType && (
+          <div
+            className={`absolute top-2 left-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded text-[10px] font-semibold ${
+              tokenType === "CERTIFICATE"
+                ? "text-emerald-400"
+                : "text-orange-400"
+            }`}
+          >
+            {tokenType === "CERTIFICATE" ? "Certificado" : "Coleccionable"}
           </div>
         )}
       </button>

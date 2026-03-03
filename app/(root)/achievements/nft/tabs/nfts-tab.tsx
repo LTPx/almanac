@@ -58,6 +58,8 @@ export default function NftsTab({
                   image={nft.imageUrl || ""}
                   title={nft.name || "Medalla NFT"}
                   description=""
+                  rarity={nft.rarity}
+                  tokenType={nft.tokenType}
                 />
               ))}
             </div>

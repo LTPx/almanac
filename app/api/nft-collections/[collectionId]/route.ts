@@ -45,8 +45,19 @@ export async function PUT(
   try {
     const { collectionId } = await context.params;
     const body = await request.json();
-    const { name, symbol, description, contractAddress, chainId, isActive } =
-      body;
+    const {
+      name,
+      symbol,
+      description,
+      contractAddress,
+      chainId,
+      isActive,
+      defaultArtistAddress,
+      defaultRoyaltyBps,
+      maxSupply,
+      certificateContractAddress,
+      collectibleContractAddress
+    } = body;
 
     // Validaciones
     if (!name?.trim()) {
@@ -114,7 +125,16 @@ export async function PUT(
         description: description?.trim() || null,
         contractAddress: contractAddress.toLowerCase(),
         chainId: chainId || 80002,
-        isActive: isActive ?? true
+        isActive: isActive ?? true,
+        defaultArtistAddress: defaultArtistAddress?.trim() || null,
+        defaultRoyaltyBps: defaultRoyaltyBps
+          ? parseInt(String(defaultRoyaltyBps))
+          : null,
+        maxSupply: maxSupply ? parseInt(String(maxSupply)) : null,
+        certificateContractAddress:
+          certificateContractAddress?.trim() || null,
+        collectibleContractAddress:
+          collectibleContractAddress?.trim() || null
       }
     });
 

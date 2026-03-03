@@ -135,6 +135,8 @@ export type Unit = {
   state?: "completed" | "available" | "locked";
 };
 
+export type NFTTokenType = "CERTIFICATE" | "COLLECTIBLE";
+
 export type EducationalNFT = {
   id: string;
   tokenId: string;
@@ -145,6 +147,11 @@ export type EducationalNFT = {
   metadataUri: string;
   mintedAt: string;
   nftAssetId: number;
+  tokenType: NFTTokenType;
+  isTradeable: boolean;
+  linkedCertTokenId?: string;
+  artistAddress?: string;
+  royaltyBps?: number;
 };
 
 export type NFTAsset = {
@@ -295,4 +302,8 @@ export interface EducationalNFTAsset {
   transactionHash?: string;
   metadataUri?: string;
   mintedAt?: string;
+  rarity?: string;
+  tokenType?: NFTTokenType;
+  isTradeable?: boolean;
+  linkedCertTokenId?: string;
 }

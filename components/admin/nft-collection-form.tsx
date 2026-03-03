@@ -8,7 +8,12 @@ import {
   Hash,
   FileText,
   Link as LinkIcon,
-  Globe
+  Globe,
+  Wallet,
+  Percent,
+  Package,
+  Shield,
+  ShoppingBag
 } from "lucide-react";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
@@ -25,6 +30,11 @@ interface NFTCollectionFormProps {
     contractAddress: string;
     chainId: number;
     isActive: boolean;
+    defaultArtistAddress?: string;
+    defaultRoyaltyBps?: number;
+    maxSupply?: number;
+    certificateContractAddress?: string;
+    collectibleContractAddress?: string;
   };
   onSuccess?: (data: any) => void;
   onCancel?: () => void;
@@ -45,7 +55,14 @@ export function NFTCollectionForm({
     description: initialData?.description || "",
     contractAddress: initialData?.contractAddress || "",
     chainId: initialData?.chainId || 80002,
-    isActive: initialData?.isActive ?? true
+    isActive: initialData?.isActive ?? true,
+    defaultArtistAddress: initialData?.defaultArtistAddress || "",
+    defaultRoyaltyBps: initialData?.defaultRoyaltyBps ?? 500,
+    maxSupply: initialData?.maxSupply ?? "",
+    certificateContractAddress:
+      initialData?.certificateContractAddress || "",
+    collectibleContractAddress:
+      initialData?.collectibleContractAddress || ""
   });
 
   const handleChange = (
@@ -68,6 +85,9 @@ export function NFTCollectionForm({
     }));
   };
 
+  const isValidAddress = (addr: string) =>
+    !addr.trim() || /^0x[a-fA-F0-9]{40}$/.test(addr);
+
   const validateForm = () => {
     if (!formData.name.trim()) {
       setError("El nombre es requerido");
@@ -85,6 +105,18 @@ export function NFTCollectionForm({
       setError(
         "Dirección del contrato inválida (debe ser 0x seguido de 40 caracteres hexadecimales)"
       );
+      return false;
+    }
+    if (!isValidAddress(formData.defaultArtistAddress)) {
+      setError("Dirección del artista inválida");
+      return false;
+    }
+    if (!isValidAddress(formData.certificateContractAddress)) {
+      setError("Dirección del contrato de certificados inválida");
+      return false;
+    }
+    if (!isValidAddress(formData.collectibleContractAddress)) {
+      setError("Dirección del contrato de coleccionables inválida");
       return false;
     }
     return true;
@@ -224,6 +256,103 @@ export function NFTCollectionForm({
               <option value={11155111}>Ethereum Sepolia (11155111)</option>
               <option value={1}>Ethereum Mainnet (1)</option>
             </select>
+          </div>
+
+          {/* Certificate Contract Address */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium mb-2">
+              <Shield size={16} />
+              Contrato de Certificados (opcional)
+            </label>
+            <Input
+              type="text"
+              name="certificateContractAddress"
+              value={formData.certificateContractAddress}
+              onChange={handleChange}
+              placeholder="0x..."
+              className="font-mono text-sm"
+            />
+            <p className="text-xs mt-2">
+              Address del contrato AlmanacCertificate (soulbound)
+            </p>
+          </div>
+
+          {/* Collectible Contract Address */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium mb-2">
+              <ShoppingBag size={16} />
+              Contrato de Coleccionables (opcional)
+            </label>
+            <Input
+              type="text"
+              name="collectibleContractAddress"
+              value={formData.collectibleContractAddress}
+              onChange={handleChange}
+              placeholder="0x..."
+              className="font-mono text-sm"
+            />
+            <p className="text-xs mt-2">
+              Address del contrato AlmanacCollectible (tradeable)
+            </p>
+          </div>
+
+          {/* Artist Wallet */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium mb-2">
+              <Wallet size={16} />
+              Wallet del Artista (opcional)
+            </label>
+            <Input
+              type="text"
+              name="defaultArtistAddress"
+              value={formData.defaultArtistAddress}
+              onChange={handleChange}
+              placeholder="0x..."
+              className="font-mono text-sm"
+            />
+            <p className="text-xs mt-2">
+              Recibe royalties de los coleccionables (ERC-2981)
+            </p>
+          </div>
+
+          {/* Royalty + Max Supply row */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium mb-2">
+                <Percent size={16} />
+                Royalties (bps)
+              </label>
+              <Input
+                type="number"
+                name="defaultRoyaltyBps"
+                value={formData.defaultRoyaltyBps}
+                onChange={handleChange}
+                placeholder="500"
+                min={0}
+                max={10000}
+              />
+              <p className="text-xs mt-2">
+                500 = 5%, 1000 = 10%
+              </p>
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium mb-2">
+                <Package size={16} />
+                Max Supply
+              </label>
+              <Input
+                type="number"
+                name="maxSupply"
+                value={formData.maxSupply}
+                onChange={handleChange}
+                placeholder="10000"
+                min={1}
+              />
+              <p className="text-xs mt-2">
+                Supply máximo de NFTs
+              </p>
+            </div>
           </div>
 
           {/* Is Active */}
