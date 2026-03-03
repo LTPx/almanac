@@ -207,9 +207,77 @@ Los registros NFT existentes quedan con defaults seguros (`CERTIFICATE`, `isTrad
 
 ---
 
-## Fase 5: Testing de integracion — PENDIENTE
+## Fase 5: Generador de Arte NFT por Capas (estilo HashLips) — PENDIENTE
 
-### 5.1 Testing de integracion
+El cliente tiene assets por capas (Background, Body, Eyes, Mouth, etc.) y necesita que al momento del mint, el backend combine capas aleatorias en una sola imagen PNG. Cada trait individual tiene su propio peso de rareza. Las imagenes se suben via admin y se almacenan en DigitalOcean Spaces. La generacion es **on-demand al mint**.
+
+### 5.1 Schema + Migracion
+
+Nuevos modelos en `prisma/schema.prisma`:
+
+- **`LayerCategory`** — Categoria de capa (Background, Body, Eyes...) con orden de composicion y flag `isRequired`. Unico por coleccion+nombre.
+- **`LayerTrait`** — Trait individual (Gold Background, Blue Eyes...) con `imageUrl` (DO Spaces), `weight` (peso de rareza, mayor=mas comun). Unico por categoria+nombre.
+- **`GeneratedNFT`** — Imagen compuesta generada. Tiene `combinationHash` (SHA-256 de trait IDs) para garantizar unicidad. Linked a `NFTAsset` para compatibilidad con mint flow existente.
+- **`GeneratedNFTTrait`** — Join table entre GeneratedNFT y LayerTrait.
+
+Agregar relaciones inversas en `NFTCollection` y `NFTAsset`.
+
+### 5.2 Instalar sharp
+
+```bash
+npm install sharp && npm install -D @types/sharp
+```
+
+### 5.3 S3 — uploadBuffer
+
+**Modificar:** `lib/s3.ts`
+
+Nueva funcion `uploadBuffer(buffer, folder, extension)` para subir la imagen compuesta a DO Spaces.
+
+### 5.4 Motor de generacion — `lib/art-generator.ts`
+
+**Nuevo archivo.** Funciones:
+
+1. `selectTraitsByWeight(categories)` — Seleccion aleatoria ponderada por peso
+2. `compositeImage(traits)` — `sharp` para componer PNGs en orden
+3. `deriveRarity(traits, categories)` — Probabilidad combinada → NORMAL/RARE/EPIC/UNIQUE
+4. `generateCombinationHash(traitIds)` — SHA-256 para unicidad
+5. `generateNFTArt(collectionId)` — Orquesta todo: seleccionar → verificar unicidad → componer → subir a DO Spaces → crear registros DB → retornar resultado
+
+### 5.5 API Routes admin
+
+| Ruta | Metodos | Descripcion |
+|------|---------|-------------|
+| `/api/admin/layer-categories` | GET, POST | CRUD categorias de capas |
+| `/api/admin/layer-categories/[categoryId]` | PUT, DELETE | Actualizar/eliminar categoria |
+| `/api/admin/layer-traits` | GET, POST | CRUD traits (POST con upload PNG a DO Spaces) |
+| `/api/admin/layer-traits/[traitId]` | PUT, DELETE | Actualizar peso/nombre, eliminar trait+imagen |
+| `/api/admin/generate-nft` | POST | Preview de generacion (admin, no mintea) |
+
+### 5.6 Admin UI
+
+| Archivo | Descripcion |
+|---------|-------------|
+| `app/(admin)/admin/nfts/layers/page.tsx` | Pagina de gestion de capas por coleccion |
+| `components/admin/layer-category-manager.tsx` | Cards de categorias con traits, pesos editables, probabilidades |
+| `components/admin/layer-trait-uploader.tsx` | Upload PNG + nombre + peso |
+| `components/admin/nft-preview-generator.tsx` | Boton "Generar Preview" con resultado visual |
+
+### 5.7 Integracion con mint flow
+
+**Modificar:** `mint/route.ts`, `mint-collectible/route.ts`, `test-mint/route.ts`
+
+Logica condicional: si la coleccion tiene `LayerCategory` configuradas → usar `generateNFTArt()`. Si no → fallback al pool estatico existente (`getAvailableNFTImage()`).
+
+### 5.8 Tipos TypeScript
+
+**Modificar:** `lib/types.ts` — Agregar tipos para LayerCategory, LayerTrait, GeneratedNFT.
+
+---
+
+## Fase 6: Testing de integracion — PENDIENTE
+
+### 6.1 Testing de integracion
 
 - [ ] Flujo certificado: completar curriculum → mint → verificar token en blockchain + registro en DB
 - [ ] Certificado NO se puede transferir (revert en blockchain)
@@ -220,6 +288,9 @@ Los registros NFT existentes quedan con defaults seguros (`CERTIFICATE`, `isTrad
 - [ ] `royaltyInfo()` retorna valores correctos para coleccionables
 - [ ] Admin test-mint funciona para ambos tipos
 - [ ] Transferencia de coleccionable funciona (usuario puede vender)
+- [ ] Generacion por capas: subir layers → configurar pesos → generar preview → mint con imagen generada
+- [ ] Unicidad: no se generan combinaciones duplicadas
+- [ ] Colecciones sin capas siguen usando pool estatico
 
 ---
 
@@ -242,7 +313,13 @@ Los registros NFT existentes quedan con defaults seguros (`CERTIFICATE`, `isTrad
 | 13  | Actualizar tipos TS                  | COMPLETADO | `lib/types.ts`                                     |
 | 14  | Actualizar frontend (CardNFT, tabs)  | COMPLETADO | `car-nft.tsx`, `nfts-tab.tsx`                      |
 | 15  | Actualizar admin (form + API)        | COMPLETADO | `nft-collection-form.tsx`, API routes              |
-| 16  | Testing de integracion               | PENDIENTE  | —                                                  |
+| 16  | Schema generador de capas            | PENDIENTE  | `schema.prisma`                                    |
+| 17  | Instalar sharp + uploadBuffer        | PENDIENTE  | `package.json`, `lib/s3.ts`                        |
+| 18  | Motor de generacion                  | PENDIENTE  | `lib/art-generator.ts`                             |
+| 19  | API admin capas                      | PENDIENTE  | `app/api/admin/layer-*`                            |
+| 20  | Admin UI capas                       | PENDIENTE  | `app/(admin)/admin/nfts/layers/`                   |
+| 21  | Integracion mint + capas             | PENDIENTE  | `mint/route.ts`, `mint-collectible/route.ts`       |
+| 22  | Testing de integracion               | PENDIENTE  | —                                                  |
 
 ---
 
