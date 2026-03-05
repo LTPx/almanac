@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { deleteImageFromSpaces } from "@/lib/s3";
+import { deleteImageFromSpaces, uploadFile } from "@/lib/s3";
 
 // PUT - Update a trait (name or weight)
 export async function PUT(
@@ -35,6 +35,65 @@ export async function PUT(
       );
     }
     console.error("Error updating layer trait:", error);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+// POST - Upload/replace image for a trait
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ traitId: string }> }
+) {
+  try {
+    const { traitId } = await params;
+
+    const trait = await prisma.layerTrait.findUnique({
+      where: { id: traitId },
+      include: { category: { select: { collectionId: true, name: true } } }
+    });
+
+    if (!trait) {
+      return NextResponse.json(
+        { message: "Trait not found" },
+        { status: 404 }
+      );
+    }
+
+    const formData = await request.formData();
+    const file = formData.get("file") as File | null;
+
+    if (!file) {
+      return NextResponse.json(
+        { message: "file is required" },
+        { status: 400 }
+      );
+    }
+
+    // Delete old image if it's not a placeholder
+    if (trait.imageUrl && !trait.imageUrl.startsWith("placeholder://")) {
+      try {
+        await deleteImageFromSpaces(trait.imageUrl);
+      } catch (err) {
+        console.error("Error deleting old trait image:", err);
+      }
+    }
+
+    // Upload new image
+    const folder = `layers/${trait.category.collectionId}/${trait.category.name.toLowerCase().replace(/\s+/g, "-")}`;
+    const uploaded = await uploadFile(file, folder);
+
+    // Update DB
+    const updated = await prisma.layerTrait.update({
+      where: { id: traitId },
+      data: { imageUrl: uploaded.url }
+    });
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error("Error uploading trait image:", error);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

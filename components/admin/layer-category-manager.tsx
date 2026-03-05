@@ -20,7 +20,8 @@ import {
   ChevronRight,
   Pencil,
   Check,
-  X
+  X,
+  Upload
 } from "lucide-react";
 import {
   AlertDialog,
@@ -58,6 +59,36 @@ export function LayerCategoryManager({
   // Edit trait weight
   const [editingTraitId, setEditingTraitId] = useState<string | null>(null);
   const [editWeight, setEditWeight] = useState("");
+
+  // Upload trait image
+  const [uploadingTraitId, setUploadingTraitId] = useState<string | null>(null);
+
+  const handleImageUpload = async (traitId: string, file: File) => {
+    setUploadingTraitId(traitId);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch(`/api/admin/layer-traits/${traitId}`, {
+        method: "POST",
+        body: formData
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Error al subir imagen");
+      }
+
+      toast.success("Imagen actualizada");
+      fetchCategories();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Error al subir imagen"
+      );
+    } finally {
+      setUploadingTraitId(null);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -252,11 +283,36 @@ export function LayerCategoryManager({
                         key={trait.id}
                         className="grid grid-cols-[60px_1fr_80px_80px_40px] gap-2 items-center bg-muted/50 rounded-md p-1"
                       >
-                        <img
-                          src={trait.imageUrl}
-                          alt={trait.name}
-                          className="w-10 h-10 rounded border object-cover"
-                        />
+                        <label className="relative w-10 h-10 rounded border overflow-hidden cursor-pointer group">
+                          {trait.imageUrl.startsWith("placeholder://") ? (
+                            <div className="w-full h-full bg-muted flex items-center justify-center">
+                              <Upload className="w-4 h-4 text-muted-foreground" />
+                            </div>
+                          ) : (
+                            <img
+                              src={trait.imageUrl}
+                              alt={trait.name}
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            {uploadingTraitId === trait.id ? (
+                              <span className="text-white text-[10px]">...</span>
+                            ) : (
+                              <Upload className="w-3.5 h-3.5 text-white" />
+                            )}
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleImageUpload(trait.id, file);
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
                         <span className="text-sm truncate">{trait.name}</span>
 
                         {editingTraitId === trait.id ? (
