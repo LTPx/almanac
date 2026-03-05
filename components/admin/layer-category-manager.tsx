@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 import {
   DndContext,
   DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
   closestCenter,
   PointerSensor,
   useSensor,
@@ -18,12 +16,7 @@ import {
   arrayMove
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -548,9 +541,10 @@ export function LayerCategoryManager({
 
     const oldIndex = categories.findIndex((c) => c.id === active.id);
     const newIndex = categories.findIndex((c) => c.id === over.id);
-    const reordered = arrayMove(categories, oldIndex, newIndex).map(
-      (c, i) => ({ ...c, order: i })
-    );
+    const reordered = arrayMove(categories, oldIndex, newIndex).map((c, i) => ({
+      ...c,
+      order: i
+    }));
 
     setCategories(reordered);
 
@@ -610,9 +604,7 @@ export function LayerCategoryManager({
               category={category}
               isExpanded={expandedId === category.id}
               onToggleExpand={() =>
-                setExpandedId(
-                  expandedId === category.id ? null : category.id
-                )
+                setExpandedId(expandedId === category.id ? null : category.id)
               }
               onDeleteCategory={deleteCategory}
               onTraitDragEnd={handleTraitDragEnd}
