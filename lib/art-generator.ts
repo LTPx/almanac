@@ -1,7 +1,7 @@
 import sharp from "sharp";
 import crypto from "crypto";
 import prisma from "@/lib/prisma";
-import { uploadBuffer } from "@/lib/s3";
+import { uploadBuffer, downloadBuffer } from "@/lib/s3";
 
 type CategoryWithTraits = {
   id: string;
@@ -84,16 +84,30 @@ export async function compositeImage(
     throw new Error("No traits to composite");
   }
 
-  // Download all images in parallel
+  // Download all images in parallel via public URL
   const imageBuffers = await Promise.all(
     traits.map(async (trait) => {
+      console.log(`[art-gen] Downloading: "${trait.traitName}" → ${trait.imageUrl}`);
+
+      // Try S3 client first, fallback to fetch
+      try {
+        const buf = await downloadBuffer(trait.imageUrl);
+        console.log(`[art-gen] S3 OK "${trait.traitName}": ${buf.length} bytes`);
+        return buf;
+      } catch (s3Err) {
+        console.log(`[art-gen] S3 failed, trying HTTP fetch for "${trait.traitName}"`);
+      }
+
+      // Fallback: HTTP fetch
       const response = await fetch(trait.imageUrl);
       if (!response.ok) {
         throw new Error(
-          `Failed to download image for trait "${trait.traitName}": ${response.status}`
+          `Failed to download "${trait.traitName}": HTTP ${response.status}`
         );
       }
-      return Buffer.from(await response.arrayBuffer());
+      const buf = Buffer.from(await response.arrayBuffer());
+      console.log(`[art-gen] HTTP OK "${trait.traitName}": ${buf.length} bytes`);
+      return buf;
     })
   );
 
@@ -186,6 +200,18 @@ export async function generateBatch(
     );
   }
 
+  // Check for traits with placeholder images (not yet uploaded)
+  const traitsWithoutImages = categories.flatMap((c) =>
+    c.traits
+      .filter((t: { imageUrl: string }) => !t.imageUrl.startsWith("http"))
+      .map((t: { name: string }) => `${c.name}/${t.name}`)
+  );
+  if (traitsWithoutImages.length > 0) {
+    throw new Error(
+      `The following traits don't have images uploaded yet: ${traitsWithoutImages.join(", ")}`
+    );
+  }
+
   // Calculate max possible unique combinations
   const maxCombinations = categories.reduce(
     (product: number, cat: { traits: unknown[] }) => {
@@ -271,8 +297,9 @@ export async function generateBatch(
 
       onProgress?.(i + 1, count);
     } catch (error) {
+      console.error(`[art-gen] Error generating image ${i + 1}:`, error);
       const message =
-        error instanceof Error ? error.message : "Unknown error";
+        error instanceof Error ? error.message : String(error);
       result.errors.push(`Image ${i + 1}: ${message}`);
     }
   }

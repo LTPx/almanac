@@ -1,4 +1,9 @@
-import { PutObjectCommand, S3, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import {
+  PutObjectCommand,
+  S3,
+  DeleteObjectCommand,
+  GetObjectCommand
+} from "@aws-sdk/client-s3";
 import { v4 as uuid } from "uuid";
 
 export const s3Client = new S3({
@@ -56,6 +61,26 @@ export async function uploadBuffer(
     ...result,
     url: `${process.env.DIGITAL_OCEAN_BUCKET_URL_ENDPOINT}/${folder}/${fileName}`
   };
+}
+
+export async function downloadBuffer(url: string): Promise<Buffer> {
+  // Extract key from URL — handle both CDN and non-CDN URLs
+  // e.g. https://almanac.fra1.cdn.digitaloceanspaces.com/path/file.png → path/file.png
+  // e.g. https://almanac.fra1.digitaloceanspaces.com/path/file.png → path/file.png
+  const key = url.replace(
+    /^https?:\/\/[^/]+\//,
+    ""
+  );
+  console.log(`[s3] downloadBuffer key="${key}" from url="${url}"`);
+  const response = await s3Client.send(
+    new GetObjectCommand({
+      Bucket: process.env.DIGITAL_OCEAN_BUCKET_NAME,
+      Key: key
+    })
+  );
+  const stream = response.Body;
+  if (!stream) throw new Error(`Empty response for key: ${key}`);
+  return Buffer.from(await stream.transformToByteArray());
 }
 
 export const deleteImageFromSpaces = async (url: string) => {
