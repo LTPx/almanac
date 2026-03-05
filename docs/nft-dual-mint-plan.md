@@ -207,7 +207,7 @@ Los registros NFT existentes quedan con defaults seguros (`CERTIFICATE`, `isTrad
 
 ---
 
-## Fase 5: Generador Batch de Arte NFT por Capas (estilo HashLips) — PENDIENTE
+## Fase 5: Generador Batch de Arte NFT por Capas (estilo HashLips) — COMPLETADA
 
 El cliente tiene assets por capas (Background, Body, Eyes, Mouth, etc.). Se pre-generan 500+ imagenes combinando capas aleatoriamente con pesos de rareza por trait. Las imagenes se guardan en DO Spaces y se registran como `NFTAsset` en la DB. Al momento del mint, el flujo existente (`getAvailableNFTImage`) selecciona un asset aleatorio no usado — **no se modifica el mint flow**.
 
@@ -331,11 +331,11 @@ Nueva funcion `uploadBuffer(buffer, folder, extension)` para subir la imagen com
 | 13  | Actualizar tipos TS                  | COMPLETADO | `lib/types.ts`                                     |
 | 14  | Actualizar frontend (CardNFT, tabs)  | COMPLETADO | `car-nft.tsx`, `nfts-tab.tsx`                      |
 | 15  | Actualizar admin (form + API)        | COMPLETADO | `nft-collection-form.tsx`, API routes              |
-| 16  | Schema capas (LayerCategory, LayerTrait) | PENDIENTE  | `schema.prisma`                                |
-| 17  | Instalar sharp + uploadBuffer        | PENDIENTE  | `package.json`, `lib/s3.ts`                        |
-| 18  | Motor de generacion batch            | PENDIENTE  | `lib/art-generator.ts`                             |
-| 19  | API admin capas + generate-batch     | PENDIENTE  | `app/api/admin/layer-*`, `generate-batch`          |
-| 20  | Admin UI capas + batch generator     | PENDIENTE  | `app/(admin)/admin/nfts/layers/`                   |
+| 16  | Schema capas (LayerCategory, LayerTrait) | COMPLETADO | `schema.prisma`                                |
+| 17  | Instalar sharp + uploadBuffer        | COMPLETADO | `package.json`, `lib/s3.ts`                        |
+| 18  | Motor de generacion batch            | COMPLETADO | `lib/art-generator.ts`                             |
+| 19  | API admin capas + generate-batch     | COMPLETADO | `app/api/admin/layer-*`, `generate-batch`          |
+| 20  | Admin UI capas + batch generator     | COMPLETADO | `app/(admin)/admin/nfts/layers/`                   |
 | 21  | Testing de integracion               | PENDIENTE  | —                                                  |
 
 ---

@@ -307,3 +307,32 @@ export interface EducationalNFTAsset {
   isTradeable?: boolean;
   linkedCertTokenId?: string;
 }
+
+export type LayerTrait = {
+  id: string;
+  categoryId: string;
+  name: string;
+  imageUrl: string;
+  weight: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type LayerCategory = {
+  id: string;
+  collectionId: string;
+  name: string;
+  order: number;
+  isRequired: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  traits: LayerTrait[];
+  _count?: { traits: number };
+};
+
+export type BatchGenerationResult = {
+  total: number;
+  generated: number;
+  byRarity: Record<string, number>;
+  errors: string[];
+};

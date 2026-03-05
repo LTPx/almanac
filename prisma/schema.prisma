@@ -543,8 +543,39 @@ model NFTCollection {
   // relationships
   educationalNFTs EducationalNFT[]
   nftAssets       NFTAsset[]
+  layerCategories LayerCategory[]
 
   @@map("nft_collection")
+}
+
+model LayerCategory {
+  id           String          @id @default(cuid())
+  collection   NFTCollection   @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId String
+  name         String          // Background, Body, Eyes, Mouth...
+  order        Int             // Orden de composición (0 = fondo, mayor = encima)
+  isRequired   Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  traits LayerTrait[]
+
+  @@unique([collectionId, name])
+  @@map("layer_category")
+}
+
+model LayerTrait {
+  id         String        @id @default(cuid())
+  category   LayerCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId String
+  name       String        // Gold Background, Blue Eyes...
+  imageUrl   String        // URL en DO Spaces
+  weight     Int           @default(100) // Mayor = más común
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@unique([categoryId, name])
+  @@map("layer_trait")
 }
 
 model Subscription {

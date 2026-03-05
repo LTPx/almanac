@@ -37,6 +37,27 @@ export async function uploadFile(file: File, folder: string) {
   };
 }
 
+export async function uploadBuffer(
+  buffer: Buffer,
+  folder: string,
+  extension: string = "png"
+) {
+  const fileName = `${uuid()}.${extension}`;
+  const result = await s3Client.send(
+    new PutObjectCommand({
+      Bucket: process.env.DIGITAL_OCEAN_BUCKET_NAME,
+      Key: `${folder}/${fileName}`,
+      Body: new Uint8Array(buffer),
+      ContentType: `image/${extension}`,
+      ACL: "public-read"
+    })
+  );
+  return {
+    ...result,
+    url: `${process.env.DIGITAL_OCEAN_BUCKET_URL_ENDPOINT}/${folder}/${fileName}`
+  };
+}
+
 export const deleteImageFromSpaces = async (url: string) => {
   const key = url.replace(
     `${process.env.DIGITAL_OCEAN_BUCKET_URL_ENDPOINT}/`,
