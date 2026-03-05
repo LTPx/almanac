@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { deleteImageFromSpaces } from "@/lib/s3";
 import { PinataSDK } from "pinata";
 
 const PINATA_GATEWAY = process.env.PINATA_GATEWAY || "gateway.pinata.cloud";
@@ -261,6 +262,15 @@ export async function DELETE(
         },
         { status: 400 }
       );
+    }
+
+    // Delete image from DO Spaces
+    if (existingNFT.imageUrl && existingNFT.imageUrl.startsWith("http")) {
+      try {
+        await deleteImageFromSpaces(existingNFT.imageUrl);
+      } catch (err) {
+        console.error("Error deleting NFT image from DO Spaces:", err);
+      }
     }
 
     await prisma.nFTAsset.delete({
