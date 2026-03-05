@@ -207,20 +207,32 @@ Los registros NFT existentes quedan con defaults seguros (`CERTIFICATE`, `isTrad
 
 ---
 
-## Fase 5: Generador de Arte NFT por Capas (estilo HashLips) — PENDIENTE
+## Fase 5: Generador Batch de Arte NFT por Capas (estilo HashLips) — PENDIENTE
 
-El cliente tiene assets por capas (Background, Body, Eyes, Mouth, etc.) y necesita que al momento del mint, el backend combine capas aleatorias en una sola imagen PNG. Cada trait individual tiene su propio peso de rareza. Las imagenes se suben via admin y se almacenan en DigitalOcean Spaces. La generacion es **on-demand al mint**.
+El cliente tiene assets por capas (Background, Body, Eyes, Mouth, etc.). Se pre-generan 500+ imagenes combinando capas aleatoriamente con pesos de rareza por trait. Las imagenes se guardan en DO Spaces y se registran como `NFTAsset` en la DB. Al momento del mint, el flujo existente (`getAvailableNFTImage`) selecciona un asset aleatorio no usado — **no se modifica el mint flow**.
+
+### Flujo
+
+```
+1. Admin sube PNGs de capas via admin panel → DO Spaces (layers/{collectionId}/{category}/)
+2. Admin configura categorias (Background, Body...) con orden y traits con pesos
+3. Admin ejecuta "Generar Batch" indicando cantidad (ej: 500)
+4. Backend genera N imagenes unicas combinando capas con sharp
+5. Cada imagen se sube a DO Spaces (generated-nfts/{collectionId}/)
+6. Se crea un NFTAsset por imagen con rareza derivada de los traits
+7. Al mint, el flujo existente selecciona un NFTAsset aleatorio disponible
+```
 
 ### 5.1 Schema + Migracion
 
 Nuevos modelos en `prisma/schema.prisma`:
 
-- **`LayerCategory`** — Categoria de capa (Background, Body, Eyes...) con orden de composicion y flag `isRequired`. Unico por coleccion+nombre.
+- **`LayerCategory`** — Categoria de capa (Background, Body, Eyes...) con `order` (composicion) y `isRequired`. Unico por coleccion+nombre.
 - **`LayerTrait`** — Trait individual (Gold Background, Blue Eyes...) con `imageUrl` (DO Spaces), `weight` (peso de rareza, mayor=mas comun). Unico por categoria+nombre.
-- **`GeneratedNFT`** — Imagen compuesta generada. Tiene `combinationHash` (SHA-256 de trait IDs) para garantizar unicidad. Linked a `NFTAsset` para compatibilidad con mint flow existente.
-- **`GeneratedNFTTrait`** — Join table entre GeneratedNFT y LayerTrait.
 
-Agregar relaciones inversas en `NFTCollection` y `NFTAsset`.
+No se necesita `GeneratedNFT` ni `GeneratedNFTTrait` — la generacion produce `NFTAsset` directamente, que es lo que el mint flow ya consume. La unicidad se verifica en memoria durante la generacion batch.
+
+Agregar relacion inversa `layerCategories` en `NFTCollection`.
 
 ### 5.2 Instalar sharp
 
@@ -238,11 +250,19 @@ Nueva funcion `uploadBuffer(buffer, folder, extension)` para subir la imagen com
 
 **Nuevo archivo.** Funciones:
 
-1. `selectTraitsByWeight(categories)` — Seleccion aleatoria ponderada por peso
-2. `compositeImage(traits)` — `sharp` para componer PNGs en orden
-3. `deriveRarity(traits, categories)` — Probabilidad combinada → NORMAL/RARE/EPIC/UNIQUE
-4. `generateCombinationHash(traitIds)` — SHA-256 para unicidad
-5. `generateNFTArt(collectionId)` — Orquesta todo: seleccionar → verificar unicidad → componer → subir a DO Spaces → crear registros DB → retornar resultado
+1. `selectTraitsByWeight(categories)` — Seleccion aleatoria ponderada por peso. Para cada categoria, selecciona un trait con probabilidad proporcional a su `weight`.
+2. `compositeImage(traits)` — Descarga PNGs desde DO Spaces, los compone en orden con `sharp`. Retorna Buffer PNG.
+3. `deriveRarity(traits, categories)` — Calcula probabilidad combinada (producto de trait.weight/totalCategoryWeight). Mapea a NORMAL (>=10%), RARE (>=1%), EPIC (>=0.1%), UNIQUE (<0.1%).
+4. `generateCombinationHash(traitIds)` — SHA-256 de IDs ordenados para verificar unicidad en el batch.
+5. `generateBatch(collectionId, count)` — Orquesta la generacion:
+   - Carga categorias + traits de la coleccion
+   - Para cada imagen (1..count):
+     - Selecciona traits por peso
+     - Verifica unicidad contra hashes ya generados (en memoria)
+     - Compone imagen con sharp
+     - Sube a DO Spaces (`generated-nfts/{collectionId}/`)
+     - Crea registro `NFTAsset` con `collectionId`, `rarity` derivada, `imageUrl`, `name` con traits
+   - Retorna resumen: total generados, por rareza, errores
 
 ### 5.5 API Routes admin
 
@@ -252,7 +272,7 @@ Nueva funcion `uploadBuffer(buffer, folder, extension)` para subir la imagen com
 | `/api/admin/layer-categories/[categoryId]` | PUT, DELETE | Actualizar/eliminar categoria |
 | `/api/admin/layer-traits` | GET, POST | CRUD traits (POST con upload PNG a DO Spaces) |
 | `/api/admin/layer-traits/[traitId]` | PUT, DELETE | Actualizar peso/nombre, eliminar trait+imagen |
-| `/api/admin/generate-nft` | POST | Preview de generacion (admin, no mintea) |
+| `/api/admin/generate-batch` | POST | Genera N imagenes para una coleccion. Body: `{ collectionId, count }` |
 
 ### 5.6 Admin UI
 
@@ -261,17 +281,15 @@ Nueva funcion `uploadBuffer(buffer, folder, extension)` para subir la imagen com
 | `app/(admin)/admin/nfts/layers/page.tsx` | Pagina de gestion de capas por coleccion |
 | `components/admin/layer-category-manager.tsx` | Cards de categorias con traits, pesos editables, probabilidades |
 | `components/admin/layer-trait-uploader.tsx` | Upload PNG + nombre + peso |
-| `components/admin/nft-preview-generator.tsx` | Boton "Generar Preview" con resultado visual |
+| `components/admin/batch-generator.tsx` | Input de cantidad + boton "Generar Batch" + progreso + resumen |
 
-### 5.7 Integracion con mint flow
+### 5.7 Tipos TypeScript
 
-**Modificar:** `mint/route.ts`, `mint-collectible/route.ts`, `test-mint/route.ts`
+**Modificar:** `lib/types.ts` — Agregar tipos para LayerCategory, LayerTrait.
 
-Logica condicional: si la coleccion tiene `LayerCategory` configuradas → usar `generateNFTArt()`. Si no → fallback al pool estatico existente (`getAvailableNFTImage()`).
+### Nota sobre el mint flow
 
-### 5.8 Tipos TypeScript
-
-**Modificar:** `lib/types.ts` — Agregar tipos para LayerCategory, LayerTrait, GeneratedNFT.
+**No se modifica el mint flow.** Las imagenes generadas se guardan como `NFTAsset` con `collectionId` y `rarity`. El flujo existente (`getAvailableNFTImage`) ya selecciona un `NFTAsset` aleatorio no usado de la coleccion — esto funciona identico tanto para assets subidos manualmente como para assets generados por batch.
 
 ---
 
@@ -313,13 +331,12 @@ Logica condicional: si la coleccion tiene `LayerCategory` configuradas → usar 
 | 13  | Actualizar tipos TS                  | COMPLETADO | `lib/types.ts`                                     |
 | 14  | Actualizar frontend (CardNFT, tabs)  | COMPLETADO | `car-nft.tsx`, `nfts-tab.tsx`                      |
 | 15  | Actualizar admin (form + API)        | COMPLETADO | `nft-collection-form.tsx`, API routes              |
-| 16  | Schema generador de capas            | PENDIENTE  | `schema.prisma`                                    |
+| 16  | Schema capas (LayerCategory, LayerTrait) | PENDIENTE  | `schema.prisma`                                |
 | 17  | Instalar sharp + uploadBuffer        | PENDIENTE  | `package.json`, `lib/s3.ts`                        |
-| 18  | Motor de generacion                  | PENDIENTE  | `lib/art-generator.ts`                             |
-| 19  | API admin capas                      | PENDIENTE  | `app/api/admin/layer-*`                            |
-| 20  | Admin UI capas                       | PENDIENTE  | `app/(admin)/admin/nfts/layers/`                   |
-| 21  | Integracion mint + capas             | PENDIENTE  | `mint/route.ts`, `mint-collectible/route.ts`       |
-| 22  | Testing de integracion               | PENDIENTE  | —                                                  |
+| 18  | Motor de generacion batch            | PENDIENTE  | `lib/art-generator.ts`                             |
+| 19  | API admin capas + generate-batch     | PENDIENTE  | `app/api/admin/layer-*`, `generate-batch`          |
+| 20  | Admin UI capas + batch generator     | PENDIENTE  | `app/(admin)/admin/nfts/layers/`                   |
+| 21  | Testing de integracion               | PENDIENTE  | —                                                  |
 
 ---
 
