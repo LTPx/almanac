@@ -20,7 +20,8 @@ import {
   Users,
   Bot,
   Languages,
-  Layers
+  Layers,
+  Library
 } from "lucide-react";
 
 interface NavItem {
@@ -44,8 +45,19 @@ const managementNav: NavItem[] = [
   { name: "Usuarios", href: "/admin/users", icon: Users },
   { name: "Problemas", href: "/admin/problem-reports", icon: Flag },
   { name: "Anuncios", href: "/admin/ads", icon: MonitorPlay },
-  { name: "NFTs", href: "/admin/nfts", icon: Coins },
-  { name: "NFT Layers", href: "/admin/nfts/layers", icon: Layers }
+  {
+    name: "NFTs",
+    icon: Coins,
+    children: [
+      {
+        name: "NFT Collections",
+        href: "/admin/nfts/collections",
+        icon: Library
+      },
+      { name: "NFTs List", href: "/admin/nfts", icon: Coins },
+      { name: "NFT Layers", href: "/admin/nfts/layers", icon: Layers }
+    ]
+  }
 ];
 
 // Settings Section
@@ -81,9 +93,28 @@ export function Sidebar({ collapsed = false, className }: SidebarProps) {
     );
   };
 
+  const allNavItems = [...contentNav, ...managementNav, ...settingsNav];
+  const collectAllHrefs = (items: NavItem[]): string[] =>
+    items.flatMap((item) => [
+      ...(item.href ? [item.href] : []),
+      ...(item.children ? collectAllHrefs(item.children) : [])
+    ]);
+  const allHrefs = collectAllHrefs(allNavItems);
+
   const isActive = (href?: string) => {
     if (!href) return false;
-    return pathname === href || pathname.startsWith(href + "/");
+    if (pathname === href) return true;
+    // Only match sub-paths if no other sibling route is a better match
+    // e.g. /admin/nfts should not match /admin/nfts/collections
+    return (
+      pathname.startsWith(href + "/") &&
+      !allHrefs.some(
+        (other) =>
+          other !== href &&
+          other.startsWith(href + "/") &&
+          pathname.startsWith(other)
+      )
+    );
   };
 
   const renderNavItem = (item: NavItem, isChild = false) => {

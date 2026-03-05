@@ -59,10 +59,8 @@ export function NFTCollectionForm({
     defaultArtistAddress: initialData?.defaultArtistAddress || "",
     defaultRoyaltyBps: initialData?.defaultRoyaltyBps ?? 500,
     maxSupply: initialData?.maxSupply ?? "",
-    certificateContractAddress:
-      initialData?.certificateContractAddress || "",
-    collectibleContractAddress:
-      initialData?.collectibleContractAddress || ""
+    certificateContractAddress: initialData?.certificateContractAddress || "",
+    collectibleContractAddress: initialData?.collectibleContractAddress || ""
   });
 
   const handleChange = (
@@ -133,10 +131,10 @@ export function NFTCollectionForm({
     try {
       const url =
         mode === "create"
-          ? "/api/nft-collections"
-          : `/api/nft-collections/${initialData?.id}`;
+          ? "/api/admin/nft-collections"
+          : `/api/admin/nft-collections/${initialData?.id}`;
 
-      const method = mode === "create" ? "POST" : "PUT";
+      const method = mode === "create" ? "POST" : "PATCH";
 
       const response = await fetch(url, {
         method,
@@ -331,9 +329,7 @@ export function NFTCollectionForm({
                 min={0}
                 max={10000}
               />
-              <p className="text-xs mt-2">
-                500 = 5%, 1000 = 10%
-              </p>
+              <p className="text-xs mt-2">500 = 5%, 1000 = 10%</p>
             </div>
 
             <div>
@@ -349,9 +345,7 @@ export function NFTCollectionForm({
                 placeholder="10000"
                 min={1}
               />
-              <p className="text-xs mt-2">
-                Supply máximo de NFTs
-              </p>
+              <p className="text-xs mt-2">Supply máximo de NFTs</p>
             </div>
           </div>
 
