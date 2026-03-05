@@ -3,6 +3,15 @@ import crypto from "crypto";
 import prisma from "@/lib/prisma";
 import { uploadBuffer, downloadBuffer } from "@/lib/s3";
 
+const NFT_NAME_PREFIX = ["Neo", "Meta", "Pixel", "Crypto", "Void", "Flux", "Nova", "Zen", "Hyper", "Neon"];
+const NFT_NAME_SUFFIX = ["Fox", "Ape", "Cat", "Orb", "Ghost", "Wolf", "Punk", "Bot", "Skull", "Gem"];
+
+function generateNftName(): string {
+  const p = NFT_NAME_PREFIX[Math.floor(Math.random() * NFT_NAME_PREFIX.length)];
+  const s = NFT_NAME_SUFFIX[Math.floor(Math.random() * NFT_NAME_SUFFIX.length)];
+  return `${p}${s}`;
+}
+
 type CategoryWithTraits = {
   id: string;
   name: string;
@@ -277,9 +286,8 @@ export async function generateBatch(
       // Derive rarity
       const rarity = deriveRarity(traits, categories);
 
-      // Build name from traits
-      const traitNames = traits.map((t) => t.traitName).join(", ");
-      const name = `#${i + 1} — ${traitNames}`;
+      // Build name
+      const name = `#${i + 1} ${generateNftName()}`;
 
       // Create NFTAsset record
       await prisma.nFTAsset.create({
