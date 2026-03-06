@@ -7,6 +7,7 @@ import { FinalTestSystem } from "./test/FinalTestSystem";
 import { Curriculum, Unit } from "@/lib/types";
 import { useProgress } from "@/hooks/useProgress";
 import { computeUnitStates } from "@/lib/utils/compute-unit-states";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type LearningPathProps = {
   curriculum: Curriculum;
@@ -44,6 +45,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
   );
   const { progress, isLoading, refetch } = useProgress(userId, curriculum.id);
   const hasCheckedResume = useRef(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     console.log(
@@ -277,7 +279,7 @@ const LearningPath: React.FC<LearningPathProps> = ({
     <div className="flex flex-col">
       <div className="px-6 py-8">
         {isLoading ? (
-          <div>Cargando progreso...</div>
+          <div>{t("home", "loadingProgress")}</div>
         ) : (
           <LessonGrid
             units={unitsWithState}

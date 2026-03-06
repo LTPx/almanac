@@ -9,12 +9,14 @@ import { ArrowLeft } from "lucide-react";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import utc from "dayjs/plugin/utc";
+import { useTranslation } from "@/hooks/useTranslation";
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 
 export default function ProfileEditPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { data: session } = useSession();
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -24,7 +26,6 @@ export default function ProfileEditPage() {
   const [month, setMonth] = useState("");
   const [year, setYear] = useState("");
 
-  // Update states when session loads
   useEffect(() => {
     if (session?.user) {
       const user = session.user as any;
@@ -32,7 +33,6 @@ export default function ProfileEditPage() {
       setEmail(user.email || "");
 
       if (user.dateOfBirth) {
-        // Parse as UTC to avoid timezone issues
         const dateOfBirth = dayjs.utc(user.dateOfBirth);
         setDay(dateOfBirth.format("DD"));
         setMonth(dateOfBirth.format("MM"));
@@ -44,30 +44,28 @@ export default function ProfileEditPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validar fecha de nacimiento si está presente
     let dateOfBirth = null;
     if (day && month && year) {
       if (day.length !== 2 || month.length !== 2 || year.length !== 4) {
-        toast.error("Formato de fecha inválido");
+        toast.error(t("profileEdit", "invalidDateFormat"));
         return;
       }
 
-      // Crear y validar fecha con dayjs
       const dateString = `${year}-${month}-${day}`;
       const date = dayjs(dateString, "YYYY-MM-DD", true);
 
       if (!date.isValid()) {
-        toast.error("Fecha inválida");
+        toast.error(t("profileEdit", "invalidDate"));
         return;
       }
 
       if (date.isAfter(dayjs())) {
-        toast.error("La fecha de nacimiento no puede ser futura");
+        toast.error(t("profileEdit", "futureDateError"));
         return;
       }
 
       if (date.isBefore(dayjs("1900-01-01"))) {
-        toast.error("La fecha de nacimiento es demasiado antigua");
+        toast.error(t("profileEdit", "ancientDateError"));
         return;
       }
 
@@ -78,26 +76,20 @@ export default function ProfileEditPage() {
     try {
       const response = await fetch("/api/user/profile", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          dateOfBirth
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, dateOfBirth })
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to update profile");
+        throw new Error(data.error || t("profileEdit", "updateError"));
       }
 
-      toast.success("Profile updated successfully");
+      toast.success(t("profileEdit", "updateSuccess"));
       window.location.reload();
     } catch (error: any) {
-      toast.error(error.message || "Failed to update profile");
+      toast.error(error.message || t("profileEdit", "updateError"));
       console.error("Profile update error:", error);
     } finally {
       setIsUpdating(false);
@@ -130,7 +122,7 @@ export default function ProfileEditPage() {
           <ArrowLeft className="w-6 h-6" />
         </button>
         <h1 className="text-xl font-semibold text-white text-center flex-1">
-          Editar Perfil
+          {t("profileEdit", "title")}
         </h1>
         <div className="w-6" />
       </div>
@@ -143,7 +135,7 @@ export default function ProfileEditPage() {
             htmlFor="name"
             className="block text-sm font-medium text-blue-400 mb-2"
           >
-            Nombre
+            {t("profileEdit", "name")}
           </label>
           <input
             id="name"
@@ -151,7 +143,7 @@ export default function ProfileEditPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Tu nombre completo"
+            placeholder={t("profileEdit", "namePlaceholder")}
           />
         </div>
 
@@ -161,7 +153,7 @@ export default function ProfileEditPage() {
             htmlFor="email"
             className="block text-sm font-medium text-blue-400 mb-2"
           >
-            Correo electrónico
+            {t("profileEdit", "email")}
           </label>
           <input
             id="email"
@@ -169,7 +161,7 @@ export default function ProfileEditPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="tu@email.com"
+            placeholder={t("profileEdit", "emailPlaceholder")}
             required
           />
         </div>
@@ -177,7 +169,7 @@ export default function ProfileEditPage() {
         {/* Date of Birth Field */}
         <div>
           <label className="block text-sm font-medium text-blue-400 mb-2">
-            Fecha de nacimiento
+            {t("profileEdit", "dateOfBirth")}
           </label>
           <div className="flex items-center gap-2">
             <input
@@ -208,7 +200,7 @@ export default function ProfileEditPage() {
             />
           </div>
           <p className="mt-2 text-xs text-gray-400">
-            Tu fecha de nacimiento es opcional
+            {t("profileEdit", "dateOfBirthOptional")}
           </p>
         </div>
 
@@ -219,7 +211,9 @@ export default function ProfileEditPage() {
             disabled={isUpdating}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium"
           >
-            {isUpdating ? "Guardando..." : "Guardar cambios"}
+            {isUpdating
+              ? t("profileEdit", "saving")
+              : t("profileEdit", "saveChanges")}
           </Button>
         </div>
       </form>

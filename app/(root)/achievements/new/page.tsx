@@ -130,10 +130,10 @@ export default function CreateCertificatePage() {
         setShowSuccess(true);
         fetchCompletedUnits(session.user.id);
       } else {
-        setError(data.message || "Error al crear certificado");
+        setError(data.message || t("achievements", "errorCreatingCertificate"));
       }
     } catch (error) {
-      setError("Error de conexión");
+      setError(t("achievements", "connectionError3"));
       console.error("Error:", error);
     } finally {
       setLoading(false);
@@ -172,7 +172,9 @@ export default function CreateCertificatePage() {
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <h1 className="text-xl font-semibold text-white">Minting</h1>
+          <h1 className="text-xl font-semibold text-white">
+            {t("achievements", "mintingTitle")}
+          </h1>
           <div className="w-10" />
         </div>
       </div>

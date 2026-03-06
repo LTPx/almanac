@@ -12,6 +12,7 @@ import InterstitialAd from "../interstitialAd";
 import { SuccessCompletion } from "./SuccessCompletion";
 import { MistakeAnalyzerOverlay } from "./MistakeAnalyzerOverlay";
 import { useFinalTestSystem } from "@/hooks/useFinalTestSystem";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface FinalTestSystemProps {
   userId: string;
@@ -67,6 +68,7 @@ export function FinalTestSystem(props: FinalTestSystemProps) {
     // Props passthrough
     curriculumId
   } = useFinalTestSystem(props);
+  const { t } = useTranslation();
 
   if (error) {
     return (
@@ -168,7 +170,7 @@ export function FinalTestSystem(props: FinalTestSystemProps) {
               <StoreContent
                 onBack={handleCloseStore}
                 showBackButton={true}
-                title="Volver a Examen"
+                title={t("store", "backToExam")}
                 backButtonVariant="button"
                 onHeartsUpdate={handleHeartsUpdate}
               />

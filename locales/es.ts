@@ -319,7 +319,17 @@ export const es = {
     share: "Compartir",
     blockchainDetails: "Detalles de la blockchain",
     day: "día",
-    days: "días"
+    days: "días",
+    mintingTitle: "Minting",
+    errorCreatingCertificate: "Error al crear certificado",
+    connectionError3: "Error de conexión",
+    ownedBy: "Propiedad de",
+    nftNotFound: "NFT no encontrado",
+    linkCopied: "Enlace copiado al portapapeles",
+    tokenId: "Token ID",
+    tokenStandard: "Token Standard",
+    unknownError: "Unknown error",
+    nftAssetNotFound: "NFT Asset not found"
   },
   payments: {
     successTitle: "¡Pago completado! 🎉",
@@ -543,6 +553,45 @@ export const es = {
     achievementsTitle: "Logros",
     noAchievements: "No tienes logros aún",
     completeToUnlock: "Completa desafíos para desbloquear logros"
+  },
+  profileEdit: {
+    title: "Editar Perfil",
+    name: "Nombre",
+    namePlaceholder: "Tu nombre completo",
+    email: "Correo electrónico",
+    emailPlaceholder: "tu@email.com",
+    dateOfBirth: "Fecha de nacimiento",
+    dateOfBirthOptional: "Tu fecha de nacimiento es opcional",
+    saving: "Guardando...",
+    saveChanges: "Guardar cambios",
+    invalidDateFormat: "Formato de fecha inválido",
+    invalidDate: "Fecha inválida",
+    futureDateError: "La fecha de nacimiento no puede ser futura",
+    ancientDateError: "La fecha de nacimiento es demasiado antigua",
+    updateSuccess: "Perfil actualizado exitosamente",
+    updateError: "Error al actualizar el perfil"
+  },
+  privacySettings: {
+    title: "Ajustes de Privacidad",
+    description:
+      "Controla cómo se recopilan y utilizan tus datos. Los cambios se aplicarán inmediatamente después de guardar.",
+    cookiePreferences: "Preferencias de Cookies",
+    necessaryCookies: "Cookies Necesarias",
+    alwaysActive: "Siempre activas",
+    necessaryDesc:
+      "Esenciales para el funcionamiento del sitio. No se pueden desactivar.",
+    analytics: "Google Analytics",
+    analyticsDesc:
+      "Nos ayuda a entender cómo usas la aplicación para mejorar tu experiencia.",
+    personalizedAds: "Publicidad Personalizada",
+    personalizedAdsDesc:
+      "Muestra anuncios relevantes según tus intereses y uso de la app.",
+    lastUpdated: "Última actualización:",
+    notSaved: "No guardado",
+    saveChanges: "Guardar cambios",
+    resetPreferences: "Restablecer preferencias",
+    resetConfirm:
+      "¿Estás seguro de que quieres restablecer todas tus preferencias de privacidad?"
   }
 } as const;
 

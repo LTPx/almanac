@@ -86,7 +86,9 @@ export default function NFTAssetDetailPage() {
       setNftAsset(data);
     } catch (err) {
       console.error("Error fetching NFT Asset:", err);
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(
+        err instanceof Error ? err.message : t("achievements", "unknownError")
+      );
     } finally {
       setLoading(false);
     }
@@ -126,7 +128,7 @@ export default function NFTAssetDetailPage() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            {error || "NFT Asset no encontrado"}
+            {error || t("achievements", "nftAssetNotFound")}
             <Button
               size="sm"
               variant="outline"

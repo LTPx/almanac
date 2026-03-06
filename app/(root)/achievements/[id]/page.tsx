@@ -138,7 +138,7 @@ export default function NFTDetailPage() {
         await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(urlNft);
-        alert("Enlace copiado al portapapeles");
+        alert(t("achievements", "linkCopied"));
       }
     } catch (err) {
       console.error("Error sharing:", err);
@@ -255,7 +255,7 @@ export default function NFTDetailPage() {
         <div>
           <h1 className="text-2xl font-bold mb-1">{nft.nftAsset?.name}</h1>
           <p className="text-gray-400 text-sm">
-            {nft.nftAsset?.collection?.name} · Owned by{" "}
+            {nft.nftAsset?.collection?.name} · {t("achievements", "ownedBy")}{" "}
             {nft.owner ? formatAddress(nft.owner) : ""}
           </p>
         </div>

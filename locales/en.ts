@@ -317,7 +317,17 @@ export const en = {
     share: "Share",
     blockchainDetails: "Blockchain Details",
     day: "day",
-    days: "days"
+    days: "days",
+    mintingTitle: "Minting",
+    errorCreatingCertificate: "Error creating certificate",
+    connectionError3: "Connection error",
+    ownedBy: "Owned by",
+    nftNotFound: "NFT not found",
+    linkCopied: "Link copied to clipboard",
+    tokenId: "Token ID",
+    tokenStandard: "Token Standard",
+    unknownError: "Unknown error",
+    nftAssetNotFound: "NFT Asset not found"
   },
   payments: {
     successTitle: "Payment complete! 🎉",
@@ -540,5 +550,42 @@ export const en = {
     achievementsTitle: "Achievements",
     noAchievements: "No achievements yet",
     completeToUnlock: "Complete challenges to unlock achievements"
+  },
+  profileEdit: {
+    title: "Edit Profile",
+    name: "Name",
+    namePlaceholder: "Your full name",
+    email: "Email",
+    emailPlaceholder: "you@email.com",
+    dateOfBirth: "Date of birth",
+    dateOfBirthOptional: "Your date of birth is optional",
+    saving: "Saving...",
+    saveChanges: "Save changes",
+    invalidDateFormat: "Invalid date format",
+    invalidDate: "Invalid date",
+    futureDateError: "Date of birth cannot be in the future",
+    ancientDateError: "Date of birth is too old",
+    updateSuccess: "Profile updated successfully",
+    updateError: "Failed to update profile"
+  },
+  privacySettings: {
+    title: "Privacy Settings",
+    description:
+      "Control how your data is collected and used. Changes will be applied immediately after saving.",
+    cookiePreferences: "Cookie Preferences",
+    necessaryCookies: "Necessary Cookies",
+    alwaysActive: "Always active",
+    necessaryDesc: "Essential for the site to function. Cannot be disabled.",
+    analytics: "Google Analytics",
+    analyticsDesc:
+      "Helps us understand how you use the app to improve your experience.",
+    personalizedAds: "Personalized Advertising",
+    personalizedAdsDesc:
+      "Shows relevant ads based on your interests and app usage.",
+    lastUpdated: "Last updated:",
+    notSaved: "Not saved",
+    saveChanges: "Save changes",
+    resetPreferences: "Reset preferences",
+    resetConfirm: "Are you sure you want to reset all your privacy preferences?"
   }
 };
