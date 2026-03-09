@@ -13,6 +13,7 @@ import { Layers, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { LayerCategoryManager } from "@/components/admin/layer-category-manager";
 import { BatchGenerator } from "@/components/admin/batch-generator";
+import { NftPreview } from "@/components/admin/nft-preview";
 
 type Collection = {
   id: string;
@@ -114,8 +115,9 @@ export default function LayersPage() {
                 />
               </div>
 
-              {/* Batch Generator (1/3 width) */}
-              <div>
+              {/* Preview + Batch Generator (1/3 width) */}
+              <div className="space-y-6">
+                <NftPreview collectionId={selectedCollectionId} />
                 <BatchGenerator
                   collectionId={selectedCollectionId}
                   collectionName={selectedCollection.name}
