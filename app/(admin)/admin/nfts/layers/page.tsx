@@ -53,9 +53,12 @@ export default function LayersPage() {
         }
 
         if (curRes.ok) {
-          const data = await curRes.json();
+          const response = await curRes.json();
           // Handle both array and object with items
-          const items = Array.isArray(data) ? data : data.items || data;
+          const items = Array.isArray(response)
+            ? response
+            : response.data || response;
+
           setCurriculums(items);
         }
       } catch {
@@ -155,9 +158,7 @@ export default function LayersPage() {
                 <h2 className="text-lg font-semibold mb-3">
                   Categorías y Traits
                 </h2>
-                <LayerCategoryManager
-                  collectionId={selectedCollectionId}
-                />
+                <LayerCategoryManager collectionId={selectedCollectionId} />
               </div>
 
               {/* Preview + Batch Generator (1/3 width) */}
