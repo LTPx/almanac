@@ -21,6 +21,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
   Plus,
@@ -60,7 +67,9 @@ function SortableTraitRow({
   updateTraitWeight,
   deleteTrait,
   handleImageUpload,
-  uploadingTraitId
+  uploadingTraitId,
+  curriculums,
+  onUpdateCurriculum
 }: {
   trait: LayerTrait;
   category: LayerCategory;
@@ -72,6 +81,8 @@ function SortableTraitRow({
   deleteTrait: (id: string) => void;
   handleImageUpload: (traitId: string, file: File) => void;
   uploadingTraitId: string | null;
+  curriculums: CurriculumOption[];
+  onUpdateCurriculum: (traitId: string, curriculumId: string | null) => void;
 }) {
   const {
     attributes,
@@ -81,6 +92,8 @@ function SortableTraitRow({
     transition,
     isDragging
   } = useSortable({ id: trait.id });
+
+  console.log(`Rendering: ${curriculums}`);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -96,7 +109,7 @@ function SortableTraitRow({
     <div
       ref={setNodeRef}
       style={style}
-      className="grid grid-cols-[24px_60px_1fr_80px_80px_40px] gap-2 items-center bg-muted/50 rounded-md p-1"
+      className="grid grid-cols-[24px_60px_1fr_120px_80px_80px_40px] gap-2 items-center bg-muted/50 rounded-md p-1"
     >
       <button
         className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
@@ -138,10 +151,28 @@ function SortableTraitRow({
       </label>
 
       <span className="text-sm truncate">{trait.name}</span>
-      {trait.curriculum && (
-        <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 shrink-0">
-          {trait.curriculum.title}
-        </Badge>
+
+      {curriculums.length > 0 ? (
+        <Select
+          value={trait.curriculumId || "none"}
+          onValueChange={(val) =>
+            onUpdateCurriculum(trait.id, val === "none" ? null : val)
+          }
+        >
+          <SelectTrigger className="h-7 text-[11px] px-2">
+            <SelectValue placeholder="Genérico" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">Genérico</SelectItem>
+            {curriculums.map((cur) => (
+              <SelectItem key={cur.id} value={cur.id}>
+                {cur.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ) : (
+        <span className="text-xs text-muted-foreground">—</span>
       )}
 
       {editingTraitId === trait.id ? (
@@ -226,7 +257,8 @@ function SortableCategoryCard({
   handleImageUpload,
   uploadingTraitId,
   fetchCategories,
-  curriculums
+  curriculums,
+  onUpdateCurriculum
 }: {
   category: LayerCategory;
   isExpanded: boolean;
@@ -243,6 +275,7 @@ function SortableCategoryCard({
   uploadingTraitId: string | null;
   fetchCategories: () => void;
   curriculums: CurriculumOption[];
+  onUpdateCurriculum: (traitId: string, curriculumId: string | null) => void;
 }) {
   const {
     attributes,
@@ -334,10 +367,11 @@ function SortableCategoryCard({
         <CardContent className="pt-0 px-4 pb-4">
           {category.traits.length > 0 && (
             <div className="space-y-2 mb-4">
-              <div className="grid grid-cols-[24px_60px_1fr_80px_80px_40px] gap-2 text-xs text-muted-foreground font-medium px-1">
+              <div className="grid grid-cols-[24px_60px_1fr_120px_80px_80px_40px] gap-2 text-xs text-muted-foreground font-medium px-1">
                 <span></span>
                 <span>Preview</span>
                 <span>Nombre</span>
+                <span>Curriculum</span>
                 <span>Peso</span>
                 <span>Prob.</span>
                 <span></span>
@@ -364,6 +398,8 @@ function SortableCategoryCard({
                       deleteTrait={deleteTrait}
                       handleImageUpload={handleImageUpload}
                       uploadingTraitId={uploadingTraitId}
+                      curriculums={curriculums}
+                      onUpdateCurriculum={onUpdateCurriculum}
                     />
                   ))}
                 </SortableContext>
@@ -474,7 +510,7 @@ export function LayerCategoryManager({
     fetch("/api/admin/curriculums")
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
-        const items = Array.isArray(data) ? data : data.items || data;
+        const items = Array.isArray(data) ? data : data.data || data;
         setCurriculums(items);
       })
       .catch(() => {});
@@ -536,6 +572,24 @@ export function LayerCategoryManager({
       fetchCategories();
     } catch {
       toast.error("Error al actualizar peso");
+    }
+  };
+
+  const updateTraitCurriculum = async (
+    traitId: string,
+    curriculumId: string | null
+  ) => {
+    try {
+      const res = await fetch(`/api/admin/layer-traits/${traitId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ curriculumId })
+      });
+      if (!res.ok) throw new Error("Error updating curriculum");
+      toast.success("Curriculum actualizado");
+      fetchCategories();
+    } catch {
+      toast.error("Error al actualizar curriculum");
     }
   };
 
@@ -637,6 +691,7 @@ export function LayerCategoryManager({
               uploadingTraitId={uploadingTraitId}
               fetchCategories={fetchCategories}
               curriculums={curriculums}
+              onUpdateCurriculum={updateTraitCurriculum}
             />
           ))}
         </SortableContext>
