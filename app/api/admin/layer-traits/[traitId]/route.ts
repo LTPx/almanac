@@ -10,13 +10,19 @@ export async function PUT(
   try {
     const { traitId } = await params;
     const body = await request.json();
-    const { name, weight } = body;
+    const { name, weight, curriculumId } = body;
 
     const trait = await prisma.layerTrait.update({
       where: { id: traitId },
       data: {
         ...(name !== undefined && { name: name.trim() }),
-        ...(weight !== undefined && { weight: parseInt(String(weight)) })
+        ...(weight !== undefined && { weight: parseInt(String(weight)) }),
+        ...(curriculumId !== undefined && {
+          curriculumId: curriculumId || null
+        })
+      },
+      include: {
+        curriculum: { select: { id: true, title: true } }
       }
     });
 

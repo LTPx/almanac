@@ -4,20 +4,35 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { Upload, X } from "lucide-react";
 import { toast } from "sonner";
+
+interface CurriculumOption {
+  id: string;
+  title: string;
+}
 
 interface LayerTraitUploaderProps {
   categoryId: string;
   onTraitCreated: () => void;
+  curriculums?: CurriculumOption[];
 }
 
 export function LayerTraitUploader({
   categoryId,
-  onTraitCreated
+  onTraitCreated,
+  curriculums
 }: LayerTraitUploaderProps) {
   const [name, setName] = useState("");
   const [weight, setWeight] = useState("100");
+  const [curriculumId, setCurriculumId] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -62,6 +77,9 @@ export function LayerTraitUploader({
       formData.append("categoryId", categoryId);
       formData.append("name", name.trim());
       formData.append("weight", weight);
+      if (curriculumId && curriculumId !== "none") {
+        formData.append("curriculumId", curriculumId);
+      }
 
       const res = await fetch("/api/admin/layer-traits", {
         method: "POST",
@@ -76,6 +94,7 @@ export function LayerTraitUploader({
       toast.success(`Trait "${name}" creado`);
       setName("");
       setWeight("100");
+      setCurriculumId("");
       clearFile();
       onTraitCreated();
     } catch (error) {
@@ -109,6 +128,25 @@ export function LayerTraitUploader({
           className="h-9"
         />
       </div>
+
+      {curriculums && curriculums.length > 0 && (
+        <div className="w-40">
+          <Label className="text-xs mb-1">Curriculum</Label>
+          <Select value={curriculumId} onValueChange={setCurriculumId}>
+            <SelectTrigger className="h-9">
+              <SelectValue placeholder="Genérico" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Genérico</SelectItem>
+              {curriculums.map((cur) => (
+                <SelectItem key={cur.id} value={cur.id}>
+                  {cur.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       <div className="flex items-end gap-2">
         {preview ? (

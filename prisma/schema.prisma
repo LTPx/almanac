@@ -134,6 +134,9 @@ model Curriculum {
 
   educationalNFTs EducationalNFT[]
 
+  // NFT Layer traits linked to this curriculum (Background, Prop)
+  layerTraits LayerTrait[]
+
   // Final Test
   finalTest FinalTest?
 
@@ -573,6 +576,10 @@ model LayerTrait {
   weight     Int           @default(100) // Mayor = más común
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
+
+  // Curriculum-linked traits (Background, Prop) — null = generic trait (Body, Suit, Head)
+  curriculum   Curriculum? @relation(fields: [curriculumId], references: [id])
+  curriculumId String?
 
   @@unique([categoryId, name])
   @@map("layer_trait")

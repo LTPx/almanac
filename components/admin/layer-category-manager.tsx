@@ -138,6 +138,11 @@ function SortableTraitRow({
       </label>
 
       <span className="text-sm truncate">{trait.name}</span>
+      {trait.curriculum && (
+        <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 shrink-0">
+          {trait.curriculum.title}
+        </Badge>
+      )}
 
       {editingTraitId === trait.id ? (
         <div className="flex items-center gap-1">
@@ -220,7 +225,8 @@ function SortableCategoryCard({
   deleteTrait,
   handleImageUpload,
   uploadingTraitId,
-  fetchCategories
+  fetchCategories,
+  curriculums
 }: {
   category: LayerCategory;
   isExpanded: boolean;
@@ -236,6 +242,7 @@ function SortableCategoryCard({
   handleImageUpload: (traitId: string, file: File) => void;
   uploadingTraitId: string | null;
   fetchCategories: () => void;
+  curriculums: CurriculumOption[];
 }) {
   const {
     attributes,
@@ -373,6 +380,7 @@ function SortableCategoryCard({
           <LayerTraitUploader
             categoryId={category.id}
             onTraitCreated={fetchCategories}
+            curriculums={curriculums}
           />
         </CardContent>
       )}
@@ -386,10 +394,13 @@ interface LayerCategoryManagerProps {
   collectionId: string;
 }
 
+type CurriculumOption = { id: string; title: string };
+
 export function LayerCategoryManager({
   collectionId
 }: LayerCategoryManagerProps) {
   const [categories, setCategories] = useState<LayerCategory[]>([]);
+  const [curriculums, setCurriculums] = useState<CurriculumOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -459,6 +470,14 @@ export function LayerCategoryManager({
 
   useEffect(() => {
     fetchCategories();
+    // Fetch curriculums for trait association
+    fetch("/api/admin/curriculums")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        const items = Array.isArray(data) ? data : data.items || data;
+        setCurriculums(items);
+      })
+      .catch(() => {});
   }, [collectionId]);
 
   const addCategory = async () => {
@@ -617,6 +636,7 @@ export function LayerCategoryManager({
               handleImageUpload={handleImageUpload}
               uploadingTraitId={uploadingTraitId}
               fetchCategories={fetchCategories}
+              curriculums={curriculums}
             />
           ))}
         </SortableContext>

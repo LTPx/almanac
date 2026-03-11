@@ -5,7 +5,7 @@ import { generateBatch } from "@/lib/art-generator";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { collectionId, count } = body;
+    const { collectionId, count, curriculumId } = body;
 
     if (!collectionId) {
       return NextResponse.json(
@@ -22,7 +22,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await generateBatch(collectionId, quantity);
+    const result = await generateBatch(
+      collectionId,
+      quantity,
+      curriculumId || undefined
+    );
 
     return NextResponse.json(result);
   } catch (error) {

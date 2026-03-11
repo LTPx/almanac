@@ -34,17 +34,20 @@ function generateNftName(): string {
   return `${p}${s}`;
 }
 
+type TraitWithCurriculum = {
+  id: string;
+  name: string;
+  imageUrl: string;
+  weight: number;
+  curriculumId: string | null;
+};
+
 type CategoryWithTraits = {
   id: string;
   name: string;
   order: number;
   isRequired: boolean;
-  traits: {
-    id: string;
-    name: string;
-    imageUrl: string;
-    weight: number;
-  }[];
+  traits: TraitWithCurriculum[];
 };
 
 type SelectedTrait = {
@@ -65,27 +68,47 @@ type BatchResult = {
 
 /**
  * Selects one trait per category using weighted random selection.
- * Higher weight = more common.
+ * If curriculumId is provided, curriculum-linked categories (those with traits
+ * that have curriculumId) will use only the matching trait for that curriculum.
+ * Generic categories (Body, Suit, Head) are selected randomly as before.
  */
 export function selectTraitsByWeight(
-  categories: CategoryWithTraits[]
+  categories: CategoryWithTraits[],
+  curriculumId?: string
 ): SelectedTrait[] {
   const selected: SelectedTrait[] = [];
 
   for (const category of categories) {
-    if (category.traits.length === 0) {
+    let availableTraits = category.traits;
+
+    if (curriculumId) {
+      // Check if this category has curriculum-linked traits
+      const hasCurriculumTraits = category.traits.some(
+        (t) => t.curriculumId !== null
+      );
+
+      if (hasCurriculumTraits) {
+        // Filter to only the trait matching this curriculum
+        availableTraits = category.traits.filter(
+          (t) => t.curriculumId === curriculumId
+        );
+      }
+      // If no curriculum traits exist in this category, use all (generic category)
+    }
+
+    if (availableTraits.length === 0) {
       if (category.isRequired) {
         throw new Error(
-          `Category "${category.name}" is required but has no traits`
+          `Category "${category.name}" is required but has no traits${curriculumId ? " for this curriculum" : ""}`
         );
       }
       continue;
     }
 
-    const totalWeight = category.traits.reduce((sum, t) => sum + t.weight, 0);
+    const totalWeight = availableTraits.reduce((sum, t) => sum + t.weight, 0);
     let random = Math.random() * totalWeight;
 
-    for (const trait of category.traits) {
+    for (const trait of availableTraits) {
       random -= trait.weight;
       if (random <= 0) {
         selected.push({
@@ -174,17 +197,30 @@ export async function compositeImage(traits: SelectedTrait[]): Promise<Buffer> {
  * Derives rarity from the combined probability of selected traits.
  * Product of (trait.weight / totalCategoryWeight) for each category.
  *
+ * For curriculum-aware generation, only generic categories (Body, Suit, Head)
+ * contribute to rarity since curriculum-linked traits are deterministic.
+ *
  * >= 10% → NORMAL, >= 1% → RARE, >= 0.1% → EPIC, < 0.1% → UNIQUE
  */
 export function deriveRarity(
   traits: SelectedTrait[],
-  categories: CategoryWithTraits[]
+  categories: CategoryWithTraits[],
+  curriculumId?: string
 ): "NORMAL" | "RARE" | "EPIC" | "UNIQUE" {
   let combinedProbability = 1;
 
   for (const trait of traits) {
     const category = categories.find((c) => c.id === trait.categoryId);
     if (!category) continue;
+
+    // Skip curriculum-linked categories for rarity calculation when generating
+    // for a specific curriculum (those traits are deterministic, not random)
+    if (curriculumId) {
+      const hasCurriculumTraits = category.traits.some(
+        (t) => t.curriculumId !== null
+      );
+      if (hasCurriculumTraits) continue;
+    }
 
     const totalWeight = category.traits.reduce((sum, t) => sum + t.weight, 0);
     if (totalWeight === 0) continue;
@@ -209,10 +245,15 @@ export function generateCombinationHash(traitIds: string[]): string {
 /**
  * Generates a batch of unique NFT images by compositing layers.
  * Creates NFTAsset records in the database.
+ *
+ * If curriculumId is provided, curriculum-linked categories (Background, Prop)
+ * will use only the trait matching that curriculum, while generic categories
+ * (Body, Suit, Head) are randomly selected.
  */
 export async function generateBatch(
   collectionId: string,
   count: number,
+  curriculumId?: string,
   onProgress?: (current: number, total: number) => void
 ): Promise<BatchResult> {
   // Load categories with traits, ordered by composition order
@@ -251,9 +292,21 @@ export async function generateBatch(
   }
 
   // Calculate max possible unique combinations
+  // For curriculum-aware generation, curriculum-linked categories have 1 option
   const maxCombinations = categories.reduce(
-    (product: number, cat: { traits: unknown[] }) => {
-      const traitCount = cat.traits.length || 1;
+    (product: number, cat: CategoryWithTraits) => {
+      let traitCount = cat.traits.length || 1;
+
+      if (curriculumId) {
+        const hasCurriculumTraits = cat.traits.some(
+          (t) => t.curriculumId !== null
+        );
+        if (hasCurriculumTraits) {
+          // Only 1 trait per curriculum-linked category
+          traitCount = 1;
+        }
+      }
+
       return product * traitCount;
     },
     1
@@ -282,7 +335,7 @@ export async function generateBatch(
 
       // Try to find a unique combination
       for (let retry = 0; retry < maxRetries; retry++) {
-        const candidate = selectTraitsByWeight(categories);
+        const candidate = selectTraitsByWeight(categories, curriculumId);
         const candidateHash = generateCombinationHash(
           candidate.map((t) => t.traitId)
         );
@@ -313,7 +366,7 @@ export async function generateBatch(
       );
 
       // Derive rarity
-      const rarity = deriveRarity(traits, categories);
+      const rarity = deriveRarity(traits, categories, curriculumId);
 
       // Build name
       const name = `#${i + 1} ${generateNftName()}`;

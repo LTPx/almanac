@@ -17,7 +17,10 @@ export async function GET(request: NextRequest) {
 
     const traits = await prisma.layerTrait.findMany({
       where: { categoryId },
-      orderBy: { weight: "desc" }
+      orderBy: { weight: "desc" },
+      include: {
+        curriculum: { select: { id: true, title: true } }
+      }
     });
 
     return NextResponse.json(traits);
@@ -38,6 +41,7 @@ export async function POST(request: NextRequest) {
     const categoryId = formData.get("categoryId") as string | null;
     const name = formData.get("name") as string | null;
     const weight = formData.get("weight") as string | null;
+    const curriculumId = formData.get("curriculumId") as string | null;
 
     if (!file || !categoryId || !name?.trim()) {
       return NextResponse.json(
@@ -68,7 +72,11 @@ export async function POST(request: NextRequest) {
         categoryId,
         name: name.trim(),
         imageUrl: uploaded.url,
-        weight: weight ? parseInt(weight) : 100
+        weight: weight ? parseInt(weight) : 100,
+        curriculumId: curriculumId || null
+      },
+      include: {
+        curriculum: { select: { id: true, title: true } }
       }
     });
 

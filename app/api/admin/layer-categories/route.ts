@@ -19,7 +19,10 @@ export async function GET(request: NextRequest) {
       orderBy: { order: "asc" },
       include: {
         traits: {
-          orderBy: { weight: "desc" }
+          orderBy: { weight: "desc" },
+          include: {
+            curriculum: { select: { id: true, title: true } }
+          }
         },
         _count: { select: { traits: true } }
       }

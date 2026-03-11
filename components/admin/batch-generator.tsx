@@ -20,11 +20,13 @@ import { BatchGenerationResult } from "@/lib/types";
 interface BatchGeneratorProps {
   collectionId: string;
   collectionName: string;
+  curriculumId?: string;
 }
 
 export function BatchGenerator({
   collectionId,
-  collectionName
+  collectionName,
+  curriculumId
 }: BatchGeneratorProps) {
   const [count, setCount] = useState("10");
   const [generating, setGenerating] = useState(false);
@@ -44,7 +46,11 @@ export function BatchGenerator({
       const res = await fetch("/api/admin/generate-batch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ collectionId, count: quantity })
+        body: JSON.stringify({
+          collectionId,
+          count: quantity,
+          ...(curriculumId && { curriculumId })
+        })
       });
 
       const data = await res.json();

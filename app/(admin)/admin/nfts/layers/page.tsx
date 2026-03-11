@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Layers, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { LayerCategoryManager } from "@/components/admin/layer-category-manager";
@@ -23,28 +24,47 @@ type Collection = {
   _count: { nftAssets: number };
 };
 
+type Curriculum = {
+  id: string;
+  title: string;
+};
+
 export default function LayersPage() {
   const [collections, setCollections] = useState<Collection[]>([]);
+  const [curriculums, setCurriculums] = useState<Curriculum[]>([]);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string>("");
+  const [selectedCurriculumId, setSelectedCurriculumId] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCollections = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch("/api/nft-collections");
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setCollections(data);
-        if (data.length > 0) {
-          setSelectedCollectionId(data[0].id);
+        const [colRes, curRes] = await Promise.all([
+          fetch("/api/nft-collections"),
+          fetch("/api/admin/curriculums")
+        ]);
+
+        if (colRes.ok) {
+          const data = await colRes.json();
+          setCollections(data);
+          if (data.length > 0) {
+            setSelectedCollectionId(data[0].id);
+          }
+        }
+
+        if (curRes.ok) {
+          const data = await curRes.json();
+          // Handle both array and object with items
+          const items = Array.isArray(data) ? data : data.items || data;
+          setCurriculums(items);
         }
       } catch {
-        console.error("Error fetching collections");
+        console.error("Error fetching data");
       } finally {
         setLoading(false);
       }
     };
-    fetchCollections();
+    fetchData();
   }, []);
 
   const selectedCollection = collections.find(
@@ -85,6 +105,9 @@ export default function LayersPage() {
         <>
           <div className="flex items-center gap-4">
             <div className="w-80">
+              <Label className="text-xs text-muted-foreground mb-1 block">
+                Colección
+              </Label>
               <Select
                 value={selectedCollectionId}
                 onValueChange={setSelectedCollectionId}
@@ -96,6 +119,28 @@ export default function LayersPage() {
                   {collections.map((col) => (
                     <SelectItem key={col.id} value={col.id}>
                       {col.name} ({col.symbol}) — {col._count.nftAssets} assets
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-80">
+              <Label className="text-xs text-muted-foreground mb-1 block">
+                Curriculum (para preview y generación)
+              </Label>
+              <Select
+                value={selectedCurriculumId}
+                onValueChange={setSelectedCurriculumId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos (aleatorio)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos (aleatorio)</SelectItem>
+                  {curriculums.map((cur) => (
+                    <SelectItem key={cur.id} value={cur.id}>
+                      {cur.title}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -117,10 +162,22 @@ export default function LayersPage() {
 
               {/* Preview + Batch Generator (1/3 width) */}
               <div className="space-y-6">
-                <NftPreview collectionId={selectedCollectionId} />
+                <NftPreview
+                  collectionId={selectedCollectionId}
+                  curriculumId={
+                    selectedCurriculumId && selectedCurriculumId !== "all"
+                      ? selectedCurriculumId
+                      : undefined
+                  }
+                />
                 <BatchGenerator
                   collectionId={selectedCollectionId}
                   collectionName={selectedCollection.name}
+                  curriculumId={
+                    selectedCurriculumId && selectedCurriculumId !== "all"
+                      ? selectedCurriculumId
+                      : undefined
+                  }
                 />
               </div>
             </div>

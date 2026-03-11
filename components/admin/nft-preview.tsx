@@ -28,14 +28,30 @@ function pickWeightedTrait(traits: LayerTrait[]): LayerTrait | null {
   return traits[traits.length - 1];
 }
 
-function randomizeCombination(categories: LayerCategory[]): SelectedTrait[] {
+function randomizeCombination(
+  categories: LayerCategory[],
+  curriculumId?: string
+): SelectedTrait[] {
   const sorted = [...categories].sort((a, b) => a.order - b.order);
   const result: SelectedTrait[] = [];
 
   for (const cat of sorted) {
-    const validTraits = cat.traits.filter(
+    let validTraits = cat.traits.filter(
       (t) => !t.imageUrl.startsWith("placeholder://")
     );
+
+    // If curriculum is selected, filter curriculum-linked categories
+    if (curriculumId) {
+      const hasCurriculumTraits = validTraits.some(
+        (t) => t.curriculumId !== null
+      );
+      if (hasCurriculumTraits) {
+        validTraits = validTraits.filter(
+          (t) => t.curriculumId === curriculumId
+        );
+      }
+    }
+
     if (validTraits.length === 0) continue;
 
     // Skip optional categories with ~30% probability
@@ -52,9 +68,10 @@ function randomizeCombination(categories: LayerCategory[]): SelectedTrait[] {
 
 interface NftPreviewProps {
   collectionId: string;
+  curriculumId?: string;
 }
 
-export function NftPreview({ collectionId }: NftPreviewProps) {
+export function NftPreview({ collectionId, curriculumId }: NftPreviewProps) {
   const [categories, setCategories] = useState<LayerCategory[]>([]);
   const [combination, setCombination] = useState<SelectedTrait[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,13 +84,13 @@ export function NftPreview({ collectionId }: NftPreviewProps) {
       if (!res.ok) throw new Error();
       const data: LayerCategory[] = await res.json();
       setCategories(data);
-      setCombination(randomizeCombination(data));
+      setCombination(randomizeCombination(data, curriculumId));
     } catch {
       // silent
     } finally {
       setLoading(false);
     }
-  }, [collectionId]);
+  }, [collectionId, curriculumId]);
 
   useEffect(() => {
     setLoading(true);
@@ -81,7 +98,7 @@ export function NftPreview({ collectionId }: NftPreviewProps) {
   }, [fetchAndRandomize]);
 
   const handleRandomize = () => {
-    setCombination(randomizeCombination(categories));
+    setCombination(randomizeCombination(categories, curriculumId));
   };
 
   const hasImages = combination.length > 0;

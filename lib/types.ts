@@ -314,6 +314,8 @@ export type LayerTrait = {
   name: string;
   imageUrl: string;
   weight: number;
+  curriculumId: string | null;
+  curriculum?: { id: string; title: string } | null;
   createdAt: Date;
   updatedAt: Date;
 };
