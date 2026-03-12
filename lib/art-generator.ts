@@ -88,10 +88,18 @@ export function selectTraitsByWeight(
       );
 
       if (hasCurriculumTraits) {
-        // Filter to only the trait matching this curriculum
-        availableTraits = category.traits.filter(
+        // Filter to only the trait(s) matching this curriculum
+        const matching = category.traits.filter(
           (t) => t.curriculumId === curriculumId
         );
+        if (matching.length > 0) {
+          availableTraits = matching;
+        } else {
+          // No match for this curriculum — fall back to generic (unlinked) traits
+          availableTraits = category.traits.filter(
+            (t) => t.curriculumId === null
+          );
+        }
       }
       // If no curriculum traits exist in this category, use all (generic category)
     }
@@ -292,21 +300,27 @@ export async function generateBatch(
   }
 
   // Calculate max possible unique combinations
-  // For curriculum-aware generation, curriculum-linked categories have 1 option
+  // Must mirror the same filtering logic used in selectTraitsByWeight
   const maxCombinations = categories.reduce(
     (product: number, cat: CategoryWithTraits) => {
-      let traitCount = cat.traits.length || 1;
+      let availableTraits = cat.traits;
 
       if (curriculumId) {
         const hasCurriculumTraits = cat.traits.some(
           (t) => t.curriculumId !== null
         );
         if (hasCurriculumTraits) {
-          // Only 1 trait per curriculum-linked category
-          traitCount = 1;
+          // Filter to only the trait(s) matching this curriculum
+          const matching = cat.traits.filter(
+            (t) => t.curriculumId === curriculumId
+          );
+          availableTraits = matching.length > 0 ? matching : cat.traits.filter(
+            (t) => t.curriculumId === null
+          );
         }
       }
 
+      const traitCount = availableTraits.length || 1;
       return product * traitCount;
     },
     1

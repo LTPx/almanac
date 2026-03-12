@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Sparkles, AlertTriangle } from "lucide-react";
+import { Sparkles, AlertTriangle, Info } from "lucide-react";
 import { toast } from "sonner";
 import { BatchGenerationResult } from "@/lib/types";
 
@@ -31,6 +31,50 @@ export function BatchGenerator({
   const [count, setCount] = useState("10");
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<BatchGenerationResult | null>(null);
+  const [maxCombinations, setMaxCombinations] = useState<number | null>(null);
+
+  const calcMaxCombinations = useCallback(async () => {
+    try {
+      const res = await fetch(
+        `/api/admin/layer-categories?collectionId=${collectionId}`
+      );
+      if (!res.ok) return;
+      const categories = await res.json();
+      if (!categories.length) {
+        setMaxCombinations(0);
+        return;
+      }
+
+      const max = categories.reduce(
+        (product: number, cat: { traits: { curriculumId: string | null }[] }) => {
+          let available = cat.traits;
+          if (curriculumId) {
+            const hasCurriculumTraits = cat.traits.some(
+              (t) => t.curriculumId !== null
+            );
+            if (hasCurriculumTraits) {
+              const matching = cat.traits.filter(
+                (t) => t.curriculumId === curriculumId
+              );
+              available =
+                matching.length > 0
+                  ? matching
+                  : cat.traits.filter((t) => t.curriculumId === null);
+            }
+          }
+          return product * (available.length || 1);
+        },
+        1
+      );
+      setMaxCombinations(max);
+    } catch {
+      setMaxCombinations(null);
+    }
+  }, [collectionId, curriculumId]);
+
+  useEffect(() => {
+    calcMaxCombinations();
+  }, [calcMaxCombinations]);
 
   const handleGenerate = async () => {
     const quantity = parseInt(count);
@@ -123,6 +167,18 @@ export function BatchGenerator({
             )}
           </Button>
         </div>
+
+        {maxCombinations !== null && (
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Info className="w-3.5 h-3.5" />
+            <span>
+              Máximo de combinaciones únicas:{" "}
+              <strong className="text-foreground">
+                {maxCombinations.toLocaleString()}
+              </strong>
+            </span>
+          </div>
+        )}
 
         {generating && (
           <div className="space-y-2">

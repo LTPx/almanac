@@ -46,9 +46,15 @@ function randomizeCombination(
         (t) => t.curriculumId !== null
       );
       if (hasCurriculumTraits) {
-        validTraits = validTraits.filter(
+        const matching = validTraits.filter(
           (t) => t.curriculumId === curriculumId
         );
+        if (matching.length > 0) {
+          validTraits = matching;
+        } else {
+          // No match for this curriculum — fall back to generic (unlinked) traits
+          validTraits = validTraits.filter((t) => t.curriculumId === null);
+        }
       }
     }
 
