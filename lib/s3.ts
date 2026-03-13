@@ -83,6 +83,24 @@ export async function downloadBuffer(url: string): Promise<Buffer> {
   return Buffer.from(await stream.transformToByteArray());
 }
 
+export async function uploadJsonMetadata(
+  json: object,
+  folder: string
+): Promise<string> {
+  const fileName = `${uuid()}.json`;
+  const body = Buffer.from(JSON.stringify(json));
+  await s3Client.send(
+    new PutObjectCommand({
+      Bucket: process.env.DIGITAL_OCEAN_BUCKET_NAME,
+      Key: `${folder}/${fileName}`,
+      Body: new Uint8Array(body),
+      ContentType: "application/json",
+      ACL: "public-read"
+    })
+  );
+  return `${process.env.DIGITAL_OCEAN_BUCKET_URL_ENDPOINT}/${folder}/${fileName}`;
+}
+
 export const deleteImageFromSpaces = async (url: string) => {
   const key = url.replace(
     `${process.env.DIGITAL_OCEAN_BUCKET_URL_ENDPOINT}/`,

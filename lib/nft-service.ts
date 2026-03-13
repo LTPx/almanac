@@ -4,6 +4,7 @@ import { privateKeyToAccount } from "thirdweb/wallets";
 import { polygonAmoy } from "thirdweb/chains";
 import { getRpcClient, eth_getTransactionReceipt } from "thirdweb/rpc";
 import prisma from "./prisma";
+import { uploadJsonMetadata } from "./s3";
 import {
   mintCertificate,
   mintCollectible,
@@ -402,7 +403,7 @@ export async function mintCertificateNFT(
     `🎓 Minteando CERTIFICADO en: ${collection.name} (${contractAddress})`
   );
 
-  const metadataUri = JSON.stringify(params.metadata);
+  const metadataUri = await uploadJsonMetadata(params.metadata, "nft-metadata");
 
   const result: ContractMintResult = await mintCertificate(
     contractAddress,
@@ -434,7 +435,7 @@ export async function mintCollectibleNFT(
     `🎨 Minteando COLECCIONABLE en: ${collection.name} (${contractAddress})`
   );
 
-  const metadataUri = JSON.stringify(params.metadata);
+  const metadataUri = await uploadJsonMetadata(params.metadata, "nft-metadata");
 
   const result: ContractMintResult = await mintCollectible(
     contractAddress,
