@@ -57,7 +57,10 @@ export async function POST(request: NextRequest) {
         break;
 
       case "FILL_IN_BLANK": {
-        const correctText = question.answers.find((a) => a.isCorrect)?.text;
+        const correctText =
+          question.answers.find((a) => a.isCorrect)?.text ||
+          // @ts-expect-error content is JSON
+          question.content?.correctAnswer;
         if (!correctText) {
           isCorrect = false;
           break;
