@@ -137,6 +137,9 @@ model Curriculum {
   // NFT Layer traits linked to this curriculum (Background, Prop)
   layerTraits LayerTrait[]
 
+  // Generated NFT assets for this curriculum
+  nftAssets NFTAsset[]
+
   // Final Test
   finalTest FinalTest?
 
@@ -491,10 +494,10 @@ model EducationalNFT {
 
   // NFT contract type fields
   tokenType         NFTTokenType @default(CERTIFICATE)
-  linkedCertTokenId String?      // tokenId del certificado en el contrato (para coleccionables)
+  linkedCertTokenId String? // tokenId del certificado en el contrato (para coleccionables)
   isTradeable       Boolean      @default(false)
   artistAddress     String?
-  royaltyBps        Int?         // basis points: 500 = 5%
+  royaltyBps        Int? // basis points: 500 = 5%
 
   // relationships
   nftAsset     NFTAsset?      @relation(fields: [nftAssetId], references: [id])
@@ -522,6 +525,10 @@ model NFTAsset {
   collection   NFTCollection? @relation(fields: [collectionId], references: [id])
   collectionId String?
 
+  // optional curriculum association
+  curriculum   Curriculum? @relation(fields: [curriculumId], references: [id])
+  curriculumId String?
+
   @@map("nft_asset")
 }
 
@@ -537,11 +544,11 @@ model NFTCollection {
   updatedAt       DateTime @updatedAt
 
   // NFT contract fields
-  defaultArtistAddress        String?
-  defaultRoyaltyBps           Int?    @default(500) // 5% default
-  maxSupply                   Int?    // coincide con MAX_SUPPLY del contrato
-  certificateContractAddress  String? // address del contrato de certificados
-  collectibleContractAddress  String? // address del contrato de coleccionables
+  defaultArtistAddress       String?
+  defaultRoyaltyBps          Int?    @default(500) // 5% default
+  maxSupply                  Int? // coincide con MAX_SUPPLY del contrato
+  certificateContractAddress String? // address del contrato de certificados
+  collectibleContractAddress String? // address del contrato de coleccionables
 
   // relationships
   educationalNFTs EducationalNFT[]
@@ -552,14 +559,14 @@ model NFTCollection {
 }
 
 model LayerCategory {
-  id           String          @id @default(cuid())
-  collection   NFTCollection   @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  id           String        @id @default(cuid())
+  collection   NFTCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
   collectionId String
-  name         String          // Background, Body, Eyes, Mouth...
-  order        Int             // Orden de composición (0 = fondo, mayor = encima)
-  isRequired   Boolean         @default(true)
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  name         String // Background, Body, Eyes, Mouth...
+  order        Int // Orden de composición (0 = fondo, mayor = encima)
+  isRequired   Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
   traits LayerTrait[]
 
@@ -571,8 +578,8 @@ model LayerTrait {
   id         String        @id @default(cuid())
   category   LayerCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId String
-  name       String        // Gold Background, Blue Eyes...
-  imageUrl   String        // URL en DO Spaces
+  name       String // Gold Background, Blue Eyes...
+  imageUrl   String // URL en DO Spaces
   weight     Int           @default(100) // Mayor = más común
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
@@ -778,7 +785,7 @@ model Ad {
   clicks AdClick[]
 
   curriculum   Curriculum? @relation(fields: [curriculumId], references: [id])
-  curriculumId String?     // null = global ad (applies to all curriculums)
+  curriculumId String? // null = global ad (applies to all curriculums)
 
   @@map("ad")
 }

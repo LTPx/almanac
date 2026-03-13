@@ -392,7 +392,8 @@ export async function generateBatch(
           imageUrl: uploaded.url,
           rarity,
           isUsed: false,
-          collectionId
+          collectionId,
+          ...(curriculumId && { curriculumId })
         }
       });
 
