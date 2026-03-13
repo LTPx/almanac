@@ -61,6 +61,7 @@ interface NFTFormProps {
     rarity: string;
     metadataUri: string;
     collectionId: string;
+    curriculumId: string;
   }) => Promise<void>;
   submitButtonText?: string;
   isLoading?: boolean;
@@ -82,13 +83,18 @@ export function NFTAssetForm({
     imageFile: null as File | null,
     rarity: initialData?.rarity || "NORMAL",
     metadataUri: initialData?.metadataUri || "",
-    collectionId: initialData?.collectionId || ""
+    collectionId: initialData?.collectionId || "",
+    curriculumId: initialData?.curriculumId || ""
   });
   const [localLoading, setLocalLoading] = useState(false);
   const [collections, setCollections] = useState<
     { id: string; name: string }[]
   >([]);
   const [collectionsLoading, setCollectionsLoading] = useState(false);
+  const [curriculums, setCurriculums] = useState<
+    { id: string; title: string }[]
+  >([]);
+  const [curriculumsLoading, setCurriculumsLoading] = useState(false);
 
   const loading = isLoading || localLoading;
 
@@ -108,6 +114,22 @@ export function NFTAssetForm({
     };
 
     fetchCollections();
+
+    const fetchCurriculums = async () => {
+      try {
+        setCurriculumsLoading(true);
+        const res = await fetch("/api/admin/curriculums");
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const items = Array.isArray(data) ? data : data.data || data;
+        setCurriculums(items);
+      } catch {
+        console.error("Error cargando curriculums");
+      } finally {
+        setCurriculumsLoading(false);
+      }
+    };
+    fetchCurriculums();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -199,6 +221,36 @@ export function NFTAssetForm({
             {collections.map((col) => (
               <SelectItem key={col.id} value={col.id}>
                 {col.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Curriculum */}
+      <div className="space-y-2">
+        <Label htmlFor="curriculum">Curriculum (opcional)</Label>
+        <Select
+          value={formData.curriculumId || "none"}
+          onValueChange={(value) =>
+            handleInputChange("curriculumId", value === "none" ? "" : value)
+          }
+          disabled={curriculumsLoading}
+        >
+          <SelectTrigger>
+            <SelectValue
+              placeholder={
+                curriculumsLoading
+                  ? "Cargando curriculums..."
+                  : "Sin curriculum"
+              }
+            />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">Sin curriculum</SelectItem>
+            {curriculums.map((cur) => (
+              <SelectItem key={cur.id} value={cur.id}>
+                {cur.title}
               </SelectItem>
             ))}
           </SelectContent>

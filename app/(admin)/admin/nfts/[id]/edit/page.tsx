@@ -34,6 +34,7 @@ export default function EditNFTPage() {
       data.append("collectionId", formData.collectionId);
     data.append("rarity", formData.rarity);
     if (formData.metadataUri) data.append("metadataUri", formData.metadataUri);
+    data.append("curriculumId", formData.curriculumId || "");
 
     const res = await fetch(`/api/admin/nft-assets/${params.id}`, {
       method: "PUT",

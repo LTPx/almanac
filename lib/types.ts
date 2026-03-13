@@ -169,6 +169,11 @@ export type NFTAsset = {
     id: string;
     name: string;
   };
+  curriculumId?: string | null;
+  curriculum?: {
+    id: string;
+    title: string;
+  } | null;
 };
 
 export type Pagination = {

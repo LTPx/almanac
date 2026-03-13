@@ -44,6 +44,12 @@ export async function GET(
             description: true,
             createdAt: true
           }
+        },
+        curriculum: {
+          select: {
+            id: true,
+            title: true
+          }
         }
       }
     });
@@ -105,6 +111,7 @@ export async function PUT(
     const metadataUri = formData.get("metadataUri") as string | null;
     const name = formData.get("name") as string | null;
     const collectionId = formData.get("collectionId") as string | null;
+    const curriculumId = formData.get("curriculumId") as string | null;
 
     const existingNFT = await prisma.nFTAsset.findUnique({
       where: { id }
@@ -203,6 +210,7 @@ export async function PUT(
     if (rarity) updateData.rarity = rarity;
     if (metadataUri) updateData.metadataUri = metadataUri;
     if (collectionId) updateData.collectionId = collectionId;
+    if (curriculumId !== null) updateData.curriculumId = curriculumId || null;
 
     const updatedNFT = await prisma.nFTAsset.update({
       where: { id },

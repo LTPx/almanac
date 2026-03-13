@@ -15,6 +15,7 @@ export default function CreateNFTPage() {
     rarity: string;
     metadataUri: string;
     collectionId?: string;
+    curriculumId?: string;
   }) => {
     const data = new FormData();
     if (formData.name) data.append("name", formData.name);
@@ -24,6 +25,8 @@ export default function CreateNFTPage() {
       data.append("collectionId", formData.collectionId);
     data.append("rarity", formData.rarity);
     if (formData.metadataUri) data.append("metadataUri", formData.metadataUri);
+    if (formData.curriculumId)
+      data.append("curriculumId", formData.curriculumId);
 
     const res = await fetch("/api/admin/nft-assets", {
       method: "POST",
