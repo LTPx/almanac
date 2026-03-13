@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "ivory-many-cheetah-189.mypinata.cloud"
       },
+      {
+        protocol: "https",
+        hostname: "almanac.fra1.digitaloceanspaces.com"
+      },
 
       {
         protocol: "https",
