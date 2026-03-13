@@ -89,7 +89,8 @@ export async function POST(
     const rarity = getRandomRarity();
     const { nftImage, nftImageId, rarityUsed } = await getAvailableNFTImage(
       rarity,
-      collectionId
+      collectionId,
+      curriculumTokenId
     );
 
     const metadata = createNFTMetadata({

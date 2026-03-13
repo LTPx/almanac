@@ -147,13 +147,43 @@ export function createNFTMetadata({
  */
 export async function getAvailableNFTImage(
   preferredRarity: Rarity,
-  collectionId: string
+  collectionId: string,
+  curriculumId?: string
 ) {
   const rarityPriority: Rarity[] = [
     preferredRarity,
     ...RARITIES.filter((r) => r !== preferredRarity)
   ];
 
+  // If curriculumId provided, first try assets matching that curriculum
+  if (curriculumId) {
+    for (const rarity of rarityPriority) {
+      const image = await prisma.nFTAsset.findFirst({
+        where: {
+          rarity,
+          isUsed: false,
+          collectionId,
+          curriculumId
+        },
+        orderBy: { id: "asc" }
+      });
+
+      if (image) {
+        const updated = await prisma.nFTAsset.update({
+          where: { id: image.id },
+          data: { isUsed: true, usedAt: new Date() }
+        });
+
+        return {
+          nftImage: updated.imageUrl,
+          nftImageId: updated.id,
+          rarityUsed: rarity
+        };
+      }
+    }
+  }
+
+  // Fallback: any available asset in the collection
   for (const rarity of rarityPriority) {
     const image = await prisma.nFTAsset.findFirst({
       where: {
