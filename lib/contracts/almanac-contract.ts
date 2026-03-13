@@ -2,15 +2,22 @@ import { ethers } from "ethers";
 import AlmanacCertificateABI from "./AlmanacCertificate.json";
 import AlmanacCollectibleABI from "./AlmanacCollectible.json";
 
-const ADMIN_PRIVATE_KEY = process.env.ADMIN_WALLET_PRIVATE_KEY;
-const RPC_URL = process.env.POLYGON_RPC_URL;
+function getSigner() {
+  const privateKey = process.env.ADMIN_WALLET_PRIVATE_KEY;
+  const rpcUrl = process.env.POLYGON_RPC_URL;
 
-if (!ADMIN_PRIVATE_KEY)
-  throw new Error("Falta ADMIN_WALLET_PRIVATE_KEY en env");
-if (!RPC_URL) throw new Error("Falta POLYGON_RPC_URL en env");
+  if (!privateKey) throw new Error("Falta ADMIN_WALLET_PRIVATE_KEY en env");
+  if (!rpcUrl) throw new Error("Falta POLYGON_RPC_URL en env");
 
-const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
-const signer = new ethers.Wallet(ADMIN_PRIVATE_KEY, provider);
+  console.log(`[contract] Creating provider with RPC: ${rpcUrl.substring(0, 50)}...`);
+
+  // Use StaticJsonRpcProvider to completely skip network auto-detection (Amoy = chainId 80002)
+  const provider = new ethers.providers.StaticJsonRpcProvider(rpcUrl, {
+    name: "polygon-amoy",
+    chainId: 80002
+  });
+  return new ethers.Wallet(privateKey, provider);
+}
 
 export interface ContractMintResult {
   tokenId: string;
@@ -28,10 +35,13 @@ export async function mintCertificate(
   const contract = new ethers.Contract(
     contractAddress,
     AlmanacCertificateABI.abi,
-    signer
+    getSigner()
   );
 
-  const tx = await contract.mint(to, uri);
+  const tx = await contract.mint(to, uri, {
+    maxPriorityFeePerGas: ethers.utils.parseUnits("30", "gwei"),
+    maxFeePerGas: ethers.utils.parseUnits("60", "gwei")
+  });
   const receipt = await tx.wait();
 
   const tokenId = extractTokenIdFromReceipt(receipt);
@@ -56,7 +66,7 @@ export async function mintCollectible(
   const contract = new ethers.Contract(
     contractAddress,
     AlmanacCollectibleABI.abi,
-    signer
+    getSigner()
   );
 
   const tx = await contract.mint(
