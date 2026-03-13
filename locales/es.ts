@@ -26,7 +26,7 @@ export const es = {
     premiumCardTitle: "Funciones\npara acelerar\ntu aprendizaje",
     premiumCardBenefit:
       "Disfruta de vidas ilimitadas\ny dile adiós a los anuncios",
-    activatePremium: "ACTIVA PREMIUM",
+    activatePremium: "OBTÉN PREMIUM",
     freeTrialOneWeek: "PRUEBA 1 SEMANA GRATIS",
     premiumPrice: "7,99€/mes. Cancela cuando quieras.",
     premiumPromoPrice: "Luego $1/mes. Cancela cuando quieras.",
@@ -99,7 +99,24 @@ export const es = {
     youHave: "Tienes:",
     lives2: "vidas",
     canBuy: "Puedes comprar:",
-    zapsSection: "Zaps"
+    zapsSection: "Zaps",
+    subscriptionModalTitle:
+      "Elige un plan para después de tu prueba gratis de 7 días",
+    planIndividualBadge: "Más popular",
+    planIndividualName: "Individual",
+    planIndividualDuration: "12 meses - €100",
+    planIndividualPrice: "€8,33",
+    planFamilialBadge: "2 a 7 miembros",
+    planFamilialName: "Familiar",
+    planFamilialDuration: "12 meses - €125",
+    planFamilialPrice: "€10,41",
+    perMonth: "/ MES",
+    subscriptionRecurring: "Pago recurrente automático, cancela cuando quieras",
+    viewAllPlans: "VER TODOS LOS PLANES",
+    subscriptionFinePrint:
+      "Recibirás un cargo automático al finalizar tu prueba gratis por el periodo de suscripción y precio que seleccionaste, a menos que canceles antes que termine tu prueba gratis",
+    startFreeTrial: "EMPIEZA 1 SEMANA GRATIS",
+    activatePremiumCta: "ACTIVA PREMIUM"
   },
   modals: {
     noHeartsTitle: "¡Sin Corazones!",

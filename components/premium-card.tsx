@@ -182,7 +182,9 @@ export default function PremiumCard({
                 <div className="flex-1">
                   <p className="text-sm font-medium">
                     {subscription.daysLeft}{" "}
-                    {subscription.daysLeft === 1 ? t("store", "day") : t("store", "days")}{" "}
+                    {subscription.daysLeft === 1
+                      ? t("store", "day")
+                      : t("store", "days")}{" "}
                     {t("store", "trialDaysLeft")}
                   </p>
                   {subscription.subscriptionTrialEnd && (
@@ -202,7 +204,9 @@ export default function PremiumCard({
               <div className="grid grid-cols-2 gap-2 mt-3">
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
                   <CheckCircle2 className="w-4 h-4 mx-auto mb-1" />
-                  <p className="text-xs font-medium">{t("store", "unlimitedLives")}</p>
+                  <p className="text-xs font-medium">
+                    {t("store", "unlimitedLives")}
+                  </p>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
                   <CheckCircle2 className="w-4 h-4 mx-auto mb-1" />
@@ -289,7 +293,8 @@ export default function PremiumCard({
                   <CheckCircle2 className="w-5 h-5" />
                 </h3>
                 <p className="text-sm text-white/80">
-                  {subscription.platform === "STRIPE" && t("store", "stripeSubscription")}
+                  {subscription.platform === "STRIPE" &&
+                    t("store", "stripeSubscription")}
                 </p>
               </div>
             </div>
@@ -302,7 +307,9 @@ export default function PremiumCard({
                 <div className="flex-1">
                   <p className="text-sm font-medium">
                     {subscription.daysLeft}{" "}
-                    {subscription.daysLeft === 1 ? t("store", "day") : t("store", "days")}{" "}
+                    {subscription.daysLeft === 1
+                      ? t("store", "day")
+                      : t("store", "days")}{" "}
                     {t("store", "trialDaysLeft")}
                   </p>
                   <p className="text-xs text-white/70">
@@ -324,7 +331,9 @@ export default function PremiumCard({
                 <div className="flex-1">
                   <p className="text-sm font-medium">
                     {t("store", "renewalIn")} {subscription.daysLeft}{" "}
-                    {subscription.daysLeft === 1 ? t("store", "day") : t("store", "days")}
+                    {subscription.daysLeft === 1
+                      ? t("store", "day")
+                      : t("store", "days")}
                   </p>
                   <p className="text-xs text-white/70">
                     {t("store", "nextPayment")}{" "}
@@ -498,7 +507,6 @@ export default function PremiumCard({
           </div>
         </CardContent>
       </Card>
-
       <SubscriptionModal
         open={showModal}
         onClose={closeModal}

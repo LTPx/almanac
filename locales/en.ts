@@ -25,7 +25,7 @@ export const en = {
     backToExam: "Back to test",
     premiumCardTitle: "Features\nto accelerate\nyour learning",
     premiumCardBenefit: "Enjoy unlimited lives\nand say goodbye to ads",
-    activatePremium: "ACTIVATE PREMIUM",
+    activatePremium: "GET PREMIUM",
     freeTrialOneWeek: "1 WEEK FREE TRIAL",
     premiumPrice: "€7.99/month. Cancel anytime.",
     premiumPromoPrice: "Only $1/month after. Cancel anytime.",
@@ -98,7 +98,23 @@ export const en = {
     youHave: "You have:",
     lives2: "lives",
     canBuy: "You can buy:",
-    zapsSection: "Zaps"
+    zapsSection: "Zaps",
+    subscriptionModalTitle: "Choose a plan for after your 7-day free trial",
+    planIndividualBadge: "Most popular",
+    planIndividualName: "Individual",
+    planIndividualDuration: "12 months - €100",
+    planIndividualPrice: "€8.33",
+    planFamilialBadge: "2 to 7 members",
+    planFamilialName: "Family",
+    planFamilialDuration: "12 months - €125",
+    planFamilialPrice: "€10.41",
+    perMonth: "/ MONTH",
+    subscriptionRecurring: "Automatic recurring payment, cancel anytime",
+    viewAllPlans: "VIEW ALL PLANS",
+    subscriptionFinePrint:
+      "You will receive an automatic charge at the end of your free trial for the subscription period and price you selected, unless you cancel before your free trial ends",
+    startFreeTrial: "START 1 WEEK FREE",
+    activatePremiumCta: "ACTIVATE PREMIUM"
   },
   modals: {
     noHeartsTitle: "Out of Hearts!",
