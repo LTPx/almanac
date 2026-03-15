@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import {
-  mintCollectibleNFT,
-  createNFTMetadata,
-  getAvailableNFTImage,
-  getRandomRarity
-} from "@/lib/nft-service";
+import { mintCollectibleNFT, createNFTMetadata } from "@/lib/nft-service";
 
 const COLLECTIBLE_CONTRACT_ADDRESS = process.env.COLLECTIBLE_CONTRACT_ADDRESS!;
 
@@ -62,7 +57,8 @@ export async function POST(
       },
       include: {
         curriculum: true,
-        collection: true
+        collection: true,
+        nftAsset: true
       }
     });
 
@@ -107,12 +103,16 @@ export async function POST(
       );
     }
 
-    // 5) Obtener imagen NFT
-    const rarity = getRandomRarity();
-    const { nftImage, nftImageId, rarityUsed } = await getAvailableNFTImage(
-      rarity,
-      collection.id
-    );
+    // 5) Reusar la imagen del certificado
+    const nftImage = certificate.nftAsset?.imageUrl;
+    const rarityUsed = (certificate.nftAsset?.rarity ?? "NORMAL") as import("@/lib/nft-service").Rarity;
+
+    if (!nftImage) {
+      return NextResponse.json(
+        { error: "El certificado no tiene imagen asociada" },
+        { status: 400 }
+      );
+    }
 
     // 6) Crear metadatos del coleccionable
     const metadata = createNFTMetadata({
@@ -145,7 +145,6 @@ export async function POST(
         transactionHash: mintResult.transactionHash,
         metadataUri: mintResult.metadataUri,
         mintedAt: new Date(),
-        nftAssetId: nftImageId,
         collectionId: collection.id,
         curriculumStartedAt: certificate.curriculumStartedAt,
         curriculumFinishedAt: certificate.curriculumFinishedAt,
@@ -167,6 +166,17 @@ export async function POST(
     });
   } catch (err: any) {
     console.error("mint-collectible endpoint error:", err);
+
+    const reason: string =
+      err?.error?.reason ?? err?.reason ?? String(err);
+
+    if (reason.includes("certificate already claimed")) {
+      return NextResponse.json(
+        { error: "Este certificado ya tiene una versión tradeable en la blockchain. Puede que la transacción anterior se completó pero no se guardó en la base de datos." },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Internal server error", detail: String(err) },
       { status: 500 }
