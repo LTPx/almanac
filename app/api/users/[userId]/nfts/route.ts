@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   context: { params: Promise<{ userId: string }> }
 ) {
   try {
@@ -19,7 +19,7 @@ export async function GET(
       );
     }
 
-    const nfts = await prisma.educationalNFT.findMany({
+    const allNfts = await prisma.educationalNFT.findMany({
       where: { userId },
       select: {
         id: true,
@@ -28,6 +28,8 @@ export async function GET(
         isTradeable: true,
         linkedCertTokenId: true,
         tokenId: true,
+        contractAddress: true,
+        transactionHash: true,
         curriculum: {
           select: {
             id: true,
@@ -46,38 +48,20 @@ export async function GET(
       orderBy: { mintedAt: "desc" }
     });
 
-    // Enriquecer con metadatos fetcheados de IPFS
-    // const enrichedNFTs = await Promise.all(
-    //   nfts.map(async (nft) => {
-    //     let metadata = null;
+    // Mapa tokenId -> collectible
+    const collectibleMap = new Map<string, typeof allNfts[number]>();
+    for (const nft of allNfts) {
+      if (nft.tokenType === "COLLECTIBLE" && nft.linkedCertTokenId) {
+        collectibleMap.set(nft.linkedCertTokenId, nft);
+      }
+    }
 
-    //     try {
-    //       // Si metadataUri es JSON stringificado, parsearlo
-    //       if (nft.metadataUri.startsWith("{")) {
-    //         metadata = JSON.parse(nft.metadataUri);
-    //       }
-    //       // Si es IPFS URI, fetchear los metadatos
-    //       else if (nft.metadataUri.startsWith("ipfs://")) {
-    //         metadata = await fetchMetadataFromIPFS(nft.metadataUri);
-    //       }
-    //       // Si es HTTP URL, fetchear directamente
-    //       else if (nft.metadataUri.startsWith("http")) {
-    //         metadata = await fetchMetadataFromURL(nft.metadataUri);
-    //       }
-    //     } catch (error) {
-    //       console.log(`No se pudo obtener metadata para NFT ${nft.id}:`, error);
-    //     }
-
-    //     return {
-    //       ...nft,
-    //       metadata
-    //     };
-    //   })
-    // );
+    const certificates = allNfts.filter((nft) => nft.tokenType === "CERTIFICATE");
 
     return NextResponse.json({
       success: true,
-      nfts: nfts.map((nft) => {
+      nfts: certificates.map((nft) => {
+        const collectible = collectibleMap.get(nft.tokenId) ?? null;
         return {
           id: nft.id,
           tokenId: nft.tokenId,
@@ -86,11 +70,18 @@ export async function GET(
           imageUrl: nft.nftAsset?.imageUrl || null,
           rarity: nft.nftAsset?.rarity,
           tokenType: nft.tokenType,
-          isTradeable: nft.isTradeable,
-          linkedCertTokenId: nft.linkedCertTokenId
+          collectible: collectible
+            ? {
+                id: collectible.id,
+                tokenId: collectible.tokenId,
+                contractAddress: collectible.contractAddress,
+                transactionHash: collectible.transactionHash,
+                isTradeable: collectible.isTradeable
+              }
+            : null
         };
       }),
-      total: nfts.length,
+      total: certificates.length,
       source: "database"
     });
   } catch (error: any) {

@@ -150,6 +150,7 @@ export async function POST(
         curriculumFinishedAt: certificate.curriculumFinishedAt,
         tokenType: "COLLECTIBLE",
         isTradeable: true,
+        nftAssetId: certificate.nftAssetId,
         linkedCertTokenId: certificate.tokenId,
         artistAddress,
         royaltyBps
