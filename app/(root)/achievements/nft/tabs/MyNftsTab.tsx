@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useUser, useSetUser } from "@/context/UserContext";
 
 type WalletStep = "create" | "backup" | "complete";
 
@@ -32,6 +33,8 @@ export default function MyNftsTab({
   refetch: () => void;
   hasWallet: boolean;
 }) {
+  const currentUser = useUser();
+  const setUser = useSetUser();
   const [step, setStep] = useState<WalletStep>("create");
   const [creatingWallet, setCreatingWallet] = useState(false);
   const [walletError, setWalletError] = useState<string | null>(null);
@@ -117,7 +120,13 @@ Fecha: ${new Date().toLocaleString()}
 
   const handleComplete = () => {
     setStep("complete");
-    setTimeout(() => refetch(), 500);
+  };
+
+  const handleFinish = () => {
+    if (currentUser) {
+      setUser({ ...currentUser, hasWallet: true });
+    }
+    refetch();
   };
 
   if (hasWallet) {
@@ -373,7 +382,7 @@ Fecha: ${new Date().toLocaleString()}
         )}
 
         <Button
-          onClick={() => refetch()}
+          onClick={handleFinish}
           className="w-full h-12 bg-[#1983DD] hover:bg-[#1666B0] text-white font-medium rounded-lg transition-colors"
         >
           {t("achievements", "start")}
