@@ -74,7 +74,11 @@ export async function mintCollectible(
     uri,
     linkedCertId,
     authorWallet,
-    royaltyBps
+    royaltyBps,
+    {
+      maxPriorityFeePerGas: ethers.utils.parseUnits("30", "gwei"),
+      maxFeePerGas: ethers.utils.parseUnits("60", "gwei")
+    }
   );
   const receipt = await tx.wait();
 
