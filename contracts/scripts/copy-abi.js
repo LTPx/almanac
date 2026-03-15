@@ -19,6 +19,11 @@ const contracts = [
     artifact: "../node_modules/@openzeppelin/contracts/build/contracts/ERC1967Proxy.json",
     includeBytecode: true,
   },
+  {
+    name: "AlmanacSplitter",
+    artifact: "../artifacts/contracts/AlmanacSplitter.sol/AlmanacSplitter.json",
+    includeBytecode: true,
+  },
 ];
 
 const outputDir = path.join(__dirname, "../../lib/contracts");

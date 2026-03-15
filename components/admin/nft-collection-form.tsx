@@ -77,7 +77,9 @@ export function NFTCollectionForm({
     defaultRoyaltyBps: initialData?.defaultRoyaltyBps ?? 500,
     maxSupply: initialData?.maxSupply ?? "",
     certificateContractAddress: initialData?.certificateContractAddress || "",
-    collectibleContractAddress: initialData?.collectibleContractAddress || ""
+    collectibleContractAddress: initialData?.collectibleContractAddress || "",
+    platformWallet: (initialData as any)?.platformWallet || "",
+    platformShareBps: (initialData as any)?.platformShareBps ?? ""
   });
 
   const handleChange = (
@@ -128,6 +130,14 @@ export function NFTCollectionForm({
     }
     if (!isValidAddress(formData.defaultArtistAddress)) {
       setError("Dirección del artista inválida");
+      return false;
+    }
+    if (!isValidAddress(formData.platformWallet)) {
+      setError("Dirección de la plataforma inválida");
+      return false;
+    }
+    if (formData.platformWallet.trim() && (!formData.platformShareBps || Number(formData.platformShareBps) < 1 || Number(formData.platformShareBps) > 9999)) {
+      setError("Share de la plataforma debe estar entre 1 y 9999 bps");
       return false;
     }
     return true;
@@ -409,40 +419,83 @@ export function NFTCollectionForm({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-1.5">
-            <Label className="flex items-center gap-2">
-              <Wallet size={14} />
-              Wallet del Artista
-            </Label>
-            <Input
-              name="defaultArtistAddress"
-              value={formData.defaultArtistAddress}
-              onChange={handleChange}
-              placeholder="0x..."
-              className="font-mono text-sm"
-            />
-            <p className="text-xs text-muted-foreground">
-              Recibe royalties de los coleccionables (ERC-2981)
-            </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-2">
+                <Wallet size={14} />
+                Wallet del Artista
+              </Label>
+              <Input
+                name="defaultArtistAddress"
+                value={formData.defaultArtistAddress}
+                onChange={handleChange}
+                placeholder="0x..."
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                Recibe su parte de royalties (ERC-2981)
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-2">
+                <Wallet size={14} />
+                Wallet de la Plataforma
+              </Label>
+              <Input
+                name="platformWallet"
+                value={formData.platformWallet}
+                onChange={handleChange}
+                placeholder="0x... (opcional)"
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                Recibe su parte de royalties vía AlmanacSplitter
+              </p>
+            </div>
           </div>
 
-          <div className="space-y-1.5">
-            <Label className="flex items-center gap-2">
-              <Percent size={14} />
-              Royalties (bps)
-            </Label>
-            <Input
-              type="number"
-              name="defaultRoyaltyBps"
-              value={formData.defaultRoyaltyBps}
-              onChange={handleChange}
-              placeholder="500"
-              min={0}
-              max={10000}
-            />
-            <p className="text-xs text-muted-foreground">
-              500 = 5% · 1000 = 10%
-            </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-2">
+                <Percent size={14} />
+                Royalties Totales (bps)
+              </Label>
+              <Input
+                type="number"
+                name="defaultRoyaltyBps"
+                value={formData.defaultRoyaltyBps}
+                onChange={handleChange}
+                placeholder="500"
+                min={0}
+                max={10000}
+              />
+              <p className="text-xs text-muted-foreground">
+                500 = 5% · 1000 = 10% · sobre el precio de venta
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-2">
+                <Percent size={14} />
+                Share de la Plataforma (bps)
+              </Label>
+              <Input
+                type="number"
+                name="platformShareBps"
+                value={formData.platformShareBps}
+                onChange={handleChange}
+                placeholder="Ej: 3000 = 30%"
+                min={1}
+                max={9999}
+                disabled={!formData.platformWallet.trim()}
+              />
+              <p className="text-xs text-muted-foreground">
+                {formData.platformWallet.trim() && formData.platformShareBps
+                  ? `Artista: ${100 - Number(formData.platformShareBps) / 100}% · App: ${Number(formData.platformShareBps) / 100}% del royalty`
+                  : "Solo si hay wallet de plataforma"}
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>

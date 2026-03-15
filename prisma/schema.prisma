@@ -550,6 +550,11 @@ model NFTCollection {
   certificateContractAddress String? // address del contrato de certificados
   collectibleContractAddress String? // address del contrato de coleccionables
 
+  // Royalty split fields
+  platformWallet         String? // wallet de la plataforma para split de royalties
+  platformShareBps       Int? // porcentaje de royalties para la plataforma (3000 = 30%)
+  royaltySplitterAddress String? // address del contrato AlmanacSplitter (si aplica)
+
   // relationships
   educationalNFTs EducationalNFT[]
   nftAssets       NFTAsset[]

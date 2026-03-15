@@ -2,12 +2,15 @@ import { ethers } from "ethers";
 import ERC1967ProxyArtifact from "./ERC1967Proxy.json";
 import AlmanacCertificateArtifact from "./AlmanacCertificate.json";
 import AlmanacCollectibleArtifact from "./AlmanacCollectible.json";
+import AlmanacSplitterArtifact from "./AlmanacSplitter.json";
 
 export interface DeployedCollectionContracts {
   certProxyAddress: string;
   collectibleProxyAddress: string | null;
+  splitterAddress: string | null;
   certTxHash: string;
   collectibleTxHash: string | null;
+  splitterTxHash: string | null;
 }
 
 export interface DeployCollectionParams {
@@ -16,6 +19,9 @@ export interface DeployCollectionParams {
   maxSupply: number;
   chainId?: number;
   deployCollectible?: boolean;
+  artistWallet?: string;
+  platformWallet?: string;
+  platformShareBps?: number;
 }
 
 function getSigner(chainId: number) {
@@ -43,7 +49,16 @@ function getSigner(chainId: number) {
 export async function deployCollectionContracts(
   params: DeployCollectionParams
 ): Promise<DeployedCollectionContracts> {
-  const { name, symbol, maxSupply, chainId = 80002, deployCollectible = true } = params;
+  const {
+    name,
+    symbol,
+    maxSupply,
+    chainId = 80002,
+    deployCollectible = true,
+    artistWallet,
+    platformWallet,
+    platformShareBps
+  } = params;
 
   const certImplAddress = process.env.CERT_IMPLEMENTATION_ADDRESS;
   const collectibleImplAddress = process.env.COLLECTIBLE_IMPLEMENTATION_ADDRESS;
@@ -84,8 +99,10 @@ export async function deployCollectionContracts(
     return {
       certProxyAddress,
       collectibleProxyAddress: null,
+      splitterAddress: null,
       certTxHash: certReceipt.transactionHash,
-      collectibleTxHash: null
+      collectibleTxHash: null,
+      splitterTxHash: null
     };
   }
 
@@ -105,10 +122,42 @@ export async function deployCollectionContracts(
   const collectibleProxyAddress = colProxy.address;
   console.log(`[deploy] AlmanacCollectible proxy: ${collectibleProxyAddress}`);
 
+  // 3. Deploy splitter si platformWallet y platformShareBps están configurados
+  let splitterAddress: string | null = null;
+  let splitterTxHash: string | null = null;
+
+  const hasSplit =
+    artistWallet &&
+    platformWallet &&
+    platformShareBps &&
+    platformShareBps > 0 &&
+    platformShareBps < 10000;
+
+  if (hasSplit) {
+    const splitterFactory = new ethers.ContractFactory(
+      AlmanacSplitterArtifact.abi,
+      AlmanacSplitterArtifact.bytecode,
+      signer
+    );
+    console.log(`[deploy] Desplegando AlmanacSplitter para "${name}" (platform ${platformShareBps}bps)...`);
+    const splitter = await splitterFactory.deploy(
+      artistWallet!,
+      platformWallet!,
+      platformShareBps!,
+      gasOverrides
+    );
+    const splitterReceipt = await splitter.deployTransaction.wait();
+    splitterAddress = splitter.address;
+    splitterTxHash = splitterReceipt.transactionHash;
+    console.log(`[deploy] AlmanacSplitter: ${splitterAddress}`);
+  }
+
   return {
     certProxyAddress,
     collectibleProxyAddress,
+    splitterAddress,
     certTxHash: certReceipt.transactionHash,
-    collectibleTxHash: colReceipt.transactionHash
+    collectibleTxHash: colReceipt.transactionHash,
+    splitterTxHash
   };
 }

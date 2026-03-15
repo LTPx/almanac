@@ -59,7 +59,9 @@ export async function POST(request: NextRequest) {
       defaultArtistAddress,
       defaultRoyaltyBps,
       maxSupply,
-      deployCollectible = true
+      deployCollectible = true,
+      platformWallet,
+      platformShareBps
     } = body;
 
     if (!name || !symbol) {
@@ -78,13 +80,16 @@ export async function POST(request: NextRequest) {
 
     const resolvedChainId = chainId || 80002;
 
-    const { certProxyAddress, collectibleProxyAddress } =
+    const { certProxyAddress, collectibleProxyAddress, splitterAddress } =
       await deployCollectionContracts({
         name,
         symbol,
         maxSupply,
         chainId: resolvedChainId,
-        deployCollectible
+        deployCollectible,
+        artistWallet: defaultArtistAddress,
+        platformWallet,
+        platformShareBps
       });
 
     const collection = await prisma.nFTCollection.create({
@@ -99,7 +104,10 @@ export async function POST(request: NextRequest) {
         defaultRoyaltyBps: defaultRoyaltyBps || 500,
         maxSupply,
         certificateContractAddress: certProxyAddress,
-        collectibleContractAddress: collectibleProxyAddress
+        collectibleContractAddress: collectibleProxyAddress,
+        platformWallet: platformWallet || null,
+        platformShareBps: platformShareBps || null,
+        royaltySplitterAddress: splitterAddress
       },
       include: {
         _count: {

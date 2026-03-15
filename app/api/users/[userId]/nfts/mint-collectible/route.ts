@@ -93,12 +93,17 @@ export async function POST(
       );
     }
 
-    const artistAddress = collection.defaultArtistAddress;
     const royaltyBps = collection.defaultRoyaltyBps ?? 500;
 
-    if (!artistAddress) {
+    // Si hay splitter deployado, úsalo como royalty receiver (divide entre artista y plataforma)
+    // Si no, cae al artistAddress directo
+    const royaltyReceiver =
+      (collection as any).royaltySplitterAddress ||
+      collection.defaultArtistAddress;
+
+    if (!royaltyReceiver) {
       return NextResponse.json(
-        { error: "La colección no tiene artistAddress configurada" },
+        { error: "La colección no tiene artistAddress ni splitter configurado" },
         { status: 400 }
       );
     }
@@ -131,7 +136,7 @@ export async function POST(
       metadata,
       collectionId: collection.id,
       linkedCertTokenId: parseInt(certificate.tokenId),
-      authorWallet: artistAddress,
+      authorWallet: royaltyReceiver,
       royaltyBps
     });
 
@@ -152,7 +157,7 @@ export async function POST(
         isTradeable: true,
         nftAssetId: certificate.nftAssetId,
         linkedCertTokenId: certificate.tokenId,
-        artistAddress,
+        artistAddress: collection.defaultArtistAddress,
         royaltyBps
       }
     });
