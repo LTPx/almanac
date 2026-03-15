@@ -46,7 +46,6 @@ export default function NFTTableView({ nfts, onDelete }: NFTTableViewProps) {
             <TableHead className="text-center">Rareza</TableHead>
             <TableHead className="text-center">Estado</TableHead>
             <TableHead className="text-center">Token ID</TableHead>
-            <TableHead className="text-center">Creado</TableHead>
             <TableHead className="text-center">Minted</TableHead>
             <TableHead className="text-right">Acciones</TableHead>
           </TableRow>
@@ -80,18 +79,26 @@ export default function NFTTableView({ nfts, onDelete }: NFTTableViewProps) {
                   </TableCell>
                   <TableCell className="font-medium">
                     <div>
-                      <p className="font-semibold">{nft.name || "No name"}</p>
+                      <Link
+                        href={`/admin/nfts/${nft.id}/edit`}
+                        className="hover:underline hover:text-primary"
+                      >
+                        <p className="font-semibold">{nft.name || "No name"}</p>
+                      </Link>
                       {nft.metadataUri && (
                         <p className="text-xs text-muted-foreground truncate max-w-xs">
                           {nft.metadataUri}
                         </p>
                       )}
+                      <p className="text-muted-foreground">
+                        {new Date(nft.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
                   </TableCell>
                   <TableCell>
                     <Link
                       href={`/admin/collections/${nft.collectionId || ""}/edit`}
-                      className="text-sm text-muted-foreground hover:underline"
+                      className="text-sm text-muted-foreground hover:underline hover:text-primary"
                     >
                       {nft.collection?.name || "No collection"}
                     </Link>
@@ -129,9 +136,6 @@ export default function NFTTableView({ nfts, onDelete }: NFTTableViewProps) {
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}
-                  </TableCell>
-                  <TableCell className="text-center text-sm text-muted-foreground">
-                    {new Date(nft.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell className="text-center text-sm text-muted-foreground">
                     {nft.isUsed && nft.usedAt
