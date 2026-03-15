@@ -114,6 +114,7 @@ export async function POST(
     const savedNFT = await saveNFTToDatabase({
       userId,
       curriculumId: curriculumTokenId,
+      collectionId,
       userCurriculumToken,
       mintResult,
       metadata,
@@ -213,6 +214,7 @@ async function validateUserAndTokens(
 async function saveNFTToDatabase({
   userId,
   curriculumId,
+  collectionId,
   userCurriculumToken,
   mintResult,
   metadata,
@@ -222,6 +224,7 @@ async function saveNFTToDatabase({
 }: {
   userId: string;
   curriculumId: string;
+  collectionId: string;
   userCurriculumToken: any;
   mintResult: any;
   metadata: any;
@@ -250,6 +253,7 @@ async function saveNFTToDatabase({
         tokenId: mintResult.tokenId ?? "",
         userId,
         curriculumId,
+        collectionId,
         contractAddress: CERTIFICATE_CONTRACT_ADDRESS,
         transactionHash: mintResult.transactionHash,
         metadataUri: mintResult.metadataUri ?? JSON.stringify(metadata),
