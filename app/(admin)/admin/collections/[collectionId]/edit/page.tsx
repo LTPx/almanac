@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { NFTCollectionForm } from "@/components/admin/nft-collection-form";
 import { BackButton } from "@/components/admin/back-button";
+import { toast } from "sonner";
 
 export default function EditCollectionPage() {
   const router = useRouter();
@@ -38,8 +39,8 @@ export default function EditCollectionPage() {
   };
 
   const handleSuccess = (data: any) => {
-    alert(`✅ Colección "${data.collection.name}" actualizada exitosamente!`);
-    router.push("/admin/nfts");
+    toast.success(`Colección "${data.name}" actualizada exitosamente`);
+    router.push("/admin/nfts/collections");
   };
 
   const handleCancel = () => {

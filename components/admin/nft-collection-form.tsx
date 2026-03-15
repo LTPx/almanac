@@ -7,18 +7,34 @@ import {
   Palette,
   Hash,
   FileText,
-  Link as LinkIcon,
   Globe,
   Wallet,
   Percent,
   Package,
   Shield,
-  ShoppingBag
+  ShoppingBag,
+  Link as LinkIcon
 } from "lucide-react";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription
+} from "../ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "../ui/select";
+import { Switch } from "../ui/switch";
+import { Label } from "../ui/label";
+import { Alert, AlertDescription } from "../ui/alert";
 
 interface NFTCollectionFormProps {
   mode: "create" | "edit";
@@ -64,22 +80,12 @@ export function NFTCollectionForm({
   });
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target;
-
     setFormData((prev) => ({
       ...prev,
       [name]: type === "number" ? parseInt(value) : value
-    }));
-  };
-
-  const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({
-      ...prev,
-      isActive: e.target.checked
     }));
   };
 
@@ -96,13 +102,11 @@ export function NFTCollectionForm({
       return false;
     }
     if (!formData.contractAddress.trim()) {
-      setError("La dirección del contrato es requerida");
+      setError("La dirección del contrato principal es requerida");
       return false;
     }
     if (!formData.contractAddress.match(/^0x[a-fA-F0-9]{40}$/)) {
-      setError(
-        "Dirección del contrato inválida (debe ser 0x seguido de 40 caracteres hexadecimales)"
-      );
+      setError("Dirección del contrato inválida (debe ser 0x + 40 hex chars)");
       return false;
     }
     if (!isValidAddress(formData.defaultArtistAddress)) {
@@ -138,9 +142,7 @@ export function NFTCollectionForm({
 
       const response = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
       });
 
@@ -151,63 +153,67 @@ export function NFTCollectionForm({
       } else {
         setError(data.message || "Error al guardar la colección");
       }
-    } catch (error) {
+    } catch (err) {
       setError("Error de conexión");
-      console.error("Error:", error);
+      console.error("Error:", err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Información de la colección</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name */}
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium mb-2">
-              <Palette size={16} />
-              Nombre de la Colección
-            </label>
-            <Input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Ej: Certificados Matemáticas"
-              required
-            />
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* ── Sección 1: Información General ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Palette size={18} />
+            Información General
+          </CardTitle>
+          <CardDescription>
+            Nombre, símbolo y descripción que identifican la colección.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-2">
+                <Palette size={14} />
+                Nombre <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Ej: Certificados Matemáticas"
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-2">
+                <Hash size={14} />
+                Símbolo (Ticker) <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                name="symbol"
+                value={formData.symbol}
+                onChange={handleChange}
+                placeholder="Ej: MATH"
+                maxLength={10}
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                Máx. 10 caracteres · se mostrará en mayúsculas
+              </p>
+            </div>
           </div>
 
-          {/* Symbol */}
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium mb-2">
-              <Hash size={16} />
-              Símbolo (Ticker)
-            </label>
-            <Input
-              type="text"
-              name="symbol"
-              value={formData.symbol}
-              onChange={handleChange}
-              placeholder="Ej: MATH"
-              maxLength={10}
-              required
-            />
-            <p className="text-xs mt-2">
-              Máximo 10 caracteres (se mostrará en mayúsculas)
-            </p>
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium mb-2">
-              <FileText size={16} />
-              Descripción (opcional)
-            </label>
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-2">
+              <FileText size={14} />
+              Descripción
+            </Label>
             <Textarea
               name="description"
               value={formData.description}
@@ -217,109 +223,153 @@ export function NFTCollectionForm({
             />
           </div>
 
-          {/* Contract Address */}
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium mb-2">
-              <LinkIcon size={16} />
-              Dirección del Contrato
-            </label>
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div>
+              <p className="text-sm font-medium">Colección activa</p>
+              <p className="text-xs text-muted-foreground">
+                Permite el minteo de NFTs en esta colección
+              </p>
+            </div>
+            <Switch
+              checked={formData.isActive}
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({ ...prev, isActive: checked }))
+              }
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ── Sección 2: Contratos Blockchain ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Globe size={18} />
+            Contratos Blockchain
+          </CardTitle>
+          <CardDescription>
+            Red y direcciones de los contratos desplegados en la blockchain.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-2">
+              <Globe size={14} />
+              Red Blockchain
+            </Label>
+            <Select
+              value={String(formData.chainId)}
+              onValueChange={(val) =>
+                setFormData((prev) => ({ ...prev, chainId: parseInt(val) }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="80002">
+                  Polygon Amoy Testnet (80002)
+                </SelectItem>
+                <SelectItem value="137">Polygon Mainnet (137)</SelectItem>
+                <SelectItem value="11155111">
+                  Ethereum Sepolia (11155111)
+                </SelectItem>
+                <SelectItem value="1">Ethereum Mainnet (1)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-2">
+              <LinkIcon size={14} />
+              Contrato Principal <span className="text-destructive">*</span>
+            </Label>
             <Input
-              type="text"
               name="contractAddress"
               value={formData.contractAddress}
               onChange={handleChange}
               placeholder="0x..."
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
+              className="font-mono text-sm"
               required
             />
-            <p className="text-xs mt-2">
-              Dirección del contrato NFT desplegado en la blockchain
+            <p className="text-xs text-muted-foreground">
+              Dirección del contrato NFT principal desplegado
             </p>
           </div>
 
-          {/* Chain ID */}
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium mb-2">
-              <Globe size={16} />
-              Red Blockchain
-            </label>
-            <select
-              name="chainId"
-              value={formData.chainId}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            >
-              <option value={80002}>Polygon Amoy Testnet (80002)</option>
-              <option value={137}>Polygon Mainnet (137)</option>
-              <option value={11155111}>Ethereum Sepolia (11155111)</option>
-              <option value={1}>Ethereum Mainnet (1)</option>
-            </select>
-          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-2">
+                <Shield size={14} />
+                Contrato Certificados
+              </Label>
+              <Input
+                name="certificateContractAddress"
+                value={formData.certificateContractAddress}
+                onChange={handleChange}
+                placeholder="0x..."
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                AlmanacCertificate · soulbound
+              </p>
+            </div>
 
-          {/* Certificate Contract Address */}
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium mb-2">
-              <Shield size={16} />
-              Contrato de Certificados (opcional)
-            </label>
-            <Input
-              type="text"
-              name="certificateContractAddress"
-              value={formData.certificateContractAddress}
-              onChange={handleChange}
-              placeholder="0x..."
-              className="font-mono text-sm"
-            />
-            <p className="text-xs mt-2">
-              Address del contrato AlmanacCertificate (soulbound)
-            </p>
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-2">
+                <ShoppingBag size={14} />
+                Contrato Coleccionables
+              </Label>
+              <Input
+                name="collectibleContractAddress"
+                value={formData.collectibleContractAddress}
+                onChange={handleChange}
+                placeholder="0x..."
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                AlmanacCollectible · tradeable
+              </p>
+            </div>
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Collectible Contract Address */}
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium mb-2">
-              <ShoppingBag size={16} />
-              Contrato de Coleccionables (opcional)
-            </label>
+      {/* ── Sección 3: Royalties & Economía ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Percent size={18} />
+            Royalties & Economía
+          </CardTitle>
+          <CardDescription>
+            Configuración de regalías para el artista y límite de supply.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-2">
+              <Wallet size={14} />
+              Wallet del Artista
+            </Label>
             <Input
-              type="text"
-              name="collectibleContractAddress"
-              value={formData.collectibleContractAddress}
-              onChange={handleChange}
-              placeholder="0x..."
-              className="font-mono text-sm"
-            />
-            <p className="text-xs mt-2">
-              Address del contrato AlmanacCollectible (tradeable)
-            </p>
-          </div>
-
-          {/* Artist Wallet */}
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium mb-2">
-              <Wallet size={16} />
-              Wallet del Artista (opcional)
-            </label>
-            <Input
-              type="text"
               name="defaultArtistAddress"
               value={formData.defaultArtistAddress}
               onChange={handleChange}
               placeholder="0x..."
               className="font-mono text-sm"
             />
-            <p className="text-xs mt-2">
+            <p className="text-xs text-muted-foreground">
               Recibe royalties de los coleccionables (ERC-2981)
             </p>
           </div>
 
-          {/* Royalty + Max Supply row */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                <Percent size={16} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-2">
+                <Percent size={14} />
                 Royalties (bps)
-              </label>
+              </Label>
               <Input
                 type="number"
                 name="defaultRoyaltyBps"
@@ -329,14 +379,16 @@ export function NFTCollectionForm({
                 min={0}
                 max={10000}
               />
-              <p className="text-xs mt-2">500 = 5%, 1000 = 10%</p>
+              <p className="text-xs text-muted-foreground">
+                500 = 5% · 1000 = 10%
+              </p>
             </div>
 
-            <div>
-              <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                <Package size={16} />
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-2">
+                <Package size={14} />
                 Max Supply
-              </label>
+              </Label>
               <Input
                 type="number"
                 name="maxSupply"
@@ -345,61 +397,48 @@ export function NFTCollectionForm({
                 placeholder="10000"
                 min={1}
               />
-              <p className="text-xs mt-2">Supply máximo de NFTs</p>
+              <p className="text-xs text-muted-foreground">
+                Dejar vacío para supply ilimitado
+              </p>
             </div>
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Is Active */}
-          <div className="flex items-center gap-3 p-4 bg-card rounded-lg">
-            <Input
-              type="checkbox"
-              id="isActive"
-              name="isActive"
-              checked={formData.isActive}
-              onChange={handleCheckbox}
-              className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-            />
-            <label htmlFor="isActive" className="text-sm font-medium">
-              Colección activa (permitir minteo de NFTs)
-            </label>
-          </div>
+      {/* Error */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
-          {/* Error Message */}
-          {error && (
-            <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-              {error}
-            </div>
+      {/* Acciones */}
+      <div className="flex gap-3">
+        <Button type="submit" disabled={loading}>
+          {loading ? (
+            <>
+              <Loader2 className="animate-spin mr-2" size={16} />
+              {mode === "create" ? "Creando..." : "Guardando..."}
+            </>
+          ) : (
+            <>
+              <Save className="mr-2" size={16} />
+              {mode === "create" ? "Crear Colección" : "Guardar Cambios"}
+            </>
           )}
+        </Button>
 
-          {/* Buttons */}
-          <div className="flex gap-3">
-            <Button type="submit" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="animate-spin" size={20} />
-                  {mode === "create" ? "Creando..." : "Guardando..."}
-                </>
-              ) : (
-                <>
-                  <Save size={20} />
-                  {mode === "create" ? "Crear Colección" : "Guardar Cambios"}
-                </>
-              )}
-            </Button>
-
-            {onCancel && (
-              <Button
-                type="button"
-                onClick={onCancel}
-                disabled={loading}
-                variant="outline"
-              >
-                Cancelar
-              </Button>
-            )}
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+        {onCancel && (
+          <Button
+            type="button"
+            onClick={onCancel}
+            disabled={loading}
+            variant="outline"
+          >
+            Cancelar
+          </Button>
+        )}
+      </div>
+    </form>
   );
 }

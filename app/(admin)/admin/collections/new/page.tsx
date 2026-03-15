@@ -2,15 +2,15 @@
 
 import { useRouter } from "next/navigation";
 import { NFTCollectionForm } from "@/components/admin/nft-collection-form";
-
 import { BackButton } from "@/components/admin/back-button";
+import { toast } from "sonner";
 
 export default function CreateCollectionPage() {
   const router = useRouter();
 
   const handleSuccess = (data: any) => {
-    alert(`✅ Colección "${data.collection.name}" creada exitosamente!`);
-    router.push("/admin/nfts");
+    toast.success(`Colección "${data.name}" creada exitosamente`);
+    router.push("/admin/nfts/collections");
   };
 
   const handleCancel = () => {
