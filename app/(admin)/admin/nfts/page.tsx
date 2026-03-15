@@ -35,6 +35,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { NFTAsset, NFTAssetsResponse } from "@/lib/types";
+
+type NFTAssetWithCollectible = NFTAsset & {
+  collectibleNFT?: {
+    tokenId: string;
+    contractAddress: string;
+    linkedCertTokenId: string | null;
+    transactionHash: string | null;
+  } | null;
+};
 import NFTGridView from "./NFTGridView";
 import NFTTableView from "./NFTTableView";
 
@@ -45,7 +54,7 @@ interface Collection {
 }
 
 export default function NFTsPage() {
-  const [nfts, setNfts] = useState<NFTAsset[]>([]);
+  const [nfts, setNfts] = useState<NFTAssetWithCollectible[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRarity, setSelectedRarity] = useState<string>("all");

@@ -67,13 +67,46 @@ export async function GET(request: NextRequest) {
       prisma.nFTAsset.count({ where })
     ]);
 
+    // Fetch collectibles linked to the certificates in this page
+    const certTokenIds = nftAssets
+      .filter((a) => a.educationalNFT?.tokenType === "CERTIFICATE")
+      .map((a) => a.educationalNFT!.tokenId);
+
+    const collectibles =
+      certTokenIds.length > 0
+        ? await prisma.educationalNFT.findMany({
+            where: {
+              tokenType: "COLLECTIBLE",
+              linkedCertTokenId: { in: certTokenIds }
+            },
+            select: {
+              tokenId: true,
+              contractAddress: true,
+              linkedCertTokenId: true,
+              transactionHash: true
+            }
+          })
+        : [];
+
+    const collectibleByCertTokenId = Object.fromEntries(
+      collectibles.map((c) => [c.linkedCertTokenId, c])
+    );
+
+    const enrichedAssets = nftAssets.map((asset) => ({
+      ...asset,
+      collectibleNFT:
+        asset.educationalNFT?.tokenType === "CERTIFICATE"
+          ? (collectibleByCertTokenId[asset.educationalNFT.tokenId] ?? null)
+          : null
+    }));
+
     const stats = await prisma.nFTAsset.groupBy({
       by: ["rarity", "isUsed"],
       _count: true
     });
 
     return NextResponse.json({
-      nftAssets,
+      nftAssets: enrichedAssets,
       pagination: {
         total,
         page: pageNumber,

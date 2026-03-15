@@ -31,6 +31,17 @@ import {
   Loader2
 } from "lucide-react";
 import { NFTAsset, EducationalNFT } from "@/lib/types";
+
+type CollectibleRef = {
+  tokenId: string;
+  contractAddress: string;
+  linkedCertTokenId: string | null;
+  transactionHash: string | null;
+};
+
+type NFTAssetWithCollectible = NFTAsset & {
+  collectibleNFT?: CollectibleRef | null;
+};
 import { getExplorerUrl } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -46,7 +57,7 @@ type EducationalNFTWithUser = EducationalNFT & {
 };
 
 interface NFTTableViewProps {
-  nfts: NFTAsset[];
+  nfts: NFTAssetWithCollectible[];
   onDelete: (id: number) => void;
 }
 
@@ -121,7 +132,9 @@ export default function NFTTableView({ nfts, onDelete }: NFTTableViewProps) {
                   | EducationalNFTWithUser
                   | undefined;
                 const isCertificate =
-                  nft.isUsed && edNFT?.tokenType === "CERTIFICATE";
+                  nft.isUsed &&
+                  edNFT?.tokenType === "CERTIFICATE" &&
+                  !nft.collectibleNFT;
 
                 return (
                   <TableRow key={nft.id}>
@@ -181,20 +194,44 @@ export default function NFTTableView({ nfts, onDelete }: NFTTableViewProps) {
                       )}
                     </TableCell>
                     <TableCell className="text-center">
-                      {edNFT ? (
-                        <Link
-                          href={getExplorerUrl(
-                            edNFT.contractAddress,
-                            edNFT.tokenId
-                          )}
-                          target="_blank"
-                          className="text-blue-600 hover:underline"
-                        >
-                          #{edNFT.tokenId}
-                        </Link>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
+                      <div className="flex  items-center gap-1">
+                        {edNFT ? (
+                          <Link
+                            href={getExplorerUrl(
+                              edNFT.contractAddress,
+                              edNFT.tokenId
+                            )}
+                            target="_blank"
+                            className="text-xs hover:underline flex items-center gap-1"
+                          >
+                            <Badge
+                              variant="outline"
+                              className="text-xs font-mono text-muted-foreground"
+                            >
+                              🔒 #{edNFT.tokenId}
+                            </Badge>
+                          </Link>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                        {nft.collectibleNFT && (
+                          <Link
+                            href={getExplorerUrl(
+                              nft.collectibleNFT.contractAddress,
+                              nft.collectibleNFT.tokenId
+                            )}
+                            target="_blank"
+                            className="text-xs hover:underline flex items-center gap-1"
+                          >
+                            <Badge
+                              variant="outline"
+                              className="text-xs font-mono text-muted-foreground"
+                            >
+                              💰 #{nft.collectibleNFT.tokenId}
+                            </Badge>
+                          </Link>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-center text-sm text-muted-foreground">
                       {nft.isUsed && nft.usedAt
