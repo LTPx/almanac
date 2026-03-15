@@ -3,6 +3,9 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { verifyAdminSession } from "@/lib/admin-auth";
+import { deployCollectionContracts } from "@/lib/contracts/deploy-collection";
+
+export const maxDuration = 60;
 
 // GET - Listar todas las collections con conteos
 export async function GET() {
@@ -51,36 +54,52 @@ export async function POST(request: NextRequest) {
       name,
       symbol,
       description,
-      contractAddress,
       chainId,
       isActive,
       defaultArtistAddress,
       defaultRoyaltyBps,
       maxSupply,
-      certificateContractAddress,
-      collectibleContractAddress
+      deployCollectible = true
     } = body;
 
-    if (!name || !symbol || !contractAddress) {
+    if (!name || !symbol) {
       return NextResponse.json(
-        { error: "name, symbol y contractAddress son requeridos" },
+        { error: "name y symbol son requeridos" },
         { status: 400 }
       );
     }
+
+    if (!maxSupply || maxSupply < 1) {
+      return NextResponse.json(
+        { error: "maxSupply es requerido y debe ser mayor a 0" },
+        { status: 400 }
+      );
+    }
+
+    const resolvedChainId = chainId || 80002;
+
+    const { certProxyAddress, collectibleProxyAddress } =
+      await deployCollectionContracts({
+        name,
+        symbol,
+        maxSupply,
+        chainId: resolvedChainId,
+        deployCollectible
+      });
 
     const collection = await prisma.nFTCollection.create({
       data: {
         name,
         symbol,
         description,
-        contractAddress,
-        chainId: chainId || 80002,
+        contractAddress: certProxyAddress,
+        chainId: resolvedChainId,
         isActive: isActive !== undefined ? isActive : true,
         defaultArtistAddress,
         defaultRoyaltyBps: defaultRoyaltyBps || 500,
         maxSupply,
-        certificateContractAddress,
-        collectibleContractAddress
+        certificateContractAddress: certProxyAddress,
+        collectibleContractAddress: collectibleProxyAddress
       },
       include: {
         _count: {
@@ -95,8 +114,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(collection, { status: 201 });
   } catch (error) {
     console.error("Error creating collection:", error);
+    const message = error instanceof Error ? error.message : "Error desconocido";
     return NextResponse.json(
-      { error: "Error al crear colección" },
+      { error: "Error al crear colección", details: message },
       { status: 500 }
     );
   }

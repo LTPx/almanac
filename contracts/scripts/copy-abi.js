@@ -14,6 +14,11 @@ const contracts = [
     name: "AlmanacCollectible",
     artifact: "../artifacts/contracts/AlmanacCollectible.sol/AlmanacCollectible.json",
   },
+  {
+    name: "ERC1967Proxy",
+    artifact: "../node_modules/@openzeppelin/contracts/build/contracts/ERC1967Proxy.json",
+    includeBytecode: true,
+  },
 ];
 
 const outputDir = path.join(__dirname, "../../lib/contracts");
@@ -36,6 +41,7 @@ for (const contract of contracts) {
   const output = {
     contractName: artifact.contractName,
     abi: artifact.abi,
+    ...(contract.includeBytecode && { bytecode: artifact.bytecode }),
   };
 
   const outputPath = path.join(outputDir, `${contract.name}.json`);

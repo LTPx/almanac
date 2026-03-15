@@ -64,6 +64,7 @@ export function NFTCollectionForm({
 }: NFTCollectionFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deployCollectible, setDeployCollectible] = useState(true);
 
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
@@ -101,24 +102,32 @@ export function NFTCollectionForm({
       setError("El símbolo es requerido");
       return false;
     }
-    if (!formData.contractAddress.trim()) {
-      setError("La dirección del contrato principal es requerida");
-      return false;
+    if (mode === "create") {
+      if (!formData.maxSupply || Number(formData.maxSupply) < 1) {
+        setError("Max Supply es requerido para deployar los contratos");
+        return false;
+      }
     }
-    if (!formData.contractAddress.match(/^0x[a-fA-F0-9]{40}$/)) {
-      setError("Dirección del contrato inválida (debe ser 0x + 40 hex chars)");
-      return false;
+    if (mode === "edit") {
+      if (!formData.contractAddress.trim()) {
+        setError("La dirección del contrato principal es requerida");
+        return false;
+      }
+      if (!formData.contractAddress.match(/^0x[a-fA-F0-9]{40}$/)) {
+        setError("Dirección del contrato inválida (debe ser 0x + 40 hex chars)");
+        return false;
+      }
+      if (!isValidAddress(formData.certificateContractAddress)) {
+        setError("Dirección del contrato de certificados inválida");
+        return false;
+      }
+      if (!isValidAddress(formData.collectibleContractAddress)) {
+        setError("Dirección del contrato de coleccionables inválida");
+        return false;
+      }
     }
     if (!isValidAddress(formData.defaultArtistAddress)) {
       setError("Dirección del artista inválida");
-      return false;
-    }
-    if (!isValidAddress(formData.certificateContractAddress)) {
-      setError("Dirección del contrato de certificados inválida");
-      return false;
-    }
-    if (!isValidAddress(formData.collectibleContractAddress)) {
-      setError("Dirección del contrato de coleccionables inválida");
       return false;
     }
     return true;
@@ -143,7 +152,9 @@ export function NFTCollectionForm({
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(
+          mode === "create" ? { ...formData, deployCollectible } : formData
+        )
       });
 
       const data = await response.json();
@@ -248,7 +259,9 @@ export function NFTCollectionForm({
             Contratos Blockchain
           </CardTitle>
           <CardDescription>
-            Red y direcciones de los contratos desplegados en la blockchain.
+            {mode === "create"
+              ? "Se deployarán contratos nuevos automáticamente al crear la colección."
+              : "Red y direcciones de los contratos desplegados en la blockchain."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -281,57 +294,106 @@ export function NFTCollectionForm({
 
           <div className="space-y-1.5">
             <Label className="flex items-center gap-2">
-              <LinkIcon size={14} />
-              Contrato Principal <span className="text-destructive">*</span>
+              <Package size={14} />
+              Max Supply <span className="text-destructive">*</span>
             </Label>
             <Input
-              name="contractAddress"
-              value={formData.contractAddress}
+              type="number"
+              name="maxSupply"
+              value={formData.maxSupply}
               onChange={handleChange}
-              placeholder="0x..."
-              className="font-mono text-sm"
-              required
+              placeholder="10000"
+              min={1}
+              required={mode === "create"}
             />
             <p className="text-xs text-muted-foreground">
-              Dirección del contrato NFT principal desplegado
+              {mode === "create"
+                ? "Se fija en el contrato al deployar · no puede cambiarse después"
+                : "Dejar vacío para supply ilimitado"}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-2">
-                <Shield size={14} />
-                Contrato Certificados
-              </Label>
-              <Input
-                name="certificateContractAddress"
-                value={formData.certificateContractAddress}
-                onChange={handleChange}
-                placeholder="0x..."
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                AlmanacCertificate · soulbound
-              </p>
+          {mode === "create" ? (
+            <div className="space-y-3">
+              <div className="rounded-lg border border-dashed p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Shield size={14} className="text-muted-foreground" />
+                  <span className="text-sm font-medium">AlmanacCertificate</span>
+                  <span className="text-xs text-muted-foreground">· soulbound · siempre</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShoppingBag size={14} className="text-muted-foreground" />
+                    <span className="text-sm font-medium">AlmanacCollectible</span>
+                    <span className="text-xs text-muted-foreground">· tradeable · opcional</span>
+                  </div>
+                  <Switch
+                    checked={deployCollectible}
+                    onCheckedChange={setDeployCollectible}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Los addresses se asignarán automáticamente tras el deploy.
+                </p>
+              </div>
             </div>
+          ) : (
+            <>
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-2">
+                  <LinkIcon size={14} />
+                  Contrato Principal <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  name="contractAddress"
+                  value={formData.contractAddress}
+                  onChange={handleChange}
+                  placeholder="0x..."
+                  className="font-mono text-sm"
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  Dirección del contrato NFT principal desplegado
+                </p>
+              </div>
 
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-2">
-                <ShoppingBag size={14} />
-                Contrato Coleccionables
-              </Label>
-              <Input
-                name="collectibleContractAddress"
-                value={formData.collectibleContractAddress}
-                onChange={handleChange}
-                placeholder="0x..."
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                AlmanacCollectible · tradeable
-              </p>
-            </div>
-          </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="flex items-center gap-2">
+                    <Shield size={14} />
+                    Contrato Certificados
+                  </Label>
+                  <Input
+                    name="certificateContractAddress"
+                    value={formData.certificateContractAddress}
+                    onChange={handleChange}
+                    placeholder="0x..."
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    AlmanacCertificate · soulbound
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="flex items-center gap-2">
+                    <ShoppingBag size={14} />
+                    Contrato Coleccionables
+                  </Label>
+                  <Input
+                    name="collectibleContractAddress"
+                    value={formData.collectibleContractAddress}
+                    onChange={handleChange}
+                    placeholder="0x..."
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    AlmanacCollectible · tradeable
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -364,43 +426,23 @@ export function NFTCollectionForm({
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-2">
-                <Percent size={14} />
-                Royalties (bps)
-              </Label>
-              <Input
-                type="number"
-                name="defaultRoyaltyBps"
-                value={formData.defaultRoyaltyBps}
-                onChange={handleChange}
-                placeholder="500"
-                min={0}
-                max={10000}
-              />
-              <p className="text-xs text-muted-foreground">
-                500 = 5% · 1000 = 10%
-              </p>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-2">
-                <Package size={14} />
-                Max Supply
-              </Label>
-              <Input
-                type="number"
-                name="maxSupply"
-                value={formData.maxSupply}
-                onChange={handleChange}
-                placeholder="10000"
-                min={1}
-              />
-              <p className="text-xs text-muted-foreground">
-                Dejar vacío para supply ilimitado
-              </p>
-            </div>
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-2">
+              <Percent size={14} />
+              Royalties (bps)
+            </Label>
+            <Input
+              type="number"
+              name="defaultRoyaltyBps"
+              value={formData.defaultRoyaltyBps}
+              onChange={handleChange}
+              placeholder="500"
+              min={0}
+              max={10000}
+            />
+            <p className="text-xs text-muted-foreground">
+              500 = 5% · 1000 = 10%
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -418,12 +460,12 @@ export function NFTCollectionForm({
           {loading ? (
             <>
               <Loader2 className="animate-spin mr-2" size={16} />
-              {mode === "create" ? "Creando..." : "Guardando..."}
+              {mode === "create" ? "Deployando en blockchain..." : "Guardando..."}
             </>
           ) : (
             <>
               <Save className="mr-2" size={16} />
-              {mode === "create" ? "Crear Colección" : "Guardar Cambios"}
+              {mode === "create" ? "Crear y Deployar Contratos" : "Guardar Cambios"}
             </>
           )}
         </Button>
