@@ -105,6 +105,7 @@ export default function NFTTableView({ nfts, onDelete }: NFTTableViewProps) {
               <TableHead>Vista</TableHead>
               <TableHead>NFT Asset</TableHead>
               <TableHead>Colección</TableHead>
+              <TableHead>Curriculum</TableHead>
               <TableHead className="text-center">Rareza</TableHead>
               <TableHead className="text-center">Estado</TableHead>
               <TableHead className="text-center">Token ID</TableHead>
@@ -174,6 +175,13 @@ export default function NFTTableView({ nfts, onDelete }: NFTTableViewProps) {
                       >
                         {nft.collection?.name || "No collection"}
                       </Link>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {nft.curriculum ? (
+                        <span>{nft.curriculum.title}</span>
+                      ) : (
+                        <span className="text-muted-foreground">Any</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge className={rarityInfo.color}>

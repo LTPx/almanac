@@ -56,6 +56,12 @@ export async function GET(request: NextRequest) {
               id: true,
               name: true
             }
+          },
+          curriculum: {
+            select: {
+              id: true,
+              title: true
+            }
           }
         },
         orderBy: {
